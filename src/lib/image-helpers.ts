@@ -4,11 +4,11 @@
  */
 
 export function getPortrait(brawlerName: string) {
-  return `/brawlers/portraits/${brawlerName.toLowerCase().replace(/\s+/g, '-')}.png`;
+  return `/brawlers/portraits/${brawlerName.toLowerCase().replace(/\s+/g, '-')}_portrait.png`;
 }
 
 export function getPin(brawlerName: string) {
-  return `/brawlers/pins/${brawlerName.toLowerCase().replace(/\s+/g, '-')}.png`;
+  return `/brawlers/pins/${brawlerName.toLowerCase().replace(/\s+/g, '-')}_pin.png`;
 }
 
 // Default fallback images
