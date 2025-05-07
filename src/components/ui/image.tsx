@@ -18,6 +18,7 @@ const Image: React.FC<ImageProps> = ({
 
   const handleError = () => {
     if (!hasError) {
+      console.log(`Image failed to load: ${src}, using fallback: ${fallbackSrc}`);
       setImgSrc(fallbackSrc);
       setHasError(true);
     }
