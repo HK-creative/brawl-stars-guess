@@ -76,22 +76,24 @@ const BrawlerAutocomplete: React.FC<BrawlerAutocompleteProps> = ({
       
       {isOpen && filteredBrawlers.length > 0 && (
         <div className="absolute z-10 w-full mt-1 bg-gray-800 border border-white/20 rounded-md shadow-lg max-h-60 overflow-y-auto">
-          {filteredBrawlers.map((brawler) => (
-            <div
-              key={brawler.name}
-              className="px-4 py-2 text-sm text-white hover:bg-gray-700 cursor-pointer flex items-center"
-              onClick={() => handleSelectBrawler(brawler)}
-            >
-              {console.log("Loading pin image for:", brawler.name, "→", getPin(brawler.name))}
-              <Image 
-                src={getPin(brawler.name)} 
-                alt={brawler.name}
-                className="w-6 h-6 rounded-full mr-2"
-                fallbackSrc="/placeholder.svg"
-              />
-              <span>{brawler.name}</span>
-            </div>
-          ))}
+          {filteredBrawlers.map((brawler) => {
+            console.log("Loading pin image for:", brawler.name, "→", getPin(brawler.name));
+            return (
+              <div
+                key={brawler.name}
+                className="px-4 py-2 text-sm text-white hover:bg-gray-700 cursor-pointer flex items-center"
+                onClick={() => handleSelectBrawler(brawler)}
+              >
+                <Image 
+                  src={getPin(brawler.name)} 
+                  alt={brawler.name}
+                  className="w-6 h-6 rounded-full mr-2"
+                  fallbackSrc="/placeholder.svg"
+                />
+                <span>{brawler.name}</span>
+              </div>
+            );
+          })}
         </div>
       )}
     </div>

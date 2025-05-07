@@ -112,6 +112,9 @@ const ClassicMode = () => {
 
   const correctBrawler = getCorrectBrawler();
 
+  // Log portrait path for debugging
+  console.log("Portrait path for correct brawler:", getPortrait(correctBrawlerName));
+
   return (
     <div>
       <ModeDescription 
@@ -128,7 +131,6 @@ const ClassicMode = () => {
                 You found the correct brawler in {guessCount} {guessCount === 1 ? 'guess' : 'guesses'}!
               </p>
               <div className="flex justify-center mb-2">
-                {console.log("Loading portrait image for:", correctBrawlerName, "→", getPortrait(correctBrawlerName))}
                 <Image
                   src={getPortrait(correctBrawlerName)}
                   alt={correctBrawlerName}

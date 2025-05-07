@@ -51,12 +51,14 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer 
   const reloadClass = compareAttribute(guess.reload, correctAnswer.reload);
   const yearResult = compareNumeric(guess.releaseYear, correctAnswer.releaseYear);
 
+  // Log the portrait path for debugging
+  console.log("Loading portrait image for:", guess.name, "→", getPortrait(guess.name));
+
   // Build the row for the guess
   return (
     <div className="animate-fade-in mb-3 border border-white/20 rounded-lg overflow-hidden">
       <div className="bg-white/10 py-2 px-3 flex items-center justify-between border-b border-white/20">
         <div className="flex items-center">
-          {console.log("Loading portrait image for:", guess.name, "→", getPortrait(guess.name))}
           <Image
             src={getPortrait(guess.name)}
             alt={guess.name}

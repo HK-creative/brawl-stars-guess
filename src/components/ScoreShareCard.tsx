@@ -158,6 +158,12 @@ const ScoreShareCard = ({
     toast.success("Image downloaded!");
   };
 
+  // Log portrait path for debugging
+  const portraitPath = brawlerName ? getPortrait(brawlerName) : '';
+  if (brawlerName) {
+    console.log("Portrait path for ScoreShareCard:", portraitPath);
+  }
+
   return (
     <div className="flex flex-col items-center">
       {/* The card that will be captured as an image */}
@@ -187,16 +193,11 @@ const ScoreShareCard = ({
             </p>
             {brawlerName && (
               <div className="flex items-center mt-2">
-                {brawlerName && (
-                  <>
-                    {console.log("Loading portrait image for:", brawlerName, "→", getPortrait(brawlerName))}
-                    <Image
-                      src={getPortrait(brawlerName)}
-                      alt={brawlerName}
-                      className="w-8 h-8 rounded-full mr-2 object-cover"
-                    />
-                  </>
-                )}
+                <Image
+                  src={getPortrait(brawlerName)}
+                  alt={brawlerName}
+                  className="w-8 h-8 rounded-full mr-2 object-cover"
+                />
                 <p className="text-brawl-yellow font-medium">{brawlerName}</p>
               </div>
             )}
