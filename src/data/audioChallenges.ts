@@ -1,5 +1,5 @@
 
-import { Brawler, brawlers } from './brawlers';
+import { Brawler, brawlers, getBrawlerByName } from './brawlers';
 
 export interface AudioChallenge {
   brawler: string;
@@ -12,34 +12,29 @@ export const audioChallenges: AudioChallenge[] = [
   {
     brawler: "Shelly",
     audioFile: "/audio/shelly_attack.mp3",
-    image: "/shelly.png"
+    image: getBrawlerByName("Shelly")?.image || "/shelly.png"
   },
   {
     brawler: "Spike",
     audioFile: "/audio/spike_super.mp3",
-    image: "/spike.png"
+    image: getBrawlerByName("Spike")?.image || "/spike.png"
   },
   {
     brawler: "Colt",
     audioFile: "/audio/colt_attack.mp3",
-    image: "/colt.png"
+    image: getBrawlerByName("Colt")?.image || "/colt.png"
   },
   {
     brawler: "Poco",
     audioFile: "/audio/poco_attack.mp3",
-    image: "/poco.png"
+    image: getBrawlerByName("Poco")?.image || "/poco.png"
   },
   {
     brawler: "El Primo",
     audioFile: "/audio/el_primo_super.mp3",
-    image: "/el_primo.png"
+    image: getBrawlerByName("El Primo")?.image || "/el_primo.png"
   }
 ];
 
 // Hardcoded challenge for testing (will be random in production)
 export const dailyAudioChallenge = audioChallenges[1]; // Spike
-
-// Helper function to get brawler details by name
-export function getBrawlerByName(name: string): Brawler | undefined {
-  return brawlers.find(brawler => brawler.name.toLowerCase() === name.toLowerCase());
-}

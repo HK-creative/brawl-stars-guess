@@ -1,3 +1,4 @@
+import brawlersData from './brawlers_full.json';
 
 export interface Brawler {
   name: string;
@@ -6,63 +7,45 @@ export interface Brawler {
   movement: string;
   range: string;
   reload: string;
-  releaseYear: number;
-  image: string;
+  releaseYear?: number;
+  released?: string;
+  image?: string;
 }
 
-// Dummy data for 5 brawlers
-export const brawlers: Brawler[] = [
-  {
-    name: "Shelly",
-    rarity: "Starter",
-    class: "Damage Dealer",
-    movement: "Normal",
-    range: "Medium",
-    reload: "Fast",
-    releaseYear: 2018,
-    image: "/shelly.png"
-  },
-  {
-    name: "Spike",
-    rarity: "Legendary",
-    class: "Assassin",
-    movement: "Very Fast",
-    range: "Short",
-    reload: "Very Fast",
-    releaseYear: 2020,
-    image: "/spike.png"
-  },
-  {
-    name: "Colt",
-    rarity: "Rare",
-    class: "Sharpshooter",
-    movement: "Normal",
-    range: "Long",
-    reload: "Normal",
-    releaseYear: 2018,
-    image: "/colt.png"
-  },
-  {
-    name: "Poco",
-    rarity: "Epic",
-    class: "Support",
-    movement: "Normal",
-    range: "Medium",
-    reload: "Slow",
-    releaseYear: 2019,
-    image: "/poco.png"
-  },
-  {
-    name: "El Primo",
-    rarity: "Super Rare",
-    class: "Tank",
-    movement: "Fast",
-    range: "Short",
-    reload: "Fast",
-    releaseYear: 2018,
-    image: "/el_primo.png"
+// Convert the imported data to match our Brawler interface
+export const brawlers: Brawler[] = brawlersData.map((brawler) => ({
+  name: brawler.name,
+  rarity: brawler.rarity,
+  class: brawler.class,
+  movement: brawler.movement,
+  range: brawler.range,
+  reload: brawler.reload,
+  releaseYear: parseInt(brawler.released || '2023'),
+  released: brawler.released,
+  // Default image path that can be overridden for specific brawlers
+  image: `/images/brawlers/${brawler.name.toLowerCase().replace(/[^a-z0-9]/g, '')}.png`
+}));
+
+// We'll keep a few brawlers with specific image paths for the challenges
+const specificImagePaths = {
+  "Shelly": "/shelly.png",
+  "Spike": "/spike.png",
+  "Colt": "/colt.png",
+  "Poco": "/poco.png",
+  "El Primo": "/el_primo.png"
+};
+
+// Apply specific image paths where available
+brawlers.forEach(brawler => {
+  if (specificImagePaths[brawler.name]) {
+    brawler.image = specificImagePaths[brawler.name];
   }
-];
+});
 
 // Hardcoded correct answer for testing
-export const correctBrawler = brawlers[1]; // Spike
+export const correctBrawler = brawlers.find(b => b.name === "Spike") || brawlers[0];
+
+// Helper function to get brawler details by name
+export function getBrawlerByName(name: string): Brawler | undefined {
+  return brawlers.find(brawler => brawler.name.toLowerCase() === name.toLowerCase());
+}
