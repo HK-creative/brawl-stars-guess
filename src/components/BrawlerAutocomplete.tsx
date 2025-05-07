@@ -2,6 +2,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Brawler } from '@/data/brawlers';
+import { getPin, DEFAULT_PIN } from '@/lib/image-helpers';
+import Image from '../components/ui/image';
 
 interface BrawlerAutocompleteProps {
   brawlers: Brawler[];
@@ -59,6 +61,11 @@ const BrawlerAutocomplete: React.FC<BrawlerAutocompleteProps> = ({
     onSelect(brawler);
     setIsOpen(false);
   };
+
+  // Helper function to handle image errors
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    e.currentTarget.src = DEFAULT_PIN;
+  };
   
   return (
     <div className="relative w-full" ref={wrapperRef}>
@@ -77,10 +84,16 @@ const BrawlerAutocomplete: React.FC<BrawlerAutocompleteProps> = ({
           {filteredBrawlers.map((brawler) => (
             <div
               key={brawler.name}
-              className="px-4 py-2 text-sm text-white hover:bg-gray-700 cursor-pointer"
+              className="px-4 py-2 text-sm text-white hover:bg-gray-700 cursor-pointer flex items-center"
               onClick={() => handleSelectBrawler(brawler)}
             >
-              {brawler.name}
+              <img 
+                src={getPin(brawler.name)} 
+                alt={brawler.name}
+                className="w-6 h-6 rounded-full mr-2"
+                onError={handleImageError}
+              />
+              <span>{brawler.name}</span>
             </div>
           ))}
         </div>

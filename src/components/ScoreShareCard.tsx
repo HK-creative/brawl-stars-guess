@@ -1,9 +1,12 @@
+
 import React, { useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Share, Download, Copy, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import html2canvas from 'html2canvas';
+import { getPortrait } from '@/lib/image-helpers';
+import Image from '@/components/ui/image';
 
 export interface ScoreShareCardProps {
   mode: 'classic' | 'audio' | 'gadget' | 'starpower' | 'voice';
@@ -184,7 +187,16 @@ const ScoreShareCard = ({
               }
             </p>
             {brawlerName && (
-              <p className="text-brawl-yellow font-medium mt-2">{brawlerName}</p>
+              <div className="flex items-center mt-2">
+                {brawlerName && (
+                  <Image
+                    src={getPortrait(brawlerName)}
+                    alt={brawlerName}
+                    className="w-8 h-8 rounded-full mr-2 object-cover"
+                  />
+                )}
+                <p className="text-brawl-yellow font-medium">{brawlerName}</p>
+              </div>
             )}
           </div>
           

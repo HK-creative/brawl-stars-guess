@@ -10,6 +10,8 @@ import BrawlerAutocomplete from '@/components/BrawlerAutocomplete';
 import { brawlers, Brawler } from '@/data/brawlers';
 import { toast } from 'sonner';
 import { fetchDailyChallenge, getTimeUntilNextChallenge } from '@/lib/daily-challenges';
+import { getPortrait } from '@/lib/image-helpers';
+import Image from '@/components/ui/image';
 
 interface StarPowerChallenge {
   brawler: string;
@@ -203,9 +205,11 @@ const StarPowerMode = () => {
         <div className="animate-fade-in">
           <Card className="brawl-card p-6 mb-4 flex flex-col items-center">
             <div className="flex items-center gap-4 mb-4">
-              <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center">
-                <span className="text-3xl">👤</span>
-              </div>
+              <Image 
+                src={getPortrait(dailyChallenge.brawler)} 
+                alt={dailyChallenge.brawler}
+                className="w-16 h-16 rounded-full object-cover"
+              />
               <div>
                 <h3 className="text-xl font-bold text-white">{dailyChallenge.brawler}</h3>
                 <p className="text-white/80">{dailyChallenge.tip}</p>

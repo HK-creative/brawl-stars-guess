@@ -9,6 +9,8 @@ import { brawlers, Brawler } from '@/data/brawlers';
 import BrawlerGuessRow from '@/components/BrawlerGuessRow';
 import BrawlerAutocomplete from '@/components/BrawlerAutocomplete';
 import { fetchDailyChallenge, getTimeUntilNextChallenge } from '@/lib/daily-challenges';
+import { getPortrait } from '@/lib/image-helpers';
+import Image from '@/components/ui/image';
 
 const ClassicMode = () => {
   const [inputValue, setInputValue] = useState('');
@@ -127,7 +129,11 @@ const ClassicMode = () => {
                 You found the correct brawler in {guessCount} {guessCount === 1 ? 'guess' : 'guesses'}!
               </p>
               <div className="flex justify-center mb-2">
-                <div className="w-16 h-16 rounded-full bg-gray-600"></div>
+                <Image
+                  src={getPortrait(correctBrawlerName)}
+                  alt={correctBrawlerName}
+                  className="w-24 h-24 rounded-full object-cover"
+                />
               </div>
               <h4 className="text-lg font-semibold text-white">{correctBrawlerName}</h4>
               <p className="text-white/70 text-sm mt-4">

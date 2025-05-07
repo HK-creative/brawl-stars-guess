@@ -2,6 +2,8 @@
 import React from 'react';
 import { Brawler } from '@/data/brawlers';
 import { ArrowUp, ArrowDown } from 'lucide-react';
+import { getPortrait } from '@/lib/image-helpers';
+import Image from './ui/image';
 
 interface BrawlerGuessRowProps {
   guess: Brawler;
@@ -54,7 +56,11 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer 
     <div className="animate-fade-in mb-3 border border-white/20 rounded-lg overflow-hidden">
       <div className="bg-white/10 py-2 px-3 flex items-center justify-between border-b border-white/20">
         <div className="flex items-center">
-          <div className="w-8 h-8 rounded-full bg-gray-600 mr-2"></div>
+          <Image
+            src={getPortrait(guess.name)}
+            alt={guess.name}
+            className="w-8 h-8 rounded-full mr-2 object-cover"
+          />
           <span className="text-white font-bold">{guess.name}</span>
         </div>
       </div>
