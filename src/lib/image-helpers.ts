@@ -4,14 +4,14 @@
  */
 
 export function getPortrait(brawlerName: string) {
-  // Handle special characters and preserve case for file name matching
+  // Preserve exact brawler name without any transformations
   const path = `/brawlers/portraits/${brawlerName}_portrait.png`;
   console.log('Generated portrait path:', path);
   return path;
 }
 
 export function getPin(brawlerName: string) {
-  // Handle special characters and preserve case for file name matching
+  // Preserve exact brawler name without any transformations
   const path = `/brawlers/pins/${brawlerName}_pin.png`;
   console.log('Generated pin path:', path);
   return path;

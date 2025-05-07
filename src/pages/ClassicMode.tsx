@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import ModeDescription from '@/components/ModeDescription';
@@ -129,6 +128,7 @@ const ClassicMode = () => {
                 You found the correct brawler in {guessCount} {guessCount === 1 ? 'guess' : 'guesses'}!
               </p>
               <div className="flex justify-center mb-2">
+                {console.log("Loading portrait image for:", correctBrawlerName, "→", getPortrait(correctBrawlerName))}
                 <Image
                   src={getPortrait(correctBrawlerName)}
                   alt={correctBrawlerName}

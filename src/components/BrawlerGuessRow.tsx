@@ -56,6 +56,7 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer 
     <div className="animate-fade-in mb-3 border border-white/20 rounded-lg overflow-hidden">
       <div className="bg-white/10 py-2 px-3 flex items-center justify-between border-b border-white/20">
         <div className="flex items-center">
+          {console.log("Loading portrait image for:", guess.name, "→", getPortrait(guess.name))}
           <Image
             src={getPortrait(guess.name)}
             alt={guess.name}

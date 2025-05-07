@@ -1,4 +1,3 @@
-
 import React, { useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -189,11 +188,14 @@ const ScoreShareCard = ({
             {brawlerName && (
               <div className="flex items-center mt-2">
                 {brawlerName && (
-                  <Image
-                    src={getPortrait(brawlerName)}
-                    alt={brawlerName}
-                    className="w-8 h-8 rounded-full mr-2 object-cover"
-                  />
+                  <>
+                    {console.log("Loading portrait image for:", brawlerName, "→", getPortrait(brawlerName))}
+                    <Image
+                      src={getPortrait(brawlerName)}
+                      alt={brawlerName}
+                      className="w-8 h-8 rounded-full mr-2 object-cover"
+                    />
+                  </>
                 )}
                 <p className="text-brawl-yellow font-medium">{brawlerName}</p>
               </div>

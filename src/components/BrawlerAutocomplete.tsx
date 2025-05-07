@@ -82,6 +82,7 @@ const BrawlerAutocomplete: React.FC<BrawlerAutocompleteProps> = ({
               className="px-4 py-2 text-sm text-white hover:bg-gray-700 cursor-pointer flex items-center"
               onClick={() => handleSelectBrawler(brawler)}
             >
+              {console.log("Loading pin image for:", brawler.name, "→", getPin(brawler.name))}
               <Image 
                 src={getPin(brawler.name)} 
                 alt={brawler.name}
