@@ -1,5 +1,5 @@
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { toast } from 'sonner';
 import { Volume2, Play, Check, X } from 'lucide-react';
 import ModeDescription from '@/components/ModeDescription';
@@ -7,11 +7,17 @@ import BrawlerAutocomplete from '@/components/BrawlerAutocomplete';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { t } from '@/lib/i18n';
-import { dailyAudioChallenge, getBrawlerByName } from '@/data/audioChallenges';
+import { getBrawlerByName } from '@/data/audioChallenges';
 import { Brawler, brawlers } from '@/data/brawlers';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { fetchDailyChallenge, getTimeUntilNextChallenge } from '@/lib/daily-challenges';
 
 const MAX_GUESSES = 3;
+
+interface AudioChallenge {
+  brawler: string;
+  audioFile: string;
+}
 
 const AudioMode = () => {
   const [guess, setGuess] = useState('');
@@ -19,11 +25,55 @@ const AudioMode = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
   const [showResult, setShowResult] = useState(false);
+  const [dailyChallenge, setDailyChallenge] = useState<AudioChallenge | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [timeUntilNext, setTimeUntilNext] = useState({ hours: 0, minutes: 0 });
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  
+  // Fallback data in case Supabase fetch fails
+  const fallbackChallenge: AudioChallenge = {
+    brawler: "Spike",
+    audioFile: "/audio/spike_super.mp3"
+  };
   
   // In a real implementation, we would check if today's challenge was already solved
   const remainingGuesses = MAX_GUESSES - guesses.length;
   const isGameOver = isCorrect || remainingGuesses <= 0;
+
+  useEffect(() => {
+    const loadChallenge = async () => {
+      setIsLoading(true);
+      try {
+        const data = await fetchDailyChallenge('audio');
+        if (data) {
+          setDailyChallenge(data);
+        } else {
+          // Fallback to local data
+          setDailyChallenge(fallbackChallenge);
+          toast.error("Couldn't load today's challenge. Using fallback data.");
+        }
+      } catch (error) {
+        console.error("Error loading audio challenge:", error);
+        setDailyChallenge(fallbackChallenge);
+        toast.error("Couldn't load today's challenge. Using fallback data.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadChallenge();
+
+    // Update the countdown timer
+    const updateCountdown = () => {
+      setTimeUntilNext(getTimeUntilNextChallenge());
+    };
+
+    // Update countdown immediately and then every minute
+    updateCountdown();
+    const intervalId = setInterval(updateCountdown, 60000);
+
+    return () => clearInterval(intervalId);
+  }, []);
   
   const handlePlayAudio = () => {
     if (audioRef.current) {
@@ -47,6 +97,8 @@ const AudioMode = () => {
   const handleSubmitGuess = (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (!dailyChallenge) return;
+    
     if (guess.trim() === '') {
       toast.error("Please enter a brawler name");
       return;
@@ -65,14 +117,14 @@ const AudioMode = () => {
     setGuesses(newGuesses);
     
     // Check if correct
-    const isCorrectGuess = guess.toLowerCase() === dailyAudioChallenge.brawler.toLowerCase();
+    const isCorrectGuess = guess.toLowerCase() === dailyChallenge.brawler.toLowerCase();
     
     if (isCorrectGuess) {
       setIsCorrect(true);
       toast.success("Correct! You got it!");
       setShowResult(true);
     } else if (newGuesses.length >= MAX_GUESSES) {
-      toast.error(`Game over! The brawler was ${dailyAudioChallenge.brawler}`);
+      toast.error(`Game over! The brawler was ${dailyChallenge.brawler}`);
       setShowResult(true);
     } else {
       toast.error(`Wrong guess! ${remainingGuesses - 1} ${remainingGuesses - 1 === 1 ? 'guess' : 'guesses'} left`);
@@ -91,9 +143,28 @@ const AudioMode = () => {
     setIsCorrect(false);
     setShowResult(false);
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-40">
+        <div className="animate-spin h-8 w-8 border-4 border-brawl-yellow border-t-transparent rounded-full"></div>
+      </div>
+    );
+  }
+
+  if (!dailyChallenge) {
+    return (
+      <Card className="brawl-card p-6">
+        <div className="text-center">
+          <h3 className="text-xl font-bold text-brawl-yellow mb-2">No Challenge Available</h3>
+          <p className="text-white/80">Check back later for today's challenge.</p>
+        </div>
+      </Card>
+    );
+  }
   
   // Get the correct brawler data
-  const correctBrawler = getBrawlerByName(dailyAudioChallenge.brawler);
+  const correctBrawler = getBrawlerByName(dailyChallenge.brawler);
 
   return (
     <div>
@@ -119,10 +190,14 @@ const AudioMode = () => {
         {/* Hidden audio element */}
         <audio 
           ref={audioRef}
-          src={dailyAudioChallenge.audioFile} 
+          src={dailyChallenge.audioFile} 
           onEnded={() => setIsPlaying(false)}
           style={{ display: 'none' }}
         />
+        
+        <div className="mt-6 text-sm text-white/60">
+          Next challenge in: {timeUntilNext.hours}h {timeUntilNext.minutes}m
+        </div>
       </Card>
       
       {/* Guess form */}
@@ -150,7 +225,7 @@ const AudioMode = () => {
           <h3 className="text-white/80 mb-2">Your guesses ({guesses.length}/{MAX_GUESSES}):</h3>
           <div className="space-y-2">
             {guesses.map((guessName, index) => {
-              const isGuessCorrect = guessName.toLowerCase() === dailyAudioChallenge.brawler.toLowerCase();
+              const isGuessCorrect = guessName.toLowerCase() === dailyChallenge.brawler.toLowerCase();
               
               return (
                 <div 

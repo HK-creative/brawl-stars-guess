@@ -8,8 +8,14 @@ import { Switch } from '@/components/ui/switch';
 import { Check, X } from 'lucide-react';
 import BrawlerAutocomplete from '@/components/BrawlerAutocomplete';
 import { brawlers, Brawler } from '@/data/brawlers';
-import { dailyStarPowerChallenge } from '@/data/starPowerChallenges';
 import { toast } from 'sonner';
+import { fetchDailyChallenge, getTimeUntilNextChallenge } from '@/lib/daily-challenges';
+
+interface StarPowerChallenge {
+  brawler: string;
+  starPowerName: string;
+  tip: string;
+}
 
 const StarPowerMode = () => {
   const [guess, setGuess] = useState('');
@@ -18,12 +24,22 @@ const StarPowerMode = () => {
   const [selectedBrawler, setSelectedBrawler] = useState<Brawler | null>(null);
   const [attempts, setAttempts] = useState(0);
   const [showResult, setShowResult] = useState(false);
+  const [dailyChallenge, setDailyChallenge] = useState<StarPowerChallenge | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [timeUntilNext, setTimeUntilNext] = useState({ hours: 0, minutes: 0 });
   const maxAttempts = 3;
 
   // Difficulty settings
   const [isGrayscale, setIsGrayscale] = useState(false);
   const [isRotated, setIsRotated] = useState(false);
   const [rotation, setRotation] = useState(0);
+
+  // Fallback data in case Supabase fetch fails
+  const fallbackChallenge: StarPowerChallenge = {
+    brawler: "Bo",
+    starPowerName: "Circling Eagle",
+    tip: "This star power increases Bo's vision range in bushes."
+  };
 
   useEffect(() => {
     // Set a random rotation degree when rotation option is toggled on
@@ -35,10 +51,45 @@ const StarPowerMode = () => {
     }
   }, [isRotated]);
 
+  useEffect(() => {
+    const loadChallenge = async () => {
+      setIsLoading(true);
+      try {
+        const data = await fetchDailyChallenge('starpower');
+        if (data) {
+          setDailyChallenge(data);
+        } else {
+          // Fallback to local data
+          setDailyChallenge(fallbackChallenge);
+          toast.error("Couldn't load today's challenge. Using fallback data.");
+        }
+      } catch (error) {
+        console.error("Error loading star power challenge:", error);
+        setDailyChallenge(fallbackChallenge);
+        toast.error("Couldn't load today's challenge. Using fallback data.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadChallenge();
+
+    // Update the countdown timer
+    const updateCountdown = () => {
+      setTimeUntilNext(getTimeUntilNextChallenge());
+    };
+
+    // Update countdown immediately and then every minute
+    updateCountdown();
+    const intervalId = setInterval(updateCountdown, 60000);
+
+    return () => clearInterval(intervalId);
+  }, []);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!guess.trim()) return;
+    if (!guess.trim() || !dailyChallenge) return;
     
     // Check if already guessed
     if (guesses.includes(guess)) {
@@ -47,7 +98,7 @@ const StarPowerMode = () => {
     }
     
     // Process the guess
-    const isGuessCorrect = guess.toLowerCase() === dailyStarPowerChallenge.brawler.toLowerCase();
+    const isGuessCorrect = guess.toLowerCase() === dailyChallenge.brawler.toLowerCase();
     const newAttempts = attempts + 1;
     
     setAttempts(newAttempts);
@@ -59,7 +110,7 @@ const StarPowerMode = () => {
       toast.success('Correct! You found the right brawler!');
     } else if (newAttempts >= maxAttempts) {
       setShowResult(true);
-      toast.error(`Out of attempts! The correct answer was ${dailyStarPowerChallenge.brawler}.`);
+      toast.error(`Out of attempts! The correct answer was ${dailyChallenge.brawler}.`);
     } else {
       toast.error(`Wrong guess! ${maxAttempts - newAttempts} attempts left.`);
     }
@@ -69,6 +120,7 @@ const StarPowerMode = () => {
   
   const handleBrawlerSelect = (brawler: Brawler) => {
     setSelectedBrawler(brawler);
+    setGuess(brawler.name);
   };
   
   const resetGame = () => {
@@ -79,6 +131,25 @@ const StarPowerMode = () => {
     setGuess('');
     setSelectedBrawler(null);
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-40">
+        <div className="animate-spin h-8 w-8 border-4 border-brawl-yellow border-t-transparent rounded-full"></div>
+      </div>
+    );
+  }
+
+  if (!dailyChallenge) {
+    return (
+      <Card className="brawl-card p-6">
+        <div className="text-center">
+          <h3 className="text-xl font-bold text-brawl-yellow mb-2">No Challenge Available</h3>
+          <p className="text-white/80">Check back later for today's challenge.</p>
+        </div>
+      </Card>
+    );
+  }
 
   return (
     <div>
@@ -120,7 +191,11 @@ const StarPowerMode = () => {
         </div>
         <p className="text-white/80">Guess which brawler uses this star power</p>
         <div className="mt-4 px-4 py-2 bg-white/10 rounded-lg">
-          <p className="text-white font-bold">{isCorrect || showResult ? dailyStarPowerChallenge.starPowerName : "??? Star Power"}</p>
+          <p className="text-white font-bold">{isCorrect || showResult ? dailyChallenge.starPowerName : "??? Star Power"}</p>
+        </div>
+        
+        <div className="mt-6 text-sm text-white/60">
+          Next challenge in: {timeUntilNext.hours}h {timeUntilNext.minutes}m
         </div>
       </Card>
       
@@ -132,8 +207,8 @@ const StarPowerMode = () => {
                 <span className="text-3xl">👤</span>
               </div>
               <div>
-                <h3 className="text-xl font-bold text-white">{dailyStarPowerChallenge.brawler}</h3>
-                <p className="text-white/80">{dailyStarPowerChallenge.tip}</p>
+                <h3 className="text-xl font-bold text-white">{dailyChallenge.brawler}</h3>
+                <p className="text-white/80">{dailyChallenge.tip}</p>
               </div>
             </div>
             
@@ -176,7 +251,7 @@ const StarPowerMode = () => {
                     className="flex items-center p-2 rounded bg-white/10"
                   >
                     <span className="mr-2">
-                      {pastGuess.toLowerCase() === dailyStarPowerChallenge.brawler.toLowerCase() ? (
+                      {pastGuess.toLowerCase() === dailyChallenge.brawler.toLowerCase() ? (
                         <Check className="w-5 h-5 text-brawl-green" />
                       ) : (
                         <X className="w-5 h-5 text-brawl-red" />

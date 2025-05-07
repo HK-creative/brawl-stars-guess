@@ -5,9 +5,10 @@ import ModeDescription from '@/components/ModeDescription';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { t } from '@/lib/i18n';
-import { brawlers, correctBrawler, Brawler } from '@/data/brawlers';
+import { brawlers, Brawler } from '@/data/brawlers';
 import BrawlerGuessRow from '@/components/BrawlerGuessRow';
 import BrawlerAutocomplete from '@/components/BrawlerAutocomplete';
+import { fetchDailyChallenge, getTimeUntilNextChallenge } from '@/lib/daily-challenges';
 
 const ClassicMode = () => {
   const [inputValue, setInputValue] = useState('');
@@ -15,6 +16,52 @@ const ClassicMode = () => {
   const [guesses, setGuesses] = useState<Brawler[]>([]);
   const [isGameOver, setIsGameOver] = useState(false);
   const [guessCount, setGuessCount] = useState(0);
+  const [correctBrawlerName, setCorrectBrawlerName] = useState<string>('');
+  const [isLoading, setIsLoading] = useState(true);
+  const [timeUntilNext, setTimeUntilNext] = useState({ hours: 0, minutes: 0 });
+
+  // Fallback data in case Supabase fetch fails
+  const fallbackBrawlerName = "Spike";
+  
+  // Find the correct brawler object
+  const getCorrectBrawler = () => {
+    return brawlers.find(b => b.name.toLowerCase() === correctBrawlerName.toLowerCase()) || brawlers[0];
+  };
+
+  useEffect(() => {
+    const loadChallenge = async () => {
+      setIsLoading(true);
+      try {
+        const data = await fetchDailyChallenge('classic');
+        if (data) {
+          setCorrectBrawlerName(data);
+        } else {
+          // Fallback to local data
+          setCorrectBrawlerName(fallbackBrawlerName);
+          toast.error("Couldn't load today's challenge. Using fallback data.");
+        }
+      } catch (error) {
+        console.error("Error loading classic challenge:", error);
+        setCorrectBrawlerName(fallbackBrawlerName);
+        toast.error("Couldn't load today's challenge. Using fallback data.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadChallenge();
+
+    // Update the countdown timer
+    const updateCountdown = () => {
+      setTimeUntilNext(getTimeUntilNextChallenge());
+    };
+
+    // Update countdown immediately and then every minute
+    updateCountdown();
+    const intervalId = setInterval(updateCountdown, 60000);
+
+    return () => clearInterval(intervalId);
+  }, []);
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,9 +76,9 @@ const ClassicMode = () => {
     setGuessCount(prev => prev + 1);
     
     // Check if the guess is correct
-    if (selectedBrawler.name === correctBrawler.name) {
+    if (selectedBrawler.name.toLowerCase() === correctBrawlerName.toLowerCase()) {
       setIsGameOver(true);
-      toast.success(`Correct! You found ${correctBrawler.name} in ${guessCount + 1} guesses!`);
+      toast.success(`Correct! You found ${correctBrawlerName} in ${guessCount + 1} guesses!`);
     }
     
     // Reset the input
@@ -42,6 +89,27 @@ const ClassicMode = () => {
   const handleSelectBrawler = (brawler: Brawler) => {
     setSelectedBrawler(brawler);
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-40">
+        <div className="animate-spin h-8 w-8 border-4 border-brawl-yellow border-t-transparent rounded-full"></div>
+      </div>
+    );
+  }
+
+  if (!correctBrawlerName) {
+    return (
+      <Card className="brawl-card p-6">
+        <div className="text-center">
+          <h3 className="text-xl font-bold text-brawl-yellow mb-2">No Challenge Available</h3>
+          <p className="text-white/80">Check back later for today's challenge.</p>
+        </div>
+      </Card>
+    );
+  }
+
+  const correctBrawler = getCorrectBrawler();
 
   return (
     <div>
@@ -61,10 +129,13 @@ const ClassicMode = () => {
               <div className="flex justify-center mb-2">
                 <div className="w-16 h-16 rounded-full bg-gray-600"></div>
               </div>
-              <h4 className="text-lg font-semibold text-white">{correctBrawler.name}</h4>
+              <h4 className="text-lg font-semibold text-white">{correctBrawlerName}</h4>
               <p className="text-white/70 text-sm mt-4">
                 Come back tomorrow for a new challenge!
               </p>
+              <div className="mt-4 text-sm text-white/60">
+                Next challenge in: {timeUntilNext.hours}h {timeUntilNext.minutes}m
+              </div>
             </div>
           </Card>
         </div>
@@ -84,6 +155,10 @@ const ClassicMode = () => {
           >
             {t('submit.guess')}
           </Button>
+          
+          <div className="text-center text-sm text-white/60 mt-2">
+            Next challenge in: {timeUntilNext.hours}h {timeUntilNext.minutes}m
+          </div>
         </form>
       )}
       
