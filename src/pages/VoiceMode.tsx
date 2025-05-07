@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import ModeDescription from '@/components/ModeDescription';
 import { Button } from '@/components/ui/button';
@@ -8,7 +7,8 @@ import { toast } from 'sonner';
 import { fetchDailyChallenge, getTimeUntilNextChallenge } from '@/lib/daily-challenges';
 import BrawlerAutocomplete from '@/components/BrawlerAutocomplete';
 import { brawlers, Brawler } from '@/data/brawlers';
-import { Check, X, Volume2 } from 'lucide-react';
+import { Check, X, Volume2, Share2 } from 'lucide-react';
+import ShareResultModal from '@/components/ShareResultModal';
 
 interface VoiceChallenge {
   brawler: string;
@@ -26,6 +26,8 @@ const VoiceMode = () => {
   const [timeUntilNext, setTimeUntilNext] = useState({ hours: 0, minutes: 0 });
   const [selectedBrawler, setSelectedBrawler] = useState<Brawler | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   
   const maxAttempts = 3;
 
@@ -112,6 +114,20 @@ const VoiceMode = () => {
     setSelectedBrawler(brawler);
     setGuess(brawler.name);
   };
+  
+  const handleShareResult = () => {
+    if (!showResult || !dailyChallenge) return;
+    setIsShareModalOpen(true);
+  };
+
+  // Create an array of guess results for the share card
+  const generateGuessResults = () => {
+    if (!dailyChallenge) return [];
+    
+    return guesses.map(
+      guess => guess.toLowerCase() === dailyChallenge.brawler.toLowerCase()
+    );
+  };
 
   if (isLoading) {
     return (
@@ -179,14 +195,25 @@ const VoiceMode = () => {
               </div>
             </div>
             
-            <Button 
-              variant="outline" 
-              className="gap-2 bg-white/10 border-white/20 hover:bg-white/20 mt-2"
-              onClick={handlePlayVoice}
-            >
-              <Volume2 className="w-4 h-4" />
-              <span>Play Again</span>
-            </Button>
+            <div className="flex gap-2 mt-2">
+              <Button 
+                variant="outline" 
+                className="gap-2 bg-white/10 border-white/20 hover:bg-white/20"
+                onClick={handlePlayVoice}
+              >
+                <Volume2 className="w-4 h-4" />
+                <span>Play Again</span>
+              </Button>
+              
+              <Button 
+                variant="outline" 
+                className="gap-2 bg-white/10 border-white/20 hover:bg-white/20"
+                onClick={handleShareResult}
+              >
+                <Share2 className="w-4 h-4" />
+                <span>Share Result</span>
+              </Button>
+            </div>
           </Card>
           
           <div className="text-center text-white/80 mt-4">
@@ -235,6 +262,18 @@ const VoiceMode = () => {
           )}
         </form>
       )}
+      
+      {/* Share Result Modal */}
+      <ShareResultModal 
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+        mode="voice"
+        success={isCorrect}
+        attempts={attempts}
+        maxAttempts={maxAttempts}
+        guessHistory={generateGuessResults()}
+        brawlerName={dailyChallenge?.brawler}
+      />
     </div>
   );
 };
