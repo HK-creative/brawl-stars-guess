@@ -1,27 +1,62 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { LanguageProvider } from "@/contexts/LanguageContext";
+import { useEffect } from "react";
+import { initLanguage } from "@/lib/i18n";
+
+// Pages
 import Index from "./pages/Index";
+import ClassicMode from "./pages/ClassicMode";
+import AudioMode from "./pages/AudioMode";
+import VoiceMode from "./pages/VoiceMode";
+import GadgetMode from "./pages/GadgetMode";
+import StarPowerMode from "./pages/StarPowerMode";
+import ScorePage from "./pages/ScorePage";
+import SettingsPage from "./pages/SettingsPage";
+import NotLivePage from "./pages/NotLivePage";
 import NotFound from "./pages/NotFound";
+
+// Layout
+import Layout from "./components/layout/Layout";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+const App = () => {
+  useEffect(() => {
+    // Initialize language on app load
+    initLanguage();
+  }, []);
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <LanguageProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Layout>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/classic" element={<ClassicMode />} />
+                <Route path="/audio" element={<AudioMode />} />
+                <Route path="/voice" element={<VoiceMode />} />
+                <Route path="/gadget" element={<GadgetMode />} />
+                <Route path="/starpower" element={<StarPowerMode />} />
+                <Route path="/score" element={<ScorePage />} />
+                <Route path="/settings" element={<SettingsPage />} />
+                <Route path="/not-live" element={<NotLivePage />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </Layout>
+          </BrowserRouter>
+        </TooltipProvider>
+      </LanguageProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;
