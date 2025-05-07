@@ -2,14 +2,13 @@
 import React, { useState, useEffect } from 'react';
 import ModeDescription from '@/components/ModeDescription';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { t } from '@/lib/i18n';
 import { toast } from 'sonner';
 import { fetchDailyChallenge, getTimeUntilNextChallenge } from '@/lib/daily-challenges';
 import BrawlerAutocomplete from '@/components/BrawlerAutocomplete';
 import { brawlers, Brawler } from '@/data/brawlers';
-import { Check, X } from 'lucide-react';
+import { Check, X, Volume2 } from 'lucide-react';
 
 interface VoiceChallenge {
   brawler: string;
@@ -26,14 +25,9 @@ const VoiceMode = () => {
   const [showResult, setShowResult] = useState(false);
   const [timeUntilNext, setTimeUntilNext] = useState({ hours: 0, minutes: 0 });
   const [selectedBrawler, setSelectedBrawler] = useState<Brawler | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
   
   const maxAttempts = 3;
-
-  // Fallback data in case Supabase fetch fails
-  const fallbackChallenge: VoiceChallenge = {
-    brawler: "Shelly",
-    voiceLine: "Let's go!"
-  };
 
   useEffect(() => {
     const loadChallenge = async () => {
@@ -43,14 +37,11 @@ const VoiceMode = () => {
         if (data) {
           setDailyChallenge(data);
         } else {
-          // Fallback to local data
-          setDailyChallenge(fallbackChallenge);
-          toast.error("Couldn't load today's challenge. Using fallback data.");
+          toast.error("Couldn't load today's challenge. Please try again later.");
         }
       } catch (error) {
         console.error("Error loading voice challenge:", error);
-        setDailyChallenge(fallbackChallenge);
-        toast.error("Couldn't load today's challenge. Using fallback data.");
+        toast.error("Couldn't load today's challenge. Please try again later.");
       } finally {
         setIsLoading(false);
       }
@@ -104,9 +95,17 @@ const VoiceMode = () => {
   };
 
   const handlePlayVoice = () => {
-    console.log('Playing voice line');
-    // Voice line playback logic will be implemented later
-    toast.info("Voice playback would happen here. Coming soon!");
+    // For now we'll just simulate the audio playback
+    setIsPlaying(true);
+    
+    // Add animation effect for "playing" state
+    setTimeout(() => {
+      setIsPlaying(false);
+    }, 2000);
+    
+    toast.info(`"${dailyChallenge?.voiceLine}"`, {
+      description: "Voice playback coming soon!"
+    });
   };
 
   const handleBrawlerSelect = (brawler: Brawler) => {
@@ -141,10 +140,21 @@ const VoiceMode = () => {
       />
       
       <Card className="brawl-card mb-6 flex flex-col items-center justify-center py-8">
-        <div className="text-6xl mb-4 animate-pulse-glow cursor-pointer" onClick={handlePlayVoice}>
-          🗣️
+        <div 
+          className={`text-6xl mb-4 ${isPlaying ? 'animate-pulse' : 'animate-pulse-glow'} cursor-pointer`} 
+          onClick={handlePlayVoice}
+        >
+          {isPlaying ? '🔊' : '🗣️'}
         </div>
-        <p className="text-white/80">Click to play voice line</p>
+        <Button 
+          variant="outline" 
+          className="gap-2 bg-white/10 border-white/20 hover:bg-white/20"
+          onClick={handlePlayVoice}
+        >
+          <Volume2 className="w-4 h-4" />
+          <span>Play Voice Line</span>
+        </Button>
+        
         <div className="mt-4 px-4 py-2 bg-white/10 rounded-lg">
           <p className="text-white/70 italic">
             {isCorrect || showResult ? `"${dailyChallenge.voiceLine}"` : `"..."`}
@@ -165,12 +175,22 @@ const VoiceMode = () => {
               </div>
               <div>
                 <h3 className="text-xl font-bold text-white">{dailyChallenge.brawler}</h3>
+                <p className="text-white/70 text-sm">"{dailyChallenge.voiceLine}"</p>
               </div>
             </div>
+            
+            <Button 
+              variant="outline" 
+              className="gap-2 bg-white/10 border-white/20 hover:bg-white/20 mt-2"
+              onClick={handlePlayVoice}
+            >
+              <Volume2 className="w-4 h-4" />
+              <span>Play Again</span>
+            </Button>
           </Card>
           
           <div className="text-center text-white/80 mt-4">
-            <p>You got it {isCorrect ? 'right' : 'wrong'} in {attempts} {attempts === 1 ? 'guess' : 'guesses'}!</p>
+            <p>You got it {isCorrect ? 'right' : 'wrong'} in {attempts} {attempts === 1 ? 'attempt' : 'attempts'}!</p>
           </div>
         </div>
       ) : (
