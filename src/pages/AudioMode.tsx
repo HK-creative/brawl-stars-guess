@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { toast } from 'sonner';
 import { Volume2, Play, Check, X } from 'lucide-react';
@@ -7,8 +6,7 @@ import BrawlerAutocomplete from '@/components/BrawlerAutocomplete';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { t } from '@/lib/i18n';
-import { getBrawlerByName } from '@/data/audioChallenges';
-import { Brawler, brawlers } from '@/data/brawlers';
+import { getBrawlerByName, Brawler, brawlers } from '@/data/brawlers';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { fetchDailyChallenge, getTimeUntilNextChallenge } from '@/lib/daily-challenges';
 
