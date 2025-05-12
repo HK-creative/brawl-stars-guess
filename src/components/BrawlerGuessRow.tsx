@@ -1,8 +1,7 @@
-
 import React from 'react';
 import { Brawler } from '@/data/brawlers';
 import { ArrowUp, ArrowDown } from 'lucide-react';
-import { getPortrait } from '@/lib/image-helpers';
+import { getPortrait, DEFAULT_PORTRAIT } from '@/lib/image-helpers';
 import Image from './ui/image';
 
 interface BrawlerGuessRowProps {
@@ -12,6 +11,7 @@ interface BrawlerGuessRowProps {
 
 const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer }) => {
   // Comparison logic for attributes
+  
   const compareAttribute = (guessValue: string, correctValue: string): string => {
     if (guessValue === correctValue) return 'bg-brawl-green text-white'; // Correct
     
@@ -51,8 +51,9 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer 
   const reloadClass = compareAttribute(guess.reload, correctAnswer.reload);
   const yearResult = compareNumeric(guess.releaseYear, correctAnswer.releaseYear);
 
-  // Log the portrait path for debugging
-  console.log("Loading portrait image for:", guess.name, "→", getPortrait(guess.name));
+  // Get portrait image path with proper debugging
+  const portraitPath = getPortrait(guess.name);
+  console.log(`Loading portrait image for: ${guess.name} → ${portraitPath}`);
 
   // Build the row for the guess
   return (
@@ -60,14 +61,16 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer 
       <div className="bg-white/10 py-2 px-3 flex items-center justify-between border-b border-white/20">
         <div className="flex items-center">
           <Image
-            src={getPortrait(guess.name)}
+            src={portraitPath}
             alt={guess.name}
+            fallbackSrc={DEFAULT_PORTRAIT}
             className="w-8 h-8 rounded-full mr-2 object-cover"
           />
           <span className="text-white font-bold">{guess.name}</span>
         </div>
       </div>
       
+      {/* grid with attributes */}
       <div className="grid grid-cols-2 gap-2 p-2">
         {/* Rarity */}
         <div className="flex items-center space-x-2">

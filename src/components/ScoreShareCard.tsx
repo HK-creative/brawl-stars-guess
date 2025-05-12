@@ -4,7 +4,7 @@ import { Card } from '@/components/ui/card';
 import { Share, Download, Copy, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import html2canvas from 'html2canvas';
-import { getPortrait } from '@/lib/image-helpers';
+import { getPortrait, DEFAULT_PORTRAIT } from '@/lib/image-helpers';
 import Image from '@/components/ui/image';
 
 export interface ScoreShareCardProps {
@@ -42,6 +42,7 @@ const ScoreShareCard = ({
   guessHistory = [],
   brawlerName
 }: ScoreShareCardProps) => {
+  
   const [copied, setCopied] = useState(false);
   const shareCardRef = useRef<HTMLDivElement>(null);
   
@@ -158,10 +159,10 @@ const ScoreShareCard = ({
     toast.success("Image downloaded!");
   };
 
-  // Log portrait path for debugging
+  // Get portrait image path with proper debugging
   const portraitPath = brawlerName ? getPortrait(brawlerName) : '';
   if (brawlerName) {
-    console.log("Portrait path for ScoreShareCard:", portraitPath);
+    console.log(`Portrait path for ScoreShareCard brawler ${brawlerName}:`, portraitPath);
   }
 
   return (
@@ -194,8 +195,9 @@ const ScoreShareCard = ({
             {brawlerName && (
               <div className="flex items-center mt-2">
                 <Image
-                  src={getPortrait(brawlerName)}
+                  src={portraitPath}
                   alt={brawlerName}
+                  fallbackSrc={DEFAULT_PORTRAIT}
                   className="w-8 h-8 rounded-full mr-2 object-cover"
                 />
                 <p className="text-brawl-yellow font-medium">{brawlerName}</p>
