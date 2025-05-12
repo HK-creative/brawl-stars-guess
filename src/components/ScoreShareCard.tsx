@@ -1,3 +1,4 @@
+
 import React, { useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -5,7 +6,6 @@ import { Share, Download, Copy, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import html2canvas from 'html2canvas';
 import { getPortrait, DEFAULT_PORTRAIT } from '@/lib/image-helpers';
-import Image from '@/components/ui/image';
 
 export interface ScoreShareCardProps {
   mode: 'classic' | 'audio' | 'gadget' | 'starpower' | 'voice';
@@ -159,14 +159,13 @@ const ScoreShareCard = ({
     toast.success("Image downloaded!");
   };
 
-  // Get portrait image path with extensive debug logging
+  // Get portrait image path
   let portraitPath = DEFAULT_PORTRAIT;
   if (brawlerName) {
     portraitPath = getPortrait(brawlerName);
     console.log(`ScoreShareCard: Portrait path for ${brawlerName}:`, portraitPath);
   }
 
-  // Rest of the component remains the same
   return (
     <div className="flex flex-col items-center">
       {/* Card that will be captured as image */}
@@ -196,11 +195,14 @@ const ScoreShareCard = ({
             </p>
             {brawlerName && (
               <div className="flex items-center mt-2">
-                <Image
+                <img
                   src={portraitPath}
                   alt={brawlerName}
-                  fallbackSrc={DEFAULT_PORTRAIT}
                   className="w-8 h-8 rounded-full mr-2 object-cover"
+                  onError={(e) => {
+                    console.error("Missing image:", portraitPath);
+                    e.currentTarget.src = DEFAULT_PORTRAIT;
+                  }}
                 />
                 <p className="text-brawl-yellow font-medium">{brawlerName}</p>
               </div>

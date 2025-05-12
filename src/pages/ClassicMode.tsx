@@ -10,7 +10,6 @@ import BrawlerGuessRow from '@/components/BrawlerGuessRow';
 import BrawlerAutocomplete from '@/components/BrawlerAutocomplete';
 import { fetchDailyChallenge, getTimeUntilNextChallenge, checkSupabaseConnection } from '@/lib/daily-challenges';
 import { getPortrait, DEFAULT_PORTRAIT } from '@/lib/image-helpers';
-import Image from '@/components/ui/image';
 import ShareResultModal from '@/components/ShareResultModal';
 
 const ClassicMode = () => {
@@ -128,7 +127,8 @@ const ClassicMode = () => {
   }
 
   const correctBrawler = getCorrectBrawler();
-  console.log("Portrait path for correct brawler:", getPortrait(correctBrawlerName));
+  const portraitPath = getPortrait(correctBrawlerName);
+  console.log("Portrait path for correct brawler:", portraitPath);
 
   return (
     <div>
@@ -152,11 +152,14 @@ const ClassicMode = () => {
                 You found the correct brawler in {guessCount} {guessCount === 1 ? 'guess' : 'guesses'}!
               </p>
               <div className="flex justify-center mb-2">
-                <Image
-                  src={getPortrait(correctBrawlerName)}
+                <img
+                  src={portraitPath}
                   alt={correctBrawlerName}
                   className="w-24 h-24 rounded-full object-cover"
-                  fallbackSrc={DEFAULT_PORTRAIT}
+                  onError={(e) => {
+                    console.error("Missing image:", portraitPath);
+                    e.currentTarget.src = DEFAULT_PORTRAIT;
+                  }}
                 />
               </div>
               <h4 className="text-lg font-semibold text-white">{correctBrawlerName}</h4>
