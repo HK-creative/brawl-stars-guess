@@ -37,16 +37,37 @@ export const getTimeUntilNextChallenge = (): { hours: number; minutes: number } 
   return { hours: diffHrs, minutes: diffMins };
 };
 
+// Check if Supabase connection is working
+export const checkSupabaseConnection = async (): Promise<boolean> => {
+  try {
+    const { data, error } = await supabase.from('daily_challenges').select('id').limit(1);
+    if (error) {
+      console.error('Supabase connection error:', error);
+      return false;
+    }
+    console.log('Supabase connection successful:', data);
+    return true;
+  } catch (err) {
+    console.error('Exception checking Supabase connection:', err);
+    return false;
+  }
+};
+
 // Fetch today's challenge for a specific mode
 export const fetchDailyChallenge = async (mode: string): Promise<any> => {
+  console.log(`Fetching daily challenge for mode: ${mode}`);
+  
   // Check if we already have this challenge in cache
-  const cacheKey = `${mode}-${getCurrentDateUTC2()}`;
+  const currentDate = getCurrentDateUTC2();
+  const cacheKey = `${mode}-${currentDate}`;
+  
   if (challengeCache[cacheKey]) {
+    console.log(`Using cached challenge for ${mode}`);
     return challengeCache[cacheKey].challenge_data;
   }
   
   try {
-    const currentDate = getCurrentDateUTC2();
+    console.log(`Querying database for ${mode} challenge on ${currentDate}`);
     
     const { data, error } = await supabase
       .from('daily_challenges')
@@ -57,19 +78,62 @@ export const fetchDailyChallenge = async (mode: string): Promise<any> => {
       
     if (error) {
       console.error('Error fetching daily challenge:', error);
-      // Fallback to local data (will be implemented in each component)
-      return null;
+      console.log('Falling back to local fallback data');
+      
+      // Return fallback data based on mode
+      return getFallbackChallengeData(mode);
     }
     
     if (data) {
+      console.log(`Successfully retrieved ${mode} challenge:`, data);
       // Cache the result
       challengeCache[cacheKey] = data;
       return data.challenge_data;
     }
     
-    return null;
+    console.log(`No data found for ${mode} challenge, using fallback`);
+    return getFallbackChallengeData(mode);
   } catch (error) {
-    console.error('Error in fetchDailyChallenge:', error);
-    return null;
+    console.error('Exception in fetchDailyChallenge:', error);
+    return getFallbackChallengeData(mode);
+  }
+};
+
+// Provide appropriate fallback data based on the mode
+const getFallbackChallengeData = (mode: string): any => {
+  console.log(`Using fallback data for ${mode} mode`);
+  
+  switch (mode) {
+    case 'classic':
+      return "Spike"; // Fallback brawler name
+      
+    case 'gadget':
+      return {
+        brawler: "Spike",
+        gadgetName: "Popping Pincushion",
+        tip: "This gadget creates a ring of spikes around Spike that damage enemies."
+      };
+      
+    case 'starpower':
+      return {
+        brawler: "Bo",
+        starPowerName: "Circling Eagle",
+        tip: "This star power increases Bo's vision range in bushes."
+      };
+      
+    case 'voice':
+      return {
+        brawler: "Shelly",
+        voiceLine: "Let's go get 'em!"
+      };
+      
+    case 'audio':
+      return {
+        brawler: "Spike",
+        audioFile: "/audio/spike_super.mp3"
+      };
+      
+    default:
+      return null;
   }
 };

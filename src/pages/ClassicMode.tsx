@@ -7,7 +7,7 @@ import { t } from '@/lib/i18n';
 import { brawlers, Brawler } from '@/data/brawlers';
 import BrawlerGuessRow from '@/components/BrawlerGuessRow';
 import BrawlerAutocomplete from '@/components/BrawlerAutocomplete';
-import { fetchDailyChallenge, getTimeUntilNextChallenge } from '@/lib/daily-challenges';
+import { fetchDailyChallenge, getTimeUntilNextChallenge, checkSupabaseConnection } from '@/lib/daily-challenges';
 import { getPortrait } from '@/lib/image-helpers';
 import Image from '@/components/ui/image';
 
@@ -20,6 +20,7 @@ const ClassicMode = () => {
   const [correctBrawlerName, setCorrectBrawlerName] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
   const [timeUntilNext, setTimeUntilNext] = useState({ hours: 0, minutes: 0 });
+  const [isBackendConnected, setIsBackendConnected] = useState(true);
 
   // Fallback data in case Supabase fetch fails
   const fallbackBrawlerName = "Spike";
@@ -33,17 +34,26 @@ const ClassicMode = () => {
     const loadChallenge = async () => {
       setIsLoading(true);
       try {
+        // Log the attempt to fetch data
+        console.log("ClassicMode: Attempting to load challenge data");
+        
         const data = await fetchDailyChallenge('classic');
+        console.log("ClassicMode: Received data:", data);
+        
         if (data) {
           setCorrectBrawlerName(data);
+          setIsBackendConnected(true);
         } else {
           // Fallback to local data
+          console.log("ClassicMode: No data received, using fallback");
           setCorrectBrawlerName(fallbackBrawlerName);
+          setIsBackendConnected(false);
           toast.error("Couldn't load today's challenge. Using fallback data.");
         }
       } catch (error) {
         console.error("Error loading classic challenge:", error);
         setCorrectBrawlerName(fallbackBrawlerName);
+        setIsBackendConnected(false);
         toast.error("Couldn't load today's challenge. Using fallback data.");
       } finally {
         setIsLoading(false);
@@ -112,7 +122,7 @@ const ClassicMode = () => {
 
   const correctBrawler = getCorrectBrawler();
 
-  // Log portrait path for debugging
+  // Log portrait path for correct brawler
   console.log("Portrait path for correct brawler:", getPortrait(correctBrawlerName));
 
   return (
@@ -121,6 +131,12 @@ const ClassicMode = () => {
         title={t('mode.classic')} 
         description={t('mode.classic.description')}
       />
+      
+      {!isBackendConnected && (
+        <div className="mb-4 p-2 bg-amber-800/50 border border-amber-600 rounded-md text-white text-sm">
+          <p>⚠️ Using fallback data: Could not connect to the challenge database.</p>
+        </div>
+      )}
       
       {isGameOver ? (
         <div className="mb-6 animate-fade-in">
