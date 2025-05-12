@@ -69,26 +69,25 @@ export const fetchDailyChallenge = async (mode: string): Promise<any> => {
   try {
     console.log(`Querying database for ${mode} challenge on ${currentDate}`);
     
+    // Important: We're removing the .single() to avoid 406 errors when no rows are returned
     const { data, error } = await supabase
       .from('daily_challenges')
       .select('id, mode, challenge_data, date')
       .eq('mode', mode)
-      .eq('date', currentDate)
-      .single();
+      .eq('date', currentDate);
       
     if (error) {
       console.error('Error fetching daily challenge:', error);
       console.log('Falling back to local fallback data');
-      
-      // Return fallback data based on mode
       return getFallbackChallengeData(mode);
     }
     
-    if (data) {
-      console.log(`Successfully retrieved ${mode} challenge:`, data);
+    // Check if we got any data
+    if (data && data.length > 0) {
+      console.log(`Successfully retrieved ${mode} challenge:`, data[0]);
       // Cache the result
-      challengeCache[cacheKey] = data;
-      return data.challenge_data;
+      challengeCache[cacheKey] = data[0];
+      return data[0].challenge_data;
     }
     
     console.log(`No data found for ${mode} challenge, using fallback`);

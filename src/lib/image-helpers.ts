@@ -3,15 +3,19 @@
  * Helper functions to generate image paths for brawler assets
  */
 
-export function getPortrait(brawlerName: string): string {
-  const path = `/brawlers/portraits/${encodeURIComponent(brawlerName)}_portrait.png`;
-  console.log('Generated portrait path:', path);
+// Fix path to point to the pins folder in the project root
+export function getPin(brawlerName: string): string {
+  // Updated path to use the correct location of pin images
+  const path = `/pins/${encodeURIComponent(brawlerName)}_pin.png`;
+  console.log('Generated pin path:', path);
   return path;
 }
 
-export function getPin(brawlerName: string): string {
-  const path = `/brawlers/pins/${encodeURIComponent(brawlerName)}_pin.png`;
-  console.log('Generated pin path:', path);
+// Fix path to point to the portraits folder in the project root
+export function getPortrait(brawlerName: string): string {
+  // Updated path to use the correct location of portrait images
+  const path = `/portraits/${encodeURIComponent(brawlerName)}_portrait.png`;
+  console.log('Generated portrait path:', path);
   return path;
 }
 
