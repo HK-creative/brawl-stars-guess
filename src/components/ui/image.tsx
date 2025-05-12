@@ -1,6 +1,6 @@
 
-import React, { useState, useEffect } from 'react';
-import { DEFAULT_PORTRAIT, DEFAULT_PIN } from '@/lib/image-helpers';
+import React, { useState } from 'react';
+import { DEFAULT_PORTRAIT } from '@/lib/image-helpers';
 
 interface ImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   fallbackSrc?: string;
@@ -8,40 +8,25 @@ interface ImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
 
 const Image: React.FC<ImageProps> = ({ 
   src, 
-  alt, 
+  alt = "Image", 
   fallbackSrc = DEFAULT_PORTRAIT,
   className = "",
   ...props 
 }) => {
-  const [imgSrc, setImgSrc] = useState<string | undefined>(src);
-  const [hasError, setHasError] = useState(false);
+  const [imageSrc, setImageSrc] = useState<string | undefined>(src);
   
-  // Reset error state if src changes
-  useEffect(() => {
-    if (src) {
-      setImgSrc(src);
-      setHasError(false);
-    }
-  }, [src]);
-
   const handleError = () => {
-    if (!hasError) {
-      console.error(`Image failed to load: ${imgSrc}, using fallback: ${fallbackSrc}`);
-      setImgSrc(fallbackSrc);
-      setHasError(true);
+    console.log(`Image failed to load: ${src}`);
+    
+    if (imageSrc !== fallbackSrc) {
+      console.log(`Using fallback: ${fallbackSrc}`);
+      setImageSrc(fallbackSrc);
     }
   };
 
-  // Debug info
-  useEffect(() => {
-    if (src) {
-      console.log(`Rendering image with src: ${src}, alt: ${alt}`);
-    }
-  }, [src, alt]);
-
   return (
     <img
-      src={imgSrc}
+      src={imageSrc}
       alt={alt}
       onError={handleError}
       className={className}

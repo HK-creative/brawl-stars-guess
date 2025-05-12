@@ -1,7 +1,8 @@
+
 import React from 'react';
 import { Brawler } from '@/data/brawlers';
 import { ArrowUp, ArrowDown } from 'lucide-react';
-import { getPortrait, DEFAULT_PORTRAIT } from '@/lib/image-helpers';
+import { getPortrait } from '@/lib/image-helpers';
 import Image from './ui/image';
 
 interface BrawlerGuessRowProps {
@@ -51,9 +52,8 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer 
   const reloadClass = compareAttribute(guess.reload, correctAnswer.reload);
   const yearResult = compareNumeric(guess.releaseYear, correctAnswer.releaseYear);
 
-  // Get portrait image path with proper debugging
+  // Get portrait image path - simplified approach
   const portraitPath = getPortrait(guess.name);
-  console.log(`Loading portrait image for: ${guess.name} → ${portraitPath}`);
 
   // Build the row for the guess
   return (
@@ -63,7 +63,7 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer 
           <Image
             src={portraitPath}
             alt={guess.name}
-            fallbackSrc={DEFAULT_PORTRAIT}
+            fallbackSrc="/placeholder.svg"
             className="w-8 h-8 rounded-full mr-2 object-cover"
           />
           <span className="text-white font-bold">{guess.name}</span>

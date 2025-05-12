@@ -3,7 +3,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Brawler } from '@/data/brawlers';
 import { getPin } from '@/lib/image-helpers';
-import Image from '../components/ui/image';
+import Image from './ui/image';
 
 interface BrawlerAutocompleteProps {
   brawlers: Brawler[];
@@ -77,7 +77,7 @@ const BrawlerAutocomplete: React.FC<BrawlerAutocompleteProps> = ({
       {isOpen && filteredBrawlers.length > 0 && (
         <div className="absolute z-10 w-full mt-1 bg-gray-800 border border-white/20 rounded-md shadow-lg max-h-60 overflow-y-auto">
           {filteredBrawlers.map((brawler) => {
-            console.log("Loading pin image for:", brawler.name, "→", getPin(brawler.name));
+            const pinPath = getPin(brawler.name);
             return (
               <div
                 key={brawler.name}
@@ -85,7 +85,7 @@ const BrawlerAutocomplete: React.FC<BrawlerAutocompleteProps> = ({
                 onClick={() => handleSelectBrawler(brawler)}
               >
                 <Image 
-                  src={getPin(brawler.name)} 
+                  src={pinPath} 
                   alt={brawler.name}
                   className="w-6 h-6 rounded-full mr-2"
                   fallbackSrc="/placeholder.svg"
