@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { DEFAULT_PORTRAIT } from '@/lib/image-helpers';
 
 interface ImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
@@ -14,13 +14,21 @@ const Image: React.FC<ImageProps> = ({
   ...props 
 }) => {
   const [imageSrc, setImageSrc] = useState<string | undefined>(src);
+  const [hasError, setHasError] = useState(false);
+  
+  // Reset error state when src changes
+  useEffect(() => {
+    setImageSrc(src);
+    setHasError(false);
+  }, [src]);
   
   const handleError = () => {
-    console.log(`Image failed to load: ${src}`);
+    console.error(`Image failed to load: ${src}`);
     
-    if (imageSrc !== fallbackSrc) {
-      console.log(`Using fallback: ${fallbackSrc}`);
+    if (!hasError && fallbackSrc && imageSrc !== fallbackSrc) {
+      console.log(`Using fallback image: ${fallbackSrc}`);
       setImageSrc(fallbackSrc);
+      setHasError(true);
     }
   };
 

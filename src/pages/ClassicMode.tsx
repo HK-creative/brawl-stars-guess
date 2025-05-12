@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import ModeDescription from '@/components/ModeDescription';
@@ -8,8 +9,9 @@ import { brawlers, Brawler } from '@/data/brawlers';
 import BrawlerGuessRow from '@/components/BrawlerGuessRow';
 import BrawlerAutocomplete from '@/components/BrawlerAutocomplete';
 import { fetchDailyChallenge, getTimeUntilNextChallenge, checkSupabaseConnection } from '@/lib/daily-challenges';
-import { getPortrait } from '@/lib/image-helpers';
+import { getPortrait, DEFAULT_PORTRAIT } from '@/lib/image-helpers';
 import Image from '@/components/ui/image';
+import ShareResultModal from '@/components/ShareResultModal';
 
 const ClassicMode = () => {
   const [inputValue, setInputValue] = useState('');
@@ -21,6 +23,7 @@ const ClassicMode = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [timeUntilNext, setTimeUntilNext] = useState({ hours: 0, minutes: 0 });
   const [isBackendConnected, setIsBackendConnected] = useState(true);
+  const [showShareModal, setShowShareModal] = useState(false);
 
   // Fallback data in case Supabase fetch fails
   const fallbackBrawlerName = "Spike";
@@ -101,6 +104,10 @@ const ClassicMode = () => {
     setSelectedBrawler(brawler);
   };
 
+  const handleShare = () => {
+    setShowShareModal(true);
+  };
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-40">
@@ -121,8 +128,6 @@ const ClassicMode = () => {
   }
 
   const correctBrawler = getCorrectBrawler();
-
-  // Log portrait path for correct brawler
   console.log("Portrait path for correct brawler:", getPortrait(correctBrawlerName));
 
   return (
@@ -151,9 +156,18 @@ const ClassicMode = () => {
                   src={getPortrait(correctBrawlerName)}
                   alt={correctBrawlerName}
                   className="w-24 h-24 rounded-full object-cover"
+                  fallbackSrc={DEFAULT_PORTRAIT}
                 />
               </div>
               <h4 className="text-lg font-semibold text-white">{correctBrawlerName}</h4>
+              
+              <Button
+                onClick={handleShare}
+                className="mt-4 bg-brawl-blue hover:bg-brawl-blue/80 text-white"
+              >
+                Share Result
+              </Button>
+              
               <p className="text-white/70 text-sm mt-4">
                 Come back tomorrow for a new challenge!
               </p>
@@ -208,6 +222,17 @@ const ClassicMode = () => {
           </Card>
         )}
       </div>
+      
+      {/* Share modal */}
+      <ShareResultModal
+        isOpen={showShareModal}
+        onClose={() => setShowShareModal(false)}
+        mode="classic"
+        success={isGameOver}
+        attempts={guessCount}
+        maxAttempts={6}
+        brawlerName={correctBrawlerName}
+      />
     </div>
   );
 };

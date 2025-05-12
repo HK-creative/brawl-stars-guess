@@ -2,7 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Brawler } from '@/data/brawlers';
-import { getPin } from '@/lib/image-helpers';
+import { getPin, DEFAULT_PIN } from '@/lib/image-helpers';
 import Image from './ui/image';
 
 interface BrawlerAutocompleteProps {
@@ -86,9 +86,9 @@ const BrawlerAutocomplete: React.FC<BrawlerAutocompleteProps> = ({
               >
                 <Image 
                   src={pinPath} 
-                  alt={brawler.name}
+                  alt={`${brawler.name} pin`}
                   className="w-6 h-6 rounded-full mr-2"
-                  fallbackSrc="/placeholder.svg"
+                  fallbackSrc={DEFAULT_PIN}
                 />
                 <span>{brawler.name}</span>
               </div>

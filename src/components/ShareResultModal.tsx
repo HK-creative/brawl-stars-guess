@@ -47,6 +47,7 @@ const ShareResultModal = ({
           await navigator.clipboard.write([data]);
           toast.success("Image copied to clipboard!");
         } catch (e) {
+          console.error("Clipboard API error:", e);
           // Fallback for browsers that don't support clipboard API
           toast.error("Your browser doesn't support clipboard images");
           
@@ -59,8 +60,8 @@ const ShareResultModal = ({
         }
       });
     } catch (error) {
-      toast.error("Failed to generate image");
       console.error("Error generating image:", error);
+      toast.error("Failed to generate image");
     } finally {
       setIsGenerating(false);
     }
@@ -88,8 +89,8 @@ const ShareResultModal = ({
       
       toast.success("Image downloaded!");
     } catch (error) {
-      toast.error("Failed to generate image");
       console.error("Error generating image:", error);
+      toast.error("Failed to generate image");
     } finally {
       setIsGenerating(false);
     }
@@ -112,7 +113,9 @@ const ShareResultModal = ({
           </Button>
         </div>
         
-        <ScoreShareCard {...scoreProps} />
+        <div id="score-share-card-wrapper">
+          <ScoreShareCard {...scoreProps} />
+        </div>
         
         <div className="mt-4 flex gap-2">
           <Button 

@@ -2,7 +2,7 @@
 import React from 'react';
 import { Brawler } from '@/data/brawlers';
 import { ArrowUp, ArrowDown } from 'lucide-react';
-import { getPortrait } from '@/lib/image-helpers';
+import { getPortrait, DEFAULT_PORTRAIT } from '@/lib/image-helpers';
 import Image from './ui/image';
 
 interface BrawlerGuessRowProps {
@@ -50,12 +50,12 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer 
   const movementClass = compareAttribute(guess.movement, correctAnswer.movement);
   const rangeClass = compareAttribute(guess.range, correctAnswer.range);
   const reloadClass = compareAttribute(guess.reload, correctAnswer.reload);
-  const yearResult = compareNumeric(guess.releaseYear, correctAnswer.releaseYear);
+  const yearResult = compareNumeric(guess.releaseYear || 0, correctAnswer.releaseYear || 0);
 
-  // Get portrait image path - simplified approach
+  // Get portrait image path with debug logging
   const portraitPath = getPortrait(guess.name);
+  console.log(`Generated portrait path for ${guess.name}: ${portraitPath}`);
 
-  // Build the row for the guess
   return (
     <div className="animate-fade-in mb-3 border border-white/20 rounded-lg overflow-hidden">
       <div className="bg-white/10 py-2 px-3 flex items-center justify-between border-b border-white/20">
@@ -63,7 +63,7 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer 
           <Image
             src={portraitPath}
             alt={guess.name}
-            fallbackSrc="/placeholder.svg"
+            fallbackSrc={DEFAULT_PORTRAIT}
             className="w-8 h-8 rounded-full mr-2 object-cover"
           />
           <span className="text-white font-bold">{guess.name}</span>
@@ -117,7 +117,7 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer 
           <span className="text-white text-sm">Release Year</span>
         </div>
         <div className={`${yearResult.color} rounded-md p-1 text-center text-sm flex items-center justify-center`}>
-          {guess.releaseYear} {yearResult.icon}
+          {guess.releaseYear || "Unknown"} {yearResult.icon}
         </div>
       </div>
     </div>

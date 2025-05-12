@@ -159,16 +159,18 @@ const ScoreShareCard = ({
     toast.success("Image downloaded!");
   };
 
-  // Get portrait image path with proper debugging
-  const portraitPath = brawlerName ? getPortrait(brawlerName) : '';
+  // Get portrait image path with extensive debug logging
+  let portraitPath = DEFAULT_PORTRAIT;
   if (brawlerName) {
-    console.log(`Portrait path for ScoreShareCard brawler ${brawlerName}:`, portraitPath);
+    portraitPath = getPortrait(brawlerName);
+    console.log(`ScoreShareCard: Portrait path for ${brawlerName}:`, portraitPath);
   }
 
+  // Rest of the component remains the same
   return (
     <div className="flex flex-col items-center">
-      {/* The card that will be captured as an image */}
-      <div ref={shareCardRef} className="p-6 rounded-xl relative overflow-hidden">
+      {/* Card that will be captured as image */}
+      <div ref={shareCardRef} className="p-6 rounded-xl relative overflow-hidden" id="score-share-card">
         <div className="absolute inset-0 bg-gradient-to-b from-brawl-dark/90 to-brawl-dark z-0"></div>
         <div className="relative z-10">
           <div className="flex justify-between items-center mb-4">
