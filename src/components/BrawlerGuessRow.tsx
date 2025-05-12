@@ -59,15 +59,17 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer 
     <div className="animate-fade-in mb-3 border border-white/20 rounded-lg overflow-hidden">
       <div className="bg-white/10 py-2 px-3 flex items-center justify-between border-b border-white/20">
         <div className="flex items-center">
-          <img
-            src={portraitPath}
-            alt={guess.name}
-            className="w-8 h-8 rounded-full mr-2 object-cover"
-            onError={(e) => {
-              console.error("Missing image:", portraitPath);
-              e.currentTarget.src = DEFAULT_PORTRAIT;
-            }}
-          />
+          <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 bg-gray-700 mr-2">
+            <img
+              src={portraitPath}
+              alt={guess.name}
+              className="w-full h-full object-contain"
+              onError={(e) => {
+                console.error("Missing image:", portraitPath);
+                e.currentTarget.src = DEFAULT_PORTRAIT;
+              }}
+            />
+          </div>
           <span className="text-white font-bold">{guess.name}</span>
         </div>
       </div>

@@ -83,15 +83,17 @@ const BrawlerAutocomplete: React.FC<BrawlerAutocompleteProps> = ({
                 className="px-4 py-2 text-sm text-white hover:bg-gray-700 cursor-pointer flex items-center"
                 onClick={() => handleSelectBrawler(brawler)}
               >
-                <img 
-                  src={pinPath} 
-                  alt={`${brawler.name} pin`}
-                  className="w-6 h-6 rounded-full mr-2"
-                  onError={(e) => {
-                    console.error("Missing image:", pinPath);
-                    e.currentTarget.src = DEFAULT_PIN;
-                  }}
-                />
+                <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 bg-gray-700 mr-2">
+                  <img 
+                    src={pinPath} 
+                    alt={`${brawler.name} pin`}
+                    className="w-full h-full object-contain"
+                    onError={(e) => {
+                      console.error("Missing image:", pinPath);
+                      e.currentTarget.src = DEFAULT_PIN;
+                    }}
+                  />
+                </div>
                 <span>{brawler.name}</span>
               </div>
             );

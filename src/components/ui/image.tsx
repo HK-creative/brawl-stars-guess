@@ -4,6 +4,7 @@ import { DEFAULT_PORTRAIT } from '@/lib/image-helpers';
 
 interface ImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   fallbackSrc?: string;
+  objectFit?: 'contain' | 'cover' | 'fill' | 'none' | 'scale-down';
 }
 
 const Image: React.FC<ImageProps> = ({ 
@@ -11,6 +12,7 @@ const Image: React.FC<ImageProps> = ({
   alt = "Image", 
   fallbackSrc = DEFAULT_PORTRAIT,
   className = "",
+  objectFit = "cover",
   ...props 
 }) => {
   const handleError = (e: React.SyntheticEvent<HTMLImageElement>) => {
@@ -25,7 +27,7 @@ const Image: React.FC<ImageProps> = ({
       src={src}
       alt={alt}
       onError={handleError}
-      className={className}
+      className={`${className} object-${objectFit}`}
       loading="lazy"
       {...props}
     />

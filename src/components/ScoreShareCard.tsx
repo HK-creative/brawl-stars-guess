@@ -1,7 +1,6 @@
 
 import React, { useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
 import { Share, Download, Copy, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import html2canvas from 'html2canvas';
@@ -195,15 +194,17 @@ const ScoreShareCard = ({
             </p>
             {brawlerName && (
               <div className="flex items-center mt-2">
-                <img
-                  src={portraitPath}
-                  alt={brawlerName}
-                  className="w-8 h-8 rounded-full mr-2 object-cover"
-                  onError={(e) => {
-                    console.error("Missing image:", portraitPath);
-                    e.currentTarget.src = DEFAULT_PORTRAIT;
-                  }}
-                />
+                <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 bg-gray-700 mr-2">
+                  <img
+                    src={portraitPath}
+                    alt={brawlerName}
+                    className="w-full h-full object-contain"
+                    onError={(e) => {
+                      console.error("Missing image:", portraitPath);
+                      e.currentTarget.src = DEFAULT_PORTRAIT;
+                    }}
+                  />
+                </div>
                 <p className="text-brawl-yellow font-medium">{brawlerName}</p>
               </div>
             )}

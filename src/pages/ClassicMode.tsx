@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import ModeDescription from '@/components/ModeDescription';
@@ -152,15 +151,17 @@ const ClassicMode = () => {
                 You found the correct brawler in {guessCount} {guessCount === 1 ? 'guess' : 'guesses'}!
               </p>
               <div className="flex justify-center mb-2">
-                <img
-                  src={portraitPath}
-                  alt={correctBrawlerName}
-                  className="w-24 h-24 rounded-full object-cover"
-                  onError={(e) => {
-                    console.error("Missing image:", portraitPath);
-                    e.currentTarget.src = DEFAULT_PORTRAIT;
-                  }}
-                />
+                <div className="w-28 h-28 rounded-full overflow-hidden flex-shrink-0 bg-gray-700">
+                  <img
+                    src={portraitPath}
+                    alt={correctBrawlerName}
+                    className="w-full h-full object-contain"
+                    onError={(e) => {
+                      console.error("Missing image:", portraitPath);
+                      e.currentTarget.src = DEFAULT_PORTRAIT;
+                    }}
+                  />
+                </div>
               </div>
               <h4 className="text-lg font-semibold text-white">{correctBrawlerName}</h4>
               

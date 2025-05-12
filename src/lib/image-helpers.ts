@@ -4,7 +4,7 @@
  */
 
 // Default fallback images 
-export const DEFAULT_PIN = "/brawlers/portraits/default.png";
+export const DEFAULT_PIN = "/brawlers/pins/default.png";
 export const DEFAULT_PORTRAIT = "/brawlers/portraits/default.png";
 
 /**
