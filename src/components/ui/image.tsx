@@ -5,6 +5,7 @@ import { DEFAULT_PORTRAIT } from '@/lib/image-helpers';
 interface ImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   fallbackSrc?: string;
   objectFit?: 'contain' | 'cover' | 'fill' | 'none' | 'scale-down';
+  imageType?: 'pin' | 'portrait' | 'default';
 }
 
 const Image: React.FC<ImageProps> = ({ 
@@ -13,6 +14,7 @@ const Image: React.FC<ImageProps> = ({
   fallbackSrc = DEFAULT_PORTRAIT,
   className = "",
   objectFit = "cover",
+  imageType = "default",
   ...props 
 }) => {
   const handleError = (e: React.SyntheticEvent<HTMLImageElement>) => {
@@ -22,12 +24,23 @@ const Image: React.FC<ImageProps> = ({
     }
   };
 
+  // Apply specific styling based on image type
+  let imageClassName = className;
+  
+  if (imageType === 'pin') {
+    imageClassName = `${className} w-full h-full object-contain p-0.5`;
+  } else if (imageType === 'portrait') {
+    imageClassName = `${className} w-full h-full object-contain`;
+  } else {
+    imageClassName = `${className} object-${objectFit}`;
+  }
+
   return (
     <img
       src={src}
       alt={alt}
       onError={handleError}
-      className={`${className} object-${objectFit}`}
+      className={imageClassName}
       loading="lazy"
       {...props}
     />

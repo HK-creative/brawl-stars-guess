@@ -10,6 +10,7 @@ import BrawlerAutocomplete from '@/components/BrawlerAutocomplete';
 import { fetchDailyChallenge, getTimeUntilNextChallenge, checkSupabaseConnection } from '@/lib/daily-challenges';
 import { getPortrait, DEFAULT_PORTRAIT } from '@/lib/image-helpers';
 import ShareResultModal from '@/components/ShareResultModal';
+import Image from '@/components/ui/image';
 
 const ClassicMode = () => {
   const [inputValue, setInputValue] = useState('');
@@ -152,14 +153,11 @@ const ClassicMode = () => {
               </p>
               <div className="flex justify-center mb-2">
                 <div className="w-28 h-28 rounded-full overflow-hidden flex-shrink-0 bg-gray-700">
-                  <img
+                  <Image
                     src={portraitPath}
                     alt={correctBrawlerName}
-                    className="w-full h-full object-contain"
-                    onError={(e) => {
-                      console.error("Missing image:", portraitPath);
-                      e.currentTarget.src = DEFAULT_PORTRAIT;
-                    }}
+                    fallbackSrc={DEFAULT_PORTRAIT}
+                    imageType="portrait"
                   />
                 </div>
               </div>

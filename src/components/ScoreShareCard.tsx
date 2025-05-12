@@ -1,10 +1,10 @@
-
 import React, { useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Share, Download, Copy, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import html2canvas from 'html2canvas';
 import { getPortrait, DEFAULT_PORTRAIT } from '@/lib/image-helpers';
+import Image from '@/components/ui/image';
 
 export interface ScoreShareCardProps {
   mode: 'classic' | 'audio' | 'gadget' | 'starpower' | 'voice';
@@ -195,14 +195,11 @@ const ScoreShareCard = ({
             {brawlerName && (
               <div className="flex items-center mt-2">
                 <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 bg-gray-700 mr-2">
-                  <img
+                  <Image
                     src={portraitPath}
                     alt={brawlerName}
-                    className="w-full h-full object-contain"
-                    onError={(e) => {
-                      console.error("Missing image:", portraitPath);
-                      e.currentTarget.src = DEFAULT_PORTRAIT;
-                    }}
+                    fallbackSrc={DEFAULT_PORTRAIT}
+                    imageType="portrait"
                   />
                 </div>
                 <p className="text-brawl-yellow font-medium">{brawlerName}</p>

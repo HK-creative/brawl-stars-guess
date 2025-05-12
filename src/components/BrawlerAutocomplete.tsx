@@ -3,6 +3,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Brawler } from '@/data/brawlers';
 import { getPin, DEFAULT_PIN } from '@/lib/image-helpers';
+import Image from '@/components/ui/image';
 
 interface BrawlerAutocompleteProps {
   brawlers: Brawler[];
@@ -84,14 +85,11 @@ const BrawlerAutocomplete: React.FC<BrawlerAutocompleteProps> = ({
                 onClick={() => handleSelectBrawler(brawler)}
               >
                 <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 bg-gray-700 mr-2">
-                  <img 
+                  <Image 
                     src={pinPath} 
                     alt={`${brawler.name} pin`}
-                    className="w-full h-full object-contain"
-                    onError={(e) => {
-                      console.error("Missing image:", pinPath);
-                      e.currentTarget.src = DEFAULT_PIN;
-                    }}
+                    fallbackSrc={DEFAULT_PIN}
+                    imageType="pin"
                   />
                 </div>
                 <span>{brawler.name}</span>
