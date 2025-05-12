@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Brawler } from '@/data/brawlers';
 import { ArrowUp, ArrowDown } from 'lucide-react';
@@ -54,7 +53,6 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer 
 
   // Get portrait image path
   const portraitPath = getPortrait(guess.name);
-  console.log(`Generated portrait path for ${guess.name}: ${portraitPath}`);
 
   return (
     <div className="animate-fade-in mb-3 border border-white/20 rounded-lg overflow-hidden">

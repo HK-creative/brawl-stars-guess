@@ -28,9 +28,9 @@ const Image: React.FC<ImageProps> = ({
   let imageClassName = className;
   
   if (imageType === 'pin') {
-    imageClassName = `${className} w-full h-full object-contain p-0.5`;
-  } else if (imageType === 'portrait') {
     imageClassName = `${className} w-full h-full object-contain`;
+  } else if (imageType === 'portrait') {
+    imageClassName = `${className} w-full h-full object-cover`;
   } else {
     imageClassName = `${className} object-${objectFit}`;
   }

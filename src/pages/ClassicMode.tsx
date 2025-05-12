@@ -128,7 +128,6 @@ const ClassicMode = () => {
 
   const correctBrawler = getCorrectBrawler();
   const portraitPath = getPortrait(correctBrawlerName);
-  console.log("Portrait path for correct brawler:", portraitPath);
 
   return (
     <div>
