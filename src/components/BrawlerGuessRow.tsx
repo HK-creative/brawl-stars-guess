@@ -1,7 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { Brawler } from '@/data/brawlers';
-import { ArrowUp, ArrowDown } from 'lucide-react';
 import { getPortrait, DEFAULT_PORTRAIT } from '@/lib/image-helpers';
 import Image from '@/components/ui/image';
 import { cn } from '@/lib/utils';
@@ -63,41 +62,41 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer 
       case 'Very Fast':
         return {
           icons: (
-            <div className="flex items-center">
-              <img src="/Rabbit_Fast.png" alt="Rabbit" className="w-4 h-4" />
-              <img src="/Rabbit_Fast.png" alt="Rabbit" className="w-4 h-4 ml-0.5" />
+            <div className="flex items-center justify-center">
+              <img src="/Rabbit_Fast.png" alt="Very Fast" className="w-4 h-4 sm:w-5 sm:h-5" />
+              <img src="/Rabbit_Fast.png" alt="Very Fast" className="w-4 h-4 sm:w-5 sm:h-5 ml-0.5" />
             </div>
           ),
           tooltip: "Very Fast",
         };
       case 'Fast':
         return {
-          icons: <img src="/Rabbit_Fast.png" alt="Rabbit" className="w-5 h-5" />,
+          icons: <img src="/Rabbit_Fast.png" alt="Fast" className="w-5 h-5 sm:w-6 sm:h-6" />,
           tooltip: "Fast",
         };
       case 'Normal':
         return {
-          icons: <img src="/Walking_Normal.png" alt="Walking" className="w-5 h-5" />,
+          icons: <img src="/Walking_Normal.png" alt="Normal" className="w-5 h-5 sm:w-6 sm:h-6" />,
           tooltip: "Normal",
         };
       case 'Slow':
         return {
-          icons: <img src="/Turtle_Slow.png" alt="Turtle" className="w-5 h-5" />,
+          icons: <img src="/Turtle_Slow.png" alt="Slow" className="w-5 h-5 sm:w-6 sm:h-6" />,
           tooltip: "Slow",
         };
       case 'Very Slow':
         return {
           icons: (
-            <div className="flex items-center">
-              <img src="/Turtle_Slow.png" alt="Turtle" className="w-4 h-4" />
-              <img src="/Turtle_Slow.png" alt="Turtle" className="w-4 h-4 ml-0.5" />
+            <div className="flex items-center justify-center">
+              <img src="/Turtle_Slow.png" alt="Very Slow" className="w-4 h-4 sm:w-5 sm:h-5" />
+              <img src="/Turtle_Slow.png" alt="Very Slow" className="w-4 h-4 sm:w-5 sm:h-5 ml-0.5" />
             </div>
           ),
           tooltip: "Very Slow",
         };
       default:
         return {
-          icons: <img src="/Walking_Normal.png" alt="Walking" className="w-5 h-5" />,
+          icons: <img src="/Walking_Normal.png" alt="Normal" className="w-5 h-5 sm:w-6 sm:h-6" />,
           tooltip: "Normal",
         };
     }
@@ -121,31 +120,7 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer 
     
     return 'bg-brawl-red text-white'; // Wrong
   };
-  
-  // Logic for numeric values with directional hints
-  const compareNumeric = (guessValue: number, correctValue: number): { color: string, icon: React.ReactNode | null } => {
-    if (guessValue === correctValue) {
-      return { color: 'bg-brawl-green text-white', icon: null };
-    }
-    
-    if (guessValue < correctValue) {
-      return { color: 'bg-brawl-red text-white', icon: <ArrowUp className="w-3 h-3" /> };
-    } else {
-      return { color: 'bg-brawl-red text-white', icon: <ArrowDown className="w-3 h-3" /> };
-    }
-  };
-  
-  // Get comparison results for each attribute
-  const rarityClass = compareAttribute(guess.rarity, correctAnswer.rarity);
-  const classClass = guess.class === correctAnswer.class ? 'bg-brawl-green' : 'bg-brawl-red';
-  const movementClass = compareAttribute(guess.movement, correctAnswer.movement);
-  const rangeClass = compareAttribute(guess.range, correctAnswer.range);
-  const reloadClass = compareAttribute(guess.reload, correctAnswer.reload);
-  const yearResult = compareNumeric(guess.releaseYear || 0, correctAnswer.releaseYear || 0);
 
-  // Get the portrait image path
-  const portraitPath = getPortrait(guess.name);
-  
   // Helper function to get abbreviated text
   const getAbbreviation = (text: string): string => {
     // Special abbreviations based on Brawl Stars conventions
@@ -164,15 +139,25 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer 
     return text.substring(0, 3);
   };
 
+  // Get comparison results for each attribute
+  const rarityClass = compareAttribute(guess.rarity, correctAnswer.rarity);
+  const classClass = guess.class === correctAnswer.class ? 'bg-brawl-green' : 'bg-brawl-red';
+  const movementClass = compareAttribute(guess.movement, correctAnswer.movement);
+  const rangeClass = compareAttribute(guess.range, correctAnswer.range);
+  const reloadClass = compareAttribute(guess.reload, correctAnswer.reload);
+
   // Get movement speed icons and tooltip text
   const movementSpeedData = getMovementSpeedIconsAndLabel(guess.movement);
 
+  // Get the portrait image path
+  const portraitPath = getPortrait(guess.name);
+  
   return (
-    <div className={cn("w-full relative rounded-lg overflow-hidden mb-2", isAnimating && "animate-fade-in")}>
-      <div className="flex items-center w-full">
+    <div className={cn("w-full relative rounded-lg overflow-hidden mb-3", isAnimating && "animate-fade-in")}>
+      <div className="flex items-stretch w-full">
         {/* Brawler portrait */}
         <div className="flex-shrink-0">
-          <div className="w-12 h-12 sm:w-14 sm:h-14">
+          <div className="w-14 h-14 sm:w-16 sm:h-16">
             <Image
               key={imageKey}
               src={portraitPath}
@@ -180,19 +165,19 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer 
               fallbackSrc={DEFAULT_PORTRAIT}
               imageType="portrait"
               aspectRatio={1}
-              className="rounded-l-lg"
+              className="rounded-l-lg h-full"
             />
           </div>
         </div>
         
-        {/* Attributes grid - updated to have 1:1 aspect ratio cells */}
-        <div className="flex flex-grow">
+        {/* Attributes grid - with larger 1:1 aspect ratio cells */}
+        <div className="flex flex-grow h-full">
           {/* Rarity */}
           <div className={cn("flex-1 relative", rarityClass)}>
             <AspectRatio ratio={1} className="w-full">
               <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-center font-semibold text-xs sm:text-sm">
-                  {isMobile ? getAbbreviation(guess.rarity) : guess.rarity.substring(0, 5)}
+                <div className="text-center font-semibold text-sm sm:text-base">
+                  {isMobile ? getAbbreviation(guess.rarity) : guess.rarity.substring(0, 7)}
                 </div>
               </div>
             </AspectRatio>
@@ -239,31 +224,19 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer 
           <div className={cn("flex-1 relative", rangeClass)}>
             <AspectRatio ratio={1} className="w-full">
               <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-center font-semibold text-xs sm:text-sm">
-                  {isMobile ? getAbbreviation(guess.range) : guess.range.substring(0, 5)}
+                <div className="text-center font-semibold text-sm sm:text-base">
+                  {isMobile ? getAbbreviation(guess.range) : guess.range.substring(0, 7)}
                 </div>
               </div>
             </AspectRatio>
           </div>
           
-          {/* Reload */}
-          <div className={cn("flex-1 relative", reloadClass)}>
+          {/* Reload - Now with rounded-right for last column */}
+          <div className={cn("flex-1 relative", reloadClass, "rounded-r-lg")}>
             <AspectRatio ratio={1} className="w-full">
               <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-center font-semibold text-xs sm:text-sm">
-                  {isMobile ? getAbbreviation(guess.reload) : guess.reload.substring(0, 5)}
-                </div>
-              </div>
-            </AspectRatio>
-          </div>
-          
-          {/* Year */}
-          <div className={cn("flex-1 relative", yearResult.color, "rounded-r-lg")}>
-            <AspectRatio ratio={1} className="w-full">
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-center font-semibold text-xs sm:text-sm flex flex-col items-center">
-                  <span>{guess.releaseYear || "?"}</span>
-                  {yearResult.icon && <div className="mt-0.5">{yearResult.icon}</div>}
+                <div className="text-center font-semibold text-sm sm:text-base">
+                  {isMobile ? getAbbreviation(guess.reload) : guess.reload.substring(0, 7)}
                 </div>
               </div>
             </AspectRatio>

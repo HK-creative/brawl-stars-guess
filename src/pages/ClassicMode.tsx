@@ -8,7 +8,7 @@ import { t } from '@/lib/i18n';
 import { brawlers, Brawler } from '@/data/brawlers';
 import BrawlerGuessRow from '@/components/BrawlerGuessRow';
 import BrawlerAutocomplete from '@/components/BrawlerAutocomplete';
-import { fetchDailyChallenge, getTimeUntilNextChallenge, checkSupabaseConnection } from '@/lib/daily-challenges';
+import { fetchDailyChallenge, getTimeUntilNextChallenge } from '@/lib/daily-challenges';
 import { getPortrait, DEFAULT_PORTRAIT } from '@/lib/image-helpers';
 import ShareResultModal from '@/components/ShareResultModal';
 import Image from '@/components/ui/image';
