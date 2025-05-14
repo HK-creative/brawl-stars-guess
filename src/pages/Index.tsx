@@ -11,7 +11,7 @@ import { fetchDailyChallenge, getTimeUntilNextChallenge } from '@/lib/daily-chal
 import { getPortrait, DEFAULT_PORTRAIT } from '@/lib/image-helpers';
 import ShareResultModal from '@/components/ShareResultModal';
 import Image from '@/components/ui/image';
-import { Clock, Share2, HelpCircle } from 'lucide-react';
+import { Clock, Share2, HelpCircle, Target } from 'lucide-react';
 
 const Index = () => {
   const [inputValue, setInputValue] = useState('');
@@ -129,13 +129,14 @@ const Index = () => {
   const portraitPath = getPortrait(correctBrawlerName);
 
   return (
-    <div>
-      <div className="text-center mb-8 animate-fade-in">
-        <h1 className="text-5xl font-bold text-brawl-yellow my-4 animate-bounce-slight">
+    <div className="animate-fade-in">
+      {/* Header Section */}
+      <div className="text-center mb-6">
+        <h1 className="text-4xl md:text-5xl font-bold text-brawl-yellow my-4 animate-bounce-slight">
           {t('app.title')}
         </h1>
         <p className="text-white/80 text-lg mb-2">{t('home.tagline')}</p>
-        <div className="flex justify-center items-center gap-2 text-sm text-white/60">
+        <div className="flex justify-center items-center gap-2 text-sm text-white/70">
           <Clock className="w-4 h-4" />
           <span>Next challenge in: {timeUntilNext.hours}h {timeUntilNext.minutes}m</span>
         </div>
@@ -143,26 +144,30 @@ const Index = () => {
       
       {!isBackendConnected && (
         <div className="mb-4 p-2 bg-amber-800/50 border border-amber-600 rounded-md text-white text-sm">
-          <p>⚠️ Using fallback data: Could not connect to the challenge database.</p>
+          <p className="flex items-center gap-1">
+            <span className="text-amber-300">⚠️</span> 
+            Using fallback data: Could not connect to the challenge database.
+          </p>
         </div>
       )}
       
-      <Card className="brawl-card p-6 mb-6">
-        <div className="text-center mb-6">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-brawl-blue/20 rounded-full text-brawl-blue font-medium text-sm mb-2">
-            <span>🎯</span> Classic Mode
+      {/* Game Card */}
+      <Card className="brawl-card p-5 mb-4 shadow-lg border-white/15">
+        <div className="text-center mb-5">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-brawl-blue/20 rounded-full text-brawl-blue font-medium text-sm mb-2">
+            <Target className="w-4 h-4" /> Classic Mode
           </div>
           <h2 className="text-xl text-white font-bold">Guess today's Brawler!</h2>
-          <p className="text-white/70 mt-2">
+          <p className="text-white/70 text-sm mt-2">
             Guess the mystery Brawler based on attributes like rarity, class, and movement speed.
           </p>
         </div>
       
         {isGameOver ? (
-          <div className="mb-6 animate-fade-in">
-            <Card className="bg-brawl-dark/50 border border-white/10 p-0 overflow-hidden">
+          <div className="mb-4 animate-fade-in">
+            <Card className="bg-brawl-dark/50 border border-white/10 p-0 overflow-hidden rounded-xl">
               <div className="flex flex-col md:flex-row">
-                {/* Large image section */}
+                {/* Image section */}
                 <div className="w-full md:w-1/2 h-64 md:h-auto bg-gradient-to-br from-brawl-blue/20 to-brawl-dark overflow-hidden">
                   <Image
                     src={portraitPath}
@@ -174,9 +179,9 @@ const Index = () => {
                 </div>
                 
                 {/* Content section */}
-                <div className="p-6 flex flex-col justify-center w-full md:w-1/2">
+                <div className="p-5 flex flex-col justify-center w-full md:w-1/2">
                   <div className="text-center md:text-left">
-                    <div className="inline-block px-3 py-1 mb-4 rounded-full bg-brawl-green/20 text-brawl-green text-sm font-medium">
+                    <div className="inline-block px-3 py-1 mb-3 rounded-full bg-brawl-green/20 text-brawl-green text-sm font-medium">
                       Victory!
                     </div>
                     <h3 className="text-2xl font-bold text-white mb-2">{correctBrawlerName}</h3>
@@ -198,7 +203,7 @@ const Index = () => {
                     
                     <Button
                       onClick={handleShare}
-                      className="w-full bg-brawl-blue hover:bg-brawl-blue/80 text-white flex items-center justify-center gap-2"
+                      className="w-full bg-brawl-blue hover:bg-brawl-blue/80 text-white flex items-center justify-center gap-2 rounded-lg"
                     >
                       <Share2 className="w-4 h-4" />
                       Share Result
@@ -209,7 +214,7 @@ const Index = () => {
             </Card>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4 mb-6">
+          <form onSubmit={handleSubmit} className="flex flex-col gap-3 mb-4">
             <BrawlerAutocomplete
               brawlers={brawlers}
               value={inputValue}
@@ -219,7 +224,7 @@ const Index = () => {
             />
             <Button 
               type="submit" 
-              className="brawl-button bg-brawl-yellow hover:bg-brawl-yellow/80 text-black font-semibold"
+              className="py-3 bg-brawl-yellow hover:bg-brawl-yellow/90 text-black font-semibold rounded-lg shadow-md"
               disabled={isGameOver || !selectedBrawler}
             >
               {t('submit.guess')}
@@ -228,19 +233,24 @@ const Index = () => {
         )}
       </Card>
       
-      <div className="mb-4 flex justify-between items-center">
-        <h3 className="text-white text-lg font-semibold">
-          Guesses: {guessCount}
+      {/* Guesses Section */}
+      <div className="mb-3 flex justify-between items-center">
+        <h3 className="text-white text-lg font-semibold flex items-center">
+          Guesses: <span className="ml-1 px-2 py-0.5 bg-white/10 rounded-md">{guessCount}</span>
         </h3>
         
-        <Button variant="ghost" className="text-white/70 hover:text-white hover:bg-white/5">
-          <HelpCircle className="w-4 h-4 mr-2" />
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          className="text-white/70 hover:text-white hover:bg-white/10 rounded-lg flex items-center gap-1"
+        >
+          <HelpCircle className="w-4 h-4" />
           How to Play
         </Button>
       </div>
       
       {/* Guesses display */}
-      <div className="space-y-4">
+      <div className="space-y-3 pb-6">
         {guesses.length > 0 ? (
           guesses.map((guess, index) => (
             <BrawlerGuessRow 
@@ -250,8 +260,8 @@ const Index = () => {
             />
           ))
         ) : (
-          <Card className="brawl-card p-4">
-            <p className="text-white text-center">Make your first guess!</p>
+          <Card className="p-4 bg-white/5 border-white/10 text-center">
+            <p className="text-white/70 text-sm">Make your first guess!</p>
           </Card>
         )}
       </div>

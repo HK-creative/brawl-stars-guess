@@ -9,12 +9,12 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen bg-brawl-gradient">
       <TopBar />
-      <main className="flex-1 container max-w-2xl mx-auto px-4 py-6">
+      <main className="flex-1 w-full px-4 py-4 mx-auto max-w-lg">
         {children}
       </main>
-      <Toaster />
+      <Toaster position="bottom-center" closeButton />
     </div>
   );
 };
