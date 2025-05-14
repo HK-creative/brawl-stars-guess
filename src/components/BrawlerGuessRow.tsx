@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Brawler } from '@/data/brawlers';
-import { ArrowUp, ArrowDown, Speedometer, Snail, User, PersonStanding } from 'lucide-react';
+import { ArrowUp, ArrowDown, Gauge, Snail, User, PersonStanding } from 'lucide-react';
 import { getPortrait, DEFAULT_PORTRAIT } from '@/lib/image-helpers';
 import Image from '@/components/ui/image';
 import { cn } from '@/lib/utils';
@@ -62,7 +62,7 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer 
         return {
           icons: (
             <div className="flex items-center justify-center relative">
-              <Speedometer className="w-5 h-5 text-red-500" strokeWidth={3} />
+              <Gauge className="w-5 h-5 text-red-500" strokeWidth={3} />
               <div className="absolute text-[8px] font-bold text-white">5</div>
             </div>
           ),
@@ -72,7 +72,7 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer 
         return {
           icons: (
             <div className="flex items-center justify-center relative">
-              <Speedometer className="w-5 h-5 text-orange-400" strokeWidth={2.5} />
+              <Gauge className="w-5 h-5 text-orange-400" strokeWidth={2.5} />
               <div className="absolute text-[8px] font-bold text-white">4</div>
             </div>
           ),
@@ -82,7 +82,7 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer 
         return {
           icons: (
             <div className="flex items-center justify-center relative">
-              <Speedometer className="w-5 h-5 text-yellow-300" strokeWidth={2} />
+              <Gauge className="w-5 h-5 text-yellow-300" strokeWidth={2} />
               <div className="absolute text-[8px] font-bold text-white">3</div>
             </div>
           ),
@@ -92,7 +92,7 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer 
         return {
           icons: (
             <div className="flex items-center justify-center relative">
-              <Speedometer className="w-5 h-5 text-blue-400" strokeWidth={2} />
+              <Gauge className="w-5 h-5 text-blue-400" strokeWidth={2} />
               <div className="absolute text-[8px] font-bold text-white">2</div>
             </div>
           ),
@@ -103,7 +103,7 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer 
         return {
           icons: (
             <div className="flex items-center justify-center relative">
-              <Speedometer className="w-5 h-5 text-blue-600" strokeWidth={1.5} />
+              <Gauge className="w-5 h-5 text-blue-600" strokeWidth={1.5} />
               <div className="absolute text-[8px] font-bold text-white">1</div>
             </div>
           ),
