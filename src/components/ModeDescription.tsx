@@ -5,12 +5,20 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 interface ModeDescriptionProps {
   title: string;
   description: string;
+  icon?: React.ReactNode;
+  className?: string;
 }
 
-const ModeDescription: React.FC<ModeDescriptionProps> = ({ title, description }) => {
+const ModeDescription: React.FC<ModeDescriptionProps> = ({ 
+  title, 
+  description, 
+  icon, 
+  className = "" 
+}) => {
   return (
-    <Card className="brawl-card mb-6">
-      <CardHeader className="pb-2">
+    <Card className={`brawl-card mb-6 ${className}`}>
+      <CardHeader className="pb-2 flex flex-row items-center">
+        {icon && <div className="mr-2 text-2xl">{icon}</div>}
         <CardTitle className="text-xl text-brawl-yellow">{title}</CardTitle>
       </CardHeader>
       <CardContent>

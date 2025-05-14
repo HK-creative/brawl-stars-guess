@@ -10,14 +10,8 @@ import { initLanguage } from "@/lib/i18n";
 
 // Pages
 import Index from "./pages/Index";
-import ClassicMode from "./pages/ClassicMode";
-import AudioMode from "./pages/AudioMode";
-import VoiceMode from "./pages/VoiceMode";
-import GadgetMode from "./pages/GadgetMode";
-import StarPowerMode from "./pages/StarPowerMode";
 import ScorePage from "./pages/ScorePage";
 import SettingsPage from "./pages/SettingsPage";
-import NotLivePage from "./pages/NotLivePage";
 import NotFound from "./pages/NotFound";
 
 // Layout
@@ -41,14 +35,8 @@ const App = () => {
             <Layout>
               <Routes>
                 <Route path="/" element={<Index />} />
-                <Route path="/classic" element={<ClassicMode />} />
-                <Route path="/audio" element={<AudioMode />} />
-                <Route path="/voice" element={<VoiceMode />} />
-                <Route path="/gadget" element={<GadgetMode />} />
-                <Route path="/starpower" element={<StarPowerMode />} />
                 <Route path="/score" element={<ScorePage />} />
                 <Route path="/settings" element={<SettingsPage />} />
-                <Route path="/not-live" element={<NotLivePage />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Layout>
