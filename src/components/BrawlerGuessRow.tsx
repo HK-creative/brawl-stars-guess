@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Brawler } from '@/data/brawlers';
-import { ArrowUp, ArrowDown } from 'lucide-react';
+import { ArrowUp, ArrowDown, Snail, ArrowsUpDown, Cheetah } from 'lucide-react';
 import { getPortrait, DEFAULT_PORTRAIT } from '@/lib/image-helpers';
 import Image from '@/components/ui/image';
 import { cn } from '@/lib/utils';
@@ -48,6 +48,21 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer 
     
     const iconFileName = classMap[className] || "icon_class_damage.png"; // Default fallback
     return `/${iconFileName}`;
+  };
+  
+  // Helper function to get movement speed icon
+  const getMovementSpeedIcon = (speed: string) => {
+    switch (speed) {
+      case 'Very Fast':
+      case 'Fast':
+        return <Cheetah className="w-5 h-5" />;
+      case 'Very Slow':
+      case 'Slow':
+        return <Snail className="w-5 h-5" />;
+      case 'Normal':
+      default:
+        return <ArrowsUpDown className="w-5 h-5" />;
+    }
   };
   
   // Comparison logic for attributes
@@ -161,10 +176,10 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer 
             </div>
           </div>
           
-          {/* Movement */}
+          {/* Movement - Now showing icon instead of text */}
           <div className={cn("flex-1 h-12 sm:h-14 flex items-center justify-center", movementClass)}>
-            <div className="text-center font-semibold text-xs sm:text-sm">
-              {isMobile ? getAbbreviation(guess.movement) : guess.movement.substring(0, 3)}
+            <div className="flex items-center justify-center">
+              {getMovementSpeedIcon(guess.movement)}
             </div>
           </div>
           
