@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Brawler } from '@/data/brawlers';
-import { ArrowUp, ArrowDown, Snail, ArrowsUpDown, Cheetah } from 'lucide-react';
+import { ArrowUp, ArrowDown, Snail, MoveHorizontal, ChevronRight, ChevronRightCircle, Gauge } from 'lucide-react';
 import { getPortrait, DEFAULT_PORTRAIT } from '@/lib/image-helpers';
 import Image from '@/components/ui/image';
 import { cn } from '@/lib/utils';
@@ -50,18 +50,40 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer 
     return `/${iconFileName}`;
   };
   
-  // Helper function to get movement speed icon
-  const getMovementSpeedIcon = (speed: string) => {
+  // Helper function to get movement speed icon and label
+  const getMovementSpeedIconAndLabel = (speed: string) => {
     switch (speed) {
       case 'Very Fast':
+        return {
+          icon: <Gauge className="w-5 h-5" />,
+          label: "V.Fast",
+          className: "text-xs font-bold"
+        };
       case 'Fast':
-        return <Cheetah className="w-5 h-5" />;
+        return {
+          icon: <ChevronRightCircle className="w-5 h-5" />,
+          label: "Fast",
+          className: "text-xs"
+        };
       case 'Very Slow':
+        return {
+          icon: <Snail className="w-5 h-5" />,
+          label: "V.Slow",
+          className: "text-xs font-bold"
+        };
       case 'Slow':
-        return <Snail className="w-5 h-5" />;
+        return {
+          icon: <Snail className="w-5 h-5 opacity-70" />,
+          label: "Slow",
+          className: "text-xs"
+        };
       case 'Normal':
       default:
-        return <ArrowsUpDown className="w-5 h-5" />;
+        return {
+          icon: <MoveHorizontal className="w-5 h-5" />,
+          label: "Norm",
+          className: "text-xs"
+        };
     }
   };
   
@@ -117,24 +139,17 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer 
     if (text === "Epic") return "Epi";
     if (text === "Rare") return "Rar";
     if (text === "Chromatic") return "Chr";
-    if (text === "Very Fast") return "V.Fast";
-    if (text === "Fast") return "Fast";
-    if (text === "Normal") return "Norm";
-    if (text === "Slow") return "Slow";
-    if (text === "Very Slow") return "V.Slow";
     if (text === "Short") return "Shrt";
     if (text === "Medium") return "Med";
     if (text === "Long") return "Long";
     if (text === "Very Long") return "V.Long";
-    if (text === "Very Fast") return "V.Fast";
-    if (text === "Fast") return "Fast";
-    if (text === "Normal") return "Norm";
-    if (text === "Slow") return "Slow";
-    if (text === "Very Slow") return "V.Slow";
     
     // Default abbreviation (first 3 characters)
     return text.substring(0, 3);
   };
+
+  // Get movement speed icon and label
+  const movementSpeedData = getMovementSpeedIconAndLabel(guess.movement);
 
   return (
     <div className={cn("w-full relative rounded-lg overflow-hidden mb-2", isAnimating && "animate-fade-in")}>
@@ -176,10 +191,13 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer 
             </div>
           </div>
           
-          {/* Movement - Now showing icon instead of text */}
-          <div className={cn("flex-1 h-12 sm:h-14 flex items-center justify-center", movementClass)}>
+          {/* Movement - Now showing icon with label */}
+          <div className={cn("flex-1 h-12 sm:h-14 flex items-center justify-center flex-col", movementClass)}>
             <div className="flex items-center justify-center">
-              {getMovementSpeedIcon(guess.movement)}
+              {movementSpeedData.icon}
+            </div>
+            <div className={cn("mt-0.5", movementSpeedData.className)}>
+              {movementSpeedData.label}
             </div>
           </div>
           
