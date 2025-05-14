@@ -34,14 +34,7 @@ const Index = () => {
   ];
 
   return (
-    <div 
-      className="min-h-[calc(100vh-80px)] px-4 py-8 md:px-8"
-      style={{
-        backgroundImage: "linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.9)), url('/placeholder.svg')",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-      }}
-    >
+    <div className="min-h-[calc(100vh-80px)] px-4 py-8 md:px-8">
       <div className="mx-auto max-w-lg">
         {/* Logo and title */}
         <div className="mb-12 text-center">
