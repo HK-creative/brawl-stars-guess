@@ -1,6 +1,7 @@
+
 import React, { useState, useEffect } from 'react';
 import { Brawler } from '@/data/brawlers';
-import { ArrowUp, ArrowDown, Gauge, Snail, User, PersonStanding } from 'lucide-react';
+import { ArrowUp, ArrowDown, Snail, User, PersonStanding } from 'lucide-react';
 import { getPortrait, DEFAULT_PORTRAIT } from '@/lib/image-helpers';
 import Image from '@/components/ui/image';
 import { cn } from '@/lib/utils';
@@ -57,65 +58,44 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer 
   
   // Helper function to get movement speed icon and label
   const getMovementSpeedIconsAndLabel = (speed: string) => {
-    // Maps speed categories to numeric values for the gauge
-    const speedValues = {
-      'Very Fast': 5,
-      'Fast': 4,
-      'Normal': 3,
-      'Slow': 2,
-      'Very Slow': 1,
-    };
-    
-    // Maps speed categories to colors
-    const speedColors = {
-      'Very Fast': '#ff3b30',    // Red
-      'Fast': '#ff9500',         // Orange
-      'Normal': '#ffcc00',       // Yellow
-      'Slow': '#34c759',         // Light Green
-      'Very Slow': '#007aff',    // Blue
-    };
-    
-    const value = speedValues[speed] || 3;
-    const color = speedColors[speed] || '#ffcc00';
-    
-    // Calculate what segments of the speedometer to light up
-    const segments = [];
-    for (let i = 1; i <= 5; i++) {
-      segments.push(i <= value);
+    switch (speed) {
+      case 'Very Fast':
+        return {
+          icons: (
+            <div className="flex">
+              <PersonStanding className="w-4 h-4 transform -scale-x-100" />
+              <PersonStanding className="w-4 h-4 ml-0.5 transform -scale-x-100" />
+            </div>
+          ),
+          tooltip: "Very Fast",
+        };
+      case 'Fast':
+        return {
+          icons: <PersonStanding className="w-5 h-5 transform -scale-x-100" />,
+          tooltip: "Fast",
+        };
+      case 'Very Slow':
+        return {
+          icons: (
+            <div className="flex">
+              <Snail className="w-4 h-4" />
+              <Snail className="w-4 h-4 ml-0.5" />
+            </div>
+          ),
+          tooltip: "Very Slow",
+        };
+      case 'Slow':
+        return {
+          icons: <Snail className="w-5 h-5" />,
+          tooltip: "Slow",
+        };
+      case 'Normal':
+      default:
+        return {
+          icons: <User className="w-5 h-5" />,
+          tooltip: "Normal",
+        };
     }
-    
-    return {
-      icons: (
-        <div className="flex flex-col items-center justify-center">
-          {/* Custom Speedometer */}
-          <div className="relative w-8 h-4">
-            {/* Speedometer Background Arc */}
-            <svg viewBox="0 0 100 50" className="w-full h-full">
-              {/* Background segments */}
-              <path d="M10,50 A40,40 0 0,1 90,50" fill="none" stroke="#e0e0e0" strokeWidth="12" strokeLinecap="round" />
-              
-              {/* Colored segments based on speed */}
-              {segments[0] && <path d="M10,50 A40,40 0 0,1 26,34" fill="none" stroke={speedColors['Very Slow']} strokeWidth="12" strokeLinecap="round" />}
-              {segments[1] && <path d="M26,34 A40,40 0 0,1 50,26" fill="none" stroke={speedColors['Slow']} strokeWidth="12" strokeLinecap="round" />}
-              {segments[2] && <path d="M50,26 A40,40 0 0,1 74,34" fill="none" stroke={speedColors['Normal']} strokeWidth="12" strokeLinecap="round" />}
-              {segments[3] && <path d="M74,34 A40,40 0 0,1 90,50" fill="none" stroke={speedColors['Fast']} strokeWidth="12" strokeLinecap="round" />}
-              
-              {/* Needle */}
-              <g transform={`rotate(${-90 + (value - 1) * 45}, 50, 50)`}>
-                <line x1="50" y1="50" x2="50" y2="20" stroke="#333" strokeWidth="3" strokeLinecap="round" />
-                <circle cx="50" cy="50" r="5" fill="#333" />
-              </g>
-            </svg>
-          </div>
-          
-          {/* Speed Value */}
-          <div className="text-[10px] font-bold mt-0.5 text-white">
-            {value}
-          </div>
-        </div>
-      ),
-      tooltip: speed,
-    };
   };
   
   // Comparison logic for attributes
