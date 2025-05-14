@@ -5,6 +5,8 @@ import { ArrowUp, ArrowDown } from 'lucide-react';
 import { getPortrait, DEFAULT_PORTRAIT } from '@/lib/image-helpers';
 import Image from '@/components/ui/image';
 import { cn } from '@/lib/utils';
+import { Table, TableCell, TableRow } from '@/components/ui/table';
+import { AspectRatio } from '@/components/ui/aspect-ratio';
 
 interface BrawlerGuessRowProps {
   guess: Brawler;
@@ -56,9 +58,9 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer 
     }
     
     if (guessValue < correctValue) {
-      return { color: 'bg-brawl-red text-white', icon: <ArrowUp className="w-5 h-5" /> };
+      return { color: 'bg-brawl-red text-white', icon: <ArrowUp className="w-3 h-3" /> };
     } else {
-      return { color: 'bg-brawl-red text-white', icon: <ArrowDown className="w-5 h-5" /> };
+      return { color: 'bg-brawl-red text-white', icon: <ArrowDown className="w-3 h-3" /> };
     }
   };
   
@@ -73,63 +75,70 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer 
   // Get the portrait image path
   const portraitPath = getPortrait(guess.name);
 
-  // Function to create an attribute cell
-  const renderAttributeCell = (label: string, value: string, bgClass: string) => {
-    return (
-      <div className="flex flex-col items-center">
-        <div className="text-white text-xs mb-1">{label}</div>
-        <div className={cn(
-          "w-full h-[90px] flex items-center justify-center rounded-md transition-all overflow-hidden",
-          bgClass,
-          isAnimating && "animate-scale-in"
-        )}>
-          <span className="text-xl font-bold">{value}</span>
-        </div>
-      </div>
-    );
-  };
-
-  // Function to create a numeric cell with arrow
-  const renderNumericCell = (label: string, value: number | undefined, result: { color: string, icon: React.ReactNode | null }) => {
-    return (
-      <div className="flex flex-col items-center">
-        <div className="text-white text-xs mb-1">{label}</div>
-        <div className={cn(
-          "w-full h-[90px] flex flex-col items-center justify-center rounded-md transition-all overflow-hidden",
-          result.color,
-          isAnimating && "animate-scale-in"
-        )}>
-          <span className="text-xl font-bold">{value || "?"}</span>
-          {result.icon && <div className="mt-1">{result.icon}</div>}
-        </div>
-      </div>
-    );
-  };
-
   return (
-    <div className={cn("grid grid-cols-7 gap-2 mb-5", isAnimating && "animate-fade-in")}>
-      {/* Brawler portrait cell */}
-      <div className="flex flex-col items-center">
-        <div className="text-white text-xs mb-1">Brawler</div>
-        <div className="bg-blue-500 w-full h-[90px] rounded-md overflow-hidden">
-          <Image
-            key={imageKey}
-            src={portraitPath}
-            alt={guess.name}
-            fallbackSrc={DEFAULT_PORTRAIT}
-            imageType="portrait"
-            className="h-full w-full"
-          />
-        </div>
-      </div>
-      
-      {/* Attribute cells */}
-      {renderAttributeCell("Rarity", guess.rarity, rarityClass)}
-      {renderAttributeCell("Class", guess.class, classClass)}
-      {renderAttributeCell("Movement", guess.movement, movementClass)}
-      {renderAttributeCell("Range", guess.range, rangeClass)}
-      {renderAttributeCell("Reload", guess.reload, reloadClass)}
-      {renderNumericCell("Release", guess.releaseYear, yearResult)}
+    <div className={cn("w-full mb-4 overflow-x-auto", isAnimating && "animate-fade-in")}>
+      <Table>
+        <TableRow className="whitespace-nowrap border-0">
+          {/* Brawler portrait cell */}
+          <TableCell className="p-1 align-middle">
+            <div className="w-10 h-10 overflow-hidden rounded-md">
+              <AspectRatio ratio={1}>
+                <Image
+                  key={imageKey}
+                  src={portraitPath}
+                  alt={guess.name}
+                  fallbackSrc={DEFAULT_PORTRAIT}
+                  imageType="portrait"
+                  className="h-full w-full"
+                />
+              </AspectRatio>
+            </div>
+          </TableCell>
+          
+          {/* Rarity */}
+          <TableCell className={cn("p-1 text-center text-xs font-medium", rarityClass)}>
+            <div className="rounded-md p-1 min-w-10 h-10 flex items-center justify-center">
+              {guess.rarity.substring(0, 3)}
+            </div>
+          </TableCell>
+          
+          {/* Class */}
+          <TableCell className={cn("p-1 text-center text-xs font-medium", classClass)}>
+            <div className="rounded-md p-1 min-w-10 h-10 flex items-center justify-center">
+              {guess.class.substring(0, 3)}
+            </div>
+          </TableCell>
+          
+          {/* Movement */}
+          <TableCell className={cn("p-1 text-center text-xs font-medium", movementClass)}>
+            <div className="rounded-md p-1 min-w-10 h-10 flex items-center justify-center">
+              {guess.movement.substring(0, 3)}
+            </div>
+          </TableCell>
+          
+          {/* Range */}
+          <TableCell className={cn("p-1 text-center text-xs font-medium", rangeClass)}>
+            <div className="rounded-md p-1 min-w-10 h-10 flex items-center justify-center">
+              {guess.range.substring(0, 3)}
+            </div>
+          </TableCell>
+          
+          {/* Reload */}
+          <TableCell className={cn("p-1 text-center text-xs font-medium", reloadClass)}>
+            <div className="rounded-md p-1 min-w-10 h-10 flex items-center justify-center">
+              {guess.reload.substring(0, 3)}
+            </div>
+          </TableCell>
+          
+          {/* Release Year */}
+          <TableCell className={cn("p-1 text-center text-xs font-medium", yearResult.color)}>
+            <div className="rounded-md p-1 min-w-10 h-10 flex flex-col items-center justify-center">
+              <span>{guess.releaseYear || "?"}</span>
+              {yearResult.icon && <div className="mt-0.5">{yearResult.icon}</div>}
+            </div>
+          </TableCell>
+        </TableRow>
+      </Table>
     </div>
   );
 };
