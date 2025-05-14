@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Brawler } from '@/data/brawlers';
 import { ArrowUp, ArrowDown } from 'lucide-react';
 import { getPortrait, DEFAULT_PORTRAIT } from '@/lib/image-helpers';
@@ -11,8 +11,15 @@ interface BrawlerGuessRowProps {
 }
 
 const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer }) => {
-  // Comparison logic for attributes
+  // State to hold the unique key for the image to force refreshes
+  const [imageKey, setImageKey] = useState<string>(`${guess.name}-${Date.now()}`);
   
+  // Force image refresh when the guess changes
+  useEffect(() => {
+    setImageKey(`${guess.name}-${Date.now()}`);
+  }, [guess.name]);
+  
+  // Comparison logic for attributes
   const compareAttribute = (guessValue: string, correctValue: string): string => {
     if (guessValue === correctValue) return 'bg-brawl-green text-white'; // Correct
     
@@ -63,6 +70,7 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer 
         {/* Larger portrait on the left */}
         <div className="h-48 w-48 flex-shrink-0 overflow-hidden bg-gray-800">
           <Image
+            key={imageKey} // Add a unique key to force re-render
             src={portraitPath}
             alt={guess.name}
             fallbackSrc={DEFAULT_PORTRAIT}

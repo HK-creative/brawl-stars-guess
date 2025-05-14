@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { DEFAULT_PORTRAIT } from '@/lib/image-helpers';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 
@@ -21,6 +21,11 @@ const Image: React.FC<ImageProps> = ({
   ...props 
 }) => {
   const [imgSrc, setImgSrc] = useState<string>(src || fallbackSrc);
+  
+  // Reset the image source whenever the src prop changes
+  useEffect(() => {
+    setImgSrc(src || fallbackSrc);
+  }, [src, fallbackSrc]);
   
   const handleError = (e: React.SyntheticEvent<HTMLImageElement>) => {
     console.error("Missing image:", src);
