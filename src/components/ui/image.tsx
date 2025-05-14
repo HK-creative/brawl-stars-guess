@@ -1,11 +1,13 @@
 
 import React from 'react';
 import { DEFAULT_PORTRAIT } from '@/lib/image-helpers';
+import { AspectRatio } from '@/components/ui/aspect-ratio';
 
 interface ImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   fallbackSrc?: string;
   objectFit?: 'contain' | 'cover' | 'fill' | 'none' | 'scale-down';
   imageType?: 'pin' | 'portrait' | 'default';
+  aspectRatio?: number;
 }
 
 const Image: React.FC<ImageProps> = ({ 
@@ -15,6 +17,7 @@ const Image: React.FC<ImageProps> = ({
   className = "",
   objectFit = "cover",
   imageType = "default",
+  aspectRatio,
   ...props 
 }) => {
   const handleError = (e: React.SyntheticEvent<HTMLImageElement>) => {
@@ -35,7 +38,7 @@ const Image: React.FC<ImageProps> = ({
     imageClassName = `${className} object-${objectFit}`;
   }
 
-  return (
+  const renderImage = () => (
     <img
       src={src}
       alt={alt}
@@ -45,6 +48,17 @@ const Image: React.FC<ImageProps> = ({
       {...props}
     />
   );
+
+  // If aspectRatio is provided, wrap in AspectRatio component
+  if (aspectRatio) {
+    return (
+      <AspectRatio ratio={aspectRatio} className="overflow-hidden">
+        {renderImage()}
+      </AspectRatio>
+    );
+  }
+
+  return renderImage();
 };
 
 export default Image;
