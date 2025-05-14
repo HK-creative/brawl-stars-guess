@@ -1,11 +1,17 @@
 
 import React, { useState, useEffect } from 'react';
 import { Brawler } from '@/data/brawlers';
-import { ArrowUp, ArrowDown, Snail, MoveHorizontal, ChevronRight, ChevronRightCircle, Gauge } from 'lucide-react';
+import { ArrowUp, ArrowDown, Snail, PersonWalking, Cheetah } from 'lucide-react';
 import { getPortrait, DEFAULT_PORTRAIT } from '@/lib/image-helpers';
 import Image from '@/components/ui/image';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface BrawlerGuessRowProps {
   guess: Brawler;
@@ -51,38 +57,43 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer 
   };
   
   // Helper function to get movement speed icon and label
-  const getMovementSpeedIconAndLabel = (speed: string) => {
+  const getMovementSpeedIconsAndLabel = (speed: string) => {
     switch (speed) {
       case 'Very Fast':
         return {
-          icon: <Gauge className="w-5 h-5" />,
-          label: "V.Fast",
-          className: "text-xs font-bold"
+          icons: (
+            <div className="flex">
+              <Cheetah className="w-4 h-4" />
+              <Cheetah className="w-4 h-4 ml-0.5" />
+            </div>
+          ),
+          tooltip: "Very Fast",
         };
       case 'Fast':
         return {
-          icon: <ChevronRightCircle className="w-5 h-5" />,
-          label: "Fast",
-          className: "text-xs"
+          icons: <Cheetah className="w-5 h-5" />,
+          tooltip: "Fast",
         };
       case 'Very Slow':
         return {
-          icon: <Snail className="w-5 h-5" />,
-          label: "V.Slow",
-          className: "text-xs font-bold"
+          icons: (
+            <div className="flex">
+              <Snail className="w-4 h-4" />
+              <Snail className="w-4 h-4 ml-0.5" />
+            </div>
+          ),
+          tooltip: "Very Slow",
         };
       case 'Slow':
         return {
-          icon: <Snail className="w-5 h-5 opacity-70" />,
-          label: "Slow",
-          className: "text-xs"
+          icons: <Snail className="w-5 h-5" />,
+          tooltip: "Slow",
         };
       case 'Normal':
       default:
         return {
-          icon: <MoveHorizontal className="w-5 h-5" />,
-          label: "Norm",
-          className: "text-xs"
+          icons: <PersonWalking className="w-5 h-5" />,
+          tooltip: "Normal",
         };
     }
   };
@@ -148,8 +159,8 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer 
     return text.substring(0, 3);
   };
 
-  // Get movement speed icon and label
-  const movementSpeedData = getMovementSpeedIconAndLabel(guess.movement);
+  // Get movement speed icons and tooltip text
+  const movementSpeedData = getMovementSpeedIconsAndLabel(guess.movement);
 
   return (
     <div className={cn("w-full relative rounded-lg overflow-hidden mb-2", isAnimating && "animate-fade-in")}>
@@ -178,7 +189,7 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer 
             </div>
           </div>
           
-          {/* Class - Now showing icon instead of text */}
+          {/* Class - Showing icon instead of text */}
           <div className={cn("flex-1 h-12 sm:h-14 flex items-center justify-center", classClass)}>
             <div className="w-6 h-6 sm:w-8 sm:h-8">
               <Image 
@@ -191,14 +202,20 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer 
             </div>
           </div>
           
-          {/* Movement - Now showing icon with label */}
-          <div className={cn("flex-1 h-12 sm:h-14 flex items-center justify-center flex-col", movementClass)}>
-            <div className="flex items-center justify-center">
-              {movementSpeedData.icon}
-            </div>
-            <div className={cn("mt-0.5", movementSpeedData.className)}>
-              {movementSpeedData.label}
-            </div>
+          {/* Movement - Showing icon with tooltip */}
+          <div className={cn("flex-1 h-12 sm:h-14 flex items-center justify-center", movementClass)}>
+            <TooltipProvider>
+              <Tooltip delayDuration={300}>
+                <TooltipTrigger asChild>
+                  <div className="cursor-help flex items-center justify-center">
+                    {movementSpeedData.icons}
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" className="bg-black text-white text-xs px-2 py-1 border-none">
+                  {movementSpeedData.tooltip}
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
           
           {/* Range */}
