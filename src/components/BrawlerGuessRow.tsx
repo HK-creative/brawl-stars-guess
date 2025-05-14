@@ -4,6 +4,7 @@ import { Brawler } from '@/data/brawlers';
 import { ArrowUp, ArrowDown } from 'lucide-react';
 import { getPortrait, DEFAULT_PORTRAIT } from '@/lib/image-helpers';
 import Image from '@/components/ui/image';
+import { cn } from '@/lib/utils';
 
 interface BrawlerGuessRowProps {
   guess: Brawler;
@@ -13,11 +14,21 @@ interface BrawlerGuessRowProps {
 const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer }) => {
   // State to hold the unique key for the image to force refreshes
   const [imageKey, setImageKey] = useState<string>(`${guess.name}-${Date.now()}`);
+  const [isAnimating, setIsAnimating] = useState(true);
   
   // Force image refresh when the guess changes
   useEffect(() => {
     setImageKey(`${guess.name}-${Date.now()}`);
   }, [guess.name]);
+  
+  // Add animation effect that ends after the component mounts
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsAnimating(false);
+    }, 600);
+    
+    return () => clearTimeout(timer);
+  }, []);
   
   // Comparison logic for attributes
   const compareAttribute = (guessValue: string, correctValue: string): string => {
@@ -45,9 +56,9 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer 
     }
     
     if (guessValue < correctValue) {
-      return { color: 'bg-brawl-red text-white', icon: <ArrowUp className="w-4 h-4" /> };
+      return { color: 'bg-brawl-red text-white', icon: <ArrowUp className="w-5 h-5" /> };
     } else {
-      return { color: 'bg-brawl-red text-white', icon: <ArrowDown className="w-4 h-4" /> };
+      return { color: 'bg-brawl-red text-white', icon: <ArrowDown className="w-5 h-5" /> };
     }
   };
   
@@ -61,16 +72,48 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer 
 
   // Get the portrait image path
   const portraitPath = getPortrait(guess.name);
-  console.log(`BrawlerGuessRow: Using portrait path for ${guess.name}:`, portraitPath);
 
-  // Updated UI based on the provided image with horizontal layout
+  // Function to create an attribute cell
+  const renderAttributeCell = (label: string, value: string, bgClass: string) => {
+    return (
+      <div className="flex flex-col items-center">
+        <div className="text-white text-xs mb-1">{label}</div>
+        <div className={cn(
+          "w-full h-[90px] flex items-center justify-center rounded-md transition-all overflow-hidden",
+          bgClass,
+          isAnimating && "animate-scale-in"
+        )}>
+          <span className="text-xl font-bold">{value}</span>
+        </div>
+      </div>
+    );
+  };
+
+  // Function to create a numeric cell with arrow
+  const renderNumericCell = (label: string, value: number | undefined, result: { color: string, icon: React.ReactNode | null }) => {
+    return (
+      <div className="flex flex-col items-center">
+        <div className="text-white text-xs mb-1">{label}</div>
+        <div className={cn(
+          "w-full h-[90px] flex flex-col items-center justify-center rounded-md transition-all overflow-hidden",
+          result.color,
+          isAnimating && "animate-scale-in"
+        )}>
+          <span className="text-xl font-bold">{value || "?"}</span>
+          {result.icon && <div className="mt-1">{result.icon}</div>}
+        </div>
+      </div>
+    );
+  };
+
   return (
-    <div className="animate-fade-in mb-5 overflow-hidden rounded-lg bg-indigo-900 border border-indigo-700">
-      <div className="flex flex-row items-center p-3">
-        {/* Larger portrait on the left */}
-        <div className="h-48 w-48 flex-shrink-0 overflow-hidden bg-gray-800">
+    <div className={cn("grid grid-cols-7 gap-2 mb-5", isAnimating && "animate-fade-in")}>
+      {/* Brawler portrait cell */}
+      <div className="flex flex-col items-center">
+        <div className="text-white text-xs mb-1">Brawler</div>
+        <div className="bg-blue-500 w-full h-[90px] rounded-md overflow-hidden">
           <Image
-            key={imageKey} // Add a unique key to force re-render
+            key={imageKey}
             src={portraitPath}
             alt={guess.name}
             fallbackSrc={DEFAULT_PORTRAIT}
@@ -78,59 +121,15 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer 
             className="h-full w-full"
           />
         </div>
-        
-        <div className="flex flex-1 flex-col pl-6">
-          {/* Brawler name */}
-          <h3 className="mb-6 text-4xl font-bold text-white">{guess.name}</h3>
-          
-          {/* Attributes displayed horizontally in two rows */}
-          <div className="grid grid-cols-3 gap-4">
-            {/* First row */}
-            <div className="flex flex-col items-center">
-              <span className="mb-1 text-md text-white/80">Rarity</span>
-              <div className={`${rarityClass} w-full rounded-full px-6 py-2 text-center text-lg font-medium`}>
-                {guess.rarity}
-              </div>
-            </div>
-            
-            <div className="flex flex-col items-center">
-              <span className="mb-1 text-md text-white/80">Class</span>
-              <div className={`${classClass} w-full rounded-full px-6 py-2 text-center text-lg font-medium`}>
-                {guess.class}
-              </div>
-            </div>
-            
-            <div className="flex flex-col items-center">
-              <span className="mb-1 text-md text-white/80">Movement</span>
-              <div className={`${movementClass} w-full rounded-full px-6 py-2 text-center text-lg font-medium`}>
-                {guess.movement}
-              </div>
-            </div>
-            
-            {/* Second row */}
-            <div className="flex flex-col items-center">
-              <span className="mb-1 text-md text-white/80">Range</span>
-              <div className={`${rangeClass} w-full rounded-full px-6 py-2 text-center text-lg font-medium`}>
-                {guess.range}
-              </div>
-            </div>
-            
-            <div className="flex flex-col items-center">
-              <span className="mb-1 text-md text-white/80">Reload</span>
-              <div className={`${reloadClass} w-full rounded-full px-6 py-2 text-center text-lg font-medium`}>
-                {guess.reload}
-              </div>
-            </div>
-            
-            <div className="flex flex-col items-center">
-              <span className="mb-1 text-md text-white/80">Year</span>
-              <div className={`${yearResult.color} w-full rounded-full px-6 py-2 text-center text-lg font-medium flex items-center justify-center`}>
-                {guess.releaseYear || "?"} {yearResult.icon}
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
+      
+      {/* Attribute cells */}
+      {renderAttributeCell("Rarity", guess.rarity, rarityClass)}
+      {renderAttributeCell("Class", guess.class, classClass)}
+      {renderAttributeCell("Movement", guess.movement, movementClass)}
+      {renderAttributeCell("Range", guess.range, rangeClass)}
+      {renderAttributeCell("Reload", guess.reload, reloadClass)}
+      {renderNumericCell("Release", guess.releaseYear, yearResult)}
     </div>
   );
 };
