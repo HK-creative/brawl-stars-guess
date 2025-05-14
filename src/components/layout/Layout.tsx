@@ -2,7 +2,7 @@
 import React from 'react';
 import TopBar from './TopBar';
 import RotatingBackground from './RotatingBackground';
-import { Toaster } from '@/components/ui/sonner';
+import { Toaster } from '@/components/ui/toaster';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -18,7 +18,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           {children}
         </div>
       </main>
-      <Toaster position="bottom-center" closeButton />
+      <Toaster />
     </div>
   );
 };

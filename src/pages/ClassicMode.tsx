@@ -1,5 +1,6 @@
+
 import React, { useState, useEffect } from 'react';
-import { toast } from '@/components/ui/sonner';
+import { toast } from '@/hooks/use-toast';
 import ModeDescription from '@/components/ModeDescription';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -81,7 +82,11 @@ const ClassicMode = () => {
     e.preventDefault();
     
     if (!selectedBrawler) {
-      toast.error("Please select a valid Brawler");
+      toast({
+        title: "Error",
+        description: "Please select a valid Brawler",
+        variant: "destructive"
+      });
       return;
     }
     
@@ -92,7 +97,11 @@ const ClassicMode = () => {
     // Check if the guess is correct
     if (selectedBrawler.name.toLowerCase() === correctBrawlerName.toLowerCase()) {
       setIsGameOver(true);
-      toast.success(`Correct! You found ${correctBrawlerName} in ${guessCount + 1} guesses!`);
+      toast({
+        title: "Success!",
+        description: `Correct! You found ${correctBrawlerName} in ${guessCount + 1} guesses!`,
+        variant: "success"
+      });
     }
     
     // Reset the input
@@ -131,10 +140,11 @@ const ClassicMode = () => {
   const portraitPath = getPortrait(correctBrawlerName);
 
   return (
-    <div className="max-w-3xl mx-auto px-4 pb-16">
+    <div className="max-w-2xl mx-auto px-4 pb-16">
       <ModeDescription 
         title={t('mode.classic')} 
         description={t('mode.classic.description')}
+        className="mb-4"
       />
       
       {!isBackendConnected && (
@@ -199,7 +209,7 @@ const ClassicMode = () => {
           </Card>
         </div>
       ) : (
-        <Card className="brawl-card p-6 mb-6">
+        <Card className="brawl-card p-5 mb-6">
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <BrawlerAutocomplete
               brawlers={brawlers}
@@ -210,13 +220,13 @@ const ClassicMode = () => {
             />
             <Button 
               type="submit" 
-              className="w-full brawl-button bg-brawl-yellow hover:bg-brawl-yellow/80 text-black font-semibold"
+              className="w-full bg-brawl-yellow hover:bg-brawl-yellow/80 text-black font-semibold py-6"
               disabled={isGameOver || !selectedBrawler}
             >
               {t('submit.guess')}
             </Button>
             
-            <div className="flex items-center justify-center gap-1 text-sm text-white/60 mt-2">
+            <div className="flex items-center justify-center gap-1 text-sm text-white/60 mt-1">
               <Clock className="w-4 h-4" />
               <span>Next: {timeUntilNext.hours}h {timeUntilNext.minutes}m</span>
             </div>
@@ -225,8 +235,8 @@ const ClassicMode = () => {
       )}
       
       {guesses.length > 0 && (
-        <div className="space-y-1">
-          <div className="flex justify-between items-center mb-2 px-2">
+        <div>
+          <div className="flex justify-between items-center mb-3 px-1">
             <h3 className="text-white text-lg font-semibold">
               Guesses: {guessCount}
             </h3>
@@ -235,16 +245,18 @@ const ClassicMode = () => {
             </div>
           </div>
           
-          {/* Guesses display */}
-          <div className="space-y-2">
-            {guesses.map((guess, index) => (
-              <BrawlerGuessRow 
-                key={index} 
-                guess={guess} 
-                correctAnswer={correctBrawler} 
-              />
-            ))}
-          </div>
+          {/* Guesses display - a card of its own */}
+          <Card className="brawl-card p-3 mb-4 overflow-hidden">
+            <div className="space-y-1.5">
+              {guesses.map((guess, index) => (
+                <BrawlerGuessRow 
+                  key={index} 
+                  guess={guess} 
+                  correctAnswer={correctBrawler} 
+                />
+              ))}
+            </div>
+          </Card>
         </div>
       )}
       
