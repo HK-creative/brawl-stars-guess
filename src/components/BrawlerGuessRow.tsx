@@ -32,6 +32,24 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer 
     return () => clearTimeout(timer);
   }, []);
   
+  // Helper function to get class icon path
+  const getClassIcon = (className: string): string => {
+    // Map the class names to their corresponding icon file names
+    const classMap: Record<string, string> = {
+      "Damage Dealer": "icon_class_damage.png",
+      "Tank": "icon_class_tank.png",
+      "Marksman": "icon_class_marksmen.png",
+      "Artillery": "icon_class_artillery.png",
+      "Controller": "icon_class_controller.png",
+      "Assassin": "icon_class_assassin.png",
+      "Support": "icon_class_support.png",
+      "Heavyweight": "icon_class_tank.png", // Map Heavyweight to tank icon
+    };
+    
+    const iconFileName = classMap[className] || "icon_class_damage.png"; // Default fallback
+    return `/${iconFileName}`;
+  };
+  
   // Comparison logic for attributes
   const compareAttribute = (guessValue: string, correctValue: string): string => {
     if (guessValue === correctValue) return 'bg-brawl-green text-white'; // Correct
@@ -66,7 +84,7 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer 
   
   // Get comparison results for each attribute
   const rarityClass = compareAttribute(guess.rarity, correctAnswer.rarity);
-  const classClass = compareAttribute(guess.class, correctAnswer.class);
+  const classClass = guess.class === correctAnswer.class ? 'bg-brawl-green' : 'bg-brawl-red';
   const movementClass = compareAttribute(guess.movement, correctAnswer.movement);
   const rangeClass = compareAttribute(guess.range, correctAnswer.range);
   const reloadClass = compareAttribute(guess.reload, correctAnswer.reload);
@@ -84,13 +102,6 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer 
     if (text === "Epic") return "Epi";
     if (text === "Rare") return "Rar";
     if (text === "Chromatic") return "Chr";
-    if (text === "Damage Dealer") return "Dmg";
-    if (text === "Support") return "Sup";
-    if (text === "Controller") return "Con";
-    if (text === "Assassin") return "Ass";
-    if (text === "Marksman") return "Mar";
-    if (text === "Tank") return "Tnk";
-    if (text === "Heavyweight") return "Hvy";
     if (text === "Very Fast") return "V.Fast";
     if (text === "Fast") return "Fast";
     if (text === "Normal") return "Norm";
@@ -137,10 +148,16 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer 
             </div>
           </div>
           
-          {/* Class */}
+          {/* Class - Now showing icon instead of text */}
           <div className={cn("flex-1 h-12 sm:h-14 flex items-center justify-center", classClass)}>
-            <div className="text-center font-semibold text-xs sm:text-sm">
-              {isMobile ? getAbbreviation(guess.class) : guess.class.substring(0, 3)}
+            <div className="w-6 h-6 sm:w-8 sm:h-8">
+              <Image 
+                src={getClassIcon(guess.class)}
+                alt={guess.class}
+                fallbackSrc="/icon_class_damage.png"
+                aspectRatio={1}
+                className="w-full h-full object-contain"
+              />
             </div>
           </div>
           
