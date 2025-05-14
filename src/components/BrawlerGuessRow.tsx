@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Brawler } from '@/data/brawlers';
-import { ArrowUp, ArrowDown, Snail, User, PersonStanding } from 'lucide-react';
+import { ArrowUp, ArrowDown } from 'lucide-react';
 import { getPortrait, DEFAULT_PORTRAIT } from '@/lib/image-helpers';
 import Image from '@/components/ui/image';
 import { cn } from '@/lib/utils';
@@ -62,37 +62,41 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer 
       case 'Very Fast':
         return {
           icons: (
-            <div className="flex">
-              <PersonStanding className="w-4 h-4 transform -scale-x-100" />
-              <PersonStanding className="w-4 h-4 ml-0.5 transform -scale-x-100" />
+            <div className="flex items-center">
+              <img src="/Rabbit_Fast.png" alt="Rabbit" className="w-4 h-4" />
+              <img src="/Rabbit_Fast.png" alt="Rabbit" className="w-4 h-4 ml-0.5" />
             </div>
           ),
           tooltip: "Very Fast",
         };
       case 'Fast':
         return {
-          icons: <PersonStanding className="w-5 h-5 transform -scale-x-100" />,
+          icons: <img src="/Rabbit_Fast.png" alt="Rabbit" className="w-5 h-5" />,
           tooltip: "Fast",
+        };
+      case 'Normal':
+        return {
+          icons: <img src="/Walking_Normal.png" alt="Walking" className="w-5 h-5" />,
+          tooltip: "Normal",
+        };
+      case 'Slow':
+        return {
+          icons: <img src="/Turtle_Slow.png" alt="Turtle" className="w-5 h-5" />,
+          tooltip: "Slow",
         };
       case 'Very Slow':
         return {
           icons: (
-            <div className="flex">
-              <Snail className="w-4 h-4" />
-              <Snail className="w-4 h-4 ml-0.5" />
+            <div className="flex items-center">
+              <img src="/Turtle_Slow.png" alt="Turtle" className="w-4 h-4" />
+              <img src="/Turtle_Slow.png" alt="Turtle" className="w-4 h-4 ml-0.5" />
             </div>
           ),
           tooltip: "Very Slow",
         };
-      case 'Slow':
-        return {
-          icons: <Snail className="w-5 h-5" />,
-          tooltip: "Slow",
-        };
-      case 'Normal':
       default:
         return {
-          icons: <User className="w-5 h-5" />,
+          icons: <img src="/Walking_Normal.png" alt="Walking" className="w-5 h-5" />,
           tooltip: "Normal",
         };
     }
@@ -202,7 +206,7 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer 
             </div>
           </div>
           
-          {/* Movement - Showing icon with tooltip */}
+          {/* Movement - Showing animal icons with tooltip */}
           <div className={cn("flex-1 h-12 sm:h-14 flex items-center justify-center", movementClass)}>
             <TooltipProvider>
               <Tooltip delayDuration={300}>
