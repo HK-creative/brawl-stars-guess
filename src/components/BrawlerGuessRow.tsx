@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Brawler } from '@/data/brawlers';
 import { ArrowUp, ArrowDown } from 'lucide-react';
@@ -55,69 +56,73 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer 
   const portraitPath = getPortrait(guess.name);
 
   return (
-    <div className="animate-fade-in mb-3 border border-white/20 rounded-lg overflow-hidden">
-      <div className="bg-white/10 py-2 px-3 flex items-center justify-between border-b border-white/20">
-        <div className="flex items-center">
-          <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 bg-gray-700 mr-2">
-            <Image
-              src={portraitPath}
-              alt={guess.name}
-              fallbackSrc={DEFAULT_PORTRAIT}
-              imageType="portrait"
-            />
+    <div className="animate-fade-in mb-5 overflow-hidden rounded-lg border border-white/20 bg-white/5 backdrop-blur-sm">
+      <div className="flex flex-row items-center">
+        {/* Larger portrait on the left */}
+        <div className="h-28 w-28 flex-shrink-0 overflow-hidden bg-gray-700">
+          <Image
+            src={portraitPath}
+            alt={guess.name}
+            fallbackSrc={DEFAULT_PORTRAIT}
+            imageType="portrait"
+            className="h-full w-full"
+          />
+        </div>
+        
+        <div className="flex flex-1 flex-col p-3">
+          {/* Brawler name */}
+          <h3 className="mb-2 text-xl font-bold text-white">{guess.name}</h3>
+          
+          {/* Attributes displayed horizontally */}
+          <div className="grid grid-cols-3 gap-2">
+            {/* Rarity */}
+            <div className="flex flex-col items-center">
+              <span className="mb-1 text-xs text-white/70">Rarity</span>
+              <div className={`${rarityClass} w-full rounded-md px-2 py-1 text-center text-xs`}>
+                {guess.rarity}
+              </div>
+            </div>
+            
+            {/* Class */}
+            <div className="flex flex-col items-center">
+              <span className="mb-1 text-xs text-white/70">Class</span>
+              <div className={`${classClass} w-full rounded-md px-2 py-1 text-center text-xs`}>
+                {guess.class}
+              </div>
+            </div>
+            
+            {/* Movement */}
+            <div className="flex flex-col items-center">
+              <span className="mb-1 text-xs text-white/70">Movement</span>
+              <div className={`${movementClass} w-full rounded-md px-2 py-1 text-center text-xs`}>
+                {guess.movement}
+              </div>
+            </div>
+            
+            {/* Range */}
+            <div className="flex flex-col items-center">
+              <span className="mb-1 text-xs text-white/70">Range</span>
+              <div className={`${rangeClass} w-full rounded-md px-2 py-1 text-center text-xs`}>
+                {guess.range}
+              </div>
+            </div>
+            
+            {/* Reload */}
+            <div className="flex flex-col items-center">
+              <span className="mb-1 text-xs text-white/70">Reload</span>
+              <div className={`${reloadClass} w-full rounded-md px-2 py-1 text-center text-xs`}>
+                {guess.reload}
+              </div>
+            </div>
+            
+            {/* Release Year */}
+            <div className="flex flex-col items-center">
+              <span className="mb-1 text-xs text-white/70">Year</span>
+              <div className={`${yearResult.color} w-full rounded-md px-2 py-1 text-center text-xs flex items-center justify-center`}>
+                {guess.releaseYear || "?"} {yearResult.icon}
+              </div>
+            </div>
           </div>
-          <span className="text-white font-bold">{guess.name}</span>
-        </div>
-      </div>
-      
-      {/* grid with attributes */}
-      <div className="grid grid-cols-2 gap-2 p-2">
-        {/* Rarity */}
-        <div className="flex items-center space-x-2">
-          <span className="text-white text-sm">Rarity</span>
-        </div>
-        <div className={`${rarityClass} rounded-md p-1 text-center text-sm flex items-center justify-center`}>
-          {guess.rarity}
-        </div>
-        
-        {/* Class */}
-        <div className="flex items-center space-x-2">
-          <span className="text-white text-sm">Class</span>
-        </div>
-        <div className={`${classClass} rounded-md p-1 text-center text-sm flex items-center justify-center`}>
-          {guess.class}
-        </div>
-        
-        {/* Movement */}
-        <div className="flex items-center space-x-2">
-          <span className="text-white text-sm">Movement</span>
-        </div>
-        <div className={`${movementClass} rounded-md p-1 text-center text-sm flex items-center justify-center`}>
-          {guess.movement}
-        </div>
-        
-        {/* Range */}
-        <div className="flex items-center space-x-2">
-          <span className="text-white text-sm">Range</span>
-        </div>
-        <div className={`${rangeClass} rounded-md p-1 text-center text-sm flex items-center justify-center`}>
-          {guess.range}
-        </div>
-        
-        {/* Reload */}
-        <div className="flex items-center space-x-2">
-          <span className="text-white text-sm">Reload</span>
-        </div>
-        <div className={`${reloadClass} rounded-md p-1 text-center text-sm flex items-center justify-center`}>
-          {guess.reload}
-        </div>
-        
-        {/* Release Year */}
-        <div className="flex items-center space-x-2">
-          <span className="text-white text-sm">Release Year</span>
-        </div>
-        <div className={`${yearResult.color} rounded-md p-1 text-center text-sm flex items-center justify-center`}>
-          {guess.releaseYear || "Unknown"} {yearResult.icon}
         </div>
       </div>
     </div>

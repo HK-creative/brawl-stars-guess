@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import ModeDescription from '@/components/ModeDescription';
@@ -11,6 +12,7 @@ import { fetchDailyChallenge, getTimeUntilNextChallenge, checkSupabaseConnection
 import { getPortrait, DEFAULT_PORTRAIT } from '@/lib/image-helpers';
 import ShareResultModal from '@/components/ShareResultModal';
 import Image from '@/components/ui/image';
+import { Clock, Share2 } from 'lucide-react';
 
 const ClassicMode = () => {
   const [inputValue, setInputValue] = useState('');
@@ -144,36 +146,55 @@ const ClassicMode = () => {
       
       {isGameOver ? (
         <div className="mb-6 animate-fade-in">
-          <Card className="brawl-card p-4">
-            <div className="text-center">
-              <h3 className="text-xl font-bold text-brawl-yellow mb-2">Congratulations!</h3>
-              <p className="text-white mb-4">
-                You found the correct brawler in {guessCount} {guessCount === 1 ? 'guess' : 'guesses'}!
-              </p>
-              <div className="flex justify-center mb-2">
-                <div className="w-28 h-28 rounded-full overflow-hidden flex-shrink-0 bg-gray-700">
-                  <Image
-                    src={portraitPath}
-                    alt={correctBrawlerName}
-                    fallbackSrc={DEFAULT_PORTRAIT}
-                    imageType="portrait"
-                  />
-                </div>
+          <Card className="brawl-card p-0 overflow-hidden">
+            <div className="flex flex-col md:flex-row">
+              {/* Large image section */}
+              <div className="w-full md:w-1/2 h-64 md:h-auto bg-gradient-to-br from-brawl-blue/20 to-brawl-dark overflow-hidden">
+                <Image
+                  src={portraitPath}
+                  alt={correctBrawlerName}
+                  fallbackSrc={DEFAULT_PORTRAIT}
+                  imageType="portrait"
+                  className="w-full h-full object-cover"
+                />
               </div>
-              <h4 className="text-lg font-semibold text-white">{correctBrawlerName}</h4>
               
-              <Button
-                onClick={handleShare}
-                className="mt-4 bg-brawl-blue hover:bg-brawl-blue/80 text-white"
-              >
-                Share Result
-              </Button>
-              
-              <p className="text-white/70 text-sm mt-4">
-                Come back tomorrow for a new challenge!
-              </p>
-              <div className="mt-4 text-sm text-white/60">
-                Next challenge in: {timeUntilNext.hours}h {timeUntilNext.minutes}m
+              {/* Content section */}
+              <div className="p-6 flex flex-col justify-center w-full md:w-1/2">
+                <div className="text-center md:text-left">
+                  <div className="inline-block px-3 py-1 mb-4 rounded-full bg-brawl-green/20 text-brawl-green text-sm font-medium">
+                    Victory!
+                  </div>
+                  <h3 className="text-2xl font-bold text-white mb-2">{correctBrawlerName}</h3>
+                  <p className="text-white/80 mb-4">
+                    You found the correct brawler in {guessCount} {guessCount === 1 ? 'guess' : 'guesses'}!
+                  </p>
+                  
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    <div className="px-3 py-1 bg-white/10 rounded-full text-xs text-white/80 flex items-center">
+                      <span className="mr-1">🏆</span> {correctBrawler.rarity}
+                    </div>
+                    <div className="px-3 py-1 bg-white/10 rounded-full text-xs text-white/80 flex items-center">
+                      <span className="mr-1">👤</span> {correctBrawler.class}
+                    </div>
+                    <div className="px-3 py-1 bg-white/10 rounded-full text-xs text-white/80 flex items-center">
+                      <span className="mr-1">🏃</span> {correctBrawler.movement}
+                    </div>
+                  </div>
+                  
+                  <Button
+                    onClick={handleShare}
+                    className="w-full bg-brawl-blue hover:bg-brawl-blue/80 text-white flex items-center justify-center gap-2"
+                  >
+                    <Share2 className="w-4 h-4" />
+                    Share Result
+                  </Button>
+                  
+                  <div className="flex items-center justify-center mt-4 text-sm text-white/60 gap-1">
+                    <Clock className="w-4 h-4" />
+                    <span>Next: {timeUntilNext.hours}h {timeUntilNext.minutes}m</span>
+                  </div>
+                </div>
               </div>
             </div>
           </Card>
@@ -195,8 +216,9 @@ const ClassicMode = () => {
             {t('submit.guess')}
           </Button>
           
-          <div className="text-center text-sm text-white/60 mt-2">
-            Next challenge in: {timeUntilNext.hours}h {timeUntilNext.minutes}m
+          <div className="flex items-center justify-center gap-1 text-sm text-white/60 mt-2">
+            <Clock className="w-4 h-4" />
+            <span>Next: {timeUntilNext.hours}h {timeUntilNext.minutes}m</span>
           </div>
         </form>
       )}

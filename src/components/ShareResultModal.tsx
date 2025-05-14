@@ -97,11 +97,11 @@ const ShareResultModal = ({
   };
   
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/70 animate-fade-in">
-      <Card className="brawl-card p-4 w-full max-w-md mx-4">
+    <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/80 animate-fade-in backdrop-blur-sm">
+      <Card className="brawl-card p-4 w-full max-w-md mx-4 border border-white/20">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-lg font-bold text-white flex items-center gap-2">
-            <Share className="w-5 h-5" /> Share Your Result
+            <Share className="w-5 h-5 text-brawl-blue" /> Share Your Result
           </h3>
           <Button 
             variant="ghost" 
@@ -113,26 +113,26 @@ const ShareResultModal = ({
           </Button>
         </div>
         
-        <div id="score-share-card-wrapper">
+        <div id="score-share-card-wrapper" className="mb-4">
           <ScoreShareCard {...scoreProps} />
         </div>
         
-        <div className="mt-4 flex gap-2">
+        <div className="grid grid-cols-2 gap-3">
           <Button 
-            className="flex-1 bg-brawl-blue hover:bg-brawl-blue/90 gap-2"
+            className="bg-brawl-blue hover:bg-brawl-blue/90 gap-2 rounded-xl"
             onClick={handleCopyToClipboard}
             disabled={isGenerating}
           >
             <Copy className="w-4 h-4" />
-            <span>Copy</span>
+            <span>{isGenerating ? "Processing..." : "Copy"}</span>
           </Button>
           <Button 
-            className="flex-1 bg-brawl-yellow hover:bg-brawl-yellow/90 text-black gap-2"
+            className="bg-brawl-yellow hover:bg-brawl-yellow/90 text-black gap-2 rounded-xl"
             onClick={handleDownload}
             disabled={isGenerating}
           >
             <Download className="w-4 h-4" />
-            <span>Download</span>
+            <span>{isGenerating ? "Processing..." : "Download"}</span>
           </Button>
         </div>
       </Card>

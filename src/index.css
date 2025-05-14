@@ -44,6 +44,14 @@
 
   body {
     @apply bg-brawl-gradient bg-cover text-foreground min-h-screen;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+  
+  /* Better font rendering */
+  html {
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }
 
@@ -55,22 +63,104 @@
   .brawl-button {
     @apply px-6 py-3 bg-brawl-blue text-white font-bold rounded-xl shadow-md 
            hover:shadow-lg transition-all duration-200 active:translate-y-0.5 
-           active:shadow-sm hover:brightness-110;
+           active:shadow-sm hover:brightness-110 flex items-center justify-center gap-2;
   }
 
   .brawl-button-secondary {
     @apply px-6 py-3 bg-brawl-yellow text-brawl-dark font-bold rounded-xl shadow-md 
            hover:shadow-lg transition-all duration-200 active:translate-y-0.5 
-           active:shadow-sm hover:brightness-110;
+           active:shadow-sm hover:brightness-110 flex items-center justify-center gap-2;
   }
 
   .brawl-button-outline {
     @apply px-6 py-3 bg-transparent border-2 border-white/30 text-white font-bold 
            rounded-xl shadow-md hover:shadow-lg transition-all duration-200 
-           active:translate-y-0.5 active:shadow-sm hover:bg-white/10;
+           active:translate-y-0.5 active:shadow-sm hover:bg-white/10 flex items-center justify-center gap-2;
   }
 
   .brawl-nav-button {
     @apply p-2 rounded-full hover:bg-white/10 transition-all duration-200;
   }
+  
+  /* New layout classes */
+  .glass-card {
+    @apply bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl overflow-hidden;
+  }
+  
+  .brawl-icon-box {
+    @apply flex items-center justify-center p-2 rounded-full bg-white/10;
+  }
+}
+
+@layer utilities {
+  /* Enhanced animations */
+  .hover-scale {
+    @apply transition-transform duration-200 hover:scale-105;
+  }
+  
+  .hover-glow {
+    @apply transition-all duration-300 hover:shadow-[0_0_15px_rgba(255,255,255,0.3)];
+  }
+  
+  /* Specialized background gradients */
+  .bg-blue-gradient {
+    @apply bg-gradient-to-br from-brawl-blue to-brawl-blue/50;
+  }
+  
+  .bg-yellow-gradient {
+    @apply bg-gradient-to-br from-brawl-yellow to-brawl-yellow/50;
+  }
+  
+  .bg-purple-gradient {
+    @apply bg-gradient-to-br from-brawl-purple to-brawl-purple/50;
+  }
+}
+
+/* Existing animations */
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bounce-slight {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+@keyframes fade-out {
+  0% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out;
+}
+
+.animate-fade-out {
+  animation: fade-out 0.3s ease-out;
+}
+
+.animate-bounce-slight {
+  animation: bounce-slight 2s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
 }

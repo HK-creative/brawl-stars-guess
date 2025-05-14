@@ -1,3 +1,4 @@
+
 import React, { useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Share, Download, Copy, Check } from 'lucide-react';
@@ -182,29 +183,32 @@ const ScoreShareCard = ({
             </div>
           </div>
           
-          <div className="mb-4">
-            <h3 className={`text-xl font-bold mb-1 ${success ? 'text-brawl-green' : 'text-brawl-red'}`}>
-              {success ? 'Victory!' : 'Challenge Failed'}
-            </h3>
-            <p className="text-white/80">
-              {success 
-                ? `Guessed in ${attempts} ${attempts === 1 ? 'try' : 'tries'}`
-                : `Failed after ${attempts} ${attempts === 1 ? 'try' : 'tries'}`
-              }
-            </p>
+          <div className="flex items-center mb-4">
             {brawlerName && (
-              <div className="flex items-center mt-2">
-                <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 bg-gray-700 mr-2">
-                  <Image
-                    src={portraitPath}
-                    alt={brawlerName}
-                    fallbackSrc={DEFAULT_PORTRAIT}
-                    imageType="portrait"
-                  />
-                </div>
-                <p className="text-brawl-yellow font-medium">{brawlerName}</p>
+              <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-gray-700 mr-3">
+                <Image
+                  src={portraitPath}
+                  alt={brawlerName}
+                  fallbackSrc={DEFAULT_PORTRAIT}
+                  imageType="portrait"
+                  className="w-full h-full"
+                />
               </div>
             )}
+            <div>
+              <h3 className={`text-xl font-bold mb-1 ${success ? 'text-brawl-green' : 'text-brawl-red'}`}>
+                {success ? 'Victory!' : 'Challenge Failed'}
+              </h3>
+              <p className="text-white/80">
+                {success 
+                  ? `Guessed in ${attempts} ${attempts === 1 ? 'try' : 'tries'}`
+                  : `Failed after ${attempts} ${attempts === 1 ? 'try' : 'tries'}`
+                }
+              </p>
+              {brawlerName && (
+                <p className="text-brawl-yellow font-medium mt-1">{brawlerName}</p>
+              )}
+            </div>
           </div>
           
           <div className="flex flex-wrap mb-2">
