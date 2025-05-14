@@ -11,17 +11,21 @@ export const DEFAULT_PORTRAIT = "/default_portrait.png";
 /**
  * Generate path for pin images
  * Format: /{brawlerName}_pin.png
+ * Handles spaces in filenames
  */
 export function getPin(name: string): string {
   if (!name) return DEFAULT_PIN;
-  return `/${encodeURIComponent(name)}_pin.png`;
+  // Don't encode, use the name directly as it appears in the filenames
+  return `/${name}_pin.png`;
 }
 
 /**
  * Generate path for portrait images
  * Format: /{brawlerName}_portrait.png
+ * Handles spaces in filenames
  */
 export function getPortrait(name: string): string {
   if (!name) return DEFAULT_PORTRAIT;
-  return `/${encodeURIComponent(name)}_portrait.png`;
+  // Don't encode, use the name directly as it appears in the filenames
+  return `/${name}_portrait.png`;
 }

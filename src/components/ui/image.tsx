@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { DEFAULT_PORTRAIT } from '@/lib/image-helpers';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 
@@ -20,11 +20,11 @@ const Image: React.FC<ImageProps> = ({
   aspectRatio,
   ...props 
 }) => {
+  const [imgSrc, setImgSrc] = useState<string>(src || fallbackSrc);
+  
   const handleError = (e: React.SyntheticEvent<HTMLImageElement>) => {
     console.error("Missing image:", src);
-    if (fallbackSrc) {
-      e.currentTarget.src = fallbackSrc;
-    }
+    setImgSrc(fallbackSrc);
   };
 
   // Apply specific styling based on image type
@@ -40,7 +40,7 @@ const Image: React.FC<ImageProps> = ({
 
   const renderImage = () => (
     <img
-      src={src}
+      src={imgSrc}
       alt={alt}
       onError={handleError}
       className={imageClassName}
