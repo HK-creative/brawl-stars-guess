@@ -153,11 +153,11 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer 
   const portraitPath = getPortrait(guess.name);
   
   return (
-    <div className={cn("w-full relative rounded-lg overflow-hidden mb-3", isAnimating && "animate-fade-in")}>
+    <div className={cn("w-full relative rounded-lg overflow-hidden transition-all", isAnimating && "animate-fade-in")}>
       <div className="flex items-stretch w-full">
         {/* Brawler portrait */}
         <div className="flex-shrink-0">
-          <div className="w-14 h-14 sm:w-16 sm:h-16">
+          <div className="w-12 h-12 sm:w-14 sm:h-14">
             <Image
               key={imageKey}
               src={portraitPath}
@@ -165,18 +165,18 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer 
               fallbackSrc={DEFAULT_PORTRAIT}
               imageType="portrait"
               aspectRatio={1}
-              className="rounded-l-lg h-full"
+              className="rounded-l-lg h-full w-full object-cover"
             />
           </div>
         </div>
         
-        {/* Attributes grid - with larger 1:1 aspect ratio cells */}
+        {/* Attributes grid */}
         <div className="flex flex-grow h-full">
           {/* Rarity */}
           <div className={cn("flex-1 relative", rarityClass)}>
             <AspectRatio ratio={1} className="w-full">
               <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-center font-semibold text-sm sm:text-base">
+                <div className="text-center font-semibold text-xs sm:text-sm">
                   {isMobile ? getAbbreviation(guess.rarity) : guess.rarity.substring(0, 7)}
                 </div>
               </div>
@@ -187,7 +187,7 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer 
           <div className={cn("flex-1 relative", classClass)}>
             <AspectRatio ratio={1} className="w-full">
               <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-6 h-6 sm:w-8 sm:h-8">
+                <div className="w-5 h-5 sm:w-6 sm:h-6">
                   <Image 
                     src={getClassIcon(guess.class)}
                     alt={guess.class}
@@ -224,18 +224,18 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer 
           <div className={cn("flex-1 relative", rangeClass)}>
             <AspectRatio ratio={1} className="w-full">
               <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-center font-semibold text-sm sm:text-base">
+                <div className="text-center font-semibold text-xs sm:text-sm">
                   {isMobile ? getAbbreviation(guess.range) : guess.range.substring(0, 7)}
                 </div>
               </div>
             </AspectRatio>
           </div>
           
-          {/* Reload - Now with rounded-right for last column */}
-          <div className={cn("flex-1 relative", reloadClass, "rounded-r-lg")}>
+          {/* Reload */}
+          <div className={cn("flex-1 relative rounded-r-lg", reloadClass)}>
             <AspectRatio ratio={1} className="w-full">
               <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-center font-semibold text-sm sm:text-base">
+                <div className="text-center font-semibold text-xs sm:text-sm">
                   {isMobile ? getAbbreviation(guess.reload) : guess.reload.substring(0, 7)}
                 </div>
               </div>

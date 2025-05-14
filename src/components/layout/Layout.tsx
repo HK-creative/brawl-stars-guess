@@ -13,8 +13,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     <div className="flex min-h-screen flex-col bg-brawl-dark relative">
       <RotatingBackground />
       <TopBar />
-      <main className="flex-1 relative z-10">
-        {children}
+      <main className="flex-1 relative z-10 flex justify-center">
+        <div className="w-full max-w-5xl px-4 py-6">
+          {children}
+        </div>
       </main>
       <Toaster position="bottom-center" closeButton />
     </div>

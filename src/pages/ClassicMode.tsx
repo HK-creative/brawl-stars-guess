@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
-import { toast } from 'sonner';
+import { toast } from '@/components/ui/sonner';
 import ModeDescription from '@/components/ModeDescription';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -132,7 +131,7 @@ const ClassicMode = () => {
   const portraitPath = getPortrait(correctBrawlerName);
 
   return (
-    <div>
+    <div className="max-w-3xl mx-auto px-4 pb-16">
       <ModeDescription 
         title={t('mode.classic')} 
         description={t('mode.classic.description')}
@@ -146,7 +145,7 @@ const ClassicMode = () => {
       
       {isGameOver ? (
         <div className="mb-6 animate-fade-in">
-          <Card className="brawl-card p-0 overflow-hidden">
+          <Card className="brawl-card overflow-hidden">
             <div className="flex flex-col md:flex-row">
               {/* Large image section */}
               <div className="w-full md:w-1/2 h-64 md:h-auto bg-gradient-to-br from-brawl-blue/20 to-brawl-dark overflow-hidden">
@@ -200,51 +199,54 @@ const ClassicMode = () => {
           </Card>
         </div>
       ) : (
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4 mb-6">
-          <BrawlerAutocomplete
-            brawlers={brawlers}
-            value={inputValue}
-            onChange={setInputValue}
-            onSelect={handleSelectBrawler}
-            disabled={isGameOver}
-          />
-          <Button 
-            type="submit" 
-            className="brawl-button bg-brawl-yellow hover:bg-brawl-yellow/80 text-black font-semibold"
-            disabled={isGameOver || !selectedBrawler}
-          >
-            {t('submit.guess')}
-          </Button>
-          
-          <div className="flex items-center justify-center gap-1 text-sm text-white/60 mt-2">
-            <Clock className="w-4 h-4" />
-            <span>Next: {timeUntilNext.hours}h {timeUntilNext.minutes}m</span>
-          </div>
-        </form>
+        <Card className="brawl-card p-6 mb-6">
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            <BrawlerAutocomplete
+              brawlers={brawlers}
+              value={inputValue}
+              onChange={setInputValue}
+              onSelect={handleSelectBrawler}
+              disabled={isGameOver}
+            />
+            <Button 
+              type="submit" 
+              className="w-full brawl-button bg-brawl-yellow hover:bg-brawl-yellow/80 text-black font-semibold"
+              disabled={isGameOver || !selectedBrawler}
+            >
+              {t('submit.guess')}
+            </Button>
+            
+            <div className="flex items-center justify-center gap-1 text-sm text-white/60 mt-2">
+              <Clock className="w-4 h-4" />
+              <span>Next: {timeUntilNext.hours}h {timeUntilNext.minutes}m</span>
+            </div>
+          </form>
+        </Card>
       )}
       
-      <div className="mb-4">
-        <h3 className="text-white text-lg font-semibold mb-2">
-          Guesses: {guessCount}
-        </h3>
-      </div>
-      
-      {/* Guesses display */}
-      <div className="space-y-4">
-        {guesses.length > 0 ? (
-          guesses.map((guess, index) => (
-            <BrawlerGuessRow 
-              key={index} 
-              guess={guess} 
-              correctAnswer={correctBrawler} 
-            />
-          ))
-        ) : (
-          <Card className="brawl-card p-4">
-            <p className="text-white text-center">Make your first guess!</p>
-          </Card>
-        )}
-      </div>
+      {guesses.length > 0 && (
+        <div className="space-y-1">
+          <div className="flex justify-between items-center mb-2 px-2">
+            <h3 className="text-white text-lg font-semibold">
+              Guesses: {guessCount}
+            </h3>
+            <div className="text-xs text-white/60 bg-white/10 px-2 py-1 rounded-full">
+              {guessCount}/6
+            </div>
+          </div>
+          
+          {/* Guesses display */}
+          <div className="space-y-2">
+            {guesses.map((guess, index) => (
+              <BrawlerGuessRow 
+                key={index} 
+                guess={guess} 
+                correctAnswer={correctBrawler} 
+              />
+            ))}
+          </div>
+        </div>
+      )}
       
       {/* Share modal */}
       <ShareResultModal
