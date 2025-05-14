@@ -52,13 +52,21 @@ const ClassicMode = () => {
           console.log("ClassicMode: No data received, using fallback");
           setCorrectBrawlerName(fallbackBrawlerName);
           setIsBackendConnected(false);
-          toast.error("Couldn't load today's challenge. Using fallback data.");
+          toast({
+            title: "Connection Error",
+            description: "Couldn't load today's challenge. Using fallback data.",
+            variant: "destructive"
+          });
         }
       } catch (error) {
         console.error("Error loading classic challenge:", error);
         setCorrectBrawlerName(fallbackBrawlerName);
         setIsBackendConnected(false);
-        toast.error("Couldn't load today's challenge. Using fallback data.");
+        toast({
+          title: "Connection Error",
+          description: "Couldn't load today's challenge. Using fallback data.",
+          variant: "destructive"
+        });
       } finally {
         setIsLoading(false);
       }
@@ -100,7 +108,7 @@ const ClassicMode = () => {
       toast({
         title: "Success!",
         description: `Correct! You found ${correctBrawlerName} in ${guessCount + 1} guesses!`,
-        variant: "success"
+        variant: "default"
       });
     }
     
@@ -247,7 +255,7 @@ const ClassicMode = () => {
           
           {/* Guesses display - a card of its own */}
           <Card className="brawl-card p-3 mb-4 overflow-hidden">
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               {guesses.map((guess, index) => (
                 <BrawlerGuessRow 
                   key={index} 

@@ -60,40 +60,40 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer 
         return {
           icons: (
             <div className="flex items-center justify-center">
-              <img src="/Rabbit_Fast.png" alt="Very Fast" className="w-4 h-4" />
-              <img src="/Rabbit_Fast.png" alt="Very Fast" className="w-4 h-4 ml-0.5" />
+              <img src="/Rabbit_Fast.png" alt="Very Fast" className="w-7 h-7" />
+              <img src="/Rabbit_Fast.png" alt="Very Fast" className="w-7 h-7 ml-0.5" />
             </div>
           ),
           tooltip: "Very Fast",
         };
       case 'Fast':
         return {
-          icons: <img src="/Rabbit_Fast.png" alt="Fast" className="w-5 h-5" />,
+          icons: <img src="/Rabbit_Fast.png" alt="Fast" className="w-9 h-9" />,
           tooltip: "Fast",
         };
       case 'Normal':
         return {
-          icons: <img src="/Walking_Normal.png" alt="Normal" className="w-5 h-5" />,
+          icons: <img src="/Walking_Normal.png" alt="Normal" className="w-9 h-9" />,
           tooltip: "Normal",
         };
       case 'Slow':
         return {
-          icons: <img src="/Turtle_Slow.png" alt="Slow" className="w-5 h-5" />,
+          icons: <img src="/Turtle_Slow.png" alt="Slow" className="w-9 h-9" />,
           tooltip: "Slow",
         };
       case 'Very Slow':
         return {
           icons: (
             <div className="flex items-center justify-center">
-              <img src="/Turtle_Slow.png" alt="Very Slow" className="w-4 h-4" />
-              <img src="/Turtle_Slow.png" alt="Very Slow" className="w-4 h-4 ml-0.5" />
+              <img src="/Turtle_Slow.png" alt="Very Slow" className="w-7 h-7" />
+              <img src="/Turtle_Slow.png" alt="Very Slow" className="w-7 h-7 ml-0.5" />
             </div>
           ),
           tooltip: "Very Slow",
         };
       default:
         return {
-          icons: <img src="/Walking_Normal.png" alt="Normal" className="w-5 h-5" />,
+          icons: <img src="/Walking_Normal.png" alt="Normal" className="w-9 h-9" />,
           tooltip: "Normal",
         };
     }
@@ -152,12 +152,12 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer 
   
   return (
     <div className={cn(
-      "w-full rounded-xl overflow-hidden mb-1.5 shadow-sm transition-all",
+      "w-full rounded-xl overflow-hidden mb-3 shadow-md transition-all",
       isAnimating && "animate-fade-in"
     )}>
-      <div className="flex h-12">
-        {/* Brawler portrait */}
-        <div className="h-full w-12 flex-shrink-0">
+      <div className="flex">
+        {/* Brawler portrait - now in 1:1 ratio */}
+        <div className="aspect-square w-16 h-16 flex-shrink-0">
           <Image
             key={imageKey}
             src={portraitPath}
@@ -168,32 +168,32 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer 
           />
         </div>
         
-        {/* Attributes */}
-        <div className="flex flex-1 h-full">
-          {/* Rarity */}
-          <div className={cn("flex-1 flex items-center justify-center", rarityClass)}>
-            <div className="text-center font-semibold text-xs">
+        {/* Attributes - now in 1:1 ratio with large content */}
+        <div className="flex flex-1 h-16 ml-2 gap-2">
+          {/* Rarity - in 1:1 square */}
+          <div className={cn("aspect-square h-16 flex items-center justify-center rounded-xl", rarityClass)}>
+            <div className="text-center font-bold text-lg flex items-center justify-center w-[90%] h-[90%]">
               {getAbbreviation(guess.rarity)}
             </div>
           </div>
           
-          {/* Class */}
-          <div className={cn("flex-1 flex items-center justify-center", classClass)}>
-            <div className="w-5 h-5">
+          {/* Class - in 1:1 square */}
+          <div className={cn("aspect-square h-16 flex items-center justify-center rounded-xl", classClass)}>
+            <div className="w-[90%] h-[90%] flex items-center justify-center">
               <img 
                 src={getClassIcon(guess.class)}
                 alt={guess.class}
-                className="w-full h-full object-contain"
+                className="w-10 h-10 object-contain"
               />
             </div>
           </div>
           
-          {/* Movement */}
-          <div className={cn("flex-1 flex items-center justify-center", movementClass)}>
+          {/* Movement - in 1:1 square */}
+          <div className={cn("aspect-square h-16 flex items-center justify-center rounded-xl", movementClass)}>
             <TooltipProvider>
               <Tooltip delayDuration={300}>
                 <TooltipTrigger asChild>
-                  <div className="cursor-help flex items-center justify-center">
+                  <div className="cursor-help flex items-center justify-center w-[90%] h-[90%]">
                     {movementSpeedData.icons}
                   </div>
                 </TooltipTrigger>
@@ -204,16 +204,16 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer 
             </TooltipProvider>
           </div>
           
-          {/* Range */}
-          <div className={cn("flex-1 flex items-center justify-center", rangeClass)}>
-            <div className="text-center font-semibold text-xs">
+          {/* Range - in 1:1 square */}
+          <div className={cn("aspect-square h-16 flex items-center justify-center rounded-xl", rangeClass)}>
+            <div className="text-center font-bold text-lg flex items-center justify-center w-[90%] h-[90%]">
               {getAbbreviation(guess.range)}
             </div>
           </div>
           
-          {/* Reload */}
-          <div className={cn("flex-1 flex items-center justify-center", reloadClass)}>
-            <div className="text-center font-semibold text-xs">
+          {/* Reload - in 1:1 square */}
+          <div className={cn("aspect-square h-16 flex items-center justify-center rounded-xl", reloadClass)}>
+            <div className="text-center font-bold text-lg flex items-center justify-center w-[90%] h-[90%]">
               {getAbbreviation(guess.reload)}
             </div>
           </div>
