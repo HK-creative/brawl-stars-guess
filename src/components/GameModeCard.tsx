@@ -3,7 +3,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { t } from '@/lib/i18n';
 import { Card } from '@/components/ui/card';
-import { Question, Music, Star, Zap } from 'lucide-react';
+import { HelpCircle, Music, Star, Zap } from 'lucide-react';
 
 interface GameModeCardProps {
   mode: string;

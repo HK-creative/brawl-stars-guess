@@ -1,7 +1,8 @@
 
 import React from 'react';
-import { Question, Music, Star, Zap } from 'lucide-react';
+import { HelpCircle, Music, Star, Zap } from 'lucide-react';
 import { t } from '@/lib/i18n';
+import GameModeCard from '@/components/GameModeCard';
 
 const Index = () => {
   // Define our game modes
@@ -9,7 +10,7 @@ const Index = () => {
     {
       mode: 'classic',
       description: 'Get clues on every try',
-      icon: <Question size={32} />,
+      icon: <HelpCircle size={32} />,
       comingSoon: false,
     },
     {
