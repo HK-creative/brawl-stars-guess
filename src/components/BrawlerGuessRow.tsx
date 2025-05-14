@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Brawler } from '@/data/brawlers';
-import { ArrowUp, ArrowDown, Snail, PersonWalking, Cheetah } from 'lucide-react';
+import { ArrowUp, ArrowDown, Snail, User, PersonStanding } from 'lucide-react';
 import { getPortrait, DEFAULT_PORTRAIT } from '@/lib/image-helpers';
 import Image from '@/components/ui/image';
 import { cn } from '@/lib/utils';
@@ -63,15 +63,15 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer 
         return {
           icons: (
             <div className="flex">
-              <Cheetah className="w-4 h-4" />
-              <Cheetah className="w-4 h-4 ml-0.5" />
+              <PersonStanding className="w-4 h-4 transform -scale-x-100" />
+              <PersonStanding className="w-4 h-4 ml-0.5 transform -scale-x-100" />
             </div>
           ),
           tooltip: "Very Fast",
         };
       case 'Fast':
         return {
-          icons: <Cheetah className="w-5 h-5" />,
+          icons: <PersonStanding className="w-5 h-5 transform -scale-x-100" />,
           tooltip: "Fast",
         };
       case 'Very Slow':
@@ -92,7 +92,7 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer 
       case 'Normal':
       default:
         return {
-          icons: <PersonWalking className="w-5 h-5" />,
+          icons: <User className="w-5 h-5" />,
           tooltip: "Normal",
         };
     }
