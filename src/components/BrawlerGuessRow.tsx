@@ -52,14 +52,18 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer 
   const reloadClass = compareAttribute(guess.reload, correctAnswer.reload);
   const yearResult = compareNumeric(guess.releaseYear || 0, correctAnswer.releaseYear || 0);
 
-  // Updated UI based on the provided image
+  // Get the portrait image path
+  const portraitPath = getPortrait(guess.name);
+  console.log(`BrawlerGuessRow: Using portrait path for ${guess.name}:`, portraitPath);
+
+  // Updated UI based on the provided image with horizontal layout
   return (
     <div className="animate-fade-in mb-5 overflow-hidden rounded-lg bg-indigo-900 border border-indigo-700">
       <div className="flex flex-row items-center p-3">
         {/* Larger portrait on the left */}
         <div className="h-48 w-48 flex-shrink-0 overflow-hidden bg-gray-800">
           <Image
-            src={getPortrait(guess.name)}
+            src={portraitPath}
             alt={guess.name}
             fallbackSrc={DEFAULT_PORTRAIT}
             imageType="portrait"
