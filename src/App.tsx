@@ -10,6 +10,7 @@ import { initLanguage } from "@/lib/i18n";
 
 // Pages
 import Index from "./pages/Index";
+import ClassicMode from "./pages/ClassicMode"; // Import ClassicMode
 import ScorePage from "./pages/ScorePage";
 import SettingsPage from "./pages/SettingsPage";
 import NotFound from "./pages/NotFound";
@@ -35,6 +36,7 @@ const App = () => {
             <Layout>
               <Routes>
                 <Route path="/" element={<Index />} />
+                <Route path="/classic" element={<ClassicMode />} /> {/* Add ClassicMode route */}
                 <Route path="/score" element={<ScorePage />} />
                 <Route path="/settings" element={<SettingsPage />} />
                 <Route path="*" element={<NotFound />} />
