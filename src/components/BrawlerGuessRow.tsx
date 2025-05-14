@@ -5,8 +5,7 @@ import { ArrowUp, ArrowDown } from 'lucide-react';
 import { getPortrait, DEFAULT_PORTRAIT } from '@/lib/image-helpers';
 import Image from '@/components/ui/image';
 import { cn } from '@/lib/utils';
-import { Table, TableCell, TableRow } from '@/components/ui/table';
-import { AspectRatio } from '@/components/ui/aspect-ratio';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface BrawlerGuessRowProps {
   guess: Brawler;
@@ -17,6 +16,7 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer 
   // State to hold the unique key for the image to force refreshes
   const [imageKey, setImageKey] = useState<string>(`${guess.name}-${Date.now()}`);
   const [isAnimating, setIsAnimating] = useState(true);
+  const isMobile = useIsMobile();
   
   // Force image refresh when the guess changes
   useEffect(() => {
@@ -74,71 +74,106 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer 
 
   // Get the portrait image path
   const portraitPath = getPortrait(guess.name);
+  
+  // Helper function to get abbreviated text
+  const getAbbreviation = (text: string): string => {
+    // Special abbreviations based on Brawl Stars conventions
+    if (text === "Mythic") return "Myt";
+    if (text === "Super Rare") return "Sup";
+    if (text === "Legendary") return "Leg";
+    if (text === "Epic") return "Epi";
+    if (text === "Rare") return "Rar";
+    if (text === "Chromatic") return "Chr";
+    if (text === "Damage Dealer") return "Dmg";
+    if (text === "Support") return "Sup";
+    if (text === "Controller") return "Con";
+    if (text === "Assassin") return "Ass";
+    if (text === "Marksman") return "Mar";
+    if (text === "Tank") return "Tnk";
+    if (text === "Heavyweight") return "Hvy";
+    if (text === "Very Fast") return "V.Fast";
+    if (text === "Fast") return "Fast";
+    if (text === "Normal") return "Norm";
+    if (text === "Slow") return "Slow";
+    if (text === "Very Slow") return "V.Slow";
+    if (text === "Short") return "Shrt";
+    if (text === "Medium") return "Med";
+    if (text === "Long") return "Long";
+    if (text === "Very Long") return "V.Long";
+    if (text === "Very Fast") return "V.Fast";
+    if (text === "Fast") return "Fast";
+    if (text === "Normal") return "Norm";
+    if (text === "Slow") return "Slow";
+    if (text === "Very Slow") return "V.Slow";
+    
+    // Default abbreviation (first 3 characters)
+    return text.substring(0, 3);
+  };
 
   return (
-    <div className={cn("w-full mb-4 overflow-x-auto", isAnimating && "animate-fade-in")}>
-      <Table>
-        <TableRow className="whitespace-nowrap border-0">
-          {/* Brawler portrait cell */}
-          <TableCell className="p-1 align-middle">
-            <div className="w-10 h-10 overflow-hidden rounded-md">
-              <AspectRatio ratio={1}>
-                <Image
-                  key={imageKey}
-                  src={portraitPath}
-                  alt={guess.name}
-                  fallbackSrc={DEFAULT_PORTRAIT}
-                  imageType="portrait"
-                  className="h-full w-full"
-                />
-              </AspectRatio>
-            </div>
-          </TableCell>
-          
+    <div className={cn("w-full relative rounded-lg overflow-hidden mb-2", isAnimating && "animate-fade-in")}>
+      <div className="flex items-center w-full">
+        {/* Brawler portrait */}
+        <div className="flex-shrink-0">
+          <div className="w-12 h-12 sm:w-14 sm:h-14">
+            <Image
+              key={imageKey}
+              src={portraitPath}
+              alt={guess.name}
+              fallbackSrc={DEFAULT_PORTRAIT}
+              imageType="portrait"
+              aspectRatio={1}
+              className="rounded-l-lg"
+            />
+          </div>
+        </div>
+        
+        {/* Attributes grid */}
+        <div className="flex flex-grow">
           {/* Rarity */}
-          <TableCell className={cn("p-1 text-center text-xs font-medium", rarityClass)}>
-            <div className="rounded-md p-1 min-w-10 h-10 flex items-center justify-center">
-              {guess.rarity.substring(0, 3)}
+          <div className={cn("flex-1 h-12 sm:h-14 flex items-center justify-center", rarityClass)}>
+            <div className="text-center font-semibold text-xs sm:text-sm">
+              {isMobile ? getAbbreviation(guess.rarity) : guess.rarity.substring(0, 3)}
             </div>
-          </TableCell>
+          </div>
           
           {/* Class */}
-          <TableCell className={cn("p-1 text-center text-xs font-medium", classClass)}>
-            <div className="rounded-md p-1 min-w-10 h-10 flex items-center justify-center">
-              {guess.class.substring(0, 3)}
+          <div className={cn("flex-1 h-12 sm:h-14 flex items-center justify-center", classClass)}>
+            <div className="text-center font-semibold text-xs sm:text-sm">
+              {isMobile ? getAbbreviation(guess.class) : guess.class.substring(0, 3)}
             </div>
-          </TableCell>
+          </div>
           
           {/* Movement */}
-          <TableCell className={cn("p-1 text-center text-xs font-medium", movementClass)}>
-            <div className="rounded-md p-1 min-w-10 h-10 flex items-center justify-center">
-              {guess.movement.substring(0, 3)}
+          <div className={cn("flex-1 h-12 sm:h-14 flex items-center justify-center", movementClass)}>
+            <div className="text-center font-semibold text-xs sm:text-sm">
+              {isMobile ? getAbbreviation(guess.movement) : guess.movement.substring(0, 3)}
             </div>
-          </TableCell>
+          </div>
           
           {/* Range */}
-          <TableCell className={cn("p-1 text-center text-xs font-medium", rangeClass)}>
-            <div className="rounded-md p-1 min-w-10 h-10 flex items-center justify-center">
-              {guess.range.substring(0, 3)}
+          <div className={cn("flex-1 h-12 sm:h-14 flex items-center justify-center", rangeClass)}>
+            <div className="text-center font-semibold text-xs sm:text-sm">
+              {isMobile ? getAbbreviation(guess.range) : guess.range.substring(0, 3)}
             </div>
-          </TableCell>
+          </div>
           
           {/* Reload */}
-          <TableCell className={cn("p-1 text-center text-xs font-medium", reloadClass)}>
-            <div className="rounded-md p-1 min-w-10 h-10 flex items-center justify-center">
-              {guess.reload.substring(0, 3)}
+          <div className={cn("flex-1 h-12 sm:h-14 flex items-center justify-center", reloadClass)}>
+            <div className="text-center font-semibold text-xs sm:text-sm">
+              {isMobile ? getAbbreviation(guess.reload) : guess.reload.substring(0, 3)}
             </div>
-          </TableCell>
+          </div>
           
-          {/* Release Year */}
-          <TableCell className={cn("p-1 text-center text-xs font-medium", yearResult.color)}>
-            <div className="rounded-md p-1 min-w-10 h-10 flex flex-col items-center justify-center">
+          {/* Year */}
+          <div className={cn("flex-1 h-12 sm:h-14 flex items-center justify-center", yearResult.color, "rounded-r-lg")}>
+            <div className="text-center font-semibold text-xs sm:text-sm flex flex-col items-center">
               <span>{guess.releaseYear || "?"}</span>
               {yearResult.icon && <div className="mt-0.5">{yearResult.icon}</div>}
             </div>
-          </TableCell>
-        </TableRow>
-      </Table>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
