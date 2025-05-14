@@ -12,6 +12,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
 
 interface BrawlerGuessRowProps {
   guess: Brawler;
@@ -184,64 +185,88 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer 
           </div>
         </div>
         
-        {/* Attributes grid */}
+        {/* Attributes grid - updated to have 1:1 aspect ratio cells */}
         <div className="flex flex-grow">
           {/* Rarity */}
-          <div className={cn("flex-1 h-12 sm:h-14 flex items-center justify-center", rarityClass)}>
-            <div className="text-center font-semibold text-xs sm:text-sm">
-              {isMobile ? getAbbreviation(guess.rarity) : guess.rarity.substring(0, 3)}
-            </div>
+          <div className={cn("flex-1 relative", rarityClass)}>
+            <AspectRatio ratio={1} className="w-full">
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="text-center font-semibold text-xs sm:text-sm">
+                  {isMobile ? getAbbreviation(guess.rarity) : guess.rarity.substring(0, 5)}
+                </div>
+              </div>
+            </AspectRatio>
           </div>
           
           {/* Class - Showing icon instead of text */}
-          <div className={cn("flex-1 h-12 sm:h-14 flex items-center justify-center", classClass)}>
-            <div className="w-6 h-6 sm:w-8 sm:h-8">
-              <Image 
-                src={getClassIcon(guess.class)}
-                alt={guess.class}
-                fallbackSrc="/icon_class_damage.png"
-                aspectRatio={1}
-                className="w-full h-full object-contain"
-              />
-            </div>
+          <div className={cn("flex-1 relative", classClass)}>
+            <AspectRatio ratio={1} className="w-full">
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-6 h-6 sm:w-8 sm:h-8">
+                  <Image 
+                    src={getClassIcon(guess.class)}
+                    alt={guess.class}
+                    fallbackSrc="/icon_class_damage.png"
+                    aspectRatio={1}
+                    className="w-full h-full object-contain"
+                  />
+                </div>
+              </div>
+            </AspectRatio>
           </div>
           
           {/* Movement - Showing animal icons with tooltip */}
-          <div className={cn("flex-1 h-12 sm:h-14 flex items-center justify-center", movementClass)}>
-            <TooltipProvider>
-              <Tooltip delayDuration={300}>
-                <TooltipTrigger asChild>
-                  <div className="cursor-help flex items-center justify-center">
-                    {movementSpeedData.icons}
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent side="bottom" className="bg-black text-white text-xs px-2 py-1 border-none">
-                  {movementSpeedData.tooltip}
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+          <div className={cn("flex-1 relative", movementClass)}>
+            <AspectRatio ratio={1} className="w-full">
+              <div className="absolute inset-0 flex items-center justify-center">
+                <TooltipProvider>
+                  <Tooltip delayDuration={300}>
+                    <TooltipTrigger asChild>
+                      <div className="cursor-help flex items-center justify-center">
+                        {movementSpeedData.icons}
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="bg-black text-white text-xs px-2 py-1 border-none">
+                      {movementSpeedData.tooltip}
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+            </AspectRatio>
           </div>
           
           {/* Range */}
-          <div className={cn("flex-1 h-12 sm:h-14 flex items-center justify-center", rangeClass)}>
-            <div className="text-center font-semibold text-xs sm:text-sm">
-              {isMobile ? getAbbreviation(guess.range) : guess.range.substring(0, 3)}
-            </div>
+          <div className={cn("flex-1 relative", rangeClass)}>
+            <AspectRatio ratio={1} className="w-full">
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="text-center font-semibold text-xs sm:text-sm">
+                  {isMobile ? getAbbreviation(guess.range) : guess.range.substring(0, 5)}
+                </div>
+              </div>
+            </AspectRatio>
           </div>
           
           {/* Reload */}
-          <div className={cn("flex-1 h-12 sm:h-14 flex items-center justify-center", reloadClass)}>
-            <div className="text-center font-semibold text-xs sm:text-sm">
-              {isMobile ? getAbbreviation(guess.reload) : guess.reload.substring(0, 3)}
-            </div>
+          <div className={cn("flex-1 relative", reloadClass)}>
+            <AspectRatio ratio={1} className="w-full">
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="text-center font-semibold text-xs sm:text-sm">
+                  {isMobile ? getAbbreviation(guess.reload) : guess.reload.substring(0, 5)}
+                </div>
+              </div>
+            </AspectRatio>
           </div>
           
           {/* Year */}
-          <div className={cn("flex-1 h-12 sm:h-14 flex items-center justify-center", yearResult.color, "rounded-r-lg")}>
-            <div className="text-center font-semibold text-xs sm:text-sm flex flex-col items-center">
-              <span>{guess.releaseYear || "?"}</span>
-              {yearResult.icon && <div className="mt-0.5">{yearResult.icon}</div>}
-            </div>
+          <div className={cn("flex-1 relative", yearResult.color, "rounded-r-lg")}>
+            <AspectRatio ratio={1} className="w-full">
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="text-center font-semibold text-xs sm:text-sm flex flex-col items-center">
+                  <span>{guess.releaseYear || "?"}</span>
+                  {yearResult.icon && <div className="mt-0.5">{yearResult.icon}</div>}
+                </div>
+              </div>
+            </AspectRatio>
           </div>
         </div>
       </div>
