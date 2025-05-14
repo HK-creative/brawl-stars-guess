@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect } from 'react';
 import { Brawler } from '@/data/brawlers';
-import { ArrowUp, ArrowDown, Snail, User, PersonStanding } from 'lucide-react';
+import { ArrowUp, ArrowDown, Speedometer, Snail, User, PersonStanding } from 'lucide-react';
 import { getPortrait, DEFAULT_PORTRAIT } from '@/lib/image-helpers';
 import Image from '@/components/ui/image';
 import { cn } from '@/lib/utils';
@@ -62,38 +61,53 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer 
       case 'Very Fast':
         return {
           icons: (
-            <div className="flex">
-              <PersonStanding className="w-4 h-4 transform -scale-x-100" />
-              <PersonStanding className="w-4 h-4 ml-0.5 transform -scale-x-100" />
+            <div className="flex items-center justify-center relative">
+              <Speedometer className="w-5 h-5 text-red-500" strokeWidth={3} />
+              <div className="absolute text-[8px] font-bold text-white">5</div>
             </div>
           ),
           tooltip: "Very Fast",
         };
       case 'Fast':
         return {
-          icons: <PersonStanding className="w-5 h-5 transform -scale-x-100" />,
-          tooltip: "Fast",
-        };
-      case 'Very Slow':
-        return {
           icons: (
-            <div className="flex">
-              <Snail className="w-4 h-4" />
-              <Snail className="w-4 h-4 ml-0.5" />
+            <div className="flex items-center justify-center relative">
+              <Speedometer className="w-5 h-5 text-orange-400" strokeWidth={2.5} />
+              <div className="absolute text-[8px] font-bold text-white">4</div>
             </div>
           ),
-          tooltip: "Very Slow",
+          tooltip: "Fast",
+        };
+      case 'Normal':
+        return {
+          icons: (
+            <div className="flex items-center justify-center relative">
+              <Speedometer className="w-5 h-5 text-yellow-300" strokeWidth={2} />
+              <div className="absolute text-[8px] font-bold text-white">3</div>
+            </div>
+          ),
+          tooltip: "Normal",
         };
       case 'Slow':
         return {
-          icons: <Snail className="w-5 h-5" />,
+          icons: (
+            <div className="flex items-center justify-center relative">
+              <Speedometer className="w-5 h-5 text-blue-400" strokeWidth={2} />
+              <div className="absolute text-[8px] font-bold text-white">2</div>
+            </div>
+          ),
           tooltip: "Slow",
         };
-      case 'Normal':
+      case 'Very Slow':
       default:
         return {
-          icons: <User className="w-5 h-5" />,
-          tooltip: "Normal",
+          icons: (
+            <div className="flex items-center justify-center relative">
+              <Speedometer className="w-5 h-5 text-blue-600" strokeWidth={1.5} />
+              <div className="absolute text-[8px] font-bold text-white">1</div>
+            </div>
+          ),
+          tooltip: "Very Slow",
         };
     }
   };
