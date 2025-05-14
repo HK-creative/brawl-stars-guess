@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { toast } from '@/hooks/use-toast';
 import ModeDescription from '@/components/ModeDescription';
@@ -148,125 +147,109 @@ const ClassicMode = () => {
   const portraitPath = getPortrait(correctBrawlerName);
 
   return (
-    <div className="max-w-2xl mx-auto px-4 pb-16">
+    <div className="max-h-screen overflow-hidden px-2 pb-2">
+      {/* Compact header */}
       <ModeDescription 
         title={t('mode.classic')} 
         description={t('mode.classic.description')}
-        className="mb-4"
+        className="mb-2 py-2"
       />
       
       {!isBackendConnected && (
-        <div className="mb-4 p-2 bg-amber-800/50 border border-amber-600 rounded-md text-white text-sm">
-          <p>⚠️ Using fallback data: Could not connect to the challenge database.</p>
+        <div className="mb-2 p-1 bg-amber-800/50 border border-amber-600 rounded-md text-white text-xs">
+          <p>⚠️ Using fallback data: Connection issue</p>
         </div>
       )}
       
-      {isGameOver ? (
-        <div className="mb-6 animate-fade-in">
-          <Card className="brawl-card overflow-hidden">
-            <div className="flex flex-col md:flex-row">
-              {/* Large image section */}
-              <div className="w-full md:w-1/2 h-64 md:h-auto bg-gradient-to-br from-brawl-blue/20 to-brawl-dark overflow-hidden">
-                <Image
-                  src={portraitPath}
-                  alt={correctBrawlerName}
-                  fallbackSrc={DEFAULT_PORTRAIT}
-                  imageType="portrait"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              
-              {/* Content section */}
-              <div className="p-6 flex flex-col justify-center w-full md:w-1/2">
-                <div className="text-center md:text-left">
-                  <div className="inline-block px-3 py-1 mb-4 rounded-full bg-brawl-green/20 text-brawl-green text-sm font-medium">
+      <div className="h-[calc(100vh-180px)] flex flex-col">
+        {/* Game area */}
+        <div className="flex-1 flex flex-col justify-between">
+          {isGameOver ? (
+            <Card className="brawl-card overflow-hidden mb-2">
+              <div className="flex items-center p-3">
+                {/* Victory display */}
+                <div className="w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden mr-3">
+                  <Image
+                    src={portraitPath}
+                    alt={correctBrawlerName}
+                    fallbackSrc={DEFAULT_PORTRAIT}
+                    imageType="portrait"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                
+                <div className="flex-1">
+                  <div className="inline-block px-2 py-0.5 mb-1 rounded-full bg-brawl-green/20 text-brawl-green text-xs font-medium">
                     Victory!
                   </div>
-                  <h3 className="text-2xl font-bold text-white mb-2">{correctBrawlerName}</h3>
-                  <p className="text-white/80 mb-4">
-                    You found the correct brawler in {guessCount} {guessCount === 1 ? 'guess' : 'guesses'}!
+                  <h3 className="text-lg font-bold text-white">{correctBrawlerName}</h3>
+                  <p className="text-white/80 text-sm">
+                    Found in {guessCount} {guessCount === 1 ? 'guess' : 'guesses'}!
                   </p>
-                  
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    <div className="px-3 py-1 bg-white/10 rounded-full text-xs text-white/80 flex items-center">
-                      <span className="mr-1">🏆</span> {correctBrawler.rarity}
-                    </div>
-                    <div className="px-3 py-1 bg-white/10 rounded-full text-xs text-white/80 flex items-center">
-                      <span className="mr-1">👤</span> {correctBrawler.class}
-                    </div>
-                    <div className="px-3 py-1 bg-white/10 rounded-full text-xs text-white/80 flex items-center">
-                      <span className="mr-1">🏃</span> {correctBrawler.movement}
-                    </div>
-                  </div>
-                  
-                  <Button
-                    onClick={handleShare}
-                    className="w-full bg-brawl-blue hover:bg-brawl-blue/80 text-white flex items-center justify-center gap-2"
-                  >
-                    <Share2 className="w-4 h-4" />
-                    Share Result
-                  </Button>
-                  
-                  <div className="flex items-center justify-center mt-4 text-sm text-white/60 gap-1">
-                    <Clock className="w-4 h-4" />
-                    <span>Next: {timeUntilNext.hours}h {timeUntilNext.minutes}m</span>
-                  </div>
+                </div>
+                
+                <Button
+                  onClick={handleShare}
+                  className="ml-2 bg-brawl-blue hover:bg-brawl-blue/80 h-10 w-10 p-0"
+                  size="sm"
+                >
+                  <Share2 className="w-4 h-4" />
+                </Button>
+              </div>
+            </Card>
+          ) : (
+            <Card className="brawl-card p-2 mb-2">
+              <form onSubmit={handleSubmit} className="flex flex-col gap-2">
+                <BrawlerAutocomplete
+                  brawlers={brawlers}
+                  value={inputValue}
+                  onChange={setInputValue}
+                  onSelect={handleSelectBrawler}
+                  disabled={isGameOver}
+                />
+                <Button 
+                  type="submit" 
+                  className="w-full bg-brawl-yellow hover:bg-brawl-yellow/80 text-black font-semibold py-2 h-10"
+                  disabled={isGameOver || !selectedBrawler}
+                >
+                  {t('submit.guess')}
+                </Button>
+              </form>
+            </Card>
+          )}
+          
+          {/* Guesses section */}
+          <div className="flex-1 flex flex-col">
+            <div className="flex justify-between items-center mb-1 px-1">
+              <div className="flex items-center gap-2">
+                <h3 className="text-white text-sm font-medium">
+                  Guesses: {guessCount}
+                </h3>
+                <div className="text-xs flex items-center text-white/60 gap-1">
+                  <Clock className="w-3 h-3" />
+                  <span>{timeUntilNext.hours}h {timeUntilNext.minutes}m</span>
                 </div>
               </div>
+              <div className="text-xs text-white/60 bg-white/10 px-2 py-0.5 rounded-full">
+                {guessCount}/6
+              </div>
             </div>
-          </Card>
-        </div>
-      ) : (
-        <Card className="brawl-card p-5 mb-6">
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-            <BrawlerAutocomplete
-              brawlers={brawlers}
-              value={inputValue}
-              onChange={setInputValue}
-              onSelect={handleSelectBrawler}
-              disabled={isGameOver}
-            />
-            <Button 
-              type="submit" 
-              className="w-full bg-brawl-yellow hover:bg-brawl-yellow/80 text-black font-semibold py-6"
-              disabled={isGameOver || !selectedBrawler}
-            >
-              {t('submit.guess')}
-            </Button>
             
-            <div className="flex items-center justify-center gap-1 text-sm text-white/60 mt-1">
-              <Clock className="w-4 h-4" />
-              <span>Next: {timeUntilNext.hours}h {timeUntilNext.minutes}m</span>
-            </div>
-          </form>
-        </Card>
-      )}
-      
-      {guesses.length > 0 && (
-        <div>
-          <div className="flex justify-between items-center mb-3 px-1">
-            <h3 className="text-white text-lg font-semibold">
-              Guesses: {guessCount}
-            </h3>
-            <div className="text-xs text-white/60 bg-white/10 px-2 py-1 rounded-full">
-              {guessCount}/6
-            </div>
+            {/* Guesses display */}
+            <Card className="brawl-card p-2 overflow-auto flex-1 max-h-[calc(100vh-320px)]">
+              <div className="space-y-1">
+                {guesses.map((guess, index) => (
+                  <BrawlerGuessRow 
+                    key={index} 
+                    guess={guess} 
+                    correctAnswer={correctBrawler} 
+                  />
+                ))}
+              </div>
+            </Card>
           </div>
-          
-          {/* Guesses display - a card of its own */}
-          <Card className="brawl-card p-3 mb-4 overflow-hidden">
-            <div className="space-y-2">
-              {guesses.map((guess, index) => (
-                <BrawlerGuessRow 
-                  key={index} 
-                  guess={guess} 
-                  correctAnswer={correctBrawler} 
-                />
-              ))}
-            </div>
-          </Card>
         </div>
-      )}
+      </div>
       
       {/* Share modal */}
       <ShareResultModal
