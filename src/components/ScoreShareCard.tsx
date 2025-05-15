@@ -1,4 +1,3 @@
-
 import React, { useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Share, Download, Copy, Check } from 'lucide-react';
@@ -8,7 +7,7 @@ import { getPortrait, DEFAULT_PORTRAIT } from '@/lib/image-helpers';
 import Image from '@/components/ui/image';
 
 export interface ScoreShareCardProps {
-  mode: 'classic' | 'audio' | 'gadget' | 'starpower' | 'voice';
+  mode: ShareResultModalMode; // Use the global type definition
   success: boolean;
   attempts: number;
   maxAttempts: number;
@@ -23,6 +22,7 @@ const modeConfig = {
   gadget: { icon: '🧩', color: 'bg-brawl-yellow' },
   starpower: { icon: '⭐', color: 'bg-brawl-green' },
   voice: { icon: '💬', color: 'bg-brawl-red' },
+  endless: { icon: '♾️', color: 'bg-brawl-blue' }, // Added endless mode config
 };
 
 // Mode names for display
@@ -32,6 +32,7 @@ const modeNames = {
   gadget: 'Gadget Mode',
   starpower: 'Star Power Mode',
   voice: 'Voice Mode',
+  endless: 'Endless Mode', // Added endless mode name
 };
 
 const ScoreShareCard = ({
