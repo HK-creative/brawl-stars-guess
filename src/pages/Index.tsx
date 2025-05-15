@@ -20,11 +20,9 @@ const Index = () => {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
         <GameModeCard 
-          title={t('mode.classic')} 
+          mode="classic"
           description={t('mode.classic.description')}
           icon={<Clock className="h-6 w-6" />}
-          path="/classic"
-          enabled={true}
         />
         
         <GameModeCard 
@@ -32,40 +30,33 @@ const Index = () => {
           description="Play as many rounds as you want with random brawlers."
           icon={<Infinity className="h-6 w-6" />}
           path="/endless"
-          enabled={true}
         />
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <GameModeCard 
-          title={t('mode.gadget')} 
+          mode="gadget"
           description={t('mode.gadget.description')}
           icon={<Activity className="h-6 w-6" />}
-          path="/gadget"
-          enabled={true}
         />
         
         <GameModeCard 
-          title={t('mode.starpower')} 
+          mode="starpower"
           description={t('mode.starpower.description')}
           icon={<Book className="h-6 w-6" />}
-          path="/starpower"
-          enabled={true}
         />
         
         <GameModeCard 
-          title={t('mode.voice')} 
+          mode="voice"
           description={t('mode.voice.description')}
           icon={<Headphones className="h-6 w-6" />}
-          path="/voice"
           comingSoon={true}
         />
         
         <GameModeCard 
-          title={t('mode.audio')} 
+          mode="audio"
           description={t('mode.audio.description')}
           icon={<Music className="h-6 w-6" />}
-          path="/audio"
           comingSoon={true}
         />
       </div>

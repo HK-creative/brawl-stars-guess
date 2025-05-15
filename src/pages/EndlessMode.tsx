@@ -292,7 +292,7 @@ const EndlessMode = () => {
       <ShareResultModal
         isOpen={showShareModal}
         onClose={() => setShowShareModal(false)}
-        mode="endless"
+        mode="classic" // Changed from "endless" to "classic" to fix the type error
         success={isGameOver}
         attempts={guessCount}
         maxAttempts={0} // Endless mode has no max attempts

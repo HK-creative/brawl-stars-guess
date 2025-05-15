@@ -3,18 +3,34 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { t } from '@/lib/i18n';
 import { Card } from '@/components/ui/card';
-import { HelpCircle, Music, Star, Zap } from 'lucide-react';
 
 interface GameModeCardProps {
-  mode: string;
+  mode?: string;
+  title?: string;
   description: string;
   icon: React.ReactNode;
+  path?: string;
   comingSoon?: boolean;
+  enabled?: boolean;
 }
 
-const GameModeCard: React.FC<GameModeCardProps> = ({ mode, description, icon, comingSoon = false }) => {
-  const title = t(`mode.${mode}`);
-  const path = `/${mode}`;
+const GameModeCard: React.FC<GameModeCardProps> = ({ 
+  mode, 
+  title, 
+  description, 
+  icon, 
+  path, 
+  comingSoon = false,
+  enabled = true
+}) => {
+  // Use mode to look up title via i18n, or use provided title directly
+  const displayTitle = title || (mode ? t(`mode.${mode}`) : '');
+  
+  // Use mode to construct path, or use provided path
+  const linkPath = path || (mode ? `/${mode}` : '#');
+  
+  // Card is not clickable if it's coming soon or not enabled
+  const isClickable = !comingSoon && enabled;
 
   return (
     <div className="relative mb-4 w-full animate-fade-in">
@@ -25,13 +41,13 @@ const GameModeCard: React.FC<GameModeCardProps> = ({ mode, description, icon, co
           </div>
         </div>
         <Link 
-          to={comingSoon ? "#" : path} 
+          to={isClickable ? linkPath : "#"} 
           className="block w-full"
         >
           <Card className="w-full cursor-pointer overflow-hidden border-transparent bg-brawl-blue/20 p-0 transition-all hover:bg-brawl-blue/30">
             <div className="flex items-center px-6 py-4 text-white">
               <div>
-                <h3 className="text-xl font-bold text-brawl-yellow">{title}</h3>
+                <h3 className="text-xl font-bold text-brawl-yellow">{displayTitle}</h3>
                 <p className="text-sm text-white/80">{description}</p>
               </div>
             </div>
