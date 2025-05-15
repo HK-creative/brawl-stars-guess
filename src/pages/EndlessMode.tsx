@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { toast } from '@/components/ui/use-toast';
 import ModeDescription from '@/components/ModeDescription';
@@ -292,7 +291,7 @@ const EndlessMode = () => {
       <ShareResultModal
         isOpen={showShareModal}
         onClose={() => setShowShareModal(false)}
-        mode="classic" // Changed from "endless" to "classic" to fix the type error
+        mode="endless"
         success={isGameOver}
         attempts={guessCount}
         maxAttempts={0} // Endless mode has no max attempts
