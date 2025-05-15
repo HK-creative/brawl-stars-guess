@@ -4,7 +4,6 @@ import { Brawler } from '@/data/brawlers';
 import { getPortrait, DEFAULT_PORTRAIT } from '@/lib/image-helpers';
 import Image from '@/components/ui/image';
 import { cn } from '@/lib/utils';
-import { useIsMobile } from '@/hooks/use-mobile';
 import {
   Tooltip,
   TooltipContent,
@@ -17,13 +16,15 @@ interface BrawlerGuessRowProps {
   correctAnswer: Brawler;
   isMobile?: boolean;
   gridWidthClass?: string;
+  gridTemplateClass?: string;
 }
 
 const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ 
   guess, 
   correctAnswer,
   isMobile = false,
-  gridWidthClass = "w-[90%] mx-auto"
+  gridWidthClass = "w-[85%] mx-auto",
+  gridTemplateClass = "grid-cols-6"
 }) => {
   const [imageKey, setImageKey] = useState<string>(`${guess.name}-${Date.now()}`);
   const [isAnimating, setIsAnimating] = useState(true);
@@ -195,13 +196,12 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({
   
   return (
     <div className={cn(
-      "flex flex-row justify-center",
+      "grid",
+      gridTemplateClass,
       rowSpacingClass,
       isAnimating && "animate-fade-in",
       gridWidthClass // Use the same width as the headers
     )}>
-      {/* All cards with fixed same size */}
-      
       {/* Brawler portrait card */}
       <div className={cn(
         "aspect-square rounded-lg overflow-hidden bg-card",

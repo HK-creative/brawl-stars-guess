@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { toast } from '@/components/ui/use-toast';
 import ModeDescription from '@/components/ModeDescription';
@@ -152,7 +153,12 @@ const ClassicMode = () => {
   // Define column header sizing based on device
   const headerSizeClass = isMobile ? "h-10" : "h-16"; // Taller headers on desktop
   const headerSpacingClass = isMobile ? "gap-1 mb-1" : "gap-3 mb-3"; // Increased spacing on desktop
+  
+  // Define consistent grid width for both headers and guess rows
   const gridWidthClass = isMobile ? "w-full" : "w-[85%] mx-auto"; // 85% width on desktop/tablet
+  
+  // Create a grid template to ensure perfect column alignment
+  const gridTemplateClass = "grid-cols-6"; // Six equal columns
 
   // Define attribute labels with adaptive sizing
   const attributeLabels = [
@@ -255,11 +261,12 @@ const ClassicMode = () => {
             
             {/* Attribute labels with glass effect and adaptive sizing */}
             <div className={cn(
-              "grid grid-cols-6",
+              "grid",
+              gridTemplateClass,
               headerSpacingClass,
               gridWidthClass
             )}>
-              {attributeLabels.map((label) => {
+              {attributeLabels.map((label, index) => {
                 return (
                   <div key={label.name} className={cn(
                     "relative overflow-hidden",
@@ -295,6 +302,7 @@ const ClassicMode = () => {
                     correctAnswer={correctBrawler} 
                     isMobile={isMobile}
                     gridWidthClass={gridWidthClass}
+                    gridTemplateClass={gridTemplateClass}
                   />
                 ))}
               </div>
