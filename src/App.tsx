@@ -11,6 +11,7 @@ import { initLanguage } from "@/lib/i18n";
 // Pages
 import Index from "./pages/Index";
 import ClassicMode from "./pages/ClassicMode"; 
+import EndlessMode from "./pages/EndlessMode";
 import ScorePage from "./pages/ScorePage";
 import SettingsPage from "./pages/SettingsPage";
 import NotFound from "./pages/NotFound";
@@ -36,6 +37,7 @@ const App = () => {
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/classic" element={<ClassicMode />} />
+                <Route path="/endless" element={<EndlessMode />} />
                 <Route path="/score" element={<ScorePage />} />
                 <Route path="/settings" element={<SettingsPage />} />
                 <Route path="*" element={<NotFound />} />

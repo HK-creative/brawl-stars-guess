@@ -1,5 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
+import { brawlers, Brawler } from "@/data/brawlers";
 
 // Interface for daily challenge data structure
 export interface DailyChallenge {
@@ -98,6 +99,12 @@ export const fetchDailyChallenge = async (mode: string): Promise<any> => {
   }
 };
 
+// Get a random brawler for endless mode
+export const getRandomBrawler = (): Brawler => {
+  const randomIndex = Math.floor(Math.random() * brawlers.length);
+  return brawlers[randomIndex];
+};
+
 // Provide appropriate fallback data based on the mode
 const getFallbackChallengeData = (mode: string): any => {
   console.log(`Using fallback data for ${mode} mode`);
@@ -105,6 +112,9 @@ const getFallbackChallengeData = (mode: string): any => {
   switch (mode) {
     case 'classic':
       return "Spike"; // Fallback brawler name
+      
+    case 'endless':
+      return getRandomBrawler().name;
       
     case 'gadget':
       return {

@@ -1,3 +1,4 @@
+
 import brawlersData from './brawlers_full.json';
 
 export interface Brawler {
@@ -69,6 +70,12 @@ brawlers.forEach(brawler => {
     brawler.image = specificImagePaths[brawler.name];
   }
 });
+
+// Get a random brawler for challenges
+export const getRandomBrawler = (): Brawler => {
+  const randomIndex = Math.floor(Math.random() * brawlers.length);
+  return brawlers[randomIndex];
+};
 
 // Hardcoded correct answer for testing
 export const correctBrawler = brawlers.find(b => b.name === "Spike") || brawlers[0];

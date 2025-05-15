@@ -1,67 +1,73 @@
 
 import React from 'react';
-import { HelpCircle, Music, Star, Zap } from 'lucide-react';
-import { t } from '@/lib/i18n';
 import GameModeCard from '@/components/GameModeCard';
+import { t } from '@/lib/i18n';
+import { Activity, Book, Headphones, Clock, Music, Infinity } from 'lucide-react';
+import { Card } from '@/components/ui/card';
 
 const Index = () => {
-  // Define our game modes
-  const gameModes = [
-    {
-      mode: 'classic',
-      description: 'Get clues on every try',
-      icon: <HelpCircle size={32} />,
-      comingSoon: false,
-    },
-    {
-      mode: 'audio',
-      description: 'Guess with in-game sounds',
-      icon: <Music size={32} />,
-      comingSoon: false,
-    },
-    {
-      mode: 'starpower',
-      description: 'One star power, one brawler to find',
-      icon: <Star size={32} />,
-      comingSoon: false,
-    },
-    {
-      mode: 'gadget',
-      description: 'Guess from gadget description',
-      icon: <Zap size={32} />,
-      comingSoon: false,
-    },
-  ];
-
   return (
-    <div className="min-h-[calc(100vh-80px)] px-4 py-8 md:px-8">
-      <div className="mx-auto max-w-lg">
-        {/* Logo and title */}
-        <div className="mb-12 text-center">
-          <h1 
-            className="mb-3 text-5xl font-bold text-brawl-yellow"
-            style={{
-              textShadow: "0 2px 4px rgba(0,0,0,0.5)",
-              fontWeight: 800,
-            }}
-          >
-            Brawldle
-          </h1>
-          <p className="text-xl text-white">Guess Brawl Stars characters</p>
-        </div>
+    <div className="container mx-auto p-4 max-w-3xl">
+      <h1 className="text-3xl font-extrabold text-center mb-6 text-brawl-yellow drop-shadow-md">
+        {t('app.name')}
+      </h1>
+      
+      <Card className="brawl-card p-4 mb-6">
+        <p className="text-white text-center">
+          {t('app.description')}
+        </p>
+      </Card>
 
-        {/* Game modes */}
-        <div className="space-y-4">
-          {gameModes.map((mode) => (
-            <GameModeCard
-              key={mode.mode}
-              mode={mode.mode}
-              description={mode.description}
-              icon={mode.icon}
-              comingSoon={mode.comingSoon}
-            />
-          ))}
-        </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+        <GameModeCard 
+          title={t('mode.classic')} 
+          description={t('mode.classic.description')}
+          icon={<Clock className="h-6 w-6" />}
+          path="/classic"
+          enabled={true}
+        />
+        
+        <GameModeCard 
+          title="Endless Mode" 
+          description="Play as many rounds as you want with random brawlers."
+          icon={<Infinity className="h-6 w-6" />}
+          path="/endless"
+          enabled={true}
+        />
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <GameModeCard 
+          title={t('mode.gadget')} 
+          description={t('mode.gadget.description')}
+          icon={<Activity className="h-6 w-6" />}
+          path="/gadget"
+          enabled={true}
+        />
+        
+        <GameModeCard 
+          title={t('mode.starpower')} 
+          description={t('mode.starpower.description')}
+          icon={<Book className="h-6 w-6" />}
+          path="/starpower"
+          enabled={true}
+        />
+        
+        <GameModeCard 
+          title={t('mode.voice')} 
+          description={t('mode.voice.description')}
+          icon={<Headphones className="h-6 w-6" />}
+          path="/voice"
+          comingSoon={true}
+        />
+        
+        <GameModeCard 
+          title={t('mode.audio')} 
+          description={t('mode.audio.description')}
+          icon={<Music className="h-6 w-6" />}
+          path="/audio"
+          comingSoon={true}
+        />
       </div>
     </div>
   );
