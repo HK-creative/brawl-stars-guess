@@ -191,20 +191,16 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({
       isAnimating && "animate-fade-in",
       gridWidthClass // Use the same width as the headers
     )}>
-      {/* Each card is now a perfect square with full width/height */}
-      <div className="w-full aspect-square">
-        <div className={cn(
-          "rounded-lg overflow-hidden bg-card w-full h-full",
-        )}>
-          <Image
-            key={imageKey}
-            src={portraitPath}
-            alt={guess.name}
-            fallbackSrc={DEFAULT_PORTRAIT}
-            imageType="portrait"
-            className="h-[90%] w-[90%] object-cover mx-auto my-auto"
-          />
-        </div>
+      {/* Brawler portrait - removed extra div wrapper */}
+      <div className="w-full aspect-square bg-card rounded-lg flex items-center justify-center">
+        <Image
+          key={imageKey}
+          src={portraitPath}
+          alt={guess.name}
+          fallbackSrc={DEFAULT_PORTRAIT}
+          imageType="portrait"
+          className="w-full h-full object-cover"
+        />
       </div>
       
       {/* Rarity card */}
