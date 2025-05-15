@@ -28,6 +28,16 @@ const EndlessMode = () => {
   const [guessedBrawlers, setGuessedBrawlers] = useState<string[]>([]);
   const isMobile = useIsMobile();
 
+  // Define attribute labels with adaptive sizing - Added this missing definition
+  const attributeLabels = [
+    { name: "Brawler", fontSize: isMobile ? "text-base" : "text-2xl" },
+    { name: "Rarity", fontSize: isMobile ? "text-base" : "text-2xl" },
+    { name: "Class", fontSize: isMobile ? "text-base" : "text-2xl" },
+    { name: "Speed", fontSize: isMobile ? "text-base" : "text-2xl" },
+    { name: "Range", fontSize: isMobile ? "text-base" : "text-2xl" },
+    { name: "Wallbreak", fontSize: isMobile ? "text-xs" : "text-xl" }
+  ];
+
   // Load a random brawler for the endless challenge
   useEffect(() => {
     startNewChallenge();
