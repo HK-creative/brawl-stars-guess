@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { toast } from '@/components/ui/use-toast';
 import ModeDescription from '@/components/ModeDescription';
@@ -236,26 +235,25 @@ const ClassicMode = () => {
               </div>
             </div>
             
-            {/* Column labels for the guess cards */}
-            <div className="flex flex-row gap-1 mb-0.5 px-0.5 text-[10px] text-white/70">
-              <div className="aspect-square h-4 flex items-center justify-center">
-                <span>Brawler</span>
-              </div>
-              <div className="aspect-square h-4 flex items-center justify-center">
-                <span>Rarity</span>
-              </div>
-              <div className="aspect-square h-4 flex items-center justify-center">
-                <span>Class</span>
-              </div>
-              <div className="aspect-square h-4 flex items-center justify-center">
-                <span>Speed</span>
-              </div>
-              <div className="aspect-square h-4 flex items-center justify-center">
-                <span>Range</span>
-              </div>
-              <div className="aspect-square h-4 flex items-center justify-center">
-                <span>Reload</span>
-              </div>
+            {/* Modern attribute labels with hexagonal design */}
+            <div className="grid grid-cols-6 gap-1 mb-1">
+              {["Brawler", "Rarity", "Class", "Speed", "Range", "Reload"].map((label, index) => (
+                <div key={index} className="relative overflow-hidden">
+                  {/* Fancy background with gradient */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-brawl-blue to-brawl-purple opacity-80 rounded-md"></div>
+                  
+                  {/* Glass effect overlay */}
+                  <div className="absolute inset-0 bg-white/10 backdrop-blur-[1px]"></div>
+                  
+                  {/* Label text with shadow */}
+                  <div className="relative z-10 flex items-center justify-center h-5 w-full text-white text-[10px] font-bold tracking-wide">
+                    <span className="drop-shadow-[0_1px_1px_rgba(0,0,0,0.5)]">{label}</span>
+                  </div>
+                  
+                  {/* Bottom border for emphasis */}
+                  <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-white/70 to-transparent"></div>
+                </div>
+              ))}
             </div>
             
             {/* Guesses display */}
