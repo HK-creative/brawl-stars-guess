@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { toast } from '@/components/ui/use-toast';
 import ModeDescription from '@/components/ModeDescription';
@@ -24,6 +25,7 @@ const EndlessMode = () => {
   const [correctBrawler, setCorrectBrawler] = useState<Brawler | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showShareModal, setShowShareModal] = useState(false);
+  const [guessedBrawlers, setGuessedBrawlers] = useState<string[]>([]);
   const isMobile = useIsMobile();
 
   // Load a random brawler for the endless challenge
@@ -44,6 +46,7 @@ const EndlessMode = () => {
       setIsGameOver(false);
       setInputValue('');
       setSelectedBrawler(null);
+      setGuessedBrawlers([]);
     } catch (error) {
       console.error("Error starting new challenge:", error);
       toast({
@@ -56,8 +59,10 @@ const EndlessMode = () => {
     }
   };
   
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = (e?: React.FormEvent) => {
+    if (e) {
+      e.preventDefault();
+    }
     
     if (!selectedBrawler || !correctBrawler) {
       toast({
@@ -68,8 +73,19 @@ const EndlessMode = () => {
       return;
     }
     
-    // Add the guess to the list
+    // Prevent guessing the same brawler twice
+    if (guessedBrawlers.includes(selectedBrawler.name)) {
+      toast({
+        title: "Already Guessed",
+        description: `You've already guessed ${selectedBrawler.name}!`,
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Add the guess to the list and track guessed brawlers
     setGuesses(prev => [selectedBrawler, ...prev]);
+    setGuessedBrawlers(prev => [...prev, selectedBrawler.name]);
     setGuessCount(prev => prev + 1);
     
     // Check if the guess is correct
@@ -116,26 +132,6 @@ const EndlessMode = () => {
 
   const portraitPath = getPortrait(correctBrawler.name);
   
-  // Define column header sizing based on device
-  const headerSizeClass = isMobile ? "h-10" : "h-16"; // Taller headers on desktop
-  const headerSpacingClass = isMobile ? "gap-1 mb-1" : "gap-3 mb-3"; // Increased spacing on desktop
-  
-  // Define consistent grid width for both headers and guess rows
-  const gridWidthClass = isMobile ? "w-full" : "w-[85%] mx-auto"; // 85% width on desktop/tablet
-  
-  // Create a grid template to ensure perfect column alignment
-  const gridTemplateClass = "grid-cols-6"; // Six equal columns
-
-  // Define attribute labels with adaptive sizing
-  const attributeLabels = [
-    { name: "Brawler", fontSize: isMobile ? "text-base" : "text-2xl" },
-    { name: "Rarity", fontSize: isMobile ? "text-base" : "text-2xl" },
-    { name: "Class", fontSize: isMobile ? "text-base" : "text-2xl" },
-    { name: "Speed", fontSize: isMobile ? "text-base" : "text-2xl" },
-    { name: "Range", fontSize: isMobile ? "text-base" : "text-2xl" },
-    { name: "Wallbreak", fontSize: isMobile ? "text-xs" : "text-xl" }
-  ];
-
   return (
     <div className="max-h-[calc(100vh-70px)] overflow-hidden px-1">
       {/* Ultra-compact header */}
@@ -198,7 +194,9 @@ const EndlessMode = () => {
                   value={inputValue}
                   onChange={setInputValue}
                   onSelect={handleSelectBrawler}
+                  onSubmit={handleSubmit}
                   disabled={isGameOver}
+                  disabledBrawlers={guessedBrawlers}
                 />
                 <Button 
                   type="submit" 
@@ -211,35 +209,42 @@ const EndlessMode = () => {
             </Card>
           )}
           
-          {/* Guesses section */}
+          {/* Guesses section with redesigned header */}
           <div className="flex-1 flex flex-col min-h-0">
-            <div className="flex justify-between items-center mb-0.5 px-0.5">
-              <div className="flex items-center gap-1.5">
-                <div className="text-white text-xs font-medium">
-                  Guesses: {guessCount}
+            {/* New redesigned header */}
+            <div className="bg-gradient-to-r from-purple-800/80 via-purple-900/90 to-purple-800/80 rounded-lg p-3 mb-3">
+              <div className="flex justify-between items-center">
+                <div className="flex flex-col">
+                  <h3 className="text-xl font-bold text-white leading-tight">
+                    Endless Challenge
+                  </h3>
+                  <div className="flex items-center space-x-2 mt-1">
+                    <div className="bg-purple-700/50 text-white/90 text-xs px-2 py-1 rounded-full">
+                      {guessCount} {guessCount === 1 ? 'attempt' : 'attempts'}
+                    </div>
+                    <Button
+                      onClick={startNewChallenge}
+                      size="sm" 
+                      variant="ghost" 
+                      className="h-7 px-2 bg-white/10 hover:bg-white/20 rounded-full text-xs text-white/90 flex items-center gap-1"
+                    >
+                      <RefreshCw className="w-3 h-3" />
+                      New Brawler
+                    </Button>
+                  </div>
                 </div>
-                
-                <Button
-                  onClick={startNewChallenge}
-                  className="bg-brawl-green/20 hover:bg-brawl-green/30 text-brawl-green h-6 py-0 px-2 text-xs"
-                  size="sm"
-                  disabled={isLoading}
-                >
-                  <RefreshCw className="w-3 h-3 mr-1" />
-                  New Challenge
-                </Button>
-              </div>
-              <div className="text-xs text-white/60 bg-white/10 px-1.5 py-0.5 rounded-full">
-                {guessCount}/∞
+                <div className="text-2xl font-bold text-white">
+                  ∞
+                </div>
               </div>
             </div>
             
             {/* Attribute labels with glass effect and perfect square aspect ratio */}
             <div className={cn(
               "grid",
-              gridTemplateClass,
-              headerSpacingClass,
-              gridWidthClass
+              "grid-cols-6",
+              isMobile ? "gap-1 mb-1" : "gap-3 mb-3",
+              isMobile ? "w-full" : "w-[85%] mx-auto"
             )}>
               {attributeLabels.map((label, index) => {
                 return (
@@ -277,8 +282,8 @@ const EndlessMode = () => {
                     guess={guess} 
                     correctAnswer={correctBrawler} 
                     isMobile={isMobile}
-                    gridWidthClass={gridWidthClass}
-                    gridTemplateClass={gridTemplateClass}
+                    gridWidthClass={isMobile ? "w-full" : "w-[85%] mx-auto"}
+                    gridTemplateClass="grid-cols-6"
                   />
                 ))}
               </div>
