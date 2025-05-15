@@ -156,15 +156,33 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer 
   // Get the portrait image path
   const portraitPath = getPortrait(guess.name);
   
+  // Define card size and spacing based on device
+  const cardSizeClass = isMobile 
+    ? "h-14" // Keep mobile size the same
+    : "h-20"; // Bigger cards for desktop/tablet
+    
+  const rowSpacingClass = isMobile
+    ? "gap-1 mb-1" // Keep mobile spacing the same
+    : "gap-3 mb-2"; // More spacing for desktop/tablet
+    
+  const cardFramingClass = isMobile
+    ? "" // No additional framing on mobile
+    : "border-2 border-white/10 shadow-md"; // Better framing for desktop/tablet
+  
   return (
     <div className={cn(
-      "flex flex-row gap-1 mb-1",
+      "flex flex-row",
+      rowSpacingClass,
       isAnimating && "animate-fade-in"
     )}>
       {/* All cards with fixed same size */}
       
       {/* Brawler portrait card */}
-      <div className="aspect-square h-14 rounded-lg overflow-hidden bg-card">
+      <div className={cn(
+        "aspect-square rounded-lg overflow-hidden bg-card",
+        cardSizeClass,
+        cardFramingClass
+      )}>
         <Image
           key={imageKey}
           src={portraitPath}
@@ -176,29 +194,54 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer 
       </div>
       
       {/* Rarity card */}
-      <div className={cn("aspect-square h-14 flex items-center justify-center rounded-lg", rarityClass)}>
-        <div className={cn("text-center font-bold flex items-center justify-center w-[95%] h-[95%]", rarityDisplay.className)}>
+      <div className={cn(
+        "aspect-square flex items-center justify-center rounded-lg",
+        cardSizeClass,
+        cardFramingClass,
+        rarityClass
+      )}>
+        <div className={cn(
+          "text-center font-bold flex items-center justify-center w-[95%] h-[95%]",
+          rarityDisplay.className,
+          !isMobile && "text-2xl" // Larger text for desktop
+        )}>
           {rarityDisplay.text}
         </div>
       </div>
       
       {/* Class card */}
-      <div className={cn("aspect-square h-14 flex items-center justify-center rounded-lg", classClass)}>
+      <div className={cn(
+        "aspect-square flex items-center justify-center rounded-lg",
+        cardSizeClass,
+        cardFramingClass,
+        classClass
+      )}>
         <div className="w-[95%] h-[95%] flex items-center justify-center">
           <img 
             src={getClassIcon(guess.class)}
             alt={guess.class}
-            className="w-[95%] h-[95%] object-contain"
+            className={cn(
+              "w-[95%] h-[95%] object-contain",
+              !isMobile && "scale-125" // Larger icon for desktop
+            )}
           />
         </div>
       </div>
       
       {/* Movement card */}
-      <div className={cn("aspect-square h-14 flex items-center justify-center rounded-lg", movementClass)}>
+      <div className={cn(
+        "aspect-square flex items-center justify-center rounded-lg",
+        cardSizeClass,
+        cardFramingClass,
+        movementClass
+      )}>
         <TooltipProvider>
           <Tooltip delayDuration={300}>
             <TooltipTrigger asChild>
-              <div className="cursor-help flex items-center justify-center w-[95%] h-[95%]">
+              <div className={cn(
+                "cursor-help flex items-center justify-center w-[95%] h-[95%]",
+                !isMobile && "scale-125" // Larger icon for desktop
+              )}>
                 {movementSpeedData.icons}
               </div>
             </TooltipTrigger>
@@ -210,15 +253,33 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer 
       </div>
       
       {/* Range card */}
-      <div className={cn("aspect-square h-14 flex items-center justify-center rounded-lg", rangeClass)}>
-        <div className={cn("text-center font-bold flex items-center justify-center w-[95%] h-[95%]", rangeDisplay.className)}>
+      <div className={cn(
+        "aspect-square flex items-center justify-center rounded-lg",
+        cardSizeClass,
+        cardFramingClass,
+        rangeClass
+      )}>
+        <div className={cn(
+          "text-center font-bold flex items-center justify-center w-[95%] h-[95%]",
+          rangeDisplay.className,
+          !isMobile && "text-2xl" // Larger text for desktop
+        )}>
           {rangeDisplay.text}
         </div>
       </div>
       
-      {/* Wallbreak card (replacing Reload) */}
-      <div className={cn("aspect-square h-14 flex items-center justify-center rounded-lg", wallbreakClass)}>
-        <div className={cn("text-center font-bold flex items-center justify-center w-[95%] h-[95%]", wallbreakDisplay.className)}>
+      {/* Wallbreak card */}
+      <div className={cn(
+        "aspect-square flex items-center justify-center rounded-lg",
+        cardSizeClass,
+        cardFramingClass,
+        wallbreakClass
+      )}>
+        <div className={cn(
+          "text-center font-bold flex items-center justify-center w-[95%] h-[95%]",
+          wallbreakDisplay.className,
+          !isMobile && "text-2xl" // Larger text for desktop
+        )}>
           {wallbreakDisplay.text}
         </div>
       </div>

@@ -13,6 +13,8 @@ import { getPortrait, DEFAULT_PORTRAIT } from '@/lib/image-helpers';
 import ShareResultModal from '@/components/ShareResultModal';
 import Image from '@/components/ui/image';
 import { Clock, Share2 } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { cn } from '@/lib/utils';
 
 const ClassicMode = () => {
   const [inputValue, setInputValue] = useState('');
@@ -25,6 +27,7 @@ const ClassicMode = () => {
   const [timeUntilNext, setTimeUntilNext] = useState({ hours: 0, minutes: 0 });
   const [isBackendConnected, setIsBackendConnected] = useState(true);
   const [showShareModal, setShowShareModal] = useState(false);
+  const isMobile = useIsMobile();
 
   // Fallback data in case Supabase fetch fails
   const fallbackBrawlerName = "Spike";
@@ -146,6 +149,10 @@ const ClassicMode = () => {
 
   const correctBrawler = getCorrectBrawler();
   const portraitPath = getPortrait(correctBrawlerName);
+  
+  // Define column header sizing based on device
+  const headerSizeClass = isMobile ? "h-10" : "h-14"; // Taller headers on desktop
+  const headerSpacingClass = isMobile ? "gap-1 mb-1" : "gap-3 mb-3"; // Increased spacing on desktop
 
   return (
     <div className="max-h-[calc(100vh-70px)] overflow-hidden px-1">
@@ -236,26 +243,35 @@ const ClassicMode = () => {
               </div>
             </div>
             
-            {/* Attribute labels with glass effect, adaptive sizing */}
-            <div className="grid grid-cols-6 gap-1 mb-1">
+            {/* Attribute labels with glass effect and adaptive sizing */}
+            <div className={cn(
+              "grid grid-cols-6",
+              headerSpacingClass
+            )}>
               {["Brawler", "Rarity", "Class", "Speed", "Range", "Wallbreak"].map((label) => {
-                // Determine font size based on label length
-                let fontClass = "text-base";
+                // Determine font size based on label length and screen size
+                let fontClass = isMobile ? "text-base" : "text-xl";
                 if (label.length >= 8) {
-                  fontClass = "text-sm";
+                  fontClass = isMobile ? "text-sm" : "text-lg";
                 }
                 
                 return (
-                  <div key={label} className="relative h-10 overflow-hidden">
+                  <div key={label} className={cn(
+                    "relative overflow-hidden",
+                    headerSizeClass
+                  )}>
                     {/* Glass effect with blue accent at bottom */}
-                    <div className="absolute inset-0 bg-brawl-blue/20 backdrop-blur-sm border-b-2 border-brawl-blue rounded-t-lg"></div>
+                    <div className="absolute inset-0 bg-black/10 backdrop-blur-sm border-b-2 border-brawl-blue rounded-t-lg"></div>
                     
                     {/* Yellow accent line */}
                     <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-brawl-yellow"></div>
                     
                     {/* Text with adaptive sizing */}
                     <div className="relative z-10 h-full w-full flex items-center justify-center">
-                      <span className={`${fontClass} font-extrabold text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]`}>
+                      <span className={cn(
+                        fontClass,
+                        "font-extrabold text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]"
+                      )}>
                         {label}
                       </span>
                     </div>
@@ -264,7 +280,7 @@ const ClassicMode = () => {
               })}
             </div>
             
-            {/* Guesses display - removed the card background as requested */}
+            {/* Guesses display */}
             <div className="overflow-auto flex-1 min-h-0 max-h-[calc(100vh-250px)] p-1">
               <div className="space-y-1">
                 {guesses.map((guess, index) => (
