@@ -10,6 +10,7 @@ interface BrawlerAutocompleteProps {
   value: string;
   onChange: (value: string) => void;
   onSelect: (brawler: Brawler) => void;
+  onSubmit?: () => void; // Added onSubmit prop
   disabled?: boolean;
 }
 
@@ -18,11 +19,13 @@ const BrawlerAutocomplete: React.FC<BrawlerAutocompleteProps> = ({
   value,
   onChange,
   onSelect,
+  onSubmit,
   disabled = false
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [filteredBrawlers, setFilteredBrawlers] = useState<Brawler[]>([]);
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   
   // Filter brawlers based on input
   useEffect(() => {
@@ -62,13 +65,42 @@ const BrawlerAutocomplete: React.FC<BrawlerAutocompleteProps> = ({
     setIsOpen(false);
   };
   
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    // Submit on Enter key if we have a valid selection in the dropdown or exact match
+    if (e.key === 'Enter' && onSubmit && value.trim() !== '') {
+      e.preventDefault();
+      
+      // Check if there's an exact match in filtered brawlers
+      const exactMatch = filteredBrawlers.find(brawler => 
+        brawler.name.toLowerCase() === value.toLowerCase()
+      );
+      
+      // If there's an exact match, select it first
+      if (exactMatch) {
+        handleSelectBrawler(exactMatch);
+      }
+      
+      // If we have any match at all, select the first one
+      else if (filteredBrawlers.length > 0) {
+        handleSelectBrawler(filteredBrawlers[0]);
+      }
+      
+      // Submit after a very short delay to ensure brawler selection is processed
+      setTimeout(() => {
+        onSubmit();
+      }, 10);
+    }
+  };
+  
   return (
     <div className="relative w-full" ref={wrapperRef}>
       <Input
+        ref={inputRef}
         type="text"
         placeholder="Type brawler name..."
         value={value}
         onChange={handleInputChange}
+        onKeyDown={handleKeyDown}
         onFocus={() => setIsOpen(true)}
         className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
         disabled={disabled}

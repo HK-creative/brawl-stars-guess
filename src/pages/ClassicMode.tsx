@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { toast } from '@/components/ui/use-toast';
 import ModeDescription from '@/components/ModeDescription';
@@ -88,8 +89,10 @@ const ClassicMode = () => {
     return () => clearInterval(intervalId);
   }, []);
   
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = (e?: React.FormEvent) => {
+    if (e) {
+      e.preventDefault();
+    }
     
     if (!selectedBrawler) {
       toast({
@@ -228,6 +231,7 @@ const ClassicMode = () => {
                   value={inputValue}
                   onChange={setInputValue}
                   onSelect={handleSelectBrawler}
+                  onSubmit={handleSubmit} // Pass submit handler
                   disabled={isGameOver}
                 />
                 <Button 
