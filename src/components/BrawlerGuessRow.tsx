@@ -58,7 +58,16 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer 
     switch (speed) {
       case 'Very Fast':
         return {
-          icons: <img src="/Rabbit_Fast.png" alt="Very Fast" className="w-full h-full object-contain" />,
+          icons: (
+            <div className="flex justify-center items-center w-full h-full">
+              <div className="w-1/2 h-full flex items-center justify-center">
+                <img src="/Rabbit_Fast.png" alt="Very Fast" className="w-full h-full object-contain" />
+              </div>
+              <div className="w-1/2 h-full flex items-center justify-center">
+                <img src="/Rabbit_Fast.png" alt="Very Fast" className="w-full h-full object-contain" />
+              </div>
+            </div>
+          ),
           tooltip: "Very Fast",
         };
       case 'Fast':
@@ -78,7 +87,16 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer 
         };
       case 'Very Slow':
         return {
-          icons: <img src="/Turtle_Slow.png" alt="Very Slow" className="w-full h-full object-contain" />,
+          icons: (
+            <div className="flex justify-center items-center w-full h-full">
+              <div className="w-1/2 h-full flex items-center justify-center">
+                <img src="/Turtle_Slow.png" alt="Very Slow" className="w-full h-full object-contain" />
+              </div>
+              <div className="w-1/2 h-full flex items-center justify-center">
+                <img src="/Turtle_Slow.png" alt="Very Slow" className="w-full h-full object-contain" />
+              </div>
+            </div>
+          ),
           tooltip: "Very Slow",
         };
       default:
@@ -171,9 +189,10 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer 
   
   return (
     <div className={cn(
-      "flex flex-row",
+      "flex flex-row justify-center",
       rowSpacingClass,
-      isAnimating && "animate-fade-in"
+      isAnimating && "animate-fade-in",
+      !isMobile && "w-[90%] mx-auto" // Makes row take up 90% of container width on desktop
     )}>
       {/* All cards with fixed same size */}
       
@@ -288,3 +307,4 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer 
 };
 
 export default BrawlerGuessRow;
+

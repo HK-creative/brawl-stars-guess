@@ -154,6 +154,16 @@ const ClassicMode = () => {
   const headerSizeClass = isMobile ? "h-10" : "h-14"; // Taller headers on desktop
   const headerSpacingClass = isMobile ? "gap-1 mb-1" : "gap-3 mb-3"; // Increased spacing on desktop
 
+  // Define attribute labels with adaptive sizing
+  const attributeLabels = [
+    { name: "Brawler", fontSize: isMobile ? "text-base" : "text-xl" },
+    { name: "Rarity", fontSize: isMobile ? "text-base" : "text-xl" },
+    { name: "Class", fontSize: isMobile ? "text-base" : "text-xl" },
+    { name: "Speed", fontSize: isMobile ? "text-base" : "text-xl" },
+    { name: "Range", fontSize: isMobile ? "text-base" : "text-xl" },
+    { name: "Wallbreak", fontSize: isMobile ? "text-xs" : "text-lg" }
+  ];
+
   return (
     <div className="max-h-[calc(100vh-70px)] overflow-hidden px-1">
       {/* Ultra-compact header */}
@@ -245,23 +255,17 @@ const ClassicMode = () => {
             
             {/* Attribute labels with glass effect and adaptive sizing */}
             <div className={cn(
-              "grid grid-cols-6",
+              "grid grid-cols-6 w-[90%] mx-auto",
               headerSpacingClass
             )}>
-              {["Brawler", "Rarity", "Class", "Speed", "Range", "Wallbreak"].map((label) => {
-                // Determine font size based on label length and screen size
-                let fontClass = isMobile ? "text-base" : "text-xl";
-                if (label.length >= 8) {
-                  fontClass = isMobile ? "text-sm" : "text-lg";
-                }
-                
+              {attributeLabels.map((label) => {
                 return (
-                  <div key={label} className={cn(
+                  <div key={label.name} className={cn(
                     "relative overflow-hidden",
                     headerSizeClass
                   )}>
-                    {/* Glass effect with blue accent at bottom */}
-                    <div className="absolute inset-0 bg-black/10 backdrop-blur-sm border-b-2 border-brawl-blue rounded-t-lg"></div>
+                    {/* Transparent glass effect */}
+                    <div className="absolute inset-0 backdrop-blur-sm border-b-2 border-brawl-blue rounded-t-lg"></div>
                     
                     {/* Yellow accent line */}
                     <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-brawl-yellow"></div>
@@ -269,10 +273,10 @@ const ClassicMode = () => {
                     {/* Text with adaptive sizing */}
                     <div className="relative z-10 h-full w-full flex items-center justify-center">
                       <span className={cn(
-                        fontClass,
+                        label.fontSize,
                         "font-extrabold text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]"
                       )}>
-                        {label}
+                        {label.name}
                       </span>
                     </div>
                   </div>
@@ -311,3 +315,4 @@ const ClassicMode = () => {
 };
 
 export default ClassicMode;
+
