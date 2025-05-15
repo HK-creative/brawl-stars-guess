@@ -14,7 +14,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       <RotatingBackground />
       <TopBar />
       <main className="flex-1 relative z-10 flex justify-center overflow-hidden">
-        <div className="w-full max-w-5xl px-2 py-2 overflow-hidden">
+        <div className="w-full max-w-5xl px-1 pt-1 pb-0 overflow-hidden">
           {children}
         </div>
       </main>

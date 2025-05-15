@@ -58,40 +58,32 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer 
     switch (speed) {
       case 'Very Fast':
         return {
-          icons: (
-            <div className="flex items-center justify-center">
-              <img src="/Rabbit_Fast.png" alt="Very Fast" className="w-full h-full max-w-[90%] max-h-[90%] object-contain" />
-            </div>
-          ),
+          icons: <img src="/Rabbit_Fast.png" alt="Very Fast" className="w-full h-full object-contain" />,
           tooltip: "Very Fast",
         };
       case 'Fast':
         return {
-          icons: <img src="/Rabbit_Fast.png" alt="Fast" className="w-full h-full max-w-[90%] max-h-[90%] object-contain" />,
+          icons: <img src="/Rabbit_Fast.png" alt="Fast" className="w-full h-full object-contain" />,
           tooltip: "Fast",
         };
       case 'Normal':
         return {
-          icons: <img src="/Walking_Normal.png" alt="Normal" className="w-full h-full max-w-[90%] max-h-[90%] object-contain" />,
+          icons: <img src="/Walking_Normal.png" alt="Normal" className="w-full h-full object-contain" />,
           tooltip: "Normal",
         };
       case 'Slow':
         return {
-          icons: <img src="/Turtle_Slow.png" alt="Slow" className="w-full h-full max-w-[90%] max-h-[90%] object-contain" />,
+          icons: <img src="/Turtle_Slow.png" alt="Slow" className="w-full h-full object-contain" />,
           tooltip: "Slow",
         };
       case 'Very Slow':
         return {
-          icons: (
-            <div className="flex items-center justify-center">
-              <img src="/Turtle_Slow.png" alt="Very Slow" className="w-full h-full max-w-[90%] max-h-[90%] object-contain" />
-            </div>
-          ),
+          icons: <img src="/Turtle_Slow.png" alt="Very Slow" className="w-full h-full object-contain" />,
           tooltip: "Very Slow",
         };
       default:
         return {
-          icons: <img src="/Walking_Normal.png" alt="Normal" className="w-full h-full max-w-[90%] max-h-[90%] object-contain" />,
+          icons: <img src="/Walking_Normal.png" alt="Normal" className="w-full h-full object-contain" />,
           tooltip: "Normal",
         };
     }
@@ -115,24 +107,29 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer 
     return 'bg-brawl-red text-white';
   };
 
-  // Helper function to get abbreviated text
-  const getAbbreviation = (text: string): string => {
+  // Helper function to get abbreviation and determine text size based on length
+  const getTextDisplay = (text: string): { text: string, className: string } => {
     // Special abbreviations based on Brawl Stars conventions
-    if (text === "Mythic") return "Myt";
-    if (text === "Super Rare") return "Sup";
-    if (text === "Legendary") return "Leg";
-    if (text === "Epic") return "Epi";
-    if (text === "Rare") return "Rar";
-    if (text === "Chromatic") return "Chr";
-    if (text === "Short") return "Shrt";
-    if (text === "Medium") return "Med";
-    if (text === "Long") return "Long";
-    if (text === "Very Long") return "V.Long";
-    if (text === "Normal") return "Nor";
-    if (text === "Very Fast") return "V.Fast";
+    if (text === "Mythic") return { text: "Myt", className: "text-lg" };
+    if (text === "Super Rare") return { text: "Sup", className: "text-lg" };
+    if (text === "Legendary") return { text: "Leg", className: "text-lg" };
+    if (text === "Epic") return { text: "Epi", className: "text-lg" };
+    if (text === "Rare") return { text: "Rar", className: "text-lg" };
+    if (text === "Chromatic") return { text: "Chr", className: "text-lg" };
+    if (text === "Short") return { text: "Short", className: "text-lg" };
+    if (text === "Medium") return { text: "Med", className: "text-lg" };
+    if (text === "Long") return { text: "Long", className: "text-lg" };
+    if (text === "Very Long") return { text: "V.Long", className: "text-base" };
+    if (text === "Normal") return { text: "Nor", className: "text-lg" };
+    if (text === "Very Fast") return { text: "V.Fast", className: "text-base" };
+    if (text === "Fast") return { text: "Fast", className: "text-lg" };
+    if (text === "Slow") return { text: "Slow", className: "text-lg" };
     
-    // Default abbreviation (first 3 characters)
-    return text.substring(0, 3);
+    // Dynamic sizing based on text length
+    if (text.length <= 3) return { text, className: "text-lg" };
+    if (text.length <= 5) return { text, className: "text-base" };
+    if (text.length <= 7) return { text, className: "text-sm" };
+    return { text: text.substring(0, 6), className: "text-sm" };
   };
 
   // Get comparison results for each attribute
@@ -145,15 +142,20 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer 
   // Get movement speed icons and tooltip text
   const movementSpeedData = getMovementSpeedIconsAndLabel(guess.movement);
 
+  // Get text display for each attribute
+  const rarityDisplay = getTextDisplay(guess.rarity);
+  const rangeDisplay = getTextDisplay(guess.range);
+  const reloadDisplay = getTextDisplay(guess.reload);
+  
   // Get the portrait image path
   const portraitPath = getPortrait(guess.name);
   
   return (
     <div className={cn(
-      "flex flex-row space-x-1 mb-1",
+      "flex flex-row gap-1 mb-1",
       isAnimating && "animate-fade-in"
     )}>
-      {/* All cards with 1:1 aspect ratio */}
+      {/* All cards with fixed same size */}
       
       {/* Brawler portrait card */}
       <div className="aspect-square h-14 rounded-lg overflow-hidden bg-card">
@@ -169,18 +171,18 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer 
       
       {/* Rarity card */}
       <div className={cn("aspect-square h-14 flex items-center justify-center rounded-lg", rarityClass)}>
-        <div className="text-center font-bold text-lg flex items-center justify-center w-[90%] h-[90%]">
-          {getAbbreviation(guess.rarity)}
+        <div className={cn("text-center font-bold flex items-center justify-center w-[95%] h-[95%]", rarityDisplay.className)}>
+          {rarityDisplay.text}
         </div>
       </div>
       
       {/* Class card */}
       <div className={cn("aspect-square h-14 flex items-center justify-center rounded-lg", classClass)}>
-        <div className="w-[90%] h-[90%] flex items-center justify-center">
+        <div className="w-[95%] h-[95%] flex items-center justify-center">
           <img 
             src={getClassIcon(guess.class)}
             alt={guess.class}
-            className="w-[90%] h-[90%] object-contain"
+            className="w-[95%] h-[95%] object-contain"
           />
         </div>
       </div>
@@ -190,7 +192,7 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer 
         <TooltipProvider>
           <Tooltip delayDuration={300}>
             <TooltipTrigger asChild>
-              <div className="cursor-help flex items-center justify-center w-[90%] h-[90%]">
+              <div className="cursor-help flex items-center justify-center w-[95%] h-[95%]">
                 {movementSpeedData.icons}
               </div>
             </TooltipTrigger>
@@ -203,15 +205,15 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer 
       
       {/* Range card */}
       <div className={cn("aspect-square h-14 flex items-center justify-center rounded-lg", rangeClass)}>
-        <div className="text-center font-bold text-lg flex items-center justify-center w-[90%] h-[90%]">
-          {getAbbreviation(guess.range)}
+        <div className={cn("text-center font-bold flex items-center justify-center w-[95%] h-[95%]", rangeDisplay.className)}>
+          {rangeDisplay.text}
         </div>
       </div>
       
       {/* Reload card */}
       <div className={cn("aspect-square h-14 flex items-center justify-center rounded-lg", reloadClass)}>
-        <div className="text-center font-bold text-lg flex items-center justify-center w-[90%] h-[90%]">
-          {getAbbreviation(guess.reload)}
+        <div className={cn("text-center font-bold flex items-center justify-center w-[95%] h-[95%]", reloadDisplay.className)}>
+          {reloadDisplay.text}
         </div>
       </div>
     </div>
