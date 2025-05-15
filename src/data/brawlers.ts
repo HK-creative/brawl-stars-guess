@@ -1,4 +1,3 @@
-
 import brawlersData from './brawlers_full.json';
 
 export interface Brawler {
@@ -8,26 +7,52 @@ export interface Brawler {
   movement: string;
   range: string;
   reload: string;
-  wallbreak?: string;  // Added wallbreak property
+  wallbreak: string;  // Wallbreak property is now required
   releaseYear?: number;
   released?: string;
   image?: string;
 }
 
+// List of brawlers that have wallbreak ability
+const wallbreakBrawlers = [
+  "Bull", 
+  "El Primo", 
+  "Frank", 
+  "Stu", 
+  "Ruffs", 
+  "Bo", 
+  "Griff", 
+  "Gene", 
+  "Shelly", 
+  "Colt", 
+  "Tara", 
+  "Brock", 
+  "Piper", 
+  "Nani", 
+  "Dynamike", 
+  "Tick", 
+  "Grom"  // Assuming "groom" was meant to be "Grom"
+];
+
 // Convert the imported data to match our Brawler interface
-export const brawlers: Brawler[] = brawlersData.map((brawler) => ({
-  name: brawler.name,
-  rarity: brawler.rarity,
-  class: brawler.class,
-  movement: brawler.movement,
-  range: brawler.range,
-  reload: brawler.reload,
-  wallbreak: "No", // Default value for wallbreak is "No" for all brawlers
-  releaseYear: parseInt(brawler.released || '2023'),
-  released: brawler.released,
-  // Default image path that can be overridden for specific brawlers
-  image: `/images/brawlers/${brawler.name.toLowerCase().replace(/[^a-z0-9]/g, '')}.png`
-}));
+export const brawlers: Brawler[] = brawlersData.map((brawler) => {
+  // Check if this brawler is in the wallbreak list
+  const hasWallbreak = wallbreakBrawlers.includes(brawler.name);
+  
+  return {
+    name: brawler.name,
+    rarity: brawler.rarity,
+    class: brawler.class,
+    movement: brawler.movement,
+    range: brawler.range,
+    reload: brawler.reload,
+    wallbreak: hasWallbreak ? "Yes" : "No",
+    releaseYear: parseInt(brawler.released || '2023'),
+    released: brawler.released,
+    // Default image path that can be overridden for specific brawlers
+    image: `/images/brawlers/${brawler.name.toLowerCase().replace(/[^a-z0-9]/g, '')}.png`
+  };
+});
 
 // We'll keep a few brawlers with specific image paths for the challenges
 const specificImagePaths = {
