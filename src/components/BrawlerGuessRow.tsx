@@ -124,6 +124,8 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer 
     if (text === "Very Fast") return { text: "V.Fast", className: "text-base" };
     if (text === "Fast") return { text: "Fast", className: "text-lg" };
     if (text === "Slow") return { text: "Slow", className: "text-lg" };
+    if (text === "Yes") return { text: "Yes", className: "text-lg" };
+    if (text === "No") return { text: "No", className: "text-lg" };
     
     // Dynamic sizing based on text length
     if (text.length <= 3) return { text, className: "text-lg" };
@@ -137,7 +139,11 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer 
   const classClass = guess.class === correctAnswer.class ? 'bg-brawl-green' : 'bg-brawl-red';
   const movementClass = compareAttribute(guess.movement, correctAnswer.movement);
   const rangeClass = compareAttribute(guess.range, correctAnswer.range);
-  const reloadClass = compareAttribute(guess.reload, correctAnswer.reload);
+  
+  // For wallbreak attribute - default to "No" for now
+  const wallbreakValue = guess.wallbreak || "No";
+  const correctWallbreakValue = correctAnswer.wallbreak || "No";
+  const wallbreakClass = wallbreakValue === correctWallbreakValue ? 'bg-brawl-green text-white' : 'bg-brawl-red text-white';
 
   // Get movement speed icons and tooltip text
   const movementSpeedData = getMovementSpeedIconsAndLabel(guess.movement);
@@ -145,7 +151,7 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer 
   // Get text display for each attribute
   const rarityDisplay = getTextDisplay(guess.rarity);
   const rangeDisplay = getTextDisplay(guess.range);
-  const reloadDisplay = getTextDisplay(guess.reload);
+  const wallbreakDisplay = getTextDisplay(wallbreakValue);
   
   // Get the portrait image path
   const portraitPath = getPortrait(guess.name);
@@ -210,10 +216,10 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer 
         </div>
       </div>
       
-      {/* Reload card */}
-      <div className={cn("aspect-square h-14 flex items-center justify-center rounded-lg", reloadClass)}>
-        <div className={cn("text-center font-bold flex items-center justify-center w-[95%] h-[95%]", reloadDisplay.className)}>
-          {reloadDisplay.text}
+      {/* Wallbreak card (replacing Reload) */}
+      <div className={cn("aspect-square h-14 flex items-center justify-center rounded-lg", wallbreakClass)}>
+        <div className={cn("text-center font-bold flex items-center justify-center w-[95%] h-[95%]", wallbreakDisplay.className)}>
+          {wallbreakDisplay.text}
         </div>
       </div>
     </div>

@@ -236,29 +236,36 @@ const ClassicMode = () => {
               </div>
             </div>
             
-            {/* Enhanced attribute labels with bold design */}
+            {/* Attribute labels with glass effect, adaptive sizing */}
             <div className="grid grid-cols-6 gap-1 mb-1">
-              {["Brawler", "Rarity", "Class", "Speed", "Range", "Reload"].map((label, index) => (
-                <div key={index} className="relative overflow-hidden h-10">
-                  {/* Bold, vibrant background with gradient */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-brawl-blue/90 to-brawl-purple/90 rounded-lg shadow-lg"></div>
-                  
-                  {/* Bottom border accent */}
-                  <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-brawl-yellow"></div>
-                  
-                  {/* Glass effect overlay */}
-                  <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]"></div>
-                  
-                  {/* Label text with enhanced styling */}
-                  <div className="relative z-10 flex items-center justify-center h-full w-full text-white font-extrabold tracking-wide">
-                    <span className="text-base drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)] transform -translate-y-[1px]">{label}</span>
+              {["Brawler", "Rarity", "Class", "Speed", "Range", "Wallbreak"].map((label) => {
+                // Determine font size based on label length
+                let fontClass = "text-base";
+                if (label.length >= 8) {
+                  fontClass = "text-sm";
+                }
+                
+                return (
+                  <div key={label} className="relative h-10 overflow-hidden">
+                    {/* Glass effect with blue accent at bottom */}
+                    <div className="absolute inset-0 bg-brawl-blue/20 backdrop-blur-sm border-b-2 border-brawl-blue rounded-t-lg"></div>
+                    
+                    {/* Yellow accent line */}
+                    <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-brawl-yellow"></div>
+                    
+                    {/* Text with adaptive sizing */}
+                    <div className="relative z-10 h-full w-full flex items-center justify-center">
+                      <span className={`${fontClass} font-extrabold text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]`}>
+                        {label}
+                      </span>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
             
-            {/* Guesses display */}
-            <Card className="brawl-card p-1 overflow-auto flex-1 min-h-0 max-h-[calc(100vh-250px)]">
+            {/* Guesses display - removed the card background as requested */}
+            <div className="overflow-auto flex-1 min-h-0 max-h-[calc(100vh-250px)] p-1">
               <div className="space-y-1">
                 {guesses.map((guess, index) => (
                   <BrawlerGuessRow 
@@ -268,7 +275,7 @@ const ClassicMode = () => {
                   />
                 ))}
               </div>
-            </Card>
+            </div>
           </div>
         </div>
       </div>

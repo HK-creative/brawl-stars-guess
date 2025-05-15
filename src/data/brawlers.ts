@@ -1,3 +1,4 @@
+
 import brawlersData from './brawlers_full.json';
 
 export interface Brawler {
@@ -7,6 +8,7 @@ export interface Brawler {
   movement: string;
   range: string;
   reload: string;
+  wallbreak?: string;  // Added wallbreak property
   releaseYear?: number;
   released?: string;
   image?: string;
@@ -20,6 +22,7 @@ export const brawlers: Brawler[] = brawlersData.map((brawler) => ({
   movement: brawler.movement,
   range: brawler.range,
   reload: brawler.reload,
+  wallbreak: "No", // Default value for wallbreak is "No" for all brawlers
   releaseYear: parseInt(brawler.released || '2023'),
   released: brawler.released,
   // Default image path that can be overridden for specific brawlers
