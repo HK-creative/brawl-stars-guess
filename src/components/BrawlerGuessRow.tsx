@@ -181,18 +181,8 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({
   // Get the portrait image path
   const portraitPath = getPortrait(guess.name);
   
-  // Define card size and spacing based on device
-  const cardSizeClass = isMobile 
-    ? "h-14" // Keep mobile size the same
-    : "h-20"; // Bigger cards for desktop/tablet
-    
-  const rowSpacingClass = isMobile
-    ? "gap-1 mb-1" // Keep mobile spacing the same
-    : "gap-3 mb-2"; // More spacing for desktop/tablet
-    
-  const cardFramingClass = isMobile
-    ? "" // No additional framing on mobile
-    : "border-2 border-white/10 shadow-md"; // Better framing for desktop/tablet
+  // Now cards are perfect squares taking their full allotted width/height
+  const rowSpacingClass = isMobile ? "gap-1 mb-1" : "gap-3 mb-2"; // Spacing between rows
   
   return (
     <div className={cn(
@@ -202,110 +192,110 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({
       isAnimating && "animate-fade-in",
       gridWidthClass // Use the same width as the headers
     )}>
-      {/* Brawler portrait card */}
-      <div className={cn(
-        "aspect-square rounded-lg overflow-hidden bg-card",
-        cardSizeClass,
-        cardFramingClass
-      )}>
-        <Image
-          key={imageKey}
-          src={portraitPath}
-          alt={guess.name}
-          fallbackSrc={DEFAULT_PORTRAIT}
-          imageType="portrait"
-          className="h-full w-full object-cover"
-        />
-      </div>
-      
-      {/* Rarity card */}
-      <div className={cn(
-        "aspect-square flex items-center justify-center rounded-lg",
-        cardSizeClass,
-        cardFramingClass,
-        rarityClass
-      )}>
+      {/* Each card is now a perfect square with full width/height */}
+      <div className="w-full aspect-square">
         <div className={cn(
-          "text-center font-bold flex items-center justify-center w-[95%] h-[95%]",
-          rarityDisplay.className,
-          !isMobile && "text-2xl" // Larger text for desktop
+          "rounded-lg overflow-hidden bg-card w-full h-full",
         )}>
-          {rarityDisplay.text}
-        </div>
-      </div>
-      
-      {/* Class card */}
-      <div className={cn(
-        "aspect-square flex items-center justify-center rounded-lg",
-        cardSizeClass,
-        cardFramingClass,
-        classClass
-      )}>
-        <div className="w-[95%] h-[95%] flex items-center justify-center">
-          <img 
-            src={getClassIcon(guess.class)}
-            alt={guess.class}
-            className={cn(
-              "w-[95%] h-[95%] object-contain",
-              !isMobile && "scale-125" // Larger icon for desktop
-            )}
+          <Image
+            key={imageKey}
+            src={portraitPath}
+            alt={guess.name}
+            fallbackSrc={DEFAULT_PORTRAIT}
+            imageType="portrait"
+            className="h-full w-full object-cover"
           />
         </div>
       </div>
       
-      {/* Movement card */}
-      <div className={cn(
-        "aspect-square flex items-center justify-center rounded-lg",
-        cardSizeClass,
-        cardFramingClass,
-        movementClass
-      )}>
-        <TooltipProvider>
-          <Tooltip delayDuration={300}>
-            <TooltipTrigger asChild>
-              <div className={cn(
-                "cursor-help flex items-center justify-center w-[95%] h-[95%]",
+      {/* Rarity card */}
+      <div className="w-full aspect-square">
+        <div className={cn(
+          "w-full h-full flex items-center justify-center rounded-lg",
+          rarityClass
+        )}>
+          <div className={cn(
+            "text-center font-bold flex items-center justify-center",
+            rarityDisplay.className,
+            !isMobile && "text-2xl" // Larger text for desktop
+          )}>
+            {rarityDisplay.text}
+          </div>
+        </div>
+      </div>
+      
+      {/* Class card */}
+      <div className="w-full aspect-square">
+        <div className={cn(
+          "w-full h-full flex items-center justify-center rounded-lg",
+          classClass
+        )}>
+          <div className="w-[90%] h-[90%] flex items-center justify-center">
+            <img 
+              src={getClassIcon(guess.class)}
+              alt={guess.class}
+              className={cn(
+                "w-full h-full object-contain",
                 !isMobile && "scale-125" // Larger icon for desktop
-              )}>
-                {movementSpeedData.icons}
-              </div>
-            </TooltipTrigger>
-            <TooltipContent side="bottom" className="bg-black text-white text-xs px-2 py-1 border-none">
-              {movementSpeedData.tooltip}
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+              )}
+            />
+          </div>
+        </div>
+      </div>
+      
+      {/* Movement card */}
+      <div className="w-full aspect-square">
+        <div className={cn(
+          "w-full h-full flex items-center justify-center rounded-lg",
+          movementClass
+        )}>
+          <TooltipProvider>
+            <Tooltip delayDuration={300}>
+              <TooltipTrigger asChild>
+                <div className={cn(
+                  "cursor-help flex items-center justify-center w-[90%] h-[90%]",
+                  !isMobile && "scale-125" // Larger icon for desktop
+                )}>
+                  {movementSpeedData.icons}
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="bg-black text-white text-xs px-2 py-1 border-none">
+                {movementSpeedData.tooltip}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
       </div>
       
       {/* Range card */}
-      <div className={cn(
-        "aspect-square flex items-center justify-center rounded-lg",
-        cardSizeClass,
-        cardFramingClass,
-        rangeClass
-      )}>
+      <div className="w-full aspect-square">
         <div className={cn(
-          "text-center font-bold flex items-center justify-center w-[95%] h-[95%]",
-          rangeDisplay.className,
-          !isMobile && "text-2xl" // Larger text for desktop
+          "w-full h-full flex items-center justify-center rounded-lg",
+          rangeClass
         )}>
-          {rangeDisplay.text}
+          <div className={cn(
+            "text-center font-bold flex items-center justify-center",
+            rangeDisplay.className,
+            !isMobile && "text-2xl" // Larger text for desktop
+          )}>
+            {rangeDisplay.text}
+          </div>
         </div>
       </div>
       
       {/* Wallbreak card */}
-      <div className={cn(
-        "aspect-square flex items-center justify-center rounded-lg",
-        cardSizeClass,
-        cardFramingClass,
-        wallbreakClass
-      )}>
+      <div className="w-full aspect-square">
         <div className={cn(
-          "text-center font-bold flex items-center justify-center w-[95%] h-[95%]",
-          wallbreakDisplay.className,
-          !isMobile && "text-2xl" // Larger text for desktop
+          "w-full h-full flex items-center justify-center rounded-lg",
+          wallbreakClass
         )}>
-          {wallbreakDisplay.text}
+          <div className={cn(
+            "text-center font-bold flex items-center justify-center",
+            wallbreakDisplay.className,
+            !isMobile && "text-2xl" // Larger text for desktop
+          )}>
+            {wallbreakDisplay.text}
+          </div>
         </div>
       </div>
     </div>

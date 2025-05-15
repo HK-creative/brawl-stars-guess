@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { toast } from '@/components/ui/use-toast';
 import ModeDescription from '@/components/ModeDescription';
@@ -259,7 +258,7 @@ const ClassicMode = () => {
               </div>
             </div>
             
-            {/* Attribute labels with glass effect and adaptive sizing */}
+            {/* Attribute labels with glass effect and perfect square aspect ratio */}
             <div className={cn(
               "grid",
               gridTemplateClass,
@@ -268,24 +267,25 @@ const ClassicMode = () => {
             )}>
               {attributeLabels.map((label, index) => {
                 return (
-                  <div key={label.name} className={cn(
-                    "relative overflow-hidden",
-                    headerSizeClass
-                  )}>
-                    {/* Transparent glass effect */}
-                    <div className="absolute inset-0 backdrop-blur-sm border-b-2 border-brawl-blue rounded-t-lg"></div>
-                    
-                    {/* Yellow accent line */}
-                    <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-brawl-yellow"></div>
-                    
-                    {/* Text with adaptive sizing */}
-                    <div className="relative z-10 h-full w-full flex items-center justify-center">
-                      <span className={cn(
-                        label.fontSize,
-                        "font-extrabold text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]"
-                      )}>
-                        {label.name}
-                      </span>
+                  <div key={label.name} className="w-full aspect-square">
+                    <div className={cn(
+                      "relative overflow-hidden w-full h-full"
+                    )}>
+                      {/* Transparent glass effect */}
+                      <div className="absolute inset-0 backdrop-blur-sm border-b-2 border-brawl-blue rounded-t-lg"></div>
+                      
+                      {/* Yellow accent line */}
+                      <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-brawl-yellow"></div>
+                      
+                      {/* Text with adaptive sizing */}
+                      <div className="relative z-10 h-full w-full flex items-center justify-center">
+                        <span className={cn(
+                          label.fontSize,
+                          "font-extrabold text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]"
+                        )}>
+                          {label.name}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 );
