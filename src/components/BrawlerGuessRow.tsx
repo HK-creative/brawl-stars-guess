@@ -15,12 +15,18 @@ import {
 interface BrawlerGuessRowProps {
   guess: Brawler;
   correctAnswer: Brawler;
+  isMobile?: boolean;
+  gridWidthClass?: string;
 }
 
-const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer }) => {
+const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ 
+  guess, 
+  correctAnswer,
+  isMobile = false,
+  gridWidthClass = "w-[90%] mx-auto"
+}) => {
   const [imageKey, setImageKey] = useState<string>(`${guess.name}-${Date.now()}`);
   const [isAnimating, setIsAnimating] = useState(true);
-  const isMobile = useIsMobile();
   
   // Force image refresh when the guess changes
   useEffect(() => {
@@ -158,7 +164,7 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer 
   const movementClass = compareAttribute(guess.movement, correctAnswer.movement);
   const rangeClass = compareAttribute(guess.range, correctAnswer.range);
   
-  // For wallbreak attribute - default to "No" for now
+  // For wallbreak attribute
   const wallbreakValue = guess.wallbreak || "No";
   const correctWallbreakValue = correctAnswer.wallbreak || "No";
   const wallbreakClass = wallbreakValue === correctWallbreakValue ? 'bg-brawl-green text-white' : 'bg-brawl-red text-white';
@@ -192,7 +198,7 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer 
       "flex flex-row justify-center",
       rowSpacingClass,
       isAnimating && "animate-fade-in",
-      !isMobile && "w-[90%] mx-auto" // Makes row take up 90% of container width on desktop
+      gridWidthClass // Use the same width as the headers
     )}>
       {/* All cards with fixed same size */}
       
@@ -307,4 +313,3 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ guess, correctAnswer 
 };
 
 export default BrawlerGuessRow;
-
