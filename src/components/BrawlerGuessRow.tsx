@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Brawler } from '@/data/brawlers';
 import { getPortrait, DEFAULT_PORTRAIT } from '@/lib/image-helpers';
@@ -68,10 +67,10 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({
           icons: (
             <div className="flex justify-center items-center w-full h-full">
               <div className="w-1/2 h-full flex items-center justify-center">
-                <img src="/Rabbit_Fast.png" alt="Very Fast" className="w-full h-full object-contain" />
+                <img src="/Rabbit_Fast.png" alt="Very Fast" className="w-[85%] h-[85%] object-contain" />
               </div>
               <div className="w-1/2 h-full flex items-center justify-center">
-                <img src="/Rabbit_Fast.png" alt="Very Fast" className="w-full h-full object-contain" />
+                <img src="/Rabbit_Fast.png" alt="Very Fast" className="w-[85%] h-[85%] object-contain" />
               </div>
             </div>
           ),
@@ -79,17 +78,17 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({
         };
       case 'Fast':
         return {
-          icons: <img src="/Rabbit_Fast.png" alt="Fast" className="w-full h-full object-contain" />,
+          icons: <img src="/Rabbit_Fast.png" alt="Fast" className="w-[85%] h-[85%] object-contain" />,
           tooltip: "Fast",
         };
       case 'Normal':
         return {
-          icons: <img src="/Walking_Normal.png" alt="Normal" className="w-full h-full object-contain" />,
+          icons: <img src="/Walking_Normal.png" alt="Normal" className="w-[85%] h-[85%] object-contain" />,
           tooltip: "Normal",
         };
       case 'Slow':
         return {
-          icons: <img src="/Turtle_Slow.png" alt="Slow" className="w-full h-full object-contain" />,
+          icons: <img src="/Turtle_Slow.png" alt="Slow" className="w-[85%] h-[85%] object-contain" />,
           tooltip: "Slow",
         };
       case 'Very Slow':
@@ -97,10 +96,10 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({
           icons: (
             <div className="flex justify-center items-center w-full h-full">
               <div className="w-1/2 h-full flex items-center justify-center">
-                <img src="/Turtle_Slow.png" alt="Very Slow" className="w-full h-full object-contain" />
+                <img src="/Turtle_Slow.png" alt="Very Slow" className="w-[85%] h-[85%] object-contain" />
               </div>
               <div className="w-1/2 h-full flex items-center justify-center">
-                <img src="/Turtle_Slow.png" alt="Very Slow" className="w-full h-full object-contain" />
+                <img src="/Turtle_Slow.png" alt="Very Slow" className="w-[85%] h-[85%] object-contain" />
               </div>
             </div>
           ),
@@ -108,7 +107,7 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({
         };
       default:
         return {
-          icons: <img src="/Walking_Normal.png" alt="Normal" className="w-full h-full object-contain" />,
+          icons: <img src="/Walking_Normal.png" alt="Normal" className="w-[85%] h-[85%] object-contain" />,
           tooltip: "Normal",
         };
     }
@@ -135,28 +134,28 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({
   // Helper function to get abbreviation and determine text size based on length
   const getTextDisplay = (text: string): { text: string, className: string } => {
     // Special abbreviations based on Brawl Stars conventions
-    if (text === "Mythic") return { text: "Myt", className: "text-lg" };
-    if (text === "Super Rare") return { text: "Sup", className: "text-lg" };
-    if (text === "Legendary") return { text: "Leg", className: "text-lg" };
-    if (text === "Epic") return { text: "Epi", className: "text-lg" };
-    if (text === "Rare") return { text: "Rar", className: "text-lg" };
-    if (text === "Chromatic") return { text: "Chr", className: "text-lg" };
-    if (text === "Short") return { text: "Short", className: "text-lg" };
-    if (text === "Medium") return { text: "Med", className: "text-lg" };
-    if (text === "Long") return { text: "Long", className: "text-lg" };
-    if (text === "Very Long") return { text: "V.Long", className: "text-base" };
-    if (text === "Normal") return { text: "Nor", className: "text-lg" };
-    if (text === "Very Fast") return { text: "V.Fast", className: "text-base" };
-    if (text === "Fast") return { text: "Fast", className: "text-lg" };
-    if (text === "Slow") return { text: "Slow", className: "text-lg" };
-    if (text === "Yes") return { text: "Yes", className: "text-lg" };
-    if (text === "No") return { text: "No", className: "text-lg" };
+    if (text === "Mythic") return { text: "Myt", className: "text-2xl" };
+    if (text === "Super Rare") return { text: "Sup", className: "text-2xl" };
+    if (text === "Legendary") return { text: "Leg", className: "text-2xl" };
+    if (text === "Epic") return { text: "Epi", className: "text-2xl" };
+    if (text === "Rare") return { text: "Rar", className: "text-2xl" };
+    if (text === "Chromatic") return { text: "Chr", className: "text-2xl" };
+    if (text === "Short") return { text: "Short", className: "text-2xl" };
+    if (text === "Medium") return { text: "Med", className: "text-2xl" };
+    if (text === "Long") return { text: "Long", className: "text-2xl" };
+    if (text === "Very Long") return { text: "V.Long", className: "text-xl" };
+    if (text === "Normal") return { text: "Nor", className: "text-2xl" };
+    if (text === "Very Fast") return { text: "V.Fast", className: "text-xl" };
+    if (text === "Fast") return { text: "Fast", className: "text-2xl" };
+    if (text === "Slow") return { text: "Slow", className: "text-2xl" };
+    if (text === "Yes") return { text: "Yes", className: "text-2xl" };
+    if (text === "No") return { text: "No", className: "text-2xl" };
     
     // Dynamic sizing based on text length
-    if (text.length <= 3) return { text, className: "text-lg" };
-    if (text.length <= 5) return { text, className: "text-base" };
-    if (text.length <= 7) return { text, className: "text-sm" };
-    return { text: text.substring(0, 6), className: "text-sm" };
+    if (text.length <= 3) return { text, className: "text-2xl" };
+    if (text.length <= 5) return { text, className: "text-xl" };
+    if (text.length <= 7) return { text, className: "text-lg" };
+    return { text: text.substring(0, 6), className: "text-base" };
   };
 
   // Get comparison results for each attribute
@@ -203,7 +202,7 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({
             alt={guess.name}
             fallbackSrc={DEFAULT_PORTRAIT}
             imageType="portrait"
-            className="h-full w-full object-cover"
+            className="h-[90%] w-[90%] object-cover mx-auto my-auto"
           />
         </div>
       </div>
@@ -215,9 +214,9 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({
           rarityClass
         )}>
           <div className={cn(
-            "text-center font-bold flex items-center justify-center",
+            "text-center font-bold flex items-center justify-center w-[85%] h-[85%]",
             rarityDisplay.className,
-            !isMobile && "text-2xl" // Larger text for desktop
+            !isMobile && "text-3xl" // Larger text for desktop
           )}>
             {rarityDisplay.text}
           </div>
@@ -230,14 +229,11 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({
           "w-full h-full flex items-center justify-center rounded-lg",
           classClass
         )}>
-          <div className="w-[90%] h-[90%] flex items-center justify-center">
+          <div className="w-[85%] h-[85%] flex items-center justify-center">
             <img 
               src={getClassIcon(guess.class)}
               alt={guess.class}
-              className={cn(
-                "w-full h-full object-contain",
-                !isMobile && "scale-125" // Larger icon for desktop
-              )}
+              className="w-full h-full object-contain"
             />
           </div>
         </div>
@@ -252,10 +248,7 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({
           <TooltipProvider>
             <Tooltip delayDuration={300}>
               <TooltipTrigger asChild>
-                <div className={cn(
-                  "cursor-help flex items-center justify-center w-[90%] h-[90%]",
-                  !isMobile && "scale-125" // Larger icon for desktop
-                )}>
+                <div className="cursor-help flex items-center justify-center w-[85%] h-[85%]">
                   {movementSpeedData.icons}
                 </div>
               </TooltipTrigger>
@@ -274,9 +267,9 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({
           rangeClass
         )}>
           <div className={cn(
-            "text-center font-bold flex items-center justify-center",
+            "text-center font-bold flex items-center justify-center w-[85%] h-[85%]",
             rangeDisplay.className,
-            !isMobile && "text-2xl" // Larger text for desktop
+            !isMobile && "text-3xl" // Larger text for desktop
           )}>
             {rangeDisplay.text}
           </div>
@@ -290,9 +283,9 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({
           wallbreakClass
         )}>
           <div className={cn(
-            "text-center font-bold flex items-center justify-center",
+            "text-center font-bold flex items-center justify-center w-[85%] h-[85%]",
             wallbreakDisplay.className,
-            !isMobile && "text-2xl" // Larger text for desktop
+            !isMobile && "text-3xl" // Larger text for desktop
           )}>
             {wallbreakDisplay.text}
           </div>

@@ -161,12 +161,12 @@ const ClassicMode = () => {
 
   // Define attribute labels with adaptive sizing
   const attributeLabels = [
-    { name: "Brawler", fontSize: isMobile ? "text-base" : "text-xl" },
-    { name: "Rarity", fontSize: isMobile ? "text-base" : "text-xl" },
-    { name: "Class", fontSize: isMobile ? "text-base" : "text-xl" },
-    { name: "Speed", fontSize: isMobile ? "text-base" : "text-xl" },
-    { name: "Range", fontSize: isMobile ? "text-base" : "text-xl" },
-    { name: "Wallbreak", fontSize: isMobile ? "text-xs" : "text-lg" }
+    { name: "Brawler", fontSize: isMobile ? "text-base" : "text-2xl" },
+    { name: "Rarity", fontSize: isMobile ? "text-base" : "text-2xl" },
+    { name: "Class", fontSize: isMobile ? "text-base" : "text-2xl" },
+    { name: "Speed", fontSize: isMobile ? "text-base" : "text-2xl" },
+    { name: "Range", fontSize: isMobile ? "text-base" : "text-2xl" },
+    { name: "Wallbreak", fontSize: isMobile ? "text-xs" : "text-xl" }
   ];
 
   return (
@@ -277,11 +277,11 @@ const ClassicMode = () => {
                       {/* Yellow accent line */}
                       <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-brawl-yellow"></div>
                       
-                      {/* Text with adaptive sizing */}
+                      {/* Text with adaptive sizing - now using 85% of container */}
                       <div className="relative z-10 h-full w-full flex items-center justify-center">
                         <span className={cn(
                           label.fontSize,
-                          "font-extrabold text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]"
+                          "font-extrabold text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] w-[85%] h-[85%] flex items-center justify-center"
                         )}>
                           {label.name}
                         </span>
