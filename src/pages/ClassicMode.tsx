@@ -28,6 +28,7 @@ const ClassicMode = () => {
   const [isBackendConnected, setIsBackendConnected] = useState(true);
   const [showShareModal, setShowShareModal] = useState(false);
   const isMobile = useIsMobile();
+  const [guessedBrawlerNames, setGuessedBrawlerNames] = useState<string[]>([]);
 
   // Fallback data in case Supabase fetch fails
   const fallbackBrawlerName = "Spike";
@@ -103,8 +104,21 @@ const ClassicMode = () => {
       return;
     }
     
-    // Add the guess to the list
+    // Check if the brawler has already been guessed
+    if (guessedBrawlerNames.includes(selectedBrawler.name)) {
+      toast({
+        title: "Already Guessed",
+        description: `You've already guessed ${selectedBrawler.name}!`,
+        variant: "destructive"
+      });
+      setInputValue('');
+      setSelectedBrawler(null);
+      return;
+    }
+    
+    // Add the guess to the list and track the name
     setGuesses(prev => [selectedBrawler, ...prev]);
+    setGuessedBrawlerNames(prev => [...prev, selectedBrawler.name]);
     setGuessCount(prev => prev + 1);
     
     // Check if the guess is correct
@@ -174,12 +188,11 @@ const ClassicMode = () => {
 
   return (
     <div className="max-h-[calc(100vh-70px)] overflow-hidden px-1">
-      {/* Ultra-compact header */}
-      <ModeDescription 
-        title={t('mode.classic')} 
-        description={t('mode.classic.description')}
-        className="mb-1 py-1"
-      />
+      {/* Redesigned header based on image */}
+      <div className="mb-4 bg-[#1b1e44] rounded-xl p-6 shadow-lg border border-[#2a2f6a]">
+        <h1 className="text-4xl font-extrabold text-brawl-yellow mb-1">Classic</h1>
+        <p className="text-gray-300 text-lg">Guess the brawler by their attributes</p>
+      </div>
       
       {!isBackendConnected && (
         <div className="mb-1 p-0.5 bg-amber-800/50 border border-amber-600 rounded-md text-white text-xs">
@@ -187,7 +200,7 @@ const ClassicMode = () => {
         </div>
       )}
       
-      <div className="h-[calc(100vh-120px)] flex flex-col">
+      <div className="h-[calc(100vh-150px)] flex flex-col">
         {/* Game area */}
         <div className="flex-1 flex flex-col space-y-1">
           {isGameOver ? (
@@ -224,19 +237,20 @@ const ClassicMode = () => {
               </div>
             </Card>
           ) : (
-            <Card className="brawl-card p-2 mb-1">
-              <form onSubmit={handleSubmit} className="flex flex-col gap-1">
+            <Card className="brawl-card p-4 mb-3">
+              <form onSubmit={handleSubmit} className="flex flex-col gap-2">
                 <BrawlerAutocomplete
                   brawlers={brawlers}
                   value={inputValue}
                   onChange={setInputValue}
                   onSelect={handleSelectBrawler}
-                  onSubmit={handleSubmit} // Pass submit handler
+                  onSubmit={handleSubmit}
                   disabled={isGameOver}
+                  disabledBrawlers={guessedBrawlerNames}
                 />
                 <Button 
                   type="submit" 
-                  className="w-full bg-brawl-yellow hover:bg-brawl-yellow/80 text-black font-semibold py-1 h-8"
+                  className="w-full bg-brawl-yellow hover:bg-brawl-yellow/80 text-black font-semibold py-2 h-10 text-lg"
                   disabled={isGameOver || !selectedBrawler}
                 >
                   {t('submit.guess')}
@@ -247,13 +261,13 @@ const ClassicMode = () => {
           
           {/* Guesses section */}
           <div className="flex-1 flex flex-col min-h-0">
-            <div className="flex justify-between items-center mb-0.5 px-0.5">
+            <div className="flex justify-between items-center mb-2 px-1">
               <div className="flex items-center gap-1.5">
-                <div className="text-white text-xs font-medium">
+                <div className="text-white text-sm font-medium">
                   Guesses: {guessCount}
                 </div>
                 <div className="text-xs flex items-center text-white/60 gap-0.5">
-                  <Clock className="w-2.5 h-2.5" />
+                  <Clock className="w-3 h-3" />
                   <span>{timeUntilNext.hours}h {timeUntilNext.minutes}m</span>
                 </div>
               </div>

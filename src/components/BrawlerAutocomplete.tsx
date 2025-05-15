@@ -10,8 +10,9 @@ interface BrawlerAutocompleteProps {
   value: string;
   onChange: (value: string) => void;
   onSelect: (brawler: Brawler) => void;
-  onSubmit?: () => void; // Added onSubmit prop
+  onSubmit?: () => void;
   disabled?: boolean;
+  disabledBrawlers?: string[]; // Add this to track already guessed brawlers
 }
 
 const BrawlerAutocomplete: React.FC<BrawlerAutocompleteProps> = ({
@@ -20,14 +21,15 @@ const BrawlerAutocomplete: React.FC<BrawlerAutocompleteProps> = ({
   onChange,
   onSelect,
   onSubmit,
-  disabled = false
+  disabled = false,
+  disabledBrawlers = []
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [filteredBrawlers, setFilteredBrawlers] = useState<Brawler[]>([]);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   
-  // Filter brawlers based on input
+  // Filter brawlers based on input and exclude already guessed brawlers
   useEffect(() => {
     if (value.trim() === '') {
       setFilteredBrawlers([]);
@@ -35,10 +37,11 @@ const BrawlerAutocomplete: React.FC<BrawlerAutocompleteProps> = ({
     }
     
     const filtered = brawlers.filter(brawler => 
-      brawler.name.toLowerCase().includes(value.toLowerCase())
+      brawler.name.toLowerCase().includes(value.toLowerCase()) && 
+      !disabledBrawlers.includes(brawler.name)
     );
     setFilteredBrawlers(filtered);
-  }, [value, brawlers]);
+  }, [value, brawlers, disabledBrawlers]);
   
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -60,6 +63,11 @@ const BrawlerAutocomplete: React.FC<BrawlerAutocompleteProps> = ({
   };
   
   const handleSelectBrawler = (brawler: Brawler) => {
+    // Don't select already guessed brawlers
+    if (disabledBrawlers.includes(brawler.name)) {
+      return;
+    }
+    
     onChange(brawler.name);
     onSelect(brawler);
     setIsOpen(false);
@@ -75,20 +83,19 @@ const BrawlerAutocomplete: React.FC<BrawlerAutocompleteProps> = ({
         brawler.name.toLowerCase() === value.toLowerCase()
       );
       
-      // If there's an exact match, select it first
+      // If there's an exact match, select it first and submit immediately
       if (exactMatch) {
         handleSelectBrawler(exactMatch);
+        onSubmit();
+        return;
       }
       
-      // If we have any match at all, select the first one
+      // If we have any match at all, select the first one and submit
       else if (filteredBrawlers.length > 0) {
         handleSelectBrawler(filteredBrawlers[0]);
-      }
-      
-      // Submit after a very short delay to ensure brawler selection is processed
-      setTimeout(() => {
         onSubmit();
-      }, 10);
+        return;
+      }
     }
   };
   
@@ -110,11 +117,17 @@ const BrawlerAutocomplete: React.FC<BrawlerAutocompleteProps> = ({
         <div className="absolute z-10 w-full mt-1 bg-gray-800 border border-white/20 rounded-md shadow-lg max-h-60 overflow-y-auto">
           {filteredBrawlers.map((brawler) => {
             const pinPath = getPin(brawler.name);
+            const isDisabled = disabledBrawlers.includes(brawler.name);
+            
             return (
               <div
                 key={brawler.name}
-                className="px-4 py-2 text-sm text-white hover:bg-gray-700 cursor-pointer flex items-center"
-                onClick={() => handleSelectBrawler(brawler)}
+                className={`px-4 py-2 text-sm hover:bg-gray-700 flex items-center ${
+                  isDisabled 
+                    ? 'cursor-not-allowed opacity-50' 
+                    : 'cursor-pointer text-white'
+                }`}
+                onClick={() => !isDisabled && handleSelectBrawler(brawler)}
               >
                 <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 bg-gray-700 mr-2">
                   <Image 
@@ -125,6 +138,9 @@ const BrawlerAutocomplete: React.FC<BrawlerAutocompleteProps> = ({
                   />
                 </div>
                 <span>{brawler.name}</span>
+                {isDisabled && (
+                  <span className="ml-auto text-xs text-red-400">Already guessed</span>
+                )}
               </div>
             );
           })}
