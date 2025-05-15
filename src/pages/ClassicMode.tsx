@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { toast } from '@/components/ui/use-toast';
 import ModeDescription from '@/components/ModeDescription';
@@ -235,23 +236,23 @@ const ClassicMode = () => {
               </div>
             </div>
             
-            {/* Modern attribute labels with hexagonal design */}
+            {/* Enhanced attribute labels with bold design */}
             <div className="grid grid-cols-6 gap-1 mb-1">
               {["Brawler", "Rarity", "Class", "Speed", "Range", "Reload"].map((label, index) => (
-                <div key={index} className="relative overflow-hidden">
-                  {/* Fancy background with gradient */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-brawl-blue to-brawl-purple opacity-80 rounded-md"></div>
+                <div key={index} className="relative overflow-hidden h-10">
+                  {/* Bold, vibrant background with gradient */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-brawl-blue/90 to-brawl-purple/90 rounded-lg shadow-lg"></div>
+                  
+                  {/* Bottom border accent */}
+                  <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-brawl-yellow"></div>
                   
                   {/* Glass effect overlay */}
-                  <div className="absolute inset-0 bg-white/10 backdrop-blur-[1px]"></div>
+                  <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]"></div>
                   
-                  {/* Label text with shadow */}
-                  <div className="relative z-10 flex items-center justify-center h-5 w-full text-white text-[10px] font-bold tracking-wide">
-                    <span className="drop-shadow-[0_1px_1px_rgba(0,0,0,0.5)]">{label}</span>
+                  {/* Label text with enhanced styling */}
+                  <div className="relative z-10 flex items-center justify-center h-full w-full text-white font-extrabold tracking-wide">
+                    <span className="text-base drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)] transform -translate-y-[1px]">{label}</span>
                   </div>
-                  
-                  {/* Bottom border for emphasis */}
-                  <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-white/70 to-transparent"></div>
                 </div>
               ))}
             </div>
