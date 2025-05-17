@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { toast } from '@/components/ui/use-toast';
 import ModeDescription from '@/components/ModeDescription';
@@ -94,6 +95,9 @@ const EndlessMode = () => {
   const [inputValue, setInputValue] = useState('');
   const [showShareModal, setShowShareModal] = useState(false);
   const isMobile = useIsMobile();
+  
+  // Add a state variable to track the most recent guess index
+  const [lastGuessIndex, setLastGuessIndex] = useState<number | null>(null);
 
   const attributeLabels = [
     { name: "Brawler", fontSize: isMobile ? "text-base" : "text-2xl" },
@@ -207,6 +211,9 @@ const EndlessMode = () => {
     setGuessCount(newGuessCount);
     setGuessedBrawlers(newGuessedBrawlers);
     setInputValue(''); // Clear input regardless of outcome
+    
+    // Set the last guess index to 0 (since we prepend guesses to the array)
+    setLastGuessIndex(0);
 
     const isCorrect = submittedBrawler.name.toLowerCase().trim() === correctBrawler.name.toLowerCase().trim();
 
@@ -411,6 +418,7 @@ const EndlessMode = () => {
                     isMobile={isMobile}
                     gridWidthClass={isMobile ? "w-full" : "w-[85%] mx-auto"}
                     gridTemplateClass="grid-cols-6"
+                    isNew={index === lastGuessIndex} // Pass the isNew prop based on lastGuessIndex
                   />
                 ))}
               </div>

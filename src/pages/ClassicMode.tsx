@@ -317,6 +317,7 @@ const ClassicMode = () => {
   ];
 
   return (
+    
     <div className="max-h-[calc(100vh-70px)] overflow-hidden px-1 py-4 md:py-8">
       {/* Header with Integrated Mode Selector - Centered & Transparent Background */}
       <div className="mb-6 md:mb-8 max-w-3xl mx-auto">

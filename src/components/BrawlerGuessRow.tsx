@@ -29,15 +29,16 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({
   isNew = false // Default to false for backward compatibility
 }) => {
   const [imageKey, setImageKey] = useState<string>(`${guess.name}-${Date.now()}`);
-  const [isRevealed, setIsRevealed] = useState(isNew); // Only initialize as true if this is a new guess
+  const [isRevealed, setIsRevealed] = useState(false);
   
-  // Only update the animation state when the component mounts, or when isNew changes
+  // Update the animation state when the component mounts or when isNew changes
   useEffect(() => {
     setImageKey(`${guess.name}-${Date.now()}`);
-    setIsRevealed(isNew); 
-
+    
     // Only animate for new guesses
     if (isNew) {
+      setIsRevealed(false); // Start with not revealed
+      
       // Use double requestAnimationFrame to ensure the class removal is processed before re-adding
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
