@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Brawler } from '@/data/brawlers';
@@ -111,7 +112,8 @@ const BrawlerAutocomplete: React.FC<BrawlerAutocompleteProps> = ({
     if (e.key === 'Enter') {
       e.preventDefault();
       
-      const exactMatchName = value.toLowerCase();
+      const currentInputText = value.trim();
+      const exactMatchName = currentInputText.toLowerCase();
       const isAlreadyGuessed = disabledBrawlers.some(name => name.toLowerCase() === exactMatchName);
       
       if (isAlreadyGuessed && filteredBrawlers.some(b => b.name.toLowerCase() === exactMatchName)) {
@@ -125,6 +127,7 @@ const BrawlerAutocomplete: React.FC<BrawlerAutocompleteProps> = ({
         return;
       }
 
+      // If there's highlighted item, use that
       if (highlightedIndex >= 0 && highlightedIndex < filteredBrawlers.length) {
         const selected = filteredBrawlers[highlightedIndex];
         if (!disabledBrawlers.includes(selected.name)) {
@@ -133,6 +136,7 @@ const BrawlerAutocomplete: React.FC<BrawlerAutocompleteProps> = ({
         }
       }
 
+      // If current input matches a brawler exactly, use that
       const exactMatchBrawler = filteredBrawlers.find(
         b => b.name.toLowerCase() === value.toLowerCase() && !disabledBrawlers.includes(b.name)
       );
@@ -141,7 +145,8 @@ const BrawlerAutocomplete: React.FC<BrawlerAutocompleteProps> = ({
         return;
       }
       
-      if (filteredBrawlers.length > 0) {
+      // If there are filtered suggestions and no exact match, use first available
+      if (filteredBrawlers.length > 0 && currentInputText) {
         const firstAvailableBrawler = filteredBrawlers.find(b => !disabledBrawlers.includes(b.name));
         if (firstAvailableBrawler) {
           handleSelectBrawlerWithSubmit(firstAvailableBrawler);
@@ -149,8 +154,11 @@ const BrawlerAutocomplete: React.FC<BrawlerAutocompleteProps> = ({
         }
       }
       
-      onChange('');
-      setIsOpen(false);
+      // If we have a submission handler and valid text but no matches, clear input
+      if (onSubmit && currentInputText) {
+        onChange('');
+        setIsOpen(false);
+      }
       return;
     }
     
