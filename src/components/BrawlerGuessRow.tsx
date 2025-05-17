@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Brawler } from '@/data/brawlers';
 import { getPortrait, DEFAULT_PORTRAIT } from '@/lib/image-helpers';
@@ -16,6 +17,7 @@ interface BrawlerGuessRowProps {
   isMobile?: boolean;
   gridWidthClass?: string;
   gridTemplateClass?: string;
+  isNew?: boolean; // Add a new prop to identify new guesses
 }
 
 const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ 
@@ -23,25 +25,27 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({
   correctAnswer,
   isMobile = false,
   gridWidthClass = "w-full",  // Default to full width
-  gridTemplateClass = "grid-cols-6"
+  gridTemplateClass = "grid-cols-6",
+  isNew = false // Default to false for backward compatibility
 }) => {
   const [imageKey, setImageKey] = useState<string>(`${guess.name}-${Date.now()}`);
-  const [isRevealed, setIsRevealed] = useState(false);
+  const [isRevealed, setIsRevealed] = useState(isNew); // Only initialize as true if this is a new guess
   
-  // Force image refresh and re-trigger animation when the guess changes
+  // Only update the animation state when the component mounts, or when isNew changes
   useEffect(() => {
     setImageKey(`${guess.name}-${Date.now()}`);
-    setIsRevealed(false); // Reset animation state, class will be removed
+    setIsRevealed(isNew); 
 
-    // Use double requestAnimationFrame to ensure the class removal is processed before re-adding
-    requestAnimationFrame(() => {
+    // Only animate for new guesses
+    if (isNew) {
+      // Use double requestAnimationFrame to ensure the class removal is processed before re-adding
       requestAnimationFrame(() => {
-        setIsRevealed(true); // Re-add class to trigger animation
+        requestAnimationFrame(() => {
+          setIsRevealed(true); // Re-add class to trigger animation
+        });
       });
-    });
-
-    // No explicit cleanup needed for these one-shot rAF calls here
-  }, [guess.name]);
+    }
+  }, [guess.name, isNew]);
   
   // Helper function to get class icon path
   const getClassIcon = (className: string): string => {
@@ -204,7 +208,7 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({
           "bg-gray-800/50 backdrop-blur-sm",
           cardBorderStyle, // Add border
           "relative",
-          isRevealed && "animate-card-reveal"
+          isNew && isRevealed && "animate-card-reveal" // Only animate if this is a new guess and revealed
         )}
       >
         <Image
@@ -227,7 +231,7 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({
           rarityClass,
           cardBorderStyle, // Add border
           "font-bold",
-          isRevealed && "animate-card-reveal"
+          isNew && isRevealed && "animate-card-reveal" // Only animate if this is a new guess and revealed
         )}
       >
         <span className={getTextDisplay(guess.rarity).className}>
@@ -244,7 +248,7 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({
           classClass,
           cardBorderStyle, // Add border
           "relative overflow-hidden",
-          isRevealed && "animate-card-reveal"
+          isNew && isRevealed && "animate-card-reveal" // Only animate if this is a new guess and revealed
         )}
       >
         <img
@@ -263,7 +267,7 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({
           movementClass,
           cardBorderStyle, // Add border
           "font-bold",
-          isRevealed && "animate-card-reveal"
+          isNew && isRevealed && "animate-card-reveal" // Only animate if this is a new guess and revealed
         )}
       >
         <span className={getTextDisplay(guess.movement).className}>
@@ -280,7 +284,7 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({
           rangeClass,
           cardBorderStyle, // Add border
           "font-bold",
-          isRevealed && "animate-card-reveal"
+          isNew && isRevealed && "animate-card-reveal" // Only animate if this is a new guess and revealed
         )}
       >
         <span className={getTextDisplay(guess.range).className}>
@@ -297,7 +301,7 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({
           wallbreakClass,
           cardBorderStyle, // Add border
           "font-bold",
-          isRevealed && "animate-card-reveal"
+          isNew && isRevealed && "animate-card-reveal" // Only animate if this is a new guess and revealed
         )}
       >
         <span className={getTextDisplay(wallbreakValue).className}>

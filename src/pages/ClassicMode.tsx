@@ -31,6 +31,7 @@ const ClassicMode = () => {
   const isMobile = useIsMobile();
   const [guessedBrawlerNames, setGuessedBrawlerNames] = useState<string[]>([]);
   const [availableBrawlers, setAvailableBrawlers] = useState<Brawler[]>([]);
+  const [lastGuessIndex, setLastGuessIndex] = useState<number | null>(null); // Track the most recent guess
 
   // Fallback data in case Supabase fetch fails
   const fallbackBrawlerName = "Spike";
@@ -68,6 +69,9 @@ const ClassicMode = () => {
     // Reset available brawlers to full set
     setAvailableBrawlers([...brawlers]);
     
+    // Reset the last guess index when starting a new game
+    setLastGuessIndex(null);
+
     // For endless mode, we need to pick a new random brawler
     if (isEndlessMode) {
       const randomBrawler = brawlers[Math.floor(Math.random() * brawlers.length)];
@@ -179,6 +183,7 @@ const ClassicMode = () => {
       setGuessCount(newGuessCount);
       setInputValue('');
       setSelectedBrawler(null);
+      setLastGuessIndex(0); // The newest guess is now at index 0 (since we prepend)
     };
 
     // Handle correct guess
@@ -237,6 +242,7 @@ const ClassicMode = () => {
 
     // Execute updates in sequence
     updateCurrentGuess();
+    
     if (isCorrectGuess) {
       // Use requestAnimationFrame to ensure state updates are processed
       requestAnimationFrame(() => {
@@ -474,6 +480,7 @@ const ClassicMode = () => {
                     isMobile={isMobile}
                     gridWidthClass={gridWidthClass}
                     gridTemplateClass={gridTemplateClass}
+                    isNew={index === lastGuessIndex} // Only the newest guess gets the animation
                   />
                 ))}
               </div>
