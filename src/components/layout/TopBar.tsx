@@ -1,12 +1,20 @@
+
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Settings, Home } from 'lucide-react';
+import { Home } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useLanguage } from '@/contexts/LanguageContext';
+import Image from '@/components/ui/image';
 
 const TopBar: React.FC = () => {
   const location = useLocation();
   const isHome = location.pathname === '/';
+  const { language, changeLanguage } = useLanguage();
+
+  const toggleLanguage = () => {
+    changeLanguage(language === 'en' ? 'he' : 'en');
+  };
 
   return (
     <header className={cn(
@@ -56,20 +64,25 @@ const TopBar: React.FC = () => {
         </div>
 
         <div className="flex items-center space-x-4">
-          <Link to="/settings">
-            <Button
-              variant="ghost"
-              size="icon"
-              className={cn(
-                "text-foreground/70 hover:text-primary",
-                "hover:bg-primary/10",
-                "border border-primary/30",
-                "transition-all duration-300"
-              )}
-            >
-              <Settings className="h-5 w-5" />
-            </Button>
-          </Link>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleLanguage}
+            className={cn(
+              "text-foreground/70 hover:text-primary",
+              "hover:bg-primary/10",
+              "border border-primary/30",
+              "transition-all duration-300"
+            )}
+          >
+            <Image 
+              src={language === 'en' ? '/USAIcon.png' : '/IsraelIcon.png'} 
+              alt={language === 'en' ? 'English' : 'Hebrew'}
+              width={20}
+              height={20}
+              className="w-5 h-5 object-contain"
+            />
+          </Button>
         </div>
       </div>
     </header>
