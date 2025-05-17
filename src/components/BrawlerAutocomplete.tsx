@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Brawler } from '@/data/brawlers';
@@ -113,6 +112,11 @@ const BrawlerAutocomplete: React.FC<BrawlerAutocompleteProps> = ({
       e.preventDefault();
       
       const currentInputText = value.trim();
+      if (!currentInputText) { 
+        // If input is empty and Enter is pressed
+        return;
+      }
+
       const exactMatchName = currentInputText.toLowerCase();
       const isAlreadyGuessed = disabledBrawlers.some(name => name.toLowerCase() === exactMatchName);
       
@@ -127,7 +131,7 @@ const BrawlerAutocomplete: React.FC<BrawlerAutocompleteProps> = ({
         return;
       }
 
-      // If there's highlighted item, use that
+      // If there's highlighted item, use that and submit immediately
       if (highlightedIndex >= 0 && highlightedIndex < filteredBrawlers.length) {
         const selected = filteredBrawlers[highlightedIndex];
         if (!disabledBrawlers.includes(selected.name)) {
@@ -136,7 +140,7 @@ const BrawlerAutocomplete: React.FC<BrawlerAutocompleteProps> = ({
         }
       }
 
-      // If current input matches a brawler exactly, use that
+      // If current input matches a brawler exactly, use that and submit immediately
       const exactMatchBrawler = filteredBrawlers.find(
         b => b.name.toLowerCase() === value.toLowerCase() && !disabledBrawlers.includes(b.name)
       );
@@ -145,7 +149,7 @@ const BrawlerAutocomplete: React.FC<BrawlerAutocompleteProps> = ({
         return;
       }
       
-      // If there are filtered suggestions and no exact match, use first available
+      // If there are filtered suggestions but no exact match, use first available and submit immediately
       if (filteredBrawlers.length > 0 && currentInputText) {
         const firstAvailableBrawler = filteredBrawlers.find(b => !disabledBrawlers.includes(b.name));
         if (firstAvailableBrawler) {
