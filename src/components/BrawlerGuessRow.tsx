@@ -22,25 +22,26 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({
   guess, 
   correctAnswer,
   isMobile = false,
-  gridWidthClass = "w-[85%] mx-auto",
+  gridWidthClass = "w-full",  // Default to full width
   gridTemplateClass = "grid-cols-6"
 }) => {
   const [imageKey, setImageKey] = useState<string>(`${guess.name}-${Date.now()}`);
-  const [isAnimating, setIsAnimating] = useState(true);
+  const [isRevealed, setIsRevealed] = useState(false);
   
-  // Force image refresh when the guess changes
+  // Force image refresh and re-trigger animation when the guess changes
   useEffect(() => {
     setImageKey(`${guess.name}-${Date.now()}`);
+    setIsRevealed(false); // Reset animation state, class will be removed
+
+    // Use double requestAnimationFrame to ensure the class removal is processed before re-adding
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        setIsRevealed(true); // Re-add class to trigger animation
+      });
+    });
+
+    // No explicit cleanup needed for these one-shot rAF calls here
   }, [guess.name]);
-  
-  // Add animation effect that ends after the component mounts
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsAnimating(false);
-    }, 600);
-    
-    return () => clearTimeout(timer);
-  }, []);
   
   // Helper function to get class icon path
   const getClassIcon = (className: string): string => {
@@ -180,19 +181,32 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({
   // Get the portrait image path
   const portraitPath = getPortrait(guess.name);
   
-  // Now cards are perfect squares taking their full allotted width/height
-  const rowSpacingClass = isMobile ? "gap-1 mb-1" : "gap-3 mb-2"; // Spacing between rows
-  
+  // Animation delay for each card (in seconds)
+  const getDelay = (index: number) => `${index * 0.15}s`;
+
+  // Border style for card outlines
+  const cardBorderStyle = "border-2 border-[#2a2f6a]";
+
   return (
     <div className={cn(
-      "grid",
-      gridTemplateClass,
-      rowSpacingClass,
-      isAnimating && "animate-fade-in",
-      gridWidthClass // Use the same width as the headers
+      "grid", 
+      gridTemplateClass, 
+      isMobile ? "gap-1" : "gap-5", // Increased gap for desktop/tablet
+      "w-full", // Full width to match search bar
+      "px-1" // Add some side padding
     )}>
-      {/* Brawler portrait - removed extra div wrapper */}
-      <div className="w-full aspect-square bg-card rounded-lg flex items-center justify-center">
+      {/* Brawler Portrait */}
+      <div
+        style={{ animationDelay: getDelay(0) }}
+        className={cn(
+          "aspect-square rounded-lg overflow-hidden",
+          "flex items-center justify-center",
+          "bg-gray-800/50 backdrop-blur-sm",
+          cardBorderStyle, // Add border
+          "relative",
+          isRevealed && "animate-card-reveal"
+        )}
+      >
         <Image
           key={imageKey}
           src={portraitPath}
@@ -201,91 +215,94 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({
           imageType="portrait"
           className="w-full h-full object-cover"
         />
+        <div className="absolute inset-0 bg-black/30" />
       </div>
       
       {/* Rarity card */}
-      <div className="w-full aspect-square">
-        <div className={cn(
-          "w-full h-full flex items-center justify-center rounded-lg",
-          rarityClass
-        )}>
-          <div className={cn(
-            "text-center font-bold flex items-center justify-center w-[85%] h-[85%]",
-            rarityDisplay.className,
-            !isMobile && "text-3xl" // Larger text for desktop
-          )}>
-            {rarityDisplay.text}
-          </div>
-        </div>
+      <div
+        style={{ animationDelay: getDelay(1) }}
+        className={cn(
+          "aspect-square rounded-lg",
+          "flex items-center justify-center",
+          rarityClass,
+          cardBorderStyle, // Add border
+          "font-bold",
+          isRevealed && "animate-card-reveal"
+        )}
+      >
+        <span className={getTextDisplay(guess.rarity).className}>
+          {getTextDisplay(guess.rarity).text}
+        </span>
       </div>
       
       {/* Class card */}
-      <div className="w-full aspect-square">
-        <div className={cn(
-          "w-full h-full flex items-center justify-center rounded-lg",
-          classClass
-        )}>
-          <div className="w-[85%] h-[85%] flex items-center justify-center">
-            <img 
-              src={getClassIcon(guess.class)}
-              alt={guess.class}
-              className="w-full h-full object-contain"
-            />
-          </div>
-        </div>
+      <div
+        style={{ animationDelay: getDelay(2) }}
+        className={cn(
+          "aspect-square rounded-lg",
+          "flex items-center justify-center",
+          classClass,
+          cardBorderStyle, // Add border
+          "relative overflow-hidden",
+          isRevealed && "animate-card-reveal"
+        )}
+      >
+        <img
+          src={getClassIcon(guess.class)}
+          alt={guess.class}
+          className="w-[85%] h-[85%] object-contain"
+        />
       </div>
       
       {/* Movement card */}
-      <div className="w-full aspect-square">
-        <div className={cn(
-          "w-full h-full flex items-center justify-center rounded-lg",
-          movementClass
-        )}>
-          <TooltipProvider>
-            <Tooltip delayDuration={300}>
-              <TooltipTrigger asChild>
-                <div className="cursor-help flex items-center justify-center w-[85%] h-[85%]">
-                  {movementSpeedData.icons}
-                </div>
-              </TooltipTrigger>
-              <TooltipContent side="bottom" className="bg-black text-white text-xs px-2 py-1 border-none">
-                {movementSpeedData.tooltip}
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
+      <div
+        style={{ animationDelay: getDelay(3) }}
+        className={cn(
+          "aspect-square rounded-lg",
+          "flex items-center justify-center",
+          movementClass,
+          cardBorderStyle, // Add border
+          "font-bold",
+          isRevealed && "animate-card-reveal"
+        )}
+      >
+        <span className={getTextDisplay(guess.movement).className}>
+          {getTextDisplay(guess.movement).text}
+        </span>
       </div>
       
       {/* Range card */}
-      <div className="w-full aspect-square">
-        <div className={cn(
-          "w-full h-full flex items-center justify-center rounded-lg",
-          rangeClass
-        )}>
-          <div className={cn(
-            "text-center font-bold flex items-center justify-center w-[85%] h-[85%]",
-            rangeDisplay.className,
-            !isMobile && "text-3xl" // Larger text for desktop
-          )}>
-            {rangeDisplay.text}
-          </div>
-        </div>
+      <div
+        style={{ animationDelay: getDelay(4) }}
+        className={cn(
+          "aspect-square rounded-lg",
+          "flex items-center justify-center",
+          rangeClass,
+          cardBorderStyle, // Add border
+          "font-bold",
+          isRevealed && "animate-card-reveal"
+        )}
+      >
+        <span className={getTextDisplay(guess.range).className}>
+          {getTextDisplay(guess.range).text}
+        </span>
       </div>
       
       {/* Wallbreak card */}
-      <div className="w-full aspect-square">
-        <div className={cn(
-          "w-full h-full flex items-center justify-center rounded-lg",
-          wallbreakClass
-        )}>
-          <div className={cn(
-            "text-center font-bold flex items-center justify-center w-[85%] h-[85%]",
-            wallbreakDisplay.className,
-            !isMobile && "text-3xl" // Larger text for desktop
-          )}>
-            {wallbreakDisplay.text}
-          </div>
-        </div>
+      <div
+        style={{ animationDelay: getDelay(5) }}
+        className={cn(
+          "aspect-square rounded-lg",
+          "flex items-center justify-center",
+          wallbreakClass,
+          cardBorderStyle, // Add border
+          "font-bold",
+          isRevealed && "animate-card-reveal"
+        )}
+      >
+        <span className={getTextDisplay(wallbreakValue).className}>
+          {getTextDisplay(wallbreakValue).text}
+        </span>
       </div>
     </div>
   );

@@ -1,37 +1,37 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 222 95% 21%;
-    --foreground: 0 0% 95%;
+    /* Brawl Time Ninja Palette */
+    --background: 0 0% 10%; /* #1A1A1A */
+    --foreground: 0 0% 98%; /* #FAFAFA */
 
-    --card: 222 35% 25%;
-    --card-foreground: 0 0% 100%;
+    --card: 0 0% 12%; /* #1F1F1F */
+    --card-foreground: 0 0% 95%; /* #F2F2F2 */
 
-    --popover: 222 35% 25%;
-    --popover-foreground: 0 0% 100%;
+    --popover: 0 0% 10%; /* #1A1A1A */
+    --popover-foreground: 0 0% 95%; /* #F2F2F2 */
 
-    --primary: 198 100% 50%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 45 100% 51%; /* #FFC107 */
+    --primary-foreground: 0 0% 10%; /* #1A1A1A */
 
-    --secondary: 42 100% 50%;
-    --secondary-foreground: 222 95% 21%;
+    --secondary: 0 0% 20%; /* #333333 */
+    --secondary-foreground: 45 100% 51%; /* #FFC107 */
 
-    --muted: 222 25% 40%;
-    --muted-foreground: 0 0% 80%;
+    --muted: 0 0% 25%; /* #404040 */
+    --muted-foreground: 0 0% 60%; /* #999999 */
 
-    --accent: 266 100% 60%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 45 100% 51%; /* #FFC107 */
+    --accent-foreground: 0 0% 10%; /* #1A1A1A */
 
-    --destructive: 0 70% 60%;
-    --destructive-foreground: 0 0% 100%;
+    --destructive: 0 72% 51%; /* #E53E3E */
+    --destructive-foreground: 0 0% 98%; /* #FAFAFA */
 
-    --border: 198 100% 50% / 0.3;
-    --input: 222 35% 25%;
-    --ring: 198 100% 50%;
+    --border: 45 100% 51%; /* #FFC107 */
+    --input: 0 0% 15%; /* #262626 */
+    --ring: 45 100% 51%; /* #FFC107 */
 
     --radius: 0.75rem;
   }
@@ -43,7 +43,8 @@
   }
 
   body {
-    @apply bg-brawl-gradient bg-cover text-foreground min-h-screen;
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
     font-family: 'Inter', system-ui, sans-serif;
   }
   
@@ -57,38 +58,38 @@
 
 @layer components {
   .brawl-card {
-    @apply bg-card-gradient bg-cover shadow-lg border border-white/10 rounded-xl p-4 backdrop-blur-sm;
+    @apply bg-card text-card-foreground shadow-lg border border-primary/50 rounded-xl p-4 backdrop-blur-sm;
   }
   
   .brawl-button {
-    @apply px-6 py-3 bg-brawl-blue text-white font-bold rounded-xl shadow-md 
+    @apply px-6 py-3 bg-primary text-primary-foreground font-bold rounded-xl shadow-md 
            hover:shadow-lg transition-all duration-200 active:translate-y-0.5 
-           active:shadow-sm hover:brightness-110 flex items-center justify-center gap-2;
+           active:shadow-sm hover:bg-primary/90 flex items-center justify-center gap-2;
   }
 
   .brawl-button-secondary {
-    @apply px-6 py-3 bg-brawl-yellow text-brawl-dark font-bold rounded-xl shadow-md 
+    @apply px-6 py-3 bg-secondary text-secondary-foreground font-bold rounded-xl shadow-md 
            hover:shadow-lg transition-all duration-200 active:translate-y-0.5 
-           active:shadow-sm hover:brightness-110 flex items-center justify-center gap-2;
+           active:shadow-sm hover:bg-secondary/90 flex items-center justify-center gap-2;
   }
 
   .brawl-button-outline {
-    @apply px-6 py-3 bg-transparent border-2 border-white/30 text-white font-bold 
+    @apply px-6 py-3 bg-transparent border-2 border-primary text-primary font-bold 
            rounded-xl shadow-md hover:shadow-lg transition-all duration-200 
-           active:translate-y-0.5 active:shadow-sm hover:bg-white/10 flex items-center justify-center gap-2;
+           active:translate-y-0.5 active:shadow-sm hover:bg-primary/10 flex items-center justify-center gap-2;
   }
 
   .brawl-nav-button {
-    @apply p-2 rounded-full hover:bg-white/10 transition-all duration-200;
+    @apply p-2 rounded-full hover:bg-primary/10 transition-all duration-200 text-foreground hover:text-primary;
   }
   
   /* New layout classes */
   .glass-card {
-    @apply bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl overflow-hidden;
+    @apply bg-card/80 backdrop-blur-sm border border-primary/30 rounded-xl overflow-hidden;
   }
   
   .brawl-icon-box {
-    @apply flex items-center justify-center p-2 rounded-full bg-white/10;
+    @apply flex items-center justify-center p-2 rounded-full bg-secondary/50 text-primary;
   }
 }
 
@@ -99,68 +100,89 @@
   }
   
   .hover-glow {
-    @apply transition-all duration-300 hover:shadow-[0_0_15px_rgba(255,255,255,0.3)];
+    @apply transition-all duration-300 hover:shadow-[0_0_15px_hsl(var(--primary)/0.5)];
   }
   
   /* Specialized background gradients */
-  .bg-blue-gradient {
-    @apply bg-gradient-to-br from-brawl-blue to-brawl-blue/50;
+  .bg-primary-gradient {
+    @apply bg-gradient-to-br from-primary to-primary/70;
   }
   
-  .bg-yellow-gradient {
-    @apply bg-gradient-to-br from-brawl-yellow to-brawl-yellow/50;
+  .bg-secondary-gradient {
+    @apply bg-gradient-to-br from-secondary to-secondary/70;
   }
   
-  .bg-purple-gradient {
-    @apply bg-gradient-to-br from-brawl-purple to-brawl-purple/50;
+  .text-gradient-primary {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-yellow-300; /* Assuming yellow-300 for a lighter shade */
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-out;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.5s ease-out;
+  }
+
+  .animate-scale {
+    animation: scale 0.3s ease-out;
+  }
+
+  .glass-effect {
+    @apply bg-card/50 backdrop-blur-md;
+  }
+
+  .hover-lift {
+    @apply transition-transform duration-300 hover:-translate-y-1;
   }
 }
 
-/* Existing animations */
-@keyframes fade-in {
-  0% {
+@keyframes fadeIn {
+  from {
     opacity: 0;
-    transform: translateY(10px);
   }
-  100% {
+  to {
     opacity: 1;
-    transform: translateY(0);
   }
 }
 
-@keyframes bounce-slight {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-5px); }
-}
-
-@keyframes pulse-glow {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
-}
-
-@keyframes fade-out {
-  0% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  100% {
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
     opacity: 0;
-    transform: translateY(10px);
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
   }
 }
 
-.animate-fade-in {
-  animation: fade-in 0.3s ease-out;
+@keyframes scale {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
-.animate-fade-out {
-  animation: fade-out 0.3s ease-out;
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
 }
 
-.animate-bounce-slight {
-  animation: bounce-slight 2s ease-in-out infinite;
+::-webkit-scrollbar-track {
+  @apply bg-background/50;
 }
 
-.animate-pulse-glow {
-  animation: pulse-glow 2s ease-in-out infinite;
+::-webkit-scrollbar-thumb {
+  @apply bg-primary/50 rounded-full hover:bg-primary/70 transition-colors;
+}
+
+/* Focus styles */
+:focus-visible {
+  @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
 }

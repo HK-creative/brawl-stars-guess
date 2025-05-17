@@ -1,28 +1,29 @@
 import React, { useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Share, Download, Copy, Check } from 'lucide-react';
+import { Share, Download, Copy, Check, Trophy, X } from 'lucide-react';
 import { toast } from 'sonner';
 import html2canvas from 'html2canvas';
 import { getPortrait, DEFAULT_PORTRAIT } from '@/lib/image-helpers';
 import Image from '@/components/ui/image';
+import { cn } from '@/lib/utils';
 
 export interface ScoreShareCardProps {
-  mode: ShareResultModalMode; // Use the global type definition
+  mode: ShareResultModalMode;
   success: boolean;
   attempts: number;
   maxAttempts: number;
-  guessHistory?: boolean[]; // Array of guess results (true for correct, false for incorrect)
+  guessHistory?: boolean[];
   brawlerName?: string;
 }
 
 // Mode-specific icons and colors
 const modeConfig = {
-  classic: { icon: '🎯', color: 'bg-brawl-blue' },
-  audio: { icon: '🔊', color: 'bg-brawl-purple' },
-  gadget: { icon: '🧩', color: 'bg-brawl-yellow' },
-  starpower: { icon: '⭐', color: 'bg-brawl-green' },
-  voice: { icon: '💬', color: 'bg-brawl-red' },
-  endless: { icon: '♾️', color: 'bg-brawl-blue' }, // Added endless mode config
+  classic: { icon: '🎯', color: 'from-blue-500/20 to-blue-600/30', borderColor: 'border-blue-500/30' },
+  audio: { icon: '🔊', color: 'from-purple-500/20 to-purple-600/30', borderColor: 'border-purple-500/30' },
+  gadget: { icon: '🧩', color: 'from-yellow-500/20 to-yellow-600/30', borderColor: 'border-yellow-500/30' },
+  starpower: { icon: '⭐', color: 'from-green-500/20 to-green-600/30', borderColor: 'border-green-500/30' },
+  voice: { icon: '💬', color: 'from-red-500/20 to-red-600/30', borderColor: 'border-red-500/30' },
+  endless: { icon: '♾️', color: 'from-blue-500/20 to-blue-600/30', borderColor: 'border-blue-500/30' },
 };
 
 // Mode names for display
@@ -32,7 +33,7 @@ const modeNames = {
   gadget: 'Gadget Mode',
   starpower: 'Star Power Mode',
   voice: 'Voice Mode',
-  endless: 'Endless Mode', // Added endless mode name
+  endless: 'Endless Mode',
 };
 
 const ScoreShareCard = ({
@@ -66,7 +67,16 @@ const ScoreShareCard = ({
         squares.push(
           <div 
             key={i}
-            className={`w-6 h-6 ${guessHistory[i] ? 'bg-brawl-green' : 'bg-brawl-red'} rounded m-0.5`}
+            className={cn(
+              "w-6 h-6 rounded m-0.5 transform transition-all duration-300",
+              "animate-scale",
+              "shadow-lg",
+              guessHistory[i] 
+                ? "bg-gradient-to-br from-green-500 to-green-600" 
+                : "bg-gradient-to-br from-red-500 to-red-600",
+              "hover:scale-110"
+            )}
+            style={{ animationDelay: `${i * 100}ms` }}
           />
         );
       }
@@ -80,7 +90,15 @@ const ScoreShareCard = ({
         squares.push(
           <div 
             key={i}
-            className={`w-6 h-6 ${isCorrect ? 'bg-brawl-green' : 'bg-brawl-red'} rounded m-0.5`}
+            className={cn(
+              "w-6 h-6 rounded m-0.5 transform transition-all duration-300",
+              "animate-scale shadow-lg",
+              isCorrect 
+                ? "bg-gradient-to-br from-green-500 to-green-600" 
+                : "bg-gradient-to-br from-red-500 to-red-600",
+              "hover:scale-110"
+            )}
+            style={{ animationDelay: `${i * 100}ms` }}
           />
         );
       }
@@ -90,7 +108,13 @@ const ScoreShareCard = ({
         squares.push(
           <div 
             key={i + attempts}
-            className="w-6 h-6 bg-gray-600 rounded m-0.5"
+            className={cn(
+              "w-6 h-6 rounded m-0.5",
+              "bg-gradient-to-br from-gray-600/50 to-gray-700/50",
+              "animate-scale",
+              "shadow-inner"
+            )}
+            style={{ animationDelay: `${i * 100}ms` }}
           />
         );
       }
@@ -168,79 +192,75 @@ const ScoreShareCard = ({
   }
 
   return (
-    <div className="flex flex-col items-center">
-      {/* Card that will be captured as image */}
-      <div ref={shareCardRef} className="p-6 rounded-xl relative overflow-hidden" id="score-share-card">
-        <div className="absolute inset-0 bg-gradient-to-b from-brawl-dark/90 to-brawl-dark z-0"></div>
-        <div className="relative z-10">
-          <div className="flex justify-between items-center mb-4">
-            <div className="flex items-center">
-              <span className="text-2xl mr-2">🔥</span>
-              <span className="text-xl font-bold text-brawl-yellow">Brawldle</span>
-            </div>
-            <div className={`px-2 py-1 rounded ${modeConfig[mode].color} text-white flex items-center`}>
-              <span className="mr-1">{modeConfig[mode].icon}</span>
-              <span className="text-sm font-medium">{modeNames[mode]}</span>
-            </div>
-          </div>
-          
-          <div className="flex items-center mb-4">
-            {brawlerName && (
-              <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-gray-700 mr-3">
-                <Image
-                  src={portraitPath}
-                  alt={brawlerName}
-                  fallbackSrc={DEFAULT_PORTRAIT}
-                  imageType="portrait"
-                  className="w-full h-full"
-                />
-              </div>
-            )}
-            <div>
-              <h3 className={`text-xl font-bold mb-1 ${success ? 'text-brawl-green' : 'text-brawl-red'}`}>
-                {success ? 'Victory!' : 'Challenge Failed'}
-              </h3>
-              <p className="text-white/80">
-                {success 
-                  ? `Guessed in ${attempts} ${attempts === 1 ? 'try' : 'tries'}`
-                  : `Failed after ${attempts} ${attempts === 1 ? 'try' : 'tries'}`
-                }
-              </p>
-              {brawlerName && (
-                <p className="text-brawl-yellow font-medium mt-1">{brawlerName}</p>
-              )}
-            </div>
-          </div>
-          
-          <div className="flex flex-wrap mb-2">
-            {renderGuessSquares()}
-          </div>
-          
-          <div className="text-white/50 text-xs mt-2">
-            brawldle.com • {new Date().toLocaleDateString()}
-          </div>
+    <div className="flex flex-col items-center justify-center min-h-[420px]">
+      <div
+        ref={shareCardRef}
+        className={cn(
+          "relative w-full max-w-lg mx-auto p-8 rounded-3xl border-4 border-[#2a2f6a] shadow-2xl overflow-hidden",
+          "bg-gradient-to-br from-[#1e3a8a] via-[#2563eb] to-[#0ea5e9]"
+        )}
+        id="score-share-card"
+      >
+        {/* Header */}
+        <div className="flex flex-col items-center mb-6">
+          <span
+            className="text-4xl md:text-5xl font-extrabold text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] tracking-wide mb-2"
+            style={{ WebkitTextStroke: '2px #222', letterSpacing: '2px' }}
+          >
+            {success ? 'VICTORY!' : 'GAME OVER!'}
+          </span>
         </div>
-      </div>
-      
-      {/* Controls for sharing */}
-      <div className="flex gap-2 mt-4">
-        <Button
-          variant="outline"
-          className="gap-2 bg-white/10 border-white/20 hover:bg-white/20"
-          onClick={handleCopyImage}
-        >
-          {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-          <span>{copied ? "Copied!" : "Copy"}</span>
-        </Button>
-        
-        <Button
-          variant="outline" 
-          className="gap-2 bg-white/10 border-white/20 hover:bg-white/20"
-          onClick={handleDownloadImage}
-        >
-          <Download className="w-4 h-4" />
-          <span>Download</span>
-        </Button>
+
+        {/* Brawler Portrait */}
+        <div className="flex flex-col items-center mb-4">
+          <div className="w-28 h-28 md:w-32 md:h-32 rounded-2xl border-4 border-brawl-yellow shadow-xl bg-[#181c3a] flex items-center justify-center mb-2">
+            <Image
+              src={portraitPath}
+              alt={brawlerName}
+              fallbackSrc={DEFAULT_PORTRAIT}
+              imageType="portrait"
+              className="w-full h-full object-cover rounded-2xl"
+            />
+          </div>
+          {brawlerName && (
+            <div className="text-2xl md:text-3xl font-bold text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] tracking-wide mb-1" style={{ WebkitTextStroke: '1px #222' }}>
+              You guessed <span className="text-brawl-yellow">{brawlerName.toUpperCase()}</span>
+            </div>
+          )}
+        </div>
+
+        {/* Stats */}
+        <div className="flex flex-col items-center mb-6">
+          <div className="text-lg md:text-xl font-semibold text-white mb-1 drop-shadow-[0_1px_2px_rgba(0,0,0,0.7)]">
+            Number of tries: <span className="text-brawl-yellow font-extrabold">{attempts}</span>
+          </div>
+          {/* Placeholder for average tries, replace with prop if available */}
+          {typeof (window as any).brawldleAverageTries !== 'undefined' && (
+            <div className="text-base text-white/90">
+              Average # of tries today: <span className="text-brawl-blue font-bold">{(window as any).brawldleAverageTries}</span>
+            </div>
+          )}
+        </div>
+
+        {/* Buttons */}
+        <div className="flex flex-row justify-center gap-4 mt-2 mb-2">
+          <Button
+            variant="secondary"
+            className="bg-brawl-blue hover:bg-brawl-blue/90 text-white text-lg font-bold px-6 py-2 rounded-xl shadow-md flex items-center gap-2"
+            onClick={handleCopyImage}
+          >
+            {copied ? <Check className="w-5 h-5" /> : <Share className="w-5 h-5" />}
+            {copied ? 'Copied!' : 'Share'}
+          </Button>
+          <Button
+            variant="secondary"
+            className="bg-brawl-yellow hover:bg-brawl-yellow/90 text-black text-lg font-bold px-6 py-2 rounded-xl shadow-md flex items-center gap-2"
+            onClick={handleDownloadImage}
+          >
+            <Download className="w-5 h-5" />
+            Download
+          </Button>
+        </div>
       </div>
     </div>
   );

@@ -1,48 +1,71 @@
+import React, { useState, useEffect, useCallback } from 'react';
+import { ChevronRight } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
-import React, { useState, useEffect } from 'react';
+// Update the background image path to match case-sensitive filenames and lowercase extensions
+const pcBackgroundImage = '/BRAWLDLE-HOME-BACKGROUND.png';
+const mobileBackgroundImage = '/BRAWLDLE-HOME-BACKGROUND-MOBILE.png';
 
-// Background images - these are the images uploaded by the user
-const backgroundImages = [
-  '/lovable-uploads/de136078-ac44-407e-8905-7bd39a03588f.png',
-  '/lovable-uploads/97176570-4ec2-47bf-860e-58e4ed1c23bf.png',
-  '/lovable-uploads/754730fd-1eff-4214-95da-ed5b3ceeaeb6.png',
-  '/lovable-uploads/ab47c8b6-7cc0-423e-8d7f-6c6ebade9814.png',
-  '/lovable-uploads/65bba15f-20b0-4755-a5e9-ca559041ace8.png',
-  '/lovable-uploads/26da03d4-1e8c-454e-8dc0-10b4e60f3473.png',
-];
+interface RotatingBackgroundProps {
+  showNextButton?: boolean;
+}
 
-const RotatingBackground: React.FC = () => {
-  // Calculate which image to show based on the current date
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+const RotatingBackground: React.FC<RotatingBackgroundProps> = ({ showNextButton = false }) => {
+  const [dailyImageIndex, setDailyImageIndex] = useState(0);
+  const [currentDay, setCurrentDay] = useState(new Date().getDate());
   
   useEffect(() => {
-    // Get current date and calculate which image to display
-    // We use the day of the month modulo number of images
     const today = new Date();
-    const dayOfMonth = today.getDate(); // 1-31
-    const imageIndex = (dayOfMonth - 1) % backgroundImages.length;
-    setCurrentImageIndex(imageIndex);
+    const dayOfMonth = today.getDate();
+
+    if (dayOfMonth !== currentDay) {
+      setCurrentDay(dayOfMonth);
+    }
+
+    const intervalId = setInterval(() => {
+      const newDay = new Date().getDate();
+      if (newDay !== currentDay) {
+        setCurrentDay(newDay);
+      }
+    }, 60000 * 5);
+
+    return () => clearInterval(intervalId);
+
+  }, [currentDay]);
     
-    // For development/testing - change image every 10 seconds
-    // Uncomment this to test rotation
-    /*
-    const interval = setInterval(() => {
-      setCurrentImageIndex((prevIndex) => (prevIndex + 1) % backgroundImages.length);
-    }, 10000);
-    
-    return () => clearInterval(interval);
-    */
-  }, []);
+  // Add responsive styles for game mode cards
+  const cardStyles = {
+    mobile: {
+      padding: '8px',
+      margin: '4px',
+      fontSize: '14px',
+    },
+    pc: {
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      flexDirection: 'column',
+    },
+  };
+
+  // Apply styles based on screen size
+  const isMobile = window.innerWidth <= 768;
+  const cardStyle = isMobile ? cardStyles.mobile : cardStyles.pc;
+
+  const currentBackgroundImage = isMobile ? mobileBackgroundImage : pcBackgroundImage;
   
   return (
     <div 
-      className="fixed inset-0 z-0 bg-cover bg-center transition-opacity duration-1000"
+      className="fixed inset-0 z-0 bg-cover bg-center transition-all duration-1000 ease-in-out"
       style={{
-        backgroundImage: `linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.85)), url('${backgroundImages[currentImageIndex]}')`,
+        backgroundImage: `url('${currentBackgroundImage}')`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
       }}
-    />
+    >
+      {/* Dark overlay with increased opacity */}
+      <div className="absolute inset-0 bg-black/50" /> {/* 50% opacity black overlay */}
+    </div>
   );
 };
 

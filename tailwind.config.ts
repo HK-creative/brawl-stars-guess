@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -101,41 +100,39 @@ export default {
 					'50%': { transform: 'translateY(-5px)' },
 				},
 				'pulse-glow': {
-					'0%, 100%': { opacity: '1' },
-					'50%': { opacity: '0.7' },
+					'0%, 100%': {
+						opacity: '1',
+						transform: 'scale(1)',
+					},
+					'50%': {
+						opacity: '0.5',
+						transform: 'scale(1.05)',
+					},
 				},
 				'fade-in': {
-					'0%': {
-						opacity: '0',
-						transform: 'translateY(10px)'
-					},
-					'100%': {
-						opacity: '1',
-						transform: 'translateY(0)'
-					}
+					'0%': { opacity: '0', transform: 'translateY(10px)' },
+					'100%': { opacity: '1', transform: 'translateY(0)' },
 				},
 				'fade-out': {
-					'0%': {
-						opacity: '1',
-						transform: 'translateY(0)'
+					'0%': { opacity: '1' },
+					'100%': { opacity: '0' },
 					},
-					'100%': {
-						opacity: '0',
-						transform: 'translateY(10px)'
-					}
-				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
 				'bounce-slight': 'bounce-slight 2s ease-in-out infinite',
 				'pulse-glow': 'pulse-glow 2s ease-in-out infinite',
-				'fade-in': 'fade-in 0.3s ease-out',
-				'fade-out': 'fade-out 0.3s ease-out'
+				'fade-in': 'fade-in 1s ease-in-out forwards',
+				'fade-out': 'fade-out 0.3s ease-out',
+				'fade-in-delay': 'fade-in 1s ease-in-out 0.3s forwards',
+				'fade-in-delay-2': 'fade-in 1s ease-in-out 0.6s forwards',
 			},
 			backgroundImage: {
 				'brawl-gradient': 'linear-gradient(to bottom, #1a2151, #203189)',
-				'card-gradient': 'linear-gradient(to bottom, rgba(255,255,255,0.15), rgba(255,255,255,0.05))'
+				'card-gradient': 'linear-gradient(to bottom, rgba(255,255,255,0.15), rgba(255,255,255,0.05))',
+				'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+				'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
 			}
 		}
 	},
