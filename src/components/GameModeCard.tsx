@@ -1,10 +1,8 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { t } from '@/lib/i18n';
 import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
-import { useIsMobile } from '@/hooks/use-mobile';
 
 interface GameModeCardProps {
   mode?: string;
@@ -38,7 +36,6 @@ const GameModeCard: React.FC<GameModeCardProps> = ({
   previewImage,
   cardBackground
 }) => {
-  const isMobile = useIsMobile();
   const displayTitle = title || (mode ? t(`mode.${mode}`) : '');
   const linkPath = path || (mode ? `/${mode}` : '#');
   const isClickable = !comingSoon && enabled;
@@ -55,8 +52,7 @@ const GameModeCard: React.FC<GameModeCardProps> = ({
       )}
     >
       <Card className={cn(
-        "relative w-full",
-        "h-14", 
+        "relative w-full h-32 md:h-48",
         "overflow-hidden",
         "rounded-xl",
         "border-2 border-white/10",
@@ -96,50 +92,36 @@ const GameModeCard: React.FC<GameModeCardProps> = ({
         </div>
 
         {/* Content */}
-        <div className="relative h-full px-3 flex items-center justify-between z-10">
-          {/* Left Side: Icon + Mode Name */}
-          <div className="flex items-center space-x-2">
-            {/* Icon Container */}
-            <div className={cn(
-              "flex-shrink-0",
-              "w-8 h-8", 
-              "rounded-lg",
-              "bg-black/40 backdrop-blur-md",
-              "flex items-center justify-center",
-              "border border-white/20",
-              "shadow-lg",
-              "transition-transform duration-300",
-              "group-hover:scale-110",
-              "overflow-hidden"
-            )}>
-              {typeof icon === 'string' && icon.startsWith('/') ? (
-                <img src={icon} alt={`${displayTitle} icon`} className="w-6 h-6 object-contain" />
-              ) : (
-                <span className="text-lg">{icon}</span>
-              )}
-            </div>
-            
-            {/* Mode Name */}
-            <div>
-              <h3 className={cn(
-                "text-lg font-bold text-white",
-                "tracking-wide",
-                "drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]"
-              )}>
-                {displayTitle}
-              </h3>
-            </div>
-          </div>
-          
-          {/* Right side with language-appropriate direction */}
+        <div className="relative h-full p-4 md:p-6 flex items-center z-10">
+          {/* Icon Container */}
           <div className={cn(
-            "flex items-center",
-            "text-white text-xl font-bold"
+            "flex-shrink-0 mr-4 md:mr-6",
+            "w-16 h-16 md:w-24 md:h-24",
+            "rounded-xl",
+            "bg-black/40 backdrop-blur-md",
+            "flex items-center justify-center",
+            "border-2 border-white/20",
+            "shadow-lg",
+            "transition-transform duration-300",
+            "group-hover:scale-110",
+            "overflow-hidden"
           )}>
-            {mode === "classic" && "🏆"}
-            {mode === "audio" && "🎵"}
-            {mode === "gadget" && "🛠️"}
-            {mode === "starpower" && "⭐"}
+            {typeof icon === 'string' && icon.startsWith('/') ? (
+              <img src={icon} alt={`${displayTitle} icon`} className="w-full h-full object-contain p-1 md:p-2" />
+            ) : (
+              <span className="text-3xl md:text-5xl">{icon}</span>
+            )}
+          </div>
+
+          {/* Text Content */}
+          <div className="flex flex-col">
+            <h3 className={cn(
+              "text-xl md:text-4xl font-black text-white",
+              "tracking-wide",
+              "drop-shadow-[0_2px_3px_rgba(0,0,0,0.7)]"
+            )}>
+              {displayTitle}
+            </h3>
           </div>
         </div>
 
@@ -151,13 +133,13 @@ const GameModeCard: React.FC<GameModeCardProps> = ({
             "animate-fade-in"
           )}>
             <div className={cn(
-              "px-3 py-1",
+              "px-6 py-3",
               "bg-white/10",
-              "border border-white/30",
+              "border-2 border-white/30",
               "rounded-lg",
               "shadow-lg"
             )}>
-              <span className="text-sm font-bold text-white animate-pulse">
+              <span className="text-xl font-bold text-white animate-pulse">
                 {t('coming.soon')}
               </span>
             </div>

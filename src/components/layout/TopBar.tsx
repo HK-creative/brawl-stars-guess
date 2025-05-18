@@ -6,69 +6,81 @@ import { Home } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import Image from '@/components/ui/image';
-import { useIsMobile } from '@/hooks/use-mobile';
 
 const TopBar: React.FC = () => {
   const location = useLocation();
   const isHome = location.pathname === '/';
   const { language, changeLanguage } = useLanguage();
-  const isMobile = useIsMobile();
 
   const toggleLanguage = () => {
     changeLanguage(language === 'en' ? 'he' : 'en');
   };
 
   return (
-    <header className="relative z-20 border-b border-primary/30 bg-background/80 backdrop-blur-sm py-2">
-      <div className="flex items-center justify-between px-3">
-        <div className="flex items-center space-x-2">
+    <header className={cn(
+      "relative z-20",
+      "border-b border-primary/30",
+      "bg-background/80 backdrop-blur-sm"
+    )}>
+      <div className={cn(
+        "max-w-7xl mx-auto",
+        "px-4 sm:px-6 lg:px-8",
+        "h-16",
+        "flex items-center justify-between"
+      )}>
+        <div className="flex items-center space-x-4">
           {!isHome && (
             <Link to="/">
               <Button
                 variant="ghost"
-                size="sm"
-                className="text-foreground/70 hover:text-primary hover:bg-primary/10 border border-primary/30"
+                size="icon"
+                className={cn(
+                  "text-foreground/70 hover:text-primary",
+                  "hover:bg-primary/10",
+                  "border border-primary/30",
+                  "transition-all duration-300"
+                )}
               >
-                <Home className="h-4 w-4" />
+                <Home className="h-5 w-5" />
               </Button>
             </Link>
           )}
           
-          {isMobile && isHome ? (
-            <div className="flex items-center space-x-1">
-              <span className="text-xl animate-bounce transition-transform duration-300 hover:scale-110">
-                🔥
-              </span>
-              <h1 className="text-xl font-bold text-gradient-primary">
-                Brawldle
-              </h1>
-            </div>
-          ) : !isHome && (
-            <Link to="/" className="flex items-center space-x-1">
-              <span className="text-lg animate-bounce transition-transform duration-300 hover:scale-110">
-                🔥
-              </span>
-              <h1 className="text-lg font-bold text-gradient-primary">
-                Brawldle
-              </h1>
-            </Link>
-          )}
+          <Link to="/" className="flex items-center space-x-2">
+            <span className={cn(
+              "text-2xl",
+              "animate-bounce",
+              "transition-transform duration-300 hover:scale-110"
+            )}>
+              🔥
+            </span>
+            <h1 className={cn(
+              "text-xl font-bold",
+              "text-gradient-primary"
+            )}>
+              Brawldle
+            </h1>
+          </Link>
         </div>
 
-        <div className="flex items-center">
+        <div className="flex items-center space-x-4">
           <Button
             variant="ghost"
-            size="sm"
+            size="icon"
             onClick={toggleLanguage}
-            className="text-foreground/70 hover:text-primary hover:bg-primary/10 border border-primary/30 p-1"
+            className={cn(
+              "text-foreground/70 hover:text-primary",
+              "hover:bg-primary/10",
+              "border border-primary/30",
+              "transition-all duration-300"
+            )}
           >
             <Image 
               src={language === 'en' ? '/USAIcon.png' : '/IsraelIcon.png'} 
               alt={language === 'en' ? 'English' : 'Hebrew'}
-              width={18}
-              height={18}
-              className="w-5 h-5"
-              objectFit="contain"
+              width={20}
+              height={20}
+              className="w-5 h-5 object-contain"
             />
           </Button>
         </div>
