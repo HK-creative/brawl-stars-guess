@@ -1,8 +1,10 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { t } from '@/lib/i18n';
 import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface GameModeCardProps {
   mode?: string;
@@ -36,6 +38,7 @@ const GameModeCard: React.FC<GameModeCardProps> = ({
   previewImage,
   cardBackground
 }) => {
+  const isMobile = useIsMobile();
   const displayTitle = title || (mode ? t(`mode.${mode}`) : '');
   const linkPath = path || (mode ? `/${mode}` : '#');
   const isClickable = !comingSoon && enabled;
@@ -52,7 +55,8 @@ const GameModeCard: React.FC<GameModeCardProps> = ({
       )}
     >
       <Card className={cn(
-        "relative w-full h-32 md:h-48",
+        "relative w-full",
+        isMobile ? "h-16" : "h-32 md:h-48",
         "overflow-hidden",
         "rounded-xl",
         "border-2 border-white/10",
@@ -92,11 +96,11 @@ const GameModeCard: React.FC<GameModeCardProps> = ({
         </div>
 
         {/* Content */}
-        <div className="relative h-full p-4 md:p-6 flex items-center z-10">
+        <div className="relative h-full p-2 md:p-6 flex items-center z-10">
           {/* Icon Container */}
           <div className={cn(
-            "flex-shrink-0 mr-4 md:mr-6",
-            "w-16 h-16 md:w-24 md:h-24",
+            "flex-shrink-0 mr-3 md:mr-6",
+            isMobile ? "w-10 h-10" : "w-16 h-16 md:w-24 md:h-24",
             "rounded-xl",
             "bg-black/40 backdrop-blur-md",
             "flex items-center justify-center",
@@ -107,7 +111,7 @@ const GameModeCard: React.FC<GameModeCardProps> = ({
             "overflow-hidden"
           )}>
             {typeof icon === 'string' && icon.startsWith('/') ? (
-              <img src={icon} alt={`${displayTitle} icon`} className="w-full h-full object-contain p-1 md:p-2" />
+              <img src={icon} alt={`${displayTitle} icon`} className="w-full h-full object-contain p-1" />
             ) : (
               <span className="text-3xl md:text-5xl">{icon}</span>
             )}
@@ -116,7 +120,8 @@ const GameModeCard: React.FC<GameModeCardProps> = ({
           {/* Text Content */}
           <div className="flex flex-col">
             <h3 className={cn(
-              "text-xl md:text-4xl font-black text-white",
+              isMobile ? "text-xl" : "text-xl md:text-4xl",
+              "font-black text-white",
               "tracking-wide",
               "drop-shadow-[0_2px_3px_rgba(0,0,0,0.7)]"
             )}>
