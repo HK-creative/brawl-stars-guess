@@ -20,7 +20,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
     <ToastProvider>
       <div className={cn(
-        "flex min-h-screen max-h-screen flex-col",
+        "flex flex-col h-screen",
         "bg-background",
         "relative overflow-hidden"
       )}>
@@ -32,41 +32,33 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         
         <main className={cn(
           "flex-1 relative z-10",
-          "flex justify-center",
-          "overflow-hidden",
-          isMobile ? "px-2" : "px-4 sm:px-6 lg:px-8",
-          "animate-fade-in"
+          "flex flex-col",
+          "overflow-hidden"
         )}>
-          <div className={cn(
-            "w-full max-w-7xl mx-auto",
-            isMobile ? "py-2" : "py-6 space-y-8",
-            "overflow-hidden"
-          )}>
-            {children}
-          </div>
+          {children}
         </main>
         
-        <footer className={cn(
-          "relative z-10",
-          isMobile ? "py-2 px-2" : "py-4 px-4 sm:px-6 lg:px-8",
-          "border-t border-primary/30",
-          "bg-background/80 backdrop-blur-sm"
-        )}>
-          <div className="max-w-7xl mx-auto flex justify-between items-center">
-            <p className={cn(
-              isMobile ? "text-xs" : "text-sm",
-              "text-foreground/60"
-            )}>
-              Made with ❤️ for Brawl Stars fans
-            </p>
-            <p className={cn(
-              isMobile ? "text-xs" : "text-sm",
-              "text-foreground/60"
-            )}>
-              © {new Date().getFullYear()} Brawldle
-            </p>
-          </div>
-        </footer>
+        {!isMobile ? (
+          <footer className={cn(
+            "relative z-10",
+            "py-4 px-4",
+            "border-t border-primary/30",
+            "bg-background/80 backdrop-blur-sm"
+          )}>
+            <div className="max-w-7xl mx-auto flex justify-between items-center">
+              <p className="text-sm text-foreground/60">
+                Made with ❤️ for Brawl Stars fans
+              </p>
+              <p className="text-sm text-foreground/60">
+                © {new Date().getFullYear()} Brawldle
+              </p>
+            </div>
+          </footer>
+        ) : (
+          <footer className="relative z-10 py-1 text-center text-xs text-foreground/60 border-t border-primary/30 bg-background/80 backdrop-blur-sm">
+            © {new Date().getFullYear()} Brawldle
+          </footer>
+        )}
         
         <Toaster />
       </div>

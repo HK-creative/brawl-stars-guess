@@ -45,46 +45,39 @@ const Index = () => {
   const isMobile = useIsMobile();
   
   return (
-    <div className={cn(
-      "container mx-auto px-4", 
-      isMobile ? "py-1" : "py-6"
-    )}>
-      <div className={cn(
-        "max-w-4xl mx-auto",
-        isMobile ? "space-y-2" : "space-y-8"
-      )}>
-        {/* Header */}
-        {isMobile ? (
-          <div className="text-center mb-2">
-            <h1 className="text-3xl font-bold text-gradient-primary">
+    <div className="flex flex-col h-full justify-between">
+      <div className="flex-1 flex flex-col pb-4">
+        {/* Header - Simplified for mobile */}
+        <div className="text-center mb-2">
+          {isMobile ? (
+            <h1 className="text-3xl font-bold text-gradient-primary mb-1">
               Brawldle
             </h1>
-            <p className="text-sm text-muted-foreground">
-              The Ultimate Daily Brawl Stars Challenge
-            </p>
-          </div>
-        ) : (
-          <div className="text-center space-y-6 mb-12">
-            <SparklesPreview />
-          </div>
-        )}
+          ) : (
+            <div className="space-y-6 mb-12">
+              <SparklesPreview />
+            </div>
+          )}
+          <p className="text-sm text-primary/80 font-medium">
+            {t('home.tagline')}
+          </p>
+        </div>
 
         {/* Game Modes Grid */}
-        <div className={cn(
-          "grid grid-cols-1 gap-2",
-          "animate-fade-in"
-        )}>
-          {gameModes.map((mode) => (
-            <GameModeCard 
-              key={mode.mode}
-              mode={mode.mode}
-              description={mode.description}
-              icon={mode.icon}
-              bgColor={mode.bgColor}
-              previewImage={mode.previewImage}
-              cardBackground={mode.cardBackground}
-            />
-          ))}
+        <div className="flex-1 flex flex-col justify-center">
+          <div className="grid grid-cols-1 gap-3 px-2 py-2">
+            {gameModes.map((mode) => (
+              <GameModeCard 
+                key={mode.mode}
+                mode={mode.mode}
+                description={mode.description}
+                icon={mode.icon}
+                bgColor={mode.bgColor}
+                previewImage={mode.previewImage}
+                cardBackground={mode.cardBackground}
+              />
+            ))}
+          </div>
         </div>
       </div>
     </div>

@@ -56,7 +56,7 @@ const GameModeCard: React.FC<GameModeCardProps> = ({
     >
       <Card className={cn(
         "relative w-full",
-        isMobile ? "h-16" : "h-32 md:h-48",
+        "h-14", 
         "overflow-hidden",
         "rounded-xl",
         "border-2 border-white/10",
@@ -96,37 +96,50 @@ const GameModeCard: React.FC<GameModeCardProps> = ({
         </div>
 
         {/* Content */}
-        <div className="relative h-full p-2 md:p-6 flex items-center z-10">
-          {/* Icon Container */}
-          <div className={cn(
-            "flex-shrink-0 mr-3 md:mr-6",
-            isMobile ? "w-10 h-10" : "w-16 h-16 md:w-24 md:h-24",
-            "rounded-xl",
-            "bg-black/40 backdrop-blur-md",
-            "flex items-center justify-center",
-            "border-2 border-white/20",
-            "shadow-lg",
-            "transition-transform duration-300",
-            "group-hover:scale-110",
-            "overflow-hidden"
-          )}>
-            {typeof icon === 'string' && icon.startsWith('/') ? (
-              <img src={icon} alt={`${displayTitle} icon`} className="w-full h-full object-contain p-1" />
-            ) : (
-              <span className="text-3xl md:text-5xl">{icon}</span>
-            )}
-          </div>
-
-          {/* Text Content */}
-          <div className="flex flex-col">
-            <h3 className={cn(
-              isMobile ? "text-xl" : "text-xl md:text-4xl",
-              "font-black text-white",
-              "tracking-wide",
-              "drop-shadow-[0_2px_3px_rgba(0,0,0,0.7)]"
+        <div className="relative h-full px-3 flex items-center justify-between z-10">
+          {/* Left Side: Icon + Mode Name */}
+          <div className="flex items-center space-x-2">
+            {/* Icon Container */}
+            <div className={cn(
+              "flex-shrink-0",
+              "w-8 h-8", 
+              "rounded-lg",
+              "bg-black/40 backdrop-blur-md",
+              "flex items-center justify-center",
+              "border border-white/20",
+              "shadow-lg",
+              "transition-transform duration-300",
+              "group-hover:scale-110",
+              "overflow-hidden"
             )}>
-              {displayTitle}
-            </h3>
+              {typeof icon === 'string' && icon.startsWith('/') ? (
+                <img src={icon} alt={`${displayTitle} icon`} className="w-6 h-6 object-contain" />
+              ) : (
+                <span className="text-lg">{icon}</span>
+              )}
+            </div>
+            
+            {/* Mode Name */}
+            <div>
+              <h3 className={cn(
+                "text-lg font-bold text-white",
+                "tracking-wide",
+                "drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]"
+              )}>
+                {displayTitle}
+              </h3>
+            </div>
+          </div>
+          
+          {/* Right side with language-appropriate direction */}
+          <div className={cn(
+            "flex items-center",
+            "text-white text-xl font-bold"
+          )}>
+            {mode === "classic" && "🏆"}
+            {mode === "audio" && "🎵"}
+            {mode === "gadget" && "🛠️"}
+            {mode === "starpower" && "⭐"}
           </div>
         </div>
 
@@ -138,13 +151,13 @@ const GameModeCard: React.FC<GameModeCardProps> = ({
             "animate-fade-in"
           )}>
             <div className={cn(
-              "px-6 py-3",
+              "px-3 py-1",
               "bg-white/10",
-              "border-2 border-white/30",
+              "border border-white/30",
               "rounded-lg",
               "shadow-lg"
             )}>
-              <span className="text-xl font-bold text-white animate-pulse">
+              <span className="text-sm font-bold text-white animate-pulse">
                 {t('coming.soon')}
               </span>
             </div>

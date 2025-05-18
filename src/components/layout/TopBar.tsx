@@ -19,71 +19,55 @@ const TopBar: React.FC = () => {
   };
 
   return (
-    <header className={cn(
-      "relative z-20",
-      "border-b border-primary/30",
-      "bg-background/80 backdrop-blur-sm"
-    )}>
-      <div className={cn(
-        "max-w-7xl mx-auto",
-        isMobile ? "px-2" : "px-4 sm:px-6 lg:px-8",
-        isMobile ? "h-12" : "h-16",
-        "flex items-center justify-between"
-      )}>
+    <header className="relative z-20 border-b border-primary/30 bg-background/80 backdrop-blur-sm py-2">
+      <div className="flex items-center justify-between px-3">
         <div className="flex items-center space-x-2">
           {!isHome && (
             <Link to="/">
               <Button
                 variant="ghost"
-                size={isMobile ? "sm" : "icon"}
-                className={cn(
-                  "text-foreground/70 hover:text-primary",
-                  "hover:bg-primary/10",
-                  "border border-primary/30",
-                  "transition-all duration-300"
-                )}
+                size="sm"
+                className="text-foreground/70 hover:text-primary hover:bg-primary/10 border border-primary/30"
               >
-                <Home className={isMobile ? "h-4 w-4" : "h-5 w-5"} />
+                <Home className="h-4 w-4" />
               </Button>
             </Link>
           )}
           
-          <Link to="/" className="flex items-center space-x-2">
-            <span className={cn(
-              isMobile ? "text-xl" : "text-2xl",
-              "animate-bounce",
-              "transition-transform duration-300 hover:scale-110"
-            )}>
-              🔥
-            </span>
-            <h1 className={cn(
-              isMobile ? "text-lg" : "text-xl",
-              "font-bold",
-              "text-gradient-primary"
-            )}>
-              Brawldle
-            </h1>
-          </Link>
+          {isMobile && isHome ? (
+            <div className="flex items-center space-x-1">
+              <span className="text-xl animate-bounce transition-transform duration-300 hover:scale-110">
+                🔥
+              </span>
+              <h1 className="text-xl font-bold text-gradient-primary">
+                Brawldle
+              </h1>
+            </div>
+          ) : !isHome && (
+            <Link to="/" className="flex items-center space-x-1">
+              <span className="text-lg animate-bounce transition-transform duration-300 hover:scale-110">
+                🔥
+              </span>
+              <h1 className="text-lg font-bold text-gradient-primary">
+                Brawldle
+              </h1>
+            </Link>
+          )}
         </div>
 
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center">
           <Button
             variant="ghost"
-            size={isMobile ? "sm" : "icon"}
+            size="sm"
             onClick={toggleLanguage}
-            className={cn(
-              "text-foreground/70 hover:text-primary",
-              "hover:bg-primary/10",
-              "border border-primary/30",
-              "transition-all duration-300"
-            )}
+            className="text-foreground/70 hover:text-primary hover:bg-primary/10 border border-primary/30 p-1"
           >
             <Image 
               src={language === 'en' ? '/USAIcon.png' : '/IsraelIcon.png'} 
               alt={language === 'en' ? 'English' : 'Hebrew'}
-              width={isMobile ? 16 : 20}
-              height={isMobile ? 16 : 20}
-              className={isMobile ? "w-4 h-4" : "w-5 h-5"}
+              width={18}
+              height={18}
+              className="w-5 h-5"
               objectFit="contain"
             />
           </Button>
