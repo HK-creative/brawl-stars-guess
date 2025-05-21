@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import ModeDescription from '@/components/ModeDescription';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { t } from '@/lib/i18n';
@@ -7,10 +6,16 @@ import { toast } from 'sonner';
 import { fetchDailyChallenge, getTimeUntilNextChallenge } from '@/lib/daily-challenges';
 import BrawlerAutocomplete from '@/components/BrawlerAutocomplete';
 import { brawlers, Brawler } from '@/data/brawlers';
-import { Check, X, Volume2, Share2 } from 'lucide-react';
+import { Home, Check, X, Volume2, Share2 } from 'lucide-react';
 import ShareResultModal from '@/components/ShareResultModal';
-import { getPortrait } from '@/lib/image-helpers';
+import { getPortrait, DEFAULT_PIN } from '@/lib/image-helpers';
 import Image from '@/components/ui/image';
+import ReactConfetti from 'react-confetti';
+import VictorySection from '../components/VictoryPopup';
+import { useNavigate } from 'react-router-dom';
+import { cn } from '@/lib/utils';
+import GameModeTracker from '@/components/GameModeTracker';
+import HomeButton from '@/components/ui/home-button';
 
 interface VoiceChallenge {
   brawler: string;
@@ -22,16 +27,18 @@ const VoiceMode = () => {
   const [guesses, setGuesses] = useState<string[]>([]);
   const [dailyChallenge, setDailyChallenge] = useState<VoiceChallenge | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isCorrect, setIsCorrect] = useState(false);
-  const [attempts, setAttempts] = useState(0);
-  const [showResult, setShowResult] = useState(false);
-  const [timeUntilNext, setTimeUntilNext] = useState({ hours: 0, minutes: 0 });
+  const [timeUntilNext, setTimeUntilNext] = useState<{ hours: number, minutes: number, seconds: number }>({ hours: 0, minutes: 0, seconds: 0 });
   const [selectedBrawler, setSelectedBrawler] = useState<Brawler | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
-  
   const maxAttempts = 3;
+
+  const [isGameOver, setIsGameOver] = useState(false);
+  const [guessCount, setGuessCount] = useState(0);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const victoryRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
+  const [correctBrawlerNameForVictory, setCorrectBrawlerNameForVictory] = useState<string>("");
 
   useEffect(() => {
     const loadChallenge = async () => {
@@ -53,56 +60,71 @@ const VoiceMode = () => {
 
     loadChallenge();
 
-    // Update the countdown timer
-    const updateCountdown = () => {
-      setTimeUntilNext(getTimeUntilNextChallenge());
+    const update = () => {
+      const now = new Date();
+      const utc2Now = new Date(now.getTime() + (2 * 60 * 60 * 1000));
+      const tomorrow = new Date(utc2Now);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      tomorrow.setHours(0, 0, 0, 0);
+      const diffMs = tomorrow.getTime() - utc2Now.getTime();
+      const hours = Math.floor(diffMs / (1000 * 60 * 60));
+      const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diffMs % (1000 * 60)) / 1000);
+      setTimeUntilNext({ hours, minutes, seconds });
     };
-
-    // Update countdown immediately and then every minute
-    updateCountdown();
-    const intervalId = setInterval(updateCountdown, 60000);
-
-    return () => clearInterval(intervalId);
+    update();
+    const interval = setInterval(update, 1000);
+    return () => clearInterval(interval);
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
+  useEffect(() => {
+    if (isGameOver && victoryRef.current) {
+      victoryRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      setShowConfetti(true);
+      window.dispatchEvent(new CustomEvent('brawldle-mode-completed', { detail: { mode: 'voice' } }));
+    }
+  }, [isGameOver]);
+
+  const handleSubmit = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     if (!guess.trim() || !dailyChallenge) return;
-    
-    // Check if already guessed
-    if (guesses.includes(guess)) {
+    if (guesses.includes(guess.toLowerCase())) {
       toast.error('You already guessed this brawler!');
       return;
     }
-    
-    // Process the guess
+    const newGuessCount = guessCount + 1;
+    setGuessCount(newGuessCount);
+    setGuesses([...guesses, guess.toLowerCase()]);
     const isGuessCorrect = guess.toLowerCase() === dailyChallenge.brawler.toLowerCase();
-    const newAttempts = attempts + 1;
-    
-    setAttempts(newAttempts);
-    setGuesses([...guesses, guess]);
-    
+
     if (isGuessCorrect) {
-      setIsCorrect(true);
-      setShowResult(true);
+      setCorrectBrawlerNameForVictory(dailyChallenge.brawler);
+      setIsGameOver(true);
       toast.success('Correct! You found the right brawler!');
-    } else if (newAttempts >= maxAttempts) {
-      setShowResult(true);
+    } else if (newGuessCount >= maxAttempts) {
+      setCorrectBrawlerNameForVictory(dailyChallenge.brawler);
+      setIsGameOver(true);
       toast.error(`Out of attempts! The correct answer was ${dailyChallenge.brawler}.`);
     } else {
-      toast.error(`Wrong guess! ${maxAttempts - newAttempts} attempts left.`);
+      toast.error(`Wrong guess! ${maxAttempts - newGuessCount} attempts left.`);
     }
-    
     setGuess('');
     setSelectedBrawler(null);
   };
 
+  const resetGame = () => {
+    setGuess('');
+    setGuesses([]);
+    setIsGameOver(false);
+    setGuessCount(0);
+    setShowConfetti(false);
+    setSelectedBrawler(null);
+    toast.info("Game Reset (manual reload for new daily challenge for now)");
+  };
+
   const handlePlayVoice = () => {
-    // For now we'll just simulate the audio playback
     setIsPlaying(true);
     
-    // Add animation effect for "playing" state
     setTimeout(() => {
       setIsPlaying(false);
     }, 2000);
@@ -118,11 +140,10 @@ const VoiceMode = () => {
   };
   
   const handleShareResult = () => {
-    if (!showResult || !dailyChallenge) return;
+    if (!isGameOver || !dailyChallenge) return;
     setIsShareModalOpen(true);
   };
 
-  // Create an array of guess results for the share card
   const generateGuessResults = () => {
     if (!dailyChallenge) return [];
     
@@ -151,11 +172,27 @@ const VoiceMode = () => {
   }
 
   return (
-    <div>
-      <ModeDescription 
-        title={t('mode.voice')} 
-        description={t('mode.voice.description')}
-      />
+    <div className="min-h-screen flex flex-col px-1 py-4 md:py-8 bg-brawl-background">
+      {showConfetti && (
+        <ReactConfetti
+          width={window.innerWidth}
+          height={window.innerHeight}
+          recycle={false}
+          numberOfPieces={300}
+          onConfettiComplete={() => setShowConfetti(false)}
+          className="fixed top-0 left-0 w-full h-full z-[100] pointer-events-none"
+        />
+      )}
+      <HomeButton />
+
+      <div className="flex justify-center mb-4 animate-fade-in-down">
+        <GameModeTracker />
+      </div>
+      <div className="mb-4 md:mb-6">
+        <h1 className="text-3xl md:text-4xl font-bold text-brawl-yellow mb-1 text-center pt-10">
+          {t('mode.voice') || 'Voice Mode'}
+        </h1>
+      </div>
       
       <Card className="brawl-card mb-6 flex flex-col items-center justify-center py-8">
         <div 
@@ -175,108 +212,86 @@ const VoiceMode = () => {
         
         <div className="mt-4 px-4 py-2 bg-white/10 rounded-lg">
           <p className="text-white/70 italic">
-            {isCorrect || showResult ? `"${dailyChallenge.voiceLine}"` : `"..."`}
+            {isGameOver ? `"${dailyChallenge.voiceLine}"` : `"Guess the brawler by their voice!"`}
           </p>
         </div>
         
         <div className="mt-6 text-sm text-white/60">
-          Next challenge in: {timeUntilNext.hours}h {timeUntilNext.minutes}m
+          Next challenge in: {timeUntilNext.hours}h {timeUntilNext.minutes}m {timeUntilNext.seconds}s
         </div>
       </Card>
       
-      {showResult ? (
-        <div className="animate-fade-in">
-          <Card className="brawl-card p-6 mb-4 flex flex-col items-center">
-            <div className="flex items-center gap-4 mb-4">
-              <Image 
-                src={getPortrait(dailyChallenge.brawler)} 
-                alt={dailyChallenge.brawler}
-                className="w-16 h-16 rounded-full object-cover"
-              />
-              <div>
-                <h3 className="text-xl font-bold text-white">{dailyChallenge.brawler}</h3>
-                <p className="text-white/70 text-sm">"{dailyChallenge.voiceLine}"</p>
-              </div>
-            </div>
-            
-            <div className="flex gap-2 mt-2">
-              <Button 
-                variant="outline" 
-                className="gap-2 bg-white/10 border-white/20 hover:bg-white/20"
-                onClick={handlePlayVoice}
-              >
-                <Volume2 className="w-4 h-4" />
-                <span>Play Again</span>
-              </Button>
-              
-              <Button 
-                variant="outline" 
-                className="gap-2 bg-white/10 border-white/20 hover:bg-white/20"
-                onClick={handleShareResult}
-              >
-                <Share2 className="w-4 h-4" />
-                <span>Share Result</span>
-              </Button>
-            </div>
-          </Card>
-          
-          <div className="text-center text-white/80 mt-4">
-            <p>You got it {isCorrect ? 'right' : 'wrong'} in {attempts} {attempts === 1 ? 'attempt' : 'attempts'}!</p>
-          </div>
-        </div>
-      ) : (
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      {!isGameOver && (
+        <>
           <BrawlerAutocomplete
-            brawlers={brawlers}
+            brawlers={brawlers.filter(b => !guesses.includes(b.name.toLowerCase()))}
             value={guess}
             onChange={setGuess}
             onSelect={handleBrawlerSelect}
-            disabled={showResult}
+            onSubmit={handleSubmit}
+            disabled={isGameOver}
           />
           
-          <Button 
-            type="submit" 
-            className="brawl-button"
-            disabled={showResult || !guess}
-          >
-            {t('submit.guess')}
-          </Button>
-          
-          {guesses.length > 0 && (
-            <div className="mt-4">
-              <h3 className="text-white font-medium mb-2">Previous Guesses:</h3>
-              <div className="space-y-2">
-                {guesses.map((pastGuess, index) => (
-                  <div 
-                    key={index} 
-                    className="flex items-center p-2 rounded bg-white/10"
-                  >
-                    <span className="mr-2">
-                      {pastGuess.toLowerCase() === dailyChallenge.brawler.toLowerCase() ? (
-                        <Check className="w-5 h-5 text-brawl-green" />
-                      ) : (
-                        <X className="w-5 h-5 text-brawl-red" />
-                      )}
-                    </span>
-                    <span className="text-white">{pastGuess}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
+          {selectedBrawler && (
+            <Button onClick={() => handleSubmit()} className="mt-3 bg-brawl-green hover:bg-brawl-green/90 text-white w-full max-w-xs mx-auto">
+              Confirm Guess: {selectedBrawler.name}
+            </Button>
           )}
-        </form>
+          
+          <p className="text-center text-white mt-2">Attempts: {guessCount}/{maxAttempts}</p>
+        </>
       )}
       
-      {/* Share Result Modal */}
+      {!isGameOver && guesses.length > 0 && (
+        <div className="mt-4 w-full max-w-md mx-auto px-2">
+          <h3 className="text-white font-medium mb-2">Previous Guesses:</h3>
+          <div className="space-y-2">
+            {guesses.map((pastGuess, index) => (
+              <div 
+                key={index} 
+                className={cn("flex items-center p-2 rounded bg-white/10", 
+                            dailyChallenge && pastGuess.toLowerCase() === dailyChallenge.brawler.toLowerCase() ? 'border border-green-500' : 'border border-red-500')}>
+                <span className="mr-2">
+                  {pastGuess.toLowerCase() === dailyChallenge.brawler.toLowerCase() ? (
+                    <Check className="w-5 h-5 text-brawl-green" />
+                  ) : (
+                    <X className="w-5 h-5 text-brawl-red" />
+                  )}
+                </span>
+                <span className="text-white">{pastGuess}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      
+      {isGameOver && dailyChallenge && (
+        <div ref={victoryRef} className="mt-6 w-full max-w-xl mx-auto px-2">
+          <VictorySection
+            brawlerName={correctBrawlerNameForVictory}
+            brawlerPortrait={getPortrait(correctBrawlerNameForVictory)}
+            tries={guessCount}
+            mode="voice"
+            nextModeKey="classic"
+            onNextMode={() => { navigate('/classic'); resetGame(); }}
+            nextBrawlerIn={timeUntilNext}
+            onShare={handleShareResult}
+          />
+          <Button onClick={resetGame} className="mt-4 w-full bg-brawl-blue hover:bg-brawl-blue/90">
+            Play Again (New Daily Challenge on Reload)
+          </Button>
+        </div>
+      )}
+      
       <ShareResultModal 
         isOpen={isShareModalOpen}
         onClose={() => setIsShareModalOpen(false)}
         mode="voice"
-        success={isCorrect}
-        attempts={attempts}
+        success={isGameOver && correctBrawlerNameForVictory === dailyChallenge.brawler}
+        attempts={guessCount}
         maxAttempts={maxAttempts}
         guessHistory={generateGuessResults()}
-        brawlerName={dailyChallenge?.brawler}
+        brawlerName={dailyChallenge?.brawler || ""}
       />
     </div>
   );

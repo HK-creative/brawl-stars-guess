@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect } from 'react';
 import { Brawler } from '@/data/brawlers';
-import { getPortrait, DEFAULT_PORTRAIT } from '@/lib/image-helpers';
+import { getPortrait, DEFAULT_PORTRAIT, getPin, DEFAULT_PIN } from '@/lib/image-helpers';
 import Image from '@/components/ui/image';
 import { cn } from '@/lib/utils';
 import {
@@ -10,6 +9,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { brawlers } from '@/data/brawlers';
 
 interface BrawlerGuessRowProps {
   guess: Brawler;
@@ -121,195 +121,334 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({
   
   // Comparison logic for attributes
   const compareAttribute = (guessValue: string, correctValue: string): string => {
-    if (guessValue === correctValue) return 'bg-brawl-green text-white';
-    
-    if (
-      (guessValue.includes("Fast") && correctValue.includes("Fast")) ||
-      (guessValue.includes("Normal") && correctValue.includes("Normal")) ||
-      (guessValue.includes("Slow") && correctValue.includes("Slow")) ||
-      (guessValue.includes("Short") && correctValue.includes("Short")) ||
-      (guessValue.includes("Medium") && correctValue.includes("Medium")) ||
-      (guessValue.includes("Long") && correctValue.includes("Long"))
-    ) {
-      return 'bg-brawl-yellow text-white';
+    if (guessValue === correctValue) {
+      return 'bg-brawl-green text-white'; // Green for exact match
     }
     
-    return 'bg-brawl-red text-white';
+    // For the more nuanced comparisons, you could return different visual cues
+    // but for simplicity, we'll just use red for incorrect
+    return 'bg-brawl-red text-white'; // Red for incorrect
   };
 
   // Helper function to get abbreviation and determine text size based on length
   const getTextDisplay = (text: string): { text: string, className: string } => {
-    // Special abbreviations based on Brawl Stars conventions
-    if (text === "Mythic") return { text: "Myt", className: "text-2xl" };
-    if (text === "Super Rare") return { text: "Sup", className: "text-2xl" };
-    if (text === "Legendary") return { text: "Leg", className: "text-2xl" };
-    if (text === "Epic") return { text: "Epi", className: "text-2xl" };
-    if (text === "Rare") return { text: "Rar", className: "text-2xl" };
-    if (text === "Chromatic") return { text: "Chr", className: "text-2xl" };
-    if (text === "Short") return { text: "Short", className: "text-2xl" };
-    if (text === "Medium") return { text: "Med", className: "text-2xl" };
-    if (text === "Long") return { text: "Long", className: "text-2xl" };
-    if (text === "Very Long") return { text: "V.Long", className: "text-xl" };
-    if (text === "Normal") return { text: "Nor", className: "text-2xl" };
-    if (text === "Very Fast") return { text: "V.Fast", className: "text-xl" };
-    if (text === "Fast") return { text: "Fast", className: "text-2xl" };
-    if (text === "Slow") return { text: "Slow", className: "text-2xl" };
-    if (text === "Yes") return { text: "Yes", className: "text-2xl" };
-    if (text === "No") return { text: "No", className: "text-2xl" };
+    // Short abbreviations for long texts
+    const abbrevMap: Record<string, string> = {
+      "Very Long": "V.Long",
+      "Very Short": "V.Short",
+      "Very Fast": "V.Fast",
+      "Very Slow": "V.Slow",
+    };
     
-    // Dynamic sizing based on text length
-    if (text.length <= 3) return { text, className: "text-2xl" };
-    if (text.length <= 5) return { text, className: "text-xl" };
-    if (text.length <= 7) return { text, className: "text-lg" };
-    return { text: text.substring(0, 6), className: "text-base" };
+    // Get abbreviation if it exists, otherwise use original text
+    const displayText = abbrevMap[text] || text;
+    
+    // Determine text size class based on length
+    let textClass = 'text-2xl';
+    if (displayText.length > 6) {
+      textClass = isMobile ? 'text-sm' : 'text-xl';
+    } else if (displayText.length > 4) {
+      textClass = isMobile ? 'text-base' : 'text-2xl';
+    } else {
+      textClass = isMobile ? 'text-xl' : 'text-3xl';
+    }
+    
+    return { text: displayText, className: textClass };
   };
 
   // Get comparison results for each attribute
   const rarityClass = compareAttribute(guess.rarity, correctAnswer.rarity);
   const classClass = guess.class === correctAnswer.class ? 'bg-brawl-green' : 'bg-brawl-red';
-  const movementClass = compareAttribute(guess.movement, correctAnswer.movement);
   const rangeClass = compareAttribute(guess.range, correctAnswer.range);
+  const wallbreakClass = compareAttribute(guess.wallbreak, correctAnswer.wallbreak);
   
-  // For wallbreak attribute
-  const wallbreakValue = guess.wallbreak || "No";
-  const correctWallbreakValue = correctAnswer.wallbreak || "No";
-  const wallbreakClass = wallbreakValue === correctWallbreakValue ? 'bg-brawl-green text-white' : 'bg-brawl-red text-white';
-
-  // Get movement speed icons and tooltip text
-  const movementSpeedData = getMovementSpeedIconsAndLabel(guess.movement);
-
-  // Get text display for each attribute
-  const rarityDisplay = getTextDisplay(guess.rarity);
-  const rangeDisplay = getTextDisplay(guess.range);
-  const wallbreakDisplay = getTextDisplay(wallbreakValue);
+  // Release year color
+  const guessYear = parseInt(guess.releaseYear?.toString() || '0');
+  const correctYear = parseInt(correctAnswer.releaseYear?.toString() || '0');
+  let releaseYearClass = 'bg-brawl-red text-white'; // Default to red (incorrect)
+  
+  if (guessYear === correctYear) releaseYearClass = 'bg-brawl-green text-white'; // Green for exact match
+  else if (Math.abs(guessYear - correctYear) === 1) releaseYearClass = 'bg-brawl-yellow text-white';
   
   // Get the portrait image path
   const portraitPath = getPortrait(guess.name);
   
   // Animation delay for each card (in seconds)
-  const getDelay = (index: number) => `${index * 0.15}s`;
+  const getDelay = (index: number) => `${0.1 + index * 0.05}s`;
 
   // Border style for card outlines
   const cardBorderStyle = "border-2 border-[#2a2f6a]";
 
+  // --- ARROW HELPERS ---
+  // Order arrays for comparison
+  const rarityOrder = ["Starter", "Rare", "Super Rare", "Epic", "Mythic", "Legendary"];
+  const rangeOrder = ["Short", "Normal", "Long", "Very Long"];
+
+  // Returns 'up', 'down', or null
+  const getArrowDirection = (orderArr: string[], guessVal: string, correctVal: string) => {
+    const guessIndex = orderArr.indexOf(guessVal);
+    const correctIndex = orderArr.indexOf(correctVal);
+    if (guessIndex < correctIndex) return 'up';
+    if (guessIndex > correctIndex) return 'down';
+    return null;
+  };
+  // For release year
+  const getYearArrowDirection = (guessYear: number, correctYear: number) => {
+    if (guessYear < correctYear) return 'up';
+    if (guessYear > correctYear) return 'down';
+    return null;
+  };
+
+  // SVG arrow component (true arrow, not triangle)
+  const ArrowBg = ({ direction }: { direction: 'up' | 'down' }) => (
+    <svg 
+      viewBox="0 0 100 100" 
+      className="absolute inset-0 w-full h-full" 
+      style={{ zIndex: 0 }}
+    >
+      {direction === 'up' ? (
+        <>
+          {/* Arrow shaft */}
+          <rect x="44" y="30" width="12" height="45" rx="5" fill="#7f1d1d" />
+          {/* Arrow head */}
+          <polygon points="50,10 80,40 65,40 65,75 35,75 35,40 20,40" fill="#7f1d1d" />
+        </>
+      ) : (
+        <>
+          {/* Arrow shaft */}
+          <rect x="44" y="25" width="12" height="45" rx="5" fill="#7f1d1d" />
+          {/* Arrow head */}
+          <polygon points="50,90 80,60 65,60 65,25 35,25 35,60 20,60" fill="#7f1d1d" />
+        </>
+      )}
+    </svg>
+  );
+
   return (
-    <div className={cn(
-      "grid", 
-      gridTemplateClass, 
-      isMobile ? "gap-1" : "gap-5", // Increased gap for desktop/tablet
-      "w-full", // Full width to match search bar
-      "px-1" // Add some side padding
-    )}>
-      {/* Brawler Portrait */}
-      <div
-        style={{ animationDelay: getDelay(0) }}
-        className={cn(
-          "aspect-square rounded-lg overflow-hidden",
-          "flex items-center justify-center",
-          "bg-gray-800/50 backdrop-blur-sm",
-          cardBorderStyle, // Add border
-          "relative",
-          isNew && isRevealed && "animate-card-reveal" // Only animate if this is a new guess and revealed
-        )}
-      >
-        <Image
-          key={imageKey}
-          src={portraitPath}
-          alt={guess.name}
-          fallbackSrc={DEFAULT_PORTRAIT}
-          imageType="portrait"
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-black/30" />
+    <div className="w-full flex justify-center"> 
+      <div className={cn(
+        "grid",
+        gridTemplateClass,
+        isMobile ? "gap-1" : "gap-5", // Match exactly with the labels (gap-5 on desktop)
+        "w-full px-1" // Match exactly with the labels
+      )}>
+          {/* Brawler Portrait */}
+          <div className="aspect-square">
+            <div 
+              style={{ animationDelay: getDelay(0) }}
+              className={cn(
+                "h-full w-full rounded-lg overflow-hidden",
+                "flex items-center justify-center",
+                "bg-gray-800/50 backdrop-blur-sm",
+                cardBorderStyle,
+                "relative",
+                isNew && isRevealed && "animate-card-reveal"
+              )}
+            >
+              <Image
+                key={imageKey}
+                src={portraitPath}
+                alt={guess.name}
+                fallbackSrc={DEFAULT_PORTRAIT}
+                imageType="portrait"
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-black/30" />
+            </div>
+          </div>
+        
+          {/* Rarity card */}
+          <div className="aspect-square">
+            <div
+              style={{ animationDelay: getDelay(1) }}
+              className={cn(
+                "h-full w-full rounded-lg",
+                "flex items-center justify-center",
+                "relative", // for arrow
+                rarityClass,
+                cardBorderStyle, // Add border
+                "font-bold",
+                isNew && isRevealed && "animate-card-reveal" // Only animate if this is a new guess and revealed
+              )}
+            >
+              {/* Arrow background if not green */}
+              {rarityClass !== 'bg-brawl-green text-white' && getArrowDirection(rarityOrder, guess.rarity, correctAnswer.rarity) && (
+                <ArrowBg direction={getArrowDirection(rarityOrder, guess.rarity, correctAnswer.rarity) as 'up' | 'down'} />
+              )}
+              <span
+                className={cn(
+                  // Responsive text size for longer rarity names
+                  isMobile
+                    ? (guess.rarity.length > 8 ? 'text-base' : guess.rarity.length > 5 ? 'text-lg' : 'text-2xl')
+                    : (guess.rarity.length > 8 ? 'text-xl' : guess.rarity.length > 5 ? 'text-2xl' : 'text-4xl'),
+                  'font-bold',
+                )}
+                style={{ position: 'relative', zIndex: 1 }}
+              >
+                {guess.rarity}
+              </span>
+            </div>
+          </div>
+        
+          {/* Class card */}
+          <div className="aspect-square">
+            <div
+              style={{ animationDelay: getDelay(2) }}
+              className={cn(
+                "h-full w-full rounded-lg",
+                "flex items-center justify-center",
+                classClass,
+                cardBorderStyle, // Add border
+                "relative overflow-visible",
+                isNew && isRevealed && "animate-card-reveal"
+              )}
+            >
+              {/* Portal container ensures the tooltip renders at the top level of the DOM */}
+              <div className="relative w-full h-full flex items-center justify-center" style={{ isolation: 'isolate' }}>
+                <TooltipProvider delayDuration={0}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="w-full h-full flex items-center justify-center">
+                        <img
+                          src={getClassIcon(guess.class)}
+                          alt={guess.class}
+                          className={cn(
+                            isMobile ? 'w-[85%] h-[85%]' : 'w-[65%] h-[65%]',
+                            'object-contain',
+                            'cursor-pointer'
+                          )}
+                          onTouchStart={(e) => {
+                            // This adds touch support for mobile
+                            const target = e.currentTarget;
+                            target.click(); // Simulate click on touch to trigger the tooltip
+                          }}
+                        />
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent
+                      side="bottom"
+                      sideOffset={12}
+                      className="min-w-[240px] max-w-[380px] p-5 bg-black/95 border-4 border-yellow-400 rounded-2xl shadow-2xl flex flex-col items-center"
+                      style={{ 
+                        boxShadow: '0 8px 32px 0 rgba(0,0,0,0.45)',
+                        position: 'fixed', // Force fixed positioning
+                        zIndex: 10000 // Extremely high z-index to ensure it's on top
+                      }}
+                      onPointerDownOutside={(e) => {
+                        // This helps with keeping the tooltip open until clicked elsewhere
+                        e.preventDefault();
+                      }}
+                    >
+                      <div className="text-xl font-extrabold text-brawl-yellow text-center mb-4 tracking-wide drop-shadow">
+                        {guess.class}
+                      </div>
+                      <div className="grid grid-cols-4 gap-4 justify-center items-center w-full px-2">
+                        {brawlers.filter(b => b.class === guess.class).map(b => (
+                          <div key={b.name} className="flex flex-col items-center">
+                            <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-yellow-400 bg-black">
+                              <Image
+                                src={getPin(b.name)}
+                                alt={b.name}
+                                fallbackSrc={DEFAULT_PIN}
+                                imageType="pin"
+                                className="w-full h-full object-contain"
+                              />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+            </div>
+          </div>
+        
+          {/* Range card */}
+          <div className="aspect-square">
+            <div
+              style={{ animationDelay: getDelay(3) }}
+              className={cn(
+                "h-full w-full rounded-lg",
+                "flex items-center justify-center",
+                "relative", // for arrow
+                rangeClass,
+                cardBorderStyle, // Add border
+                "font-bold",
+                isNew && isRevealed && "animate-card-reveal" // Only animate if this is a new guess and revealed
+              )}
+            >
+              {/* Arrow background if not green */}
+              {rangeClass !== 'bg-brawl-green text-white' && getArrowDirection(rangeOrder, guess.range, correctAnswer.range) && (
+                <ArrowBg direction={getArrowDirection(rangeOrder, guess.range, correctAnswer.range) as 'up' | 'down'} />
+              )}
+              <span
+                className={cn(
+                  isMobile ? getTextDisplay(guess.range).className : 'text-3xl',
+                  'font-bold'
+                )}
+                style={{ position: 'relative', zIndex: 1 }}
+              >
+                {getTextDisplay(guess.range).text}
+              </span>
+            </div>
+          </div>
+        
+          {/* Wallbreak card */}
+          <div className="aspect-square">
+            <div
+              style={{ animationDelay: getDelay(4) }}
+              className={cn(
+                "h-full w-full rounded-lg",
+                "flex items-center justify-center",
+                wallbreakClass,
+                cardBorderStyle, // Add border
+                "font-bold",
+                isNew && isRevealed && "animate-card-reveal" // Only animate if this is a new guess and revealed
+              )}
+            >
+              <span
+                className={cn(
+                  isMobile ? getTextDisplay(guess.wallbreak).className : 'text-3xl',
+                  'font-bold'
+                )}
+              >
+                {getTextDisplay(guess.wallbreak).text}
+              </span>
+            </div>
+          </div>
+        
+          {/* Release Year card (last) */}
+          <div className="aspect-square">
+            <div
+              style={{ animationDelay: getDelay(5) }}
+              className={cn(
+                "h-full w-full rounded-lg",
+                "flex items-center justify-center",
+                "relative", // for arrow
+                releaseYearClass,
+                cardBorderStyle, // Add border
+                "font-bold",
+                isNew && isRevealed && "animate-card-reveal" // Only animate if this is a new guess and revealed
+              )}
+            >
+              {/* Arrow background if not green */}
+              {releaseYearClass !== 'bg-brawl-green text-white' && getYearArrowDirection(guessYear, correctYear) && (
+                <ArrowBg direction={getYearArrowDirection(guessYear, correctYear) as 'up' | 'down'} />
+              )}
+              <span
+                className={cn(
+                  isMobile ? 'text-xl' : 'text-4xl',
+                  'font-bold'
+                )}
+                style={{ position: 'relative', zIndex: 1 }}
+              >
+                {guessYear || '?'}
+              </span>
+            </div>
+          </div>
+        </div>
       </div>
-      
-      {/* Rarity card */}
-      <div
-        style={{ animationDelay: getDelay(1) }}
-        className={cn(
-          "aspect-square rounded-lg",
-          "flex items-center justify-center",
-          rarityClass,
-          cardBorderStyle, // Add border
-          "font-bold",
-          isNew && isRevealed && "animate-card-reveal" // Only animate if this is a new guess and revealed
-        )}
-      >
-        <span className={getTextDisplay(guess.rarity).className}>
-          {getTextDisplay(guess.rarity).text}
-        </span>
-      </div>
-      
-      {/* Class card */}
-      <div
-        style={{ animationDelay: getDelay(2) }}
-        className={cn(
-          "aspect-square rounded-lg",
-          "flex items-center justify-center",
-          classClass,
-          cardBorderStyle, // Add border
-          "relative overflow-hidden",
-          isNew && isRevealed && "animate-card-reveal" // Only animate if this is a new guess and revealed
-        )}
-      >
-        <img
-          src={getClassIcon(guess.class)}
-          alt={guess.class}
-          className="w-[85%] h-[85%] object-contain"
-        />
-      </div>
-      
-      {/* Movement card */}
-      <div
-        style={{ animationDelay: getDelay(3) }}
-        className={cn(
-          "aspect-square rounded-lg",
-          "flex items-center justify-center",
-          movementClass,
-          cardBorderStyle, // Add border
-          "font-bold",
-          isNew && isRevealed && "animate-card-reveal" // Only animate if this is a new guess and revealed
-        )}
-      >
-        <span className={getTextDisplay(guess.movement).className}>
-          {getTextDisplay(guess.movement).text}
-        </span>
-      </div>
-      
-      {/* Range card */}
-      <div
-        style={{ animationDelay: getDelay(4) }}
-        className={cn(
-          "aspect-square rounded-lg",
-          "flex items-center justify-center",
-          rangeClass,
-          cardBorderStyle, // Add border
-          "font-bold",
-          isNew && isRevealed && "animate-card-reveal" // Only animate if this is a new guess and revealed
-        )}
-      >
-        <span className={getTextDisplay(guess.range).className}>
-          {getTextDisplay(guess.range).text}
-        </span>
-      </div>
-      
-      {/* Wallbreak card */}
-      <div
-        style={{ animationDelay: getDelay(5) }}
-        className={cn(
-          "aspect-square rounded-lg",
-          "flex items-center justify-center",
-          wallbreakClass,
-          cardBorderStyle, // Add border
-          "font-bold",
-          isNew && isRevealed && "animate-card-reveal" // Only animate if this is a new guess and revealed
-        )}
-      >
-        <span className={getTextDisplay(wallbreakValue).className}>
-          {getTextDisplay(wallbreakValue).text}
-        </span>
-      </div>
-    </div>
   );
 };
 

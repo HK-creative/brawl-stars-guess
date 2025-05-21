@@ -1,0 +1,286 @@
+import React from 'react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog';
+import { useAuthModal } from '@/contexts/AuthModalContext';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { toast } from 'sonner';
+import { useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { Loader2, X, LogIn, Mail, Lock } from 'lucide-react';
+import { DialogClose } from '@radix-ui/react-dialog';
+
+const AuthModal: React.FC = () => {
+  const { isAuthModalOpen, closeAuthModal, authModalMode, openAuthModal } = useAuthModal();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [resetSent, setResetSent] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    
+    if (authModalMode !== 'reset' && (!email || !password)) {
+      setError('Please fill in all fields');
+      return;
+    }
+    if (!email) {
+      setError('Please enter your email');
+      return;
+    }
+
+    setLoading(true);
+    
+    try {
+      let result;
+      
+      if (authModalMode === 'signup') {
+        result = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/auth/callback`,
+          },
+        });
+        
+        if (result.error) throw result.error;
+        
+        if (result.data?.user) {
+          toast.success('Check your email to confirm your account!');
+          closeAuthModal();
+        }
+      } else {
+        result = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+        
+        if (result.error) throw result.error;
+        
+        if (result.data?.user) {
+          toast.success('Welcome back!');
+          closeAuthModal();
+        }
+      }
+    } catch (error: any) {
+      const message = error.message || (authModalMode === 'signup' ? 'Sign up failed' : 'Login failed');
+      setError(message);
+      toast.error(message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePasswordReset = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    setError(null);
+
+    if (!email) {
+      setError("Please enter your email address.");
+      return;
+    }
+    setLoading(true);
+    try {
+      const { error: resetApiError } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth/callback?type=recovery`,
+      });
+      if (resetApiError) throw resetApiError;
+      setResetSent(true);
+    } catch (error: any) {
+      const message = error.message || "Failed to send reset instructions.";
+      setError(message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleOpenChange = (open: boolean) => {
+    if (!open) {
+      closeAuthModal();
+      setEmail('');
+      setPassword('');
+      setLoading(false);
+      setError(null);
+      setResetSent(false);
+    }
+  };
+  
+  React.useEffect(() => {
+    setEmail('');
+    setPassword('');
+    setError(null);
+  }, [authModalMode]);
+
+
+  if (!isAuthModalOpen) return null;
+
+  const currentTitle = authModalMode === 'signin' 
+    ? 'Sign in with email' 
+    : authModalMode === 'signup' 
+      ? 'Create your Brawldle account' 
+      : 'Reset your password';
+
+  const currentDescription = authModalMode === 'signin'
+    ? 'Access your Brawldle stats, save progress, and compete on leaderboards!'
+    : authModalMode === 'signup'
+      ? 'Join Brawldle to unlock achievements and climb the ranks!'
+      : 'Enter your email to receive password reset instructions.';
+      
+  const currentButtonText = authModalMode === 'reset' 
+    ? 'Send Reset Link' 
+    : authModalMode === 'signup' 
+      ? 'Create Account' 
+      : 'Get Started';
+
+
+  return (
+    <Dialog open={isAuthModalOpen} onOpenChange={handleOpenChange}>
+      <DialogContent className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[90vw] sm:w-full sm:max-w-lg bg-white text-gray-900 rounded-xl p-8 shadow-2xl">
+        <DialogClose asChild>
+          <button 
+            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-full hover:bg-gray-100"
+            aria-label="Close"
+            onClick={closeAuthModal}
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </DialogClose>
+
+        <div className="flex flex-col items-center mb-6">
+            <div className="p-2.5 bg-gray-100 rounded-full mb-4">
+                <LogIn className="h-6 w-6 text-gray-600" />
+            </div>
+            <DialogTitle className="text-2xl font-bold text-center">
+                {currentTitle}
+            </DialogTitle>
+            {currentDescription && (
+                <DialogDescription className="text-gray-500 pt-2 text-sm text-center max-w-xs">
+                {currentDescription}
+                </DialogDescription>
+            )}
+        </div>
+        
+        {error && (
+          <div className="mb-4 p-3 bg-red-50 border border-red-300 rounded-md text-red-600 text-sm">
+            {error}
+          </div>
+        )}
+
+        {authModalMode === 'reset' && resetSent ? (
+          <div className="text-center py-4">
+            <p className="text-green-600 font-semibold">Password reset email sent!</p>
+            <p className="text-sm text-gray-500 mt-2">Please check your inbox (and spam folder).</p>
+            <Button 
+              variant="link" 
+              onClick={() => openAuthModal('signin')}
+              className="mt-4 text-blue-600 hover:text-blue-500"
+            >
+              Back to Login
+            </Button>
+          </div>
+        ) : (
+          <form onSubmit={authModalMode === 'reset' ? handlePasswordReset : handleSubmit} className="space-y-4">
+            <div className="space-y-1.5 relative">
+              <Label htmlFor="email-modal" className="sr-only">Email</Label>
+              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
+              <Input
+                id="email-modal"
+                type="email"
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400"
+              />
+            </div>
+            
+            {authModalMode !== 'reset' && (
+              <div className="space-y-1.5 relative">
+                <Label htmlFor="password-modal" className="sr-only">Password</Label>
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
+                <Input
+                  id="password-modal"
+                  type="password"
+                  placeholder="Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  className="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400"
+                />
+              </div>
+            )}
+            
+            {authModalMode === 'signin' && (
+                <div className="text-right -mt-2 mb-2">
+                    <button 
+                      type="button" 
+                      onClick={() => openAuthModal('reset')}
+                      className="text-xs text-blue-600 hover:text-blue-500 hover:underline focus:outline-none font-medium"
+                      disabled={loading}
+                    >
+                      Forgot password?
+                    </button>
+                </div>
+            )}
+            
+            <Button 
+              type="submit" 
+              className="w-full bg-gray-800 hover:bg-gray-700 text-white font-semibold py-3 rounded-md transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+              disabled={loading || (authModalMode === 'reset' && resetSent)}
+            >
+              {loading ? <Loader2 className="mx-auto h-5 w-5 animate-spin" /> : currentButtonText}
+            </Button>
+          </form>
+        )}
+
+        {!(authModalMode === 'reset' && resetSent) && (
+            <div className="mt-6 text-center">
+            {authModalMode === 'signin' && (
+                <p className="text-sm text-gray-500">
+                Don't have an account?{' '}
+                <button 
+                    onClick={() => openAuthModal('signup')} 
+                    className="font-medium text-blue-600 hover:text-blue-500 hover:underline focus:outline-none"
+                >
+                    Sign up
+                </button>
+                </p>
+            )}
+            {authModalMode === 'signup' && (
+                <p className="text-sm text-gray-500">
+                Already have an account?{' '}
+                <button 
+                    onClick={() => openAuthModal('signin')} 
+                    className="font-medium text-blue-600 hover:text-blue-500 hover:underline focus:outline-none"
+                >
+                    Log in
+                </button>
+                </p>
+            )}
+            {authModalMode === 'reset' && !resetSent && (
+                <p className="text-sm text-gray-500">
+                Remembered your password?{' '}
+                <button 
+                    onClick={() => openAuthModal('signin')} 
+                    className="font-medium text-blue-600 hover:text-blue-500 hover:underline focus:outline-none"
+                >
+                    Back to Login
+                </button>
+                </p>
+            )}
+            </div>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+export default AuthModal; 

@@ -1,85 +1,29 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { toast } from '@/components/ui/use-toast';
-import ModeDescription from '@/components/ModeDescription';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { t } from '@/lib/i18n';
 import { brawlers, Brawler } from '@/data/brawlers';
 import BrawlerGuessRow from '@/components/BrawlerGuessRow';
-// import BrawlerAutocomplete from '@/components/BrawlerAutocomplete'; // Temporarily removed
 import { getRandomBrawler } from '@/lib/daily-challenges';
 import { getPortrait, DEFAULT_PORTRAIT } from '@/lib/image-helpers';
 import ShareResultModal from '@/components/ShareResultModal';
 import Image from '@/components/ui/image';
-import { RefreshCw, Share2 } from 'lucide-react';
+import { RefreshCw, Share2, Home } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
+import ReactConfetti from 'react-confetti';
+import VictorySection from '../components/VictoryPopup';
+import { useNavigate } from 'react-router-dom';
+import BrawlerAutocomplete from '@/components/BrawlerAutocomplete';
 
 type GameStatus = 'loading' | 'playing' | 'victory' | 'error';
 
-type VictoryModalData = {
+interface VictoryData {
   brawlerName: string;
   portraitPath: string;
   guessCount: number;
 }
-
-const VictoryModal = ({ 
-  modalData,
-  onShare, 
-  onNextBrawler 
-}: {
-  modalData: VictoryModalData;
-  onShare: () => void;
-  onNextBrawler: () => void;
-}) => {
-  return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-md">
-      <div className="brawl-card p-6 max-w-md mx-auto rounded-lg shadow-2xl">
-        <div className="text-3xl md:text-4xl font-extrabold text-brawl-yellow text-center mb-4">
-          VICTORY!
-        </div>
-        <div className="flex flex-col items-center">
-          <div className="w-24 h-24 md:w-28 md:h-28 rounded-xl border-4 border-brawl-yellow shadow-lg bg-[#181c3a] flex items-center justify-center mb-3">
-            {modalData.brawlerName && modalData.portraitPath && (
-              <Image
-                src={modalData.portraitPath}
-                alt={modalData.brawlerName}
-                fallbackSrc={DEFAULT_PORTRAIT}
-                imageType="portrait"
-                className="w-full h-full object-cover rounded-xl"
-              />
-            )}
-          </div>
-          <h3 className="text-xl md:text-2xl font-bold text-white text-center mb-1">
-            You guessed <span className="text-brawl-yellow">{modalData.brawlerName?.toUpperCase()}</span>
-          </h3>
-          <p className="text-md md:text-lg text-white/80 text-center mb-5">
-            Found in {modalData.guessCount} {modalData.guessCount === 1 ? 'guess' : 'guesses'}!
-          </p>
-          <div className="flex flex-col sm:flex-row gap-2 w-full">
-            <Button
-              onClick={onShare}
-              className="flex-1 bg-brawl-blue hover:bg-brawl-blue/80 text-white font-semibold py-2 h-10 text-sm"
-              size="lg"
-            >
-              <Share2 className="w-4 h-4 mr-2" />
-              Share
-            </Button>
-            <Button
-              onClick={onNextBrawler}
-              className="flex-1 bg-brawl-green hover:bg-brawl-green/80 text-white font-semibold py-2 h-10 text-sm"
-              size="lg"
-            >
-              <RefreshCw className="w-4 h-4 mr-2" />
-              Next Brawler
-            </Button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 const EndlessMode = () => {
   const [gameStatus, setGameStatus] = useState<GameStatus>('loading');
@@ -87,17 +31,20 @@ const EndlessMode = () => {
   const [correctBrawler, setCorrectBrawler] = useState<Brawler | null>(null);
   const [guesses, setGuesses] = useState<Brawler[]>([]);
   const [guessCount, setGuessCount] = useState(0);
-  const [guessedBrawlers, setGuessedBrawlers] = useState<string[]>([]); // Names of brawlers guessed in the current round
+  const [guessedBrawlers, setGuessedBrawlers] = useState<string[]>([]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const [victoryModalData, setVictoryModalData] = useState<VictoryModalData | null>(null);
+  const [currentVictoryData, setCurrentVictoryData] = useState<VictoryData | null>(null);
   
   const [inputValue, setInputValue] = useState('');
+  const [selectedBrawlerForGuess, setSelectedBrawlerForGuess] = useState<Brawler | null>(null);
   const [showShareModal, setShowShareModal] = useState(false);
   const isMobile = useIsMobile();
-  
-  // Add a state variable to track the most recent guess index
   const [lastGuessIndex, setLastGuessIndex] = useState<number | null>(null);
+
+  const victoryRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
+  const [showConfetti, setShowConfetti] = useState(false);
 
   const attributeLabels = [
     { name: "Brawler", fontSize: isMobile ? "text-base" : "text-2xl" },
@@ -111,7 +58,6 @@ const EndlessMode = () => {
   const initializeNewRound = (currentRound: number, calledFrom: 'initial' | 'next_brawler' | 'skip_retry') => {
     console.log(`[DEBUG] Attempting initializeNewRound. Current gameStatus: ${gameStatus}, Called from: ${calledFrom}, Current round: ${currentRound}`);
 
-    // Only allow initialization in specific cases
     if (calledFrom === 'initial' && gameStatus !== 'loading') {
       console.warn(`[DEBUG] Blocked initializeNewRound: initial call but gameStatus is ${gameStatus}`);
       return;
@@ -127,8 +73,9 @@ const EndlessMode = () => {
 
     console.log("[DEBUG] Proceeding with initializeNewRound. Setting gameStatus to 'loading'");
     setGameStatus('loading');
+    setShowConfetti(false);
+    setCurrentVictoryData(null);
 
-    // Use setTimeout to ensure state updates are processed in the correct order
     setTimeout(() => {
       try {
         const newBrawler = getRandomBrawler();
@@ -136,17 +83,15 @@ const EndlessMode = () => {
           throw new Error("Failed to get new brawler.");
         }
 
-        // Batch state updates
         setCorrectBrawler(newBrawler);
         setGuesses([]);
         setGuessCount(0);
-        setGuessedBrawlers([]); // Clear guessed brawlers for new round
+        setGuessedBrawlers([]);
         setInputValue('');
-        setRound(currentRound + 1);
+        setSelectedBrawlerForGuess(null);
+        setRound(prev => prev + 1);
         setErrorMessage(null);
-        setVictoryModalData(null);
         
-        // Set playing status last
         setTimeout(() => {
           setGameStatus('playing');
           console.log("[DEBUG] New round initialized. Brawler:", newBrawler.name);
@@ -226,7 +171,7 @@ const EndlessMode = () => {
 
       // Set victory state in next tick to ensure other state updates are processed
       setTimeout(() => {
-        setVictoryModalData({
+        setCurrentVictoryData({
           brawlerName: correctBrawler.name,
           portraitPath: getPortrait(correctBrawler.name),
           guessCount: newGuessCount,
@@ -249,12 +194,9 @@ const EndlessMode = () => {
   };
 
   const handleNextBrawlerFromModal = () => {
-    if (gameStatus !== 'victory') {
-      console.error("[DEBUG] handleNextBrawlerFromModal called when gameStatus was not 'victory'. This should not happen.");
-      return; // Should not happen if UI is correctly managed
+    if (gameStatus === 'victory') {
+      initializeNewRound(round, 'next_brawler');
     }
-    console.log("[DEBUG] 'Next Brawler' button clicked. Initializing new round.");
-    initializeNewRound(round, 'next_brawler');
   };
 
   const handleShare = () => {
@@ -295,11 +237,11 @@ const EndlessMode = () => {
 
   return (
     <div className="max-h-[calc(100vh-70px)] overflow-hidden px-1">
-      <ModeDescription
-        title={t('mode.endless')}
-        description="Play as many rounds as you want with random brawlers."
-        className="mb-1 py-1"
-      />
+      <div className="mb-4 md:mb-6">
+        <h1 className="text-3xl md:text-4xl font-bold text-brawl-yellow mb-1 text-center">
+          {t('mode.endless') || 'Endless Mode'}
+        </h1>
+      </div>
 
       <div className="h-[calc(100vh-120px)] flex flex-col">
         <div className="flex-1 flex flex-col space-y-1">
@@ -408,8 +350,8 @@ const EndlessMode = () => {
               ))}
             </div>
 
-            <div className="overflow-auto flex-1 min-h-0 max-h-[calc(100vh-250px)] p-1">
-              <div className="space-y-1">
+            <div className="overflow-y-auto overflow-x-visible flex-1 min-h-0 max-h-[calc(100vh-250px)] p-1">
+              <div className="space-y-1 overflow-visible">
                 {guesses.map((guess, index) => (
                   <BrawlerGuessRow
                     key={`${round}-${guess.name}-${index}`}
@@ -427,12 +369,18 @@ const EndlessMode = () => {
         </div>
       </div>
 
-      {gameStatus === 'victory' && victoryModalData && (
-        <VictoryModal
-          modalData={victoryModalData}
-          onShare={handleShare}
-          onNextBrawler={handleNextBrawlerFromModal}
-        />
+      {gameStatus === 'victory' && currentVictoryData && (
+        <div ref={victoryRef} className="mt-6 w-full max-w-xl mx-auto px-2">
+          <VictorySection
+            brawlerName={currentVictoryData.brawlerName}
+            brawlerPortrait={currentVictoryData.portraitPath}
+            tries={currentVictoryData.guessCount}
+            mode="endless"
+            nextModeKey="endless_next"
+            onNextMode={handleNextBrawlerFromModal}
+            onShare={handleShare}
+          />
+        </div>
       )}
 
       <ShareResultModal
@@ -442,7 +390,7 @@ const EndlessMode = () => {
         success={gameStatus === 'victory'} // Share modal might need this to reflect actual win
         attempts={guessCount} // This should be the count for the completed round
         maxAttempts={0}
-        brawlerName={victoryModalData?.brawlerName || correctBrawler?.name || ''} // Ensure brawler name is available
+        brawlerName={currentVictoryData?.brawlerName || correctBrawler?.name || ''} // Ensure brawler name is available
       />
     </div>
   );

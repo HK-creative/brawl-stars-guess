@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { brawlers, Brawler } from "@/data/brawlers";
 
@@ -36,6 +35,14 @@ export const getTimeUntilNextChallenge = (): { hours: number; minutes: number } 
   const diffMins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
   
   return { hours: diffHrs, minutes: diffMins };
+};
+
+// Helper to get yesterday's date in UTC+2 (CEST) timezone
+export const getYesterdayDateUTC2 = (): string => {
+  const now = new Date();
+  const utc2Date = new Date(now.getTime() + (2 * 60 * 60 * 1000)); // UTC+2
+  utc2Date.setDate(utc2Date.getDate() - 1); // Go back 1 day
+  return utc2Date.toISOString().split('T')[0]; // Format as YYYY-MM-DD
 };
 
 // Check if Supabase connection is working
@@ -99,6 +106,81 @@ export const fetchDailyChallenge = async (mode: string): Promise<any> => {
   }
 };
 
+// Fallback data for yesterday's challenge
+const getYesterdayFallbackData = (mode: string): any => {
+  switch (mode) {
+    case 'classic':
+      return "Shelly"; // Fallback to Shelly for yesterday's brawler
+    case 'gadget':
+      return {
+        brawler: "Shelly",
+        gadgetName: "Clay Pigeons",
+        tip: "This gadget temporarily narrows Shelly's attack spread, increasing her range."
+      };
+    case 'starpower':
+      return {
+        brawler: "Shelly",
+        starPowerName: "Shell Shock",
+        tip: "This star power slows down enemies hit by Shelly's Super."
+      };
+    case 'voice':
+      return {
+        brawler: "Colt",
+        voiceLine: "Check out my guns! Ha ha!"
+      };
+    case 'audio':
+      return {
+        brawler: "Shelly",
+        audioFile: "/audio/shelly_super.mp3"
+      };
+    default:
+      return null;
+  }
+};
+
+// Fetch yesterday's challenge for a specific mode
+export const fetchYesterdayChallenge = async (mode: string): Promise<any> => {
+  console.log(`Fetching yesterday's challenge for mode: ${mode}`);
+  
+  // Calculate yesterday's date
+  const yesterdayDate = getYesterdayDateUTC2();
+ const cacheKey = `${mode}-${yesterdayDate}-day-offset-1`;
+  
+  if (challengeCache[cacheKey]) {
+    console.log(`Using cached yesterday's challenge for ${mode}`);
+    return challengeCache[cacheKey].challenge_data;
+  }
+  
+  try {
+    console.log(`Querying database for ${mode} challenge on ${yesterdayDate}`);
+    
+    const { data, error } = await supabase
+      .from('daily_challenges')
+      .select('id, mode, challenge_data, date')
+      .eq('mode', mode)
+      .eq('date', yesterdayDate);
+      
+    if (error) {
+      console.error('Error fetching yesterday\'s daily challenge:', error);
+      return getYesterdayFallbackData(mode); // Use fallback data instead of returning null
+    }
+    
+    // Check if we got any data
+    if (data && data.length > 0) {
+      console.log(`Successfully retrieved yesterday's ${mode} challenge:`, data[0]);
+      // Cache the result
+      challengeCache[cacheKey] = data[0];
+      return data[0].challenge_data;
+    }
+    
+    console.log(`No data found for yesterday's ${mode} challenge, using fallback`);
+    return getYesterdayFallbackData(mode);
+  } catch (error) {
+    console.error('Exception in fetchYesterdayChallenge:', error);
+    return getYesterdayFallbackData(mode);
+  }
+};
+
 // Get a random brawler for endless mode
 export const getRandomBrawler = (): Brawler => {
   const randomIndex = Math.floor(Math.random() * brawlers.length);
@@ -127,7 +209,8 @@ const getFallbackChallengeData = (mode: string): any => {
       return {
         brawler: "Bo",
         starPowerName: "Circling Eagle",
-        tip: "This star power increases Bo's vision range in bushes."
+        tip: "This star power increases Bo's vision range in bushes.",
+        image: "bo_starpower_01.png"
       };
       
     case 'voice':

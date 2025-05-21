@@ -4,7 +4,7 @@ import React from "react";
 
 export function SparklesPreview() {
   return (
-    <div className="w-full flex flex-col items-center justify-center overflow-hidden py-4 md:py-8">
+    <div className="w-full flex flex-col items-center justify-center overflow-hidden pb-4 md:pb-8">
       {/* Main title with gold gradient */}
       <h1 className="md:text-7xl text-5xl lg:text-8xl font-bold text-center relative z-20 bg-gradient-to-b from-[#FFD700] via-[#FFA500] to-[#FF8C00] text-transparent bg-clip-text animate-fade-in">
         Brawldle
