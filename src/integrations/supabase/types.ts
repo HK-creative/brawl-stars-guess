@@ -32,24 +32,6 @@ export type Database = {
           mode?: string
         }
         Relationships: []
-      },
-      profiles: {
-        Row: {
-          id: string;
-          current_streak: number;
-          last_completed_date: string | null;
-        };
-        Insert: {
-          id: string;
-          current_streak?: number;
-          last_completed_date?: string | null;
-        };
-        Update: {
-          id?: string;
-          current_streak?: number;
-          last_completed_date?: string | null;
-        };
-        Relationships: [];
       }
     }
     Views: {
