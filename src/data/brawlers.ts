@@ -1,7 +1,19 @@
 
 import brawlersData from './brawlers_full.json';
 
+// Define interfaces for gadgets and star powers
+export interface Gadget {
+  name: string;
+  tip?: string;
+}
+
+export interface StarPower {
+  name: string;
+  tip?: string;
+}
+
 export interface Brawler {
+  id?: number;   // Adding optional id field for use in Survival Mode
   name: string;
   rarity: string;
   class: string;
@@ -12,6 +24,8 @@ export interface Brawler {
   releaseYear?: number;
   released?: string;
   image?: string;
+  gadgets?: Gadget[];
+  starPowers?: StarPower[];
 }
 
 // List of brawlers that have wallbreak ability
@@ -68,6 +82,50 @@ const specificImagePaths = {
 brawlers.forEach(brawler => {
   if (specificImagePaths[brawler.name]) {
     brawler.image = specificImagePaths[brawler.name];
+  }
+  
+  // Add some sample gadgets and star powers for common brawlers
+  // This ensures we have data for the game modes
+  if (brawler.name === "Shelly") {
+    brawler.gadgets = [
+      { name: "Fast Forward", tip: "Shelly dashes forward a short distance." },
+      { name: "Clay Pigeons", tip: "Shelly's next attack has a longer range but narrower spread." }
+    ];
+    brawler.starPowers = [
+      { name: "Shell Shock", tip: "Shelly's Super slows down enemies for 3.0 seconds." },
+      { name: "Band-Aid", tip: "When Shelly falls below 40% health, she instantly heals for 2000 health. Band-Aid recharges in 15.0 seconds." }
+    ];
+  }
+  else if (brawler.name === "Colt") {
+    brawler.gadgets = [
+      { name: "Speedloader", tip: "Colt immediately reloads 2 ammo." },
+      { name: "Silver Bullet", tip: "Colt fires a high damage bullet that destroys walls." }
+    ];
+    brawler.starPowers = [
+      { name: "Slick Boots", tip: "Colt moves 10% faster." },
+      { name: "Magnum Special", tip: "Colt's attack range and bullet speed are increased by 11%." }
+    ];
+  }
+  else if (brawler.name === "Spike") {
+    brawler.gadgets = [
+      { name: "Popping Pincushion", tip: "Spike's next attack will shoot a burst of 5 spikes in all directions." },
+      { name: "Life Plant", tip: "Spike plants a healing cactus that heals nearby allies for 1000 health over 5 seconds." }
+    ];
+    brawler.starPowers = [
+      { name: "Fertilize", tip: "Spike heals 800 health per second when near his Super." },
+      { name: "Curveball", tip: "Spike's spike projectiles curve slightly in flight." }
+    ];
+  }
+  else {
+    // For other brawlers, add some generic gadgets and star powers as fallback
+    brawler.gadgets = [
+      { name: `${brawler.name}'s First Gadget`, tip: `A special gadget for ${brawler.name}.` },
+      { name: `${brawler.name}'s Second Gadget`, tip: `Another special gadget for ${brawler.name}.` }
+    ];
+    brawler.starPowers = [
+      { name: `${brawler.name}'s First Star Power`, tip: `A special ability for ${brawler.name}.` },
+      { name: `${brawler.name}'s Second Star Power`, tip: `Another special ability for ${brawler.name}.` }
+    ];
   }
 });
 

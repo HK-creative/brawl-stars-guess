@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from '@/components/ui/use-toast';
-import ModeDescription from '@/components/ModeDescription';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { t } from '@/lib/i18n';
@@ -16,7 +15,23 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 import { Switch } from '@/components/ui/switch';
 
-const ClassicMode = () => {
+interface ClassicModeProps {
+  brawlerId?: number;
+  onRoundEnd?: (result: { success: boolean, brawlerName?: string }) => void;
+  maxGuesses?: number;
+  isEndlessMode?: boolean;
+  isSurvivalMode?: boolean;
+  skipVictoryScreen?: boolean;
+}
+
+const ClassicMode = ({
+  brawlerId,
+  onRoundEnd,
+  maxGuesses = 6,
+  isEndlessMode: propIsEndlessMode = false,
+  isSurvivalMode = false,
+  skipVictoryScreen = false
+}: ClassicModeProps = {}) => {
   const [inputValue, setInputValue] = useState('');
   const [selectedBrawler, setSelectedBrawler] = useState<Brawler | null>(null);
   const [guesses, setGuesses] = useState<Brawler[]>([]);
@@ -27,12 +42,13 @@ const ClassicMode = () => {
   const [timeUntilNext, setTimeUntilNext] = useState({ hours: 0, minutes: 0 });
   const [isBackendConnected, setIsBackendConnected] = useState(true);
   const [showShareModal, setShowShareModal] = useState(false);
-  const [isEndlessMode, setIsEndlessMode] = useState(false);
+  const [isEndlessMode, setIsEndlessMode] = useState(propIsEndlessMode);
   const isMobile = useIsMobile();
   const [guessedBrawlerNames, setGuessedBrawlerNames] = useState<string[]>([]);
   const [availableBrawlers, setAvailableBrawlers] = useState<Brawler[]>([]);
   const [lastGuessIndex, setLastGuessIndex] = useState<number | null>(null); // Track the most recent guess
-
+  const [gameKey, setGameKey] = useState(Date.now().toString()); // Key to force re-render
+  
   // Fallback data in case Supabase fetch fails
   const fallbackBrawlerName = "Spike";
   
@@ -81,353 +97,314 @@ const ClassicMode = () => {
     }
   };
 
-  // Modified loadChallenge function
+  // CRITICAL: This effect detects when brawlerId changes and resets the game
   useEffect(() => {
-    const loadChallenge = async () => {
-      setIsLoading(true);
-      try {
-        // Initialize available brawlers first
-        setAvailableBrawlers([...brawlers]);
+    console.log(`ClassicMode: brawlerId changed to ${brawlerId}`);
+    
+    // Reset game state when brawlerId changes (critical for Survival Mode)
+    setInputValue('');
+    setSelectedBrawler(null);
+    setGuesses([]);
+    setIsGameOver(false);
+    setGuessCount(0);
+    setLastGuessIndex(null);
+    setGuessedBrawlerNames([]);
+    setAvailableBrawlers([...brawlers]);
+    
+    // Generate a new key to force complete component re-initialization
+    setGameKey(Date.now().toString());
+    
+    // Load the new challenge with the changed brawlerId
+    loadChallenge();
+  }, [brawlerId]); // Re-run when brawlerId changes
 
-        if (!isEndlessMode) {
-          // Normal daily challenge mode
-          const data = await fetchDailyChallenge('classic');
-          
-          if (data) {
-            setCorrectBrawlerName(data);
-            setIsBackendConnected(true);
-          } else {
-            setCorrectBrawlerName(fallbackBrawlerName);
-            setIsBackendConnected(false);
-            toast({
-              title: "Connection Error",
-              description: "Couldn't load today's challenge. Using fallback data.",
-              variant: "destructive"
-            });
-          }
+  // Function to load the challenge
+  const loadChallenge = async () => {
+    setIsLoading(true);
+    
+    try {
+      // If we have a specified brawlerId, use that brawler (for SurvivalMode)
+      if (brawlerId !== undefined) {
+        // Check if the brawlerId is within a valid range
+        if (brawlerId <= 0 || brawlerId > brawlers.length) {
+          console.warn(`Brawler ID ${brawlerId} is out of range (1-${brawlers.length}). Using fallback.`);
+          // Use a fallback brawler (Shelly or first available)
+          const fallbackBrawler = brawlers[0];
+          console.log(`Using fallback brawler: ${fallbackBrawler.name} instead of invalid ID: ${brawlerId}`);
+          setCorrectBrawlerName(fallbackBrawler.name);
+          setIsLoading(false);
+          return;
+        }
+        
+        const specifiedBrawler = brawlers.find(b => b.id === brawlerId);
+        if (specifiedBrawler) {
+          console.log(`Setting correct brawler to: ${specifiedBrawler.name} (ID: ${brawlerId})`);
+          setCorrectBrawlerName(specifiedBrawler.name);
+          setIsLoading(false);
+          return;
         } else {
-          // Endless mode - pick a random brawler
-          const randomBrawler = brawlers[Math.floor(Math.random() * brawlers.length)];
+          // Brawler ID not found - use fallback
+          console.error(`Brawler with ID ${brawlerId} not found in data`);
+          const fallbackBrawler = brawlers[0];
+          console.log(`Using fallback brawler: ${fallbackBrawler.name} after ID not found`);
+          setCorrectBrawlerName(fallbackBrawler.name);
+          setIsLoading(false);
+          return;
+        }
+      }
+      
+      // For endless mode, use a random brawler from the available pool
+      if (isEndlessMode) {
+        const randomBrawler = getRandomBrawler();
+        if (randomBrawler) {
           setCorrectBrawlerName(randomBrawler.name);
           setAvailableBrawlers(prev => prev.filter(b => b.name !== randomBrawler.name));
+          setIsLoading(false);
+          return;
+        }
+      }
+      
+      // Try to fetch the daily challenge from the backend
+      try {
+        const response = await fetchDailyChallenge('classic'); // Pass 'classic' as the mode parameter
+        if (response?.success) {
+          setCorrectBrawlerName(response.brawlerName);
           setIsBackendConnected(true);
+        } else {
+          throw new Error('Failed to fetch daily challenge');
         }
       } catch (error) {
-        console.error("Error loading classic challenge:", error);
+        console.error('Error fetching daily challenge:', error);
+        // Use fallback data if the backend is unavailable
         setCorrectBrawlerName(fallbackBrawlerName);
         setIsBackendConnected(false);
         toast({
-          title: "Connection Error",
-          description: "Couldn't load today's challenge. Using fallback data.",
-          variant: "destructive"
+          title: 'Offline Mode',
+          description: 'Could not connect to server. Using offline mode.',
         });
-      } finally {
-        setIsLoading(false);
       }
-    };
+      
+      // Update the time until the next challenge
+      const timeRemaining = getTimeUntilNextChallenge();
+      setTimeUntilNext(timeRemaining);
+    } catch (error) {
+      console.error('Error in loadChallenge:', error);
+      toast({
+        title: 'Error',
+        description: 'An error occurred while loading the challenge.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-    loadChallenge();
-
+  // Update countdown timer every minute
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTimeUntilNext(getTimeUntilNextChallenge());
+    }, 60000);
+    return () => clearInterval(timer);
+  }, []);
+  
+  // Load the daily challenge on first mount (only if not in endless mode)
+  useEffect(() => {
     if (!isEndlessMode) {
-      const updateCountdown = () => {
-        setTimeUntilNext(getTimeUntilNextChallenge());
-      };
-      updateCountdown();
-      const intervalId = setInterval(updateCountdown, 60000);
-      return () => clearInterval(intervalId);
+      loadChallenge();
     }
   }, [isEndlessMode]);
 
-  // Initialize available brawlers when component mounts
-  useEffect(() => {
-    setAvailableBrawlers([...brawlers]);
-  }, []);
-  
-  // Simplified handleSubmit function
-  const handleSubmit = (e?: React.FormEvent) => {
-    if (e) {
-      e.preventDefault();
-    }
-
-    // Basic validation
-    if (!selectedBrawler || !correctBrawlerName) {
-      toast({
-        title: "Error",
-        description: "Please select a valid brawler",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    // Check for duplicate guesses
-    if (guessedBrawlerNames.includes(selectedBrawler.name)) {
-      toast({
-        title: "Already Guessed",
-        description: `You've already guessed ${selectedBrawler.name}!`,
-        variant: "destructive"
-      });
-      setInputValue('');
-      setSelectedBrawler(null);
-      return;
-    }
-
-    // Store current values
-    const currentBrawler = selectedBrawler;
-    const isCorrectGuess = currentBrawler.name.toLowerCase() === correctBrawlerName.toLowerCase();
-    const newGuessCount = guessCount + 1;
-
-    // Batch state updates for the current guess
-    const updateCurrentGuess = () => {
-      setGuesses(prev => [currentBrawler, ...prev]);
-      setGuessedBrawlerNames(prev => [...prev, currentBrawler.name]);
-      setGuessCount(newGuessCount);
-      setInputValue('');
-      setSelectedBrawler(null);
-      setLastGuessIndex(0); // The newest guess is now at index 0 (since we prepend)
-    };
-
-    // Handle correct guess
-    const handleCorrectGuess = () => {
-      if (isEndlessMode) {
-        const currentCorrectBrawlerName = correctBrawlerName; // Capture current correct brawler
-        const remainingBrawlers = availableBrawlers.filter(
-          b => b.name.toLowerCase() !== currentCorrectBrawlerName.toLowerCase()
-        );
-
-        if (remainingBrawlers.length > 0) {
-          const nextBrawler = remainingBrawlers[Math.floor(Math.random() * remainingBrawlers.length)];
-          
-          if (nextBrawler && nextBrawler.name) {
-            // Update state for the next round directly
-            setCorrectBrawlerName(nextBrawler.name);
-              setAvailableBrawlers(remainingBrawlers);
-            setGuesses([]); // Clear previous guesses for the new round
-            // Note: guessCount will continue incrementing for total endless mode stats if desired,
-            // or could be reset here if each round is independent.
-            // For now, let's assume guessCount is for the current brawler before it resets with setGuesses([])
-            // If we need a round counter, that would be a new state variable.
-
-              toast({
-                title: "Correct!",
-                description: "Here's your next brawler to guess!",
-                variant: "default"
-              });
-          } else {
-            // Should not happen if remainingBrawlers is not empty, but good to handle
-            setIsGameOver(true);
-            toast({
-              title: "Game Over",
-              description: "Could not select the next brawler. You've guessed them all or an error occurred.",
-              variant: "default"
-            });
-          }
-        } else {
-          setIsGameOver(true);
-          toast({
-            title: "Game Over",
-            description: "You've guessed all available brawlers!",
-            variant: "default"
-          });
-        }
-      } else {
-        // Normal mode - game over on correct guess
-        setIsGameOver(true);
-        toast({
-          title: "Success!",
-          description: `Correct! You found ${correctBrawlerName} in ${newGuessCount} guesses!`,
-          variant: "default"
-        });
-      }
-    };
-
-    // Execute updates in sequence
-    updateCurrentGuess();
-    
-    if (isCorrectGuess) {
-      // Use requestAnimationFrame to ensure state updates are processed
-      requestAnimationFrame(() => {
-        handleCorrectGuess();
-      });
-    }
-  };
-  
+  // Function to handle brawler selection
   const handleSelectBrawler = (brawler: Brawler) => {
     setSelectedBrawler(brawler);
   };
 
+  // Function to handle sharing
   const handleShare = () => {
     setShowShareModal(true);
   };
 
+  // Function to toggle endless mode
   const toggleEndlessMode = () => {
-    if (guessCount > 0) {
+    // Only allow toggling if not in survival mode
+    if (isSurvivalMode) return;
+    
+    const newEndlessMode = !isEndlessMode;
+    setIsEndlessMode(newEndlessMode);
+    
+    // If switching to endless mode, need to reset and pick a random brawler
+    if (newEndlessMode) {
+      resetGame();
+    } else {
+      // If switching back to daily mode, load the daily challenge
+      setCorrectBrawlerName('');
+      setIsGameOver(false);
+      setGuesses([]);
+      loadChallenge();
+    }
+  };
+
+  // Simplified handleSubmit function
+  const handleSubmit = (e?: React.FormEvent) => {
+    e?.preventDefault();
+    
+    if (isGameOver) return;
+    
+    if (!selectedBrawler) {
       toast({
-        title: "Cannot Switch Mode",
-        description: "You can only switch modes before starting a new game.",
-        variant: "destructive"
+        title: 'No brawler selected',
+        description: 'Please select a brawler to make a guess.',
+        variant: 'destructive',
       });
       return;
     }
     
-    // Reset game state before switching modes
-    resetGame();
-    setIsEndlessMode(!isEndlessMode);
+    // Check if this brawler has already been guessed
+    if (guessedBrawlerNames.includes(selectedBrawler.name)) {
+      toast({
+        title: 'Already guessed',
+        description: `You've already guessed ${selectedBrawler.name}.`,
+        variant: 'destructive',
+      });
+      setInputValue('');
+      setSelectedBrawler(null);
+      return;
+    }
+    
+    // Add the guess
+    setGuesses(prevGuesses => [...prevGuesses, selectedBrawler]);
+    setGuessedBrawlerNames(prev => [...prev, selectedBrawler.name]);
+    setGuessCount(prevCount => prevCount + 1);
+    setInputValue('');
+    setSelectedBrawler(null);
+    setLastGuessIndex(guesses.length); // Set the index of the newest guess for animation
+    
+    // Check if correct guess
+    const isCorrect = selectedBrawler.name.toLowerCase() === correctBrawlerName.toLowerCase();
+    
+    if (isCorrect) {
+      // For survival mode, defer to the parent component to handle victory
+      if (isSurvivalMode && onRoundEnd) {
+        // Pass the actual brawler name that was guessed correctly to ensure correct display in victory popup
+        onRoundEnd({ success: true, brawlerName: selectedBrawler.name });
+        return;
+      }
+      
+      // Standard victory handling
+      toast({
+        title: 'Correct!',
+        description: `You guessed ${correctBrawlerName} in ${guessCount + 1} tries.`,
+        variant: 'default',
+      });
+      
+      setIsGameOver(true);
+      
+      // For endless mode, prepare for the next round after a delay
+      if (isEndlessMode) {
+        setTimeout(() => {
+          resetGame();
+        }, 2000);
+      }
+    }
+    // Check if out of guesses
+    else if (guessCount + 1 >= maxGuesses) {
+      // For survival mode, defer to the parent component to handle loss
+      if (isSurvivalMode && onRoundEnd) {
+        onRoundEnd({ success: false });
+        return;
+      }
+      
+      // Standard game over handling
+      toast({
+        title: 'Game Over',
+        description: `The correct answer was ${correctBrawlerName}.`,
+        variant: 'destructive',
+      });
+      
+      setIsGameOver(true);
+    }
   };
 
+  // Get the correct brawler object for comparison
+  const correctBrawler = getCorrectBrawler();
+  
+  // Define the structure for the guess grid based on the device type
+  const gridWidthClass = isMobile ? "w-full" : "w-full max-w-4xl mx-auto";
+  const gridTemplateClass = isMobile ? "grid-cols-5" : "grid-cols-5";
+  
+  // Attribute labels for the header
+  const attributeLabels = [
+    { name: "Name", fontSize: "text-sm" },
+    { name: "Rarity", fontSize: "text-sm" },
+    { name: "Class", fontSize: "text-sm" },
+    { name: "Gender", fontSize: "text-sm" },
+    { name: "Chromatic", fontSize: isMobile ? "text-xs" : "text-sm" },
+  ];
+  
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-40">
-        <div className="animate-spin h-8 w-8 border-4 border-brawl-yellow border-t-transparent rounded-full"></div>
+      <div className="min-h-[80vh] grid place-items-center">
+        <Card className="p-4 text-center animate-pulse">
+          <p>Loading challenge...</p>
+        </Card>
       </div>
     );
   }
-
-  if (!correctBrawlerName) {
-    return (
-      <Card className="brawl-card p-6">
-        <div className="text-center">
-          <h3 className="text-xl font-bold text-brawl-yellow mb-2">No Challenge Available</h3>
-          <p className="text-white/80">Check back later for today's challenge.</p>
-        </div>
-      </Card>
-    );
-  }
-
-  const correctBrawler = getCorrectBrawler();
-  const portraitPath = getPortrait(correctBrawlerName);
-  
-  // Define column header sizing based on device
-  const headerSizeClass = isMobile ? "h-10" : "h-16"; // Taller headers on desktop
-  const headerSpacingClass = isMobile ? "gap-1 mb-1" : "gap-3 mb-3"; // Increased spacing on desktop
-  
-  // Define consistent grid width for both headers and guess rows
-  const gridWidthClass = isMobile ? "w-full" : "w-[85%] mx-auto"; // 85% width on desktop/tablet
-  
-  // Create a grid template to ensure perfect column alignment
-  const gridTemplateClass = "grid-cols-6"; // Six equal columns
-
-  // Define attribute labels with adaptive sizing
-  const attributeLabels = [
-    { name: "Brawler", fontSize: isMobile ? "text-base" : "text-2xl" },
-    { name: "Rarity", fontSize: isMobile ? "text-base" : "text-2xl" },
-    { name: "Class", fontSize: isMobile ? "text-base" : "text-2xl" },
-    { name: "Speed", fontSize: isMobile ? "text-base" : "text-2xl" },
-    { name: "Range", fontSize: isMobile ? "text-base" : "text-2xl" },
-    { name: "Wallbreak", fontSize: isMobile ? "text-xs" : "text-xl" }
-  ];
 
   return (
-    
-    <div className="max-h-[calc(100vh-70px)] overflow-hidden px-1 py-4 md:py-8">
-      {/* Header with Integrated Mode Selector - Centered & Transparent Background */}
-      <div className="mb-6 md:mb-8 max-w-3xl mx-auto">
-        {/* Title and Description - Centered */}
-        <div className="mb-4 md:mb-6">
-          <h1 className="text-3xl md:text-4xl font-bold text-brawl-yellow mb-1 text-center">
-            Classic Mode
-          </h1>
-          <p className="text-neutral-300 text-sm md:text-base text-center">
-            Guess the brawler by their attributes. Test your knowledge!
-          </p>
+    <div key={gameKey} className="flex flex-col min-h-[80vh] py-2">
+      {!isSurvivalMode && (
+        <div className="flex justify-between items-center mb-4">
+          <div className="flex items-center gap-2">
+            {!isEndlessMode ? (
+              <span className="text-sm text-white/60">Daily Challenge</span>
+            ) : (
+              <span className="text-sm text-white/60">Endless Mode</span>
+            )}
+            
+            {!isSurvivalMode && (
+              <div className="flex items-center gap-1">
+                <Switch 
+                  checked={isEndlessMode}
+                  onCheckedChange={toggleEndlessMode}
+                  className="data-[state=checked]:bg-amber-500"
+                />
+                <Infinity className="h-4 w-4 text-white/60" />
+              </div>
+            )}
           </div>
-          
-        {/* Mode Selector (Segmented Control) - Centered */}
-        <div className="flex flex-col items-center gap-2 mb-4">
-          <div className="flex w-full max-w-xs sm:max-w-sm md:max-w-md border border-neutral-600 rounded-lg p-0.5 bg-neutral-800/30">
-            <button
-              onClick={() => { if (guessCount === 0) { setIsEndlessMode(false); resetGame(); } }}
-              disabled={guessCount > 0}
-                  className={cn(
-                "flex-1 py-2 px-3 sm:px-4 rounded-md text-sm font-medium transition-all duration-200 ease-in-out",
-                !isEndlessMode ? "bg-brawl-yellow text-black shadow-md" : "text-neutral-300 hover:bg-neutral-700/50",
-                guessCount > 0 && "opacity-60 cursor-not-allowed"
-                  )}
-            >
-              Daily Challenge
-            </button>
-            <button
-              onClick={() => { if (guessCount === 0) { setIsEndlessMode(true); resetGame(); } }}
-              disabled={guessCount > 0}
+        </div>
+      )}
+      
+      <div className="mb-4 flex flex-col">
+        <div className="mb-4">
+          <form onSubmit={handleSubmit} className="space-y-2">
+            <BrawlerAutocomplete
+              brawlers={availableBrawlers}
+              value={inputValue}
+              onChange={setInputValue}
+              onSelect={handleSelectBrawler}
+              onSubmit={handleSubmit}
+              disabled={isGameOver}
+              disabledBrawlers={guessedBrawlerNames}
+            />
+            
+            <Button 
+              type="submit" 
+              disabled={!selectedBrawler || isGameOver}
               className={cn(
-                "flex-1 py-2 px-3 sm:px-4 rounded-md text-sm font-medium transition-all duration-200 ease-in-out flex items-center justify-center gap-1.5",
-                isEndlessMode ? "bg-brawl-yellow text-black shadow-md" : "text-neutral-300 hover:bg-neutral-700/50",
-                guessCount > 0 && "opacity-60 cursor-not-allowed"
+                "w-full bg-gradient-to-r from-amber-600 to-pink-600 hover:from-amber-500 hover:to-pink-500 border-none",
+                (!selectedBrawler || isGameOver) && "opacity-50 cursor-not-allowed"
               )}
             >
-              <Infinity className="w-4 h-4" /> Endless Mode
-            </button>
-          </div>
-          {isEndlessMode ? (
-             <p className="text-xs text-neutral-400 text-center">
-               Play with random brawlers until you guess them all.
-             </p>
-           ) : (
-             <p className="text-xs text-neutral-400 text-center">
-               A new brawler to guess, updated daily.
-             </p>
-           )}
+              Guess
+            </Button>
+          </form>
         </div>
-
-        {!isBackendConnected && (
-          <div className="mt-4 p-2 bg-red-800/30 border border-red-700 rounded-md text-white text-xs text-center max-w-md mx-auto">
-            <p>⚠️ Using fallback data due to a connection issue. Some features might be limited.</p>
-          </div>
-        )}
-      </div>
-      
-      {/* Autocomplete section */}
-      <div className="mb-6 md:mb-8 w-full max-w-xl mx-auto">
-        <BrawlerAutocomplete
-          brawlers={brawlers}
-          value={inputValue}
-          onChange={setInputValue}
-          onSelect={handleSelectBrawler}
-          onSubmit={handleSubmit}
-          disabled={isGameOver}
-          disabledBrawlers={guessedBrawlerNames}
-        />
-      </div>
-      
-      <div className="h-[calc(100vh-180px)] md:h-[calc(100vh-220px)] flex flex-col"> {/* Adjusted height accounting for new header */}
-        {/* Game area */}
-        <div className="flex-1 flex flex-col space-y-1">
-          {isGameOver ? (
-            <div className="flex justify-center items-center py-8">
-              <div className="w-full max-w-md mx-auto p-8 rounded-3xl border-4 border-[#2a2f6a] shadow-2xl bg-gradient-to-br from-[#1e3a8a] via-[#2563eb] to-[#0ea5e9] flex flex-col items-center">
-                <span className="text-4xl md:text-5xl font-extrabold text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] tracking-wide mb-4" style={{ WebkitTextStroke: '2px #222', letterSpacing: '2px' }}>
-                  VICTORY!
-                </span>
-                <div className="w-28 h-28 md:w-32 md:h-32 rounded-2xl border-4 border-brawl-yellow shadow-xl bg-[#181c3a] flex items-center justify-center mb-4">
-                  <Image
-                    src={portraitPath}
-                    alt={correctBrawlerName}
-                    fallbackSrc={DEFAULT_PORTRAIT}
-                    imageType="portrait"
-                    className="w-full h-full object-cover rounded-2xl"
-                  />
-                </div>
-                <div className="text-2xl md:text-3xl font-bold text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] tracking-wide mb-2" style={{ WebkitTextStroke: '1px #222' }}>
-                  You guessed <span className="text-brawl-yellow">{correctBrawlerName.toUpperCase()}</span>
-                </div>
-                <div className="text-lg md:text-xl font-semibold text-white mb-1 drop-shadow-[0_1px_2px_rgba(0,0,0,0.7)]">
-                  Number of tries: <span className="text-brawl-yellow font-extrabold">{guessCount}</span>
-                </div>
-                <Button
-                  onClick={handleShare}
-                  className="mt-6 bg-brawl-blue hover:bg-brawl-blue/90 text-white text-lg font-bold px-8 py-3 rounded-xl shadow-md flex items-center gap-2"
-                  size="lg"
-                >
-                  <Share2 className="w-5 h-5" />
-                  Share
-                </Button>
-              </div>
-            </div>
-          ) : (
-            null /* The BrawlerAutocomplete is now handled above, outside this conditional block */
-          )}
-          
-          {/* Guesses section */}
-          <div className="flex-1 flex flex-col min-h-0">
+        
+        <div className={gridWidthClass}>
+          <div className="w-full rounded-lg overflow-hidden flex flex-col">
+            {/* Header section with guess count and time until next challenge */}
             <div className="flex justify-between items-center mb-1 px-1">
               <div className="flex items-center gap-1.5">
                 <div className="text-white text-sm font-medium">
@@ -490,16 +467,18 @@ const ClassicMode = () => {
         </div>
       </div>
       
-      {/* Share modal */}
-      <ShareResultModal
-        isOpen={showShareModal}
-        onClose={() => setShowShareModal(false)}
-        mode="classic"
-        success={isGameOver}
-        attempts={guessCount}
-        maxAttempts={6}
-        brawlerName={correctBrawlerName}
-      />
+      {/* Share modal - don't show in survival mode */}
+      {!isSurvivalMode && (
+        <ShareResultModal
+          isOpen={showShareModal}
+          onClose={() => setShowShareModal(false)}
+          mode="classic"
+          success={isGameOver}
+          attempts={guessCount}
+          maxAttempts={maxGuesses}
+          brawlerName={correctBrawlerName}
+        />
+      )}
 
       {/* Modified game info display */}
       <div className="flex justify-between items-center mb-4">

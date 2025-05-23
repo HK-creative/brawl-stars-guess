@@ -13,7 +13,7 @@ import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Loader2, X, LogIn, Mail, Lock } from 'lucide-react';
+import { Loader2, LogIn, Mail, Lock, X } from 'lucide-react';
 import { DialogClose } from '@radix-ui/react-dialog';
 
 const AuthModal: React.FC = () => {
@@ -144,15 +144,6 @@ const AuthModal: React.FC = () => {
   return (
     <Dialog open={isAuthModalOpen} onOpenChange={handleOpenChange}>
       <DialogContent className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[90vw] sm:w-full sm:max-w-lg bg-white text-gray-900 rounded-xl p-8 shadow-2xl">
-        <DialogClose asChild>
-          <button 
-            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-full hover:bg-gray-100"
-            aria-label="Close"
-            onClick={closeAuthModal}
-          >
-            <X className="h-5 w-5" />
-          </button>
-        </DialogClose>
 
         <div className="flex flex-col items-center mb-6">
             <div className="p-2.5 bg-gray-100 rounded-full mb-4">
@@ -188,9 +179,9 @@ const AuthModal: React.FC = () => {
           </div>
         ) : (
           <form onSubmit={authModalMode === 'reset' ? handlePasswordReset : handleSubmit} className="space-y-4">
-            <div className="space-y-1.5 relative">
+            <div className="space-y-1.5 relative flex items-center">
               <Label htmlFor="email-modal" className="sr-only">Email</Label>
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
+              <Mail className="absolute left-3 h-5 w-5 text-gray-400 pointer-events-none" />
               <Input
                 id="email-modal"
                 type="email"
@@ -198,14 +189,14 @@ const AuthModal: React.FC = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400"
+                className="w-full pl-10 pr-3 h-12 border border-gray-300 rounded-md focus:ring-2 focus:ring-amber-500 focus:border-amber-500 placeholder-gray-400"
               />
             </div>
             
             {authModalMode !== 'reset' && (
-              <div className="space-y-1.5 relative">
+              <div className="space-y-1.5 relative flex items-center">
                 <Label htmlFor="password-modal" className="sr-only">Password</Label>
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
+                <Lock className="absolute left-3 h-5 w-5 text-gray-400 pointer-events-none" />
                 <Input
                   id="password-modal"
                   type="password"
@@ -213,7 +204,7 @@ const AuthModal: React.FC = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400"
+                  className="w-full pl-10 pr-3 h-12 border border-gray-300 rounded-md focus:ring-2 focus:ring-amber-500 focus:border-amber-500 placeholder-gray-400"
                 />
               </div>
             )}
@@ -223,7 +214,7 @@ const AuthModal: React.FC = () => {
                     <button 
                       type="button" 
                       onClick={() => openAuthModal('reset')}
-                      className="text-xs text-blue-600 hover:text-blue-500 hover:underline focus:outline-none font-medium"
+                      className="text-xs text-amber-600 hover:text-amber-500 hover:underline focus:outline-none font-medium"
                       disabled={loading}
                     >
                       Forgot password?
@@ -233,7 +224,7 @@ const AuthModal: React.FC = () => {
             
             <Button 
               type="submit" 
-              className="w-full bg-gray-800 hover:bg-gray-700 text-white font-semibold py-3 rounded-md transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+              className="w-full bg-amber-600 hover:bg-amber-500 text-white font-semibold py-3 rounded-md transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2"
               disabled={loading || (authModalMode === 'reset' && resetSent)}
             >
               {loading ? <Loader2 className="mx-auto h-5 w-5 animate-spin" /> : currentButtonText}
@@ -248,7 +239,7 @@ const AuthModal: React.FC = () => {
                 Don't have an account?{' '}
                 <button 
                     onClick={() => openAuthModal('signup')} 
-                    className="font-medium text-blue-600 hover:text-blue-500 hover:underline focus:outline-none"
+                    className="font-medium text-amber-600 hover:text-amber-500 hover:underline focus:outline-none"
                 >
                     Sign up
                 </button>
@@ -259,7 +250,7 @@ const AuthModal: React.FC = () => {
                 Already have an account?{' '}
                 <button 
                     onClick={() => openAuthModal('signin')} 
-                    className="font-medium text-blue-600 hover:text-blue-500 hover:underline focus:outline-none"
+                    className="font-medium text-amber-600 hover:text-amber-500 hover:underline focus:outline-none"
                 >
                     Log in
                 </button>
@@ -270,7 +261,7 @@ const AuthModal: React.FC = () => {
                 Remembered your password?{' '}
                 <button 
                     onClick={() => openAuthModal('signin')} 
-                    className="font-medium text-blue-600 hover:text-blue-500 hover:underline focus:outline-none"
+                    className="font-medium text-amber-600 hover:text-amber-500 hover:underline focus:outline-none"
                 >
                     Back to Login
                 </button>

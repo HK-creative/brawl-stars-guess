@@ -41,16 +41,33 @@ const modeOrder = [
   { name: 'Star Power Mode', route: '/starpower' },
 ];
 
-const StarPowerMode = () => {
+interface StarPowerModeProps {
+  brawlerId?: number;
+  onRoundEnd?: (result: { success: boolean, brawlerName?: string }) => void;
+  maxGuesses?: number;
+  isEndlessMode?: boolean;
+  isSurvivalMode?: boolean;
+  skipVictoryScreen?: boolean;
+}
+
+const StarPowerMode = ({
+  brawlerId,
+  onRoundEnd,
+  maxGuesses = 6,
+  isEndlessMode: propIsEndlessMode = false,
+  isSurvivalMode = false,
+  skipVictoryScreen = false
+}: StarPowerModeProps = {}) => {
   const [guess, setGuess] = useState('');
   const [guesses, setGuesses] = useState<string[]>([]);
   const [selectedBrawler, setSelectedBrawler] = useState<Brawler | null>(null);
   const [dailyChallenge, setDailyChallenge] = useState<StarPowerChallenge | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [timeUntilNext, setTimeUntilNext] = useState<{ hours: number; minutes: number; seconds: number }>({ hours: 0, minutes: 0, seconds: 0 });
+  const [timeUntilNext, setTimeUntilNext] = useState<{ hours: number; minutes: number; seconds?: number }>({ hours: 0, minutes: 0, seconds: 0 });
   const [attempts, setAttempts] = useState(0);
   const [isCorrect, setIsCorrect] = useState(false);
   const [showResult, setShowResult] = useState(false);
+  const [gameKey, setGameKey] = useState(Date.now().toString()); // Key to force re-render
 
   // Difficulty settings
   const [isGrayscale, setIsGrayscale] = useState(false);
@@ -76,7 +93,7 @@ const StarPowerMode = () => {
   const [isGameOver, setIsGameOver] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [guessCount, setGuessCount] = useState(0);
-  const [isEndlessMode, setIsEndlessMode] = useState(false);
+  const [isEndlessMode, setIsEndlessMode] = useState(propIsEndlessMode);
 
   // Add windowSize state for confetti
   const [windowSize, setWindowSize] = useState({ width: window.innerWidth, height: window.innerHeight });
@@ -86,138 +103,13 @@ const StarPowerMode = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // CRITICAL: This effect detects when brawlerId changes and resets the game
   useEffect(() => {
-    // Set a random rotation degree when rotation option is toggled on
-    if (isRotated) {
-      const angles = [90, 180, 270];
-      setRotation(angles[Math.floor(Math.random() * angles.length)]);
-    } else {
-      setRotation(0);
-    }
-  }, [isRotated]);
-
-  const loadChallengeDetails = async () => {
-    setIsLoading(true);
-    try {
-      const data = await fetchDailyChallenge('starpower');
-      if (data) {
-        setDailyChallenge(data);
-        if (data.image) {
-          setStarPowerImage(`/${data.image}`);
-          setCorrectBrawlerForVictory(data.brawler);
-        }
-      } else {
-        setDailyChallenge(fallbackChallenge);
-        setStarPowerImage(`/${fallbackChallenge.image}`);
-        setCorrectBrawlerForVictory(fallbackChallenge.brawler);
-        toast.error("Couldn't load today's challenge. Using fallback data.");
-      }
-      setGuesses([]);
-      setGuessCount(0);
-      setIsGameOver(false);
-      setShowConfetti(false);
-      setGuess('');
-      setSelectedBrawler(null);
-    } catch (error) {
-      console.error("Error loading star power challenge:", error);
-      setDailyChallenge(fallbackChallenge);
-      setStarPowerImage(`/${fallbackChallenge.image}`);
-      setCorrectBrawlerForVictory(fallbackChallenge.brawler);
-      toast.error("Error loading challenge.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadChallengeDetails();
-  }, [isEndlessMode]);
-
-  useEffect(() => {
-    if (isEndlessMode) {
-      setTimeUntilNext({ hours: 0, minutes: 0, seconds: 0 });
-      return;
-    }
-    const update = () => {
-      const now = new Date();
-      const utc2Now = new Date(now.getTime() + (2 * 60 * 60 * 1000));
-      const tomorrow = new Date(utc2Now);
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      tomorrow.setHours(0, 0, 0, 0);
-      const diffMs = tomorrow.getTime() - utc2Now.getTime();
-      const hours = Math.floor(diffMs / (1000 * 60 * 60));
-      const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((diffMs % (1000 * 60)) / 1000);
-      setTimeUntilNext({ hours, minutes, seconds });
-    };
-    update();
-    const interval = setInterval(update, 1000);
-    return () => clearInterval(interval);
-  }, [isEndlessMode]);
-
-  useEffect(() => {
-    const fetchYesterday = async () => {
-      try {
-        const yest = await fetchYesterdayChallenge('starpower');
-        if (yest && yest.image) {
-          setYesterdayStarPower({ image: `/${yest.image}`, brawler: yest.brawler });
-        }
-      } catch (error) {
-        console.error("Error fetching yesterday's challenge:", error);
-      }
-    };
-    fetchYesterday();
-  }, []);
-
-  useEffect(() => {
-    if (isGameOver && victoryRef.current) {
-      victoryRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      setShowConfetti(true);
-      // Dispatch mode completed event
-      window.dispatchEvent(new CustomEvent('brawldle-mode-completed', { detail: { mode: 'starpower' } }));
-    }
-  }, [isGameOver]);
-
-  const handleGuess = () => {
-    const trimmedGuess = guess.trim();
-    if (!trimmedGuess || !dailyChallenge) return;
-    const brawlerMatch = brawlers.find(b => b.name.toLowerCase() === trimmedGuess.toLowerCase());
-    if (!brawlerMatch) {
-      toast.error('Please enter a valid brawler name!');
-      return;
-    }
-    if (guesses.includes(trimmedGuess.toLowerCase())) {
-      toast.error('You already guessed this brawler!');
-      return;
-    }
-    const newGuessCount = guessCount + 1;
-    setGuessCount(newGuessCount);
-    setGuesses([...guesses, trimmedGuess.toLowerCase()]);
-    const isGuessCorrect = trimmedGuess.toLowerCase() === dailyChallenge.brawler.toLowerCase();
+    console.log(`StarPowerMode: brawlerId changed to ${brawlerId}`);
     
-    if (isGuessCorrect) {
-      setIsGameOver(true);
-      toast.success('Correct! You found the right brawler!');
-    } else {
-      toast.error('Wrong guess! Try again.');
-    }
+    // Reset game state when brawlerId changes (critical for Survival Mode)
     setGuess('');
-    setSelectedBrawler(null);
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    handleGuess();
-  };
-  
-  const handleBrawlerSelect = (brawler: Brawler) => {
-    setSelectedBrawler(brawler);
-    setGuess(brawler.name);
-  };
-  
-  const resetGame = () => {
     setGuesses([]);
-    setGuess('');
     setSelectedBrawler(null);
     setAttempts(0);
     setIsCorrect(false);
@@ -225,62 +117,407 @@ const StarPowerMode = () => {
     setIsGameOver(false);
     setShowConfetti(false);
     setGuessCount(0);
+    
+    // Generate a new key to force complete component re-initialization
+    setGameKey(Date.now().toString());
+    
+    // Load the new challenge with the changed brawlerId
+    loadChallengeForCurrentMode();
+  }, [brawlerId]); // Re-run when brawlerId changes
+
+  // Helper function to get a random star power for a specific brawler
+  const getRandomStarPowerForBrawler = (brawlerName: string): StarPowerChallenge => {
+    // Find the brawler in our data
+    const brawler = brawlers.find(b => b.name.toLowerCase() === brawlerName.toLowerCase());
+    if (!brawler || !brawler.starPowers || brawler.starPowers.length === 0) {
+      console.log(`No star powers found for brawler: ${brawlerName}, using fallback`);
+      return fallbackChallenge;
+    }
+    
+    // Get a random star power
+    const randomIndex = Math.floor(Math.random() * brawler.starPowers.length);
+    const starPower = brawler.starPowers[randomIndex];
+    
+    // Generate image path based on naming convention
+    // Example: "bo_starpower_01.png"
+    // Get the number from the star power name if possible
+    let num = '01';
+    const match = starPower.name.match(/(\d+)/);
+    if (match) {
+      num = match[1].padStart(2, '0');
+    }
+    
+    const imageFileName = `${brawler.name.toLowerCase().replace(/ /g, '_')}_starpower_${num}.png`;
+    
+    return {
+      brawler: brawler.name,
+      starPowerName: starPower.name,
+      tip: starPower.tip || "No tip available",
+      image: `/StarPowerImages/${imageFileName}`
+    };
   };
 
+  const loadChallengeDetails = () => {
+    if (!dailyChallenge) return;
+    
+    // Update UI states for the challenge
+    setStarPowerImage(dailyChallenge.image);
+    setCorrectBrawlerForVictory(dailyChallenge.brawler);
+    
+    // Set difficulty features
+    // For standard mode, every 3rd day is grayscale, every 5th day is rotated
+    const today = new Date();
+    const dayOfMonth = today.getDate();
+    
+    const shouldBeGrayscale = dayOfMonth % 3 === 0;
+    const shouldBeRotated = dayOfMonth % 5 === 0;
+    
+    setIsGrayscale(shouldBeGrayscale);
+    setIsRotated(shouldBeRotated);
+    
+    if (shouldBeRotated) {
+      // Random rotation between -45 and 45 degrees
+      setRotation(Math.floor(Math.random() * 90) - 45);
+    } else {
+      setRotation(0);
+    }
+    
+    console.log("Challenge loaded:", dailyChallenge);
+  };
+
+  // Timer update effect
+  useEffect(() => {
+    const timer = setInterval(() => {
+      update();
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+  
+  // Load challenge on mount if not in survival mode
+  useEffect(() => {
+    if (!isSurvivalMode) {
+      loadChallengeForCurrentMode();
+    }
+    // In survival mode, the challenge is loaded by the brawlerId effect
+  }, [isSurvivalMode, isEndlessMode]);
+  
+  // Update confetti timeout
+  useEffect(() => {
+    if (showConfetti) {
+      const timer = setTimeout(() => {
+        setShowConfetti(false);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [showConfetti]);
+
+  // Function to load a challenge specific to the current mode
+  const loadChallengeForCurrentMode = async () => {
+    setIsLoading(true);
+    
+    try {
+      // If we have a specified brawlerId, use that brawler (for SurvivalMode)
+      if (brawlerId !== undefined) {
+        // Check if the brawlerId is within a valid range
+        if (brawlerId <= 0 || brawlerId > brawlers.length) {
+          console.warn(`Brawler ID ${brawlerId} is out of range (1-${brawlers.length}). Using fallback.`);
+          // Use a fallback brawler (Shelly or first available)
+          const fallbackBrawlerId = 1; // Shelly
+          const fallbackBrawler = brawlers.find(b => b.id === fallbackBrawlerId) || brawlers[0];
+          
+          if (fallbackBrawler) {
+            console.log(`Using fallback brawler: ${fallbackBrawler.name} instead of invalid ID: ${brawlerId}`);
+            const challenge = getRandomStarPowerForBrawler(fallbackBrawler.name);
+            setDailyChallenge(challenge);
+            loadChallengeDetails();
+            setIsLoading(false);
+            return;
+          }
+        }
+        
+        // If the ID is valid, proceed normally
+        const brawlerForId = brawlers.find(b => b.id === brawlerId);
+        if (brawlerForId) {
+          console.log(`Getting random star power for brawler: ${brawlerForId.name} (ID: ${brawlerId})`);
+          const challenge = getRandomStarPowerForBrawler(brawlerForId.name);
+          setDailyChallenge(challenge);
+          loadChallengeDetails();
+          setIsLoading(false);
+          return;
+        } else {
+          // Brawler ID not found - use fallback
+          console.error(`Brawler with ID ${brawlerId} not found in data`);
+          const fallbackBrawler = brawlers[0];
+          console.log(`Using fallback brawler: ${fallbackBrawler.name} after ID not found`);
+          const challenge = getRandomStarPowerForBrawler(fallbackBrawler.name);
+          setDailyChallenge(challenge);
+          loadChallengeDetails();
+          setIsLoading(false);
+          return;
+        }
+      }
+      
+      // For endless mode, use a random brawler's star power
+      if (isEndlessMode) {
+        // Select a random brawler
+        const randomBrawlerIndex = Math.floor(Math.random() * brawlers.length);
+        const randomBrawler = brawlers[randomBrawlerIndex];
+        const challenge = getRandomStarPowerForBrawler(randomBrawler.name);
+        setDailyChallenge(challenge);
+        loadChallengeDetails();
+        setIsLoading(false);
+        return;
+      }
+      
+      // For standard mode, try to fetch from backend
+      try {
+        const response = await fetchDailyChallenge('starpower');
+        if (response?.success) {
+          const starpower = response.starpower;
+          const challenge: StarPowerChallenge = {
+            brawler: starpower.brawler,
+            starPowerName: starpower.name,
+            tip: starpower.tip || "No tip available",
+            image: `/StarPowerImages/${starpower.image || 'default_starpower.png'}`
+          };
+          setDailyChallenge(challenge);
+          
+          // Fetch yesterday's challenge for comparison
+          fetchYesterday();
+        } else {
+          throw new Error("Failed to fetch star power challenge");
+        }
+      } catch (error) {
+        console.error("Error fetching star power challenge:", error);
+        setDailyChallenge(fallbackChallenge);
+        toast("Offline Mode", {
+          description: "Using local fallback data as server could not be reached."
+        });
+      }
+      
+      loadChallengeDetails();
+    } catch (error) {
+      console.error("Error loading challenge:", error);
+      toast("Error", {
+        description: "Something went wrong loading the challenge."
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Update time and related state
+  const update = () => {
+    // Update time till next challenge
+    const nextTime = getTimeUntilNextChallenge();
+    setTimeUntilNext({
+      hours: nextTime.hours,
+      minutes: nextTime.minutes,
+      seconds: 0 // Default to 0 as getTimeUntilNextChallenge doesn't return seconds
+    });
+  };
+
+  // Fetch yesterday's challenge if needed
+  const fetchYesterday = async () => {
+    try {
+      const yesterdayData = await fetchYesterdayChallenge('starpower');
+      if (yesterdayData?.success) {
+        setYesterdayStarPower({
+          brawler: yesterdayData.starpower.brawler,
+          image: getPortrait(yesterdayData.starpower.brawler)
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching yesterday's star power:", error);
+    }
+  };
+
+  const resetGame = () => {
+    setGuess('');
+    setGuesses([]);
+    setSelectedBrawler(null);
+    setAttempts(0);
+    setIsCorrect(false);
+    setShowResult(false);
+    setIsGameOver(false);
+    setShowConfetti(false);
+    setGuessCount(0);
+    
+    if (isEndlessMode) {
+      loadChallengeForCurrentMode();
+    }
+  };
+
+  const handleGuess = () => {
+    if (!dailyChallenge || showResult || !selectedBrawler) return;
+
+    const currentGuess = selectedBrawler.name;
+    
+    // Check if already guessed
+    if (guesses.includes(currentGuess)) {
+      toast('Already guessed', {
+        description: `You've already guessed ${currentGuess}!`,
+      });
+      return;
+    }
+
+    // Add to guesses
+    setGuesses([...guesses, currentGuess]);
+    setGuess('');
+    setSelectedBrawler(null);
+    setAttempts(attempts + 1);
+    setGuessCount(guessCount + 1);
+    
+    // Check if correct
+    const isThisGuessCorrect = currentGuess.toLowerCase() === dailyChallenge.brawler.toLowerCase();
+    
+    if (isThisGuessCorrect) {
+      setIsCorrect(true);
+      setShowResult(true);
+      setIsGameOver(true);
+      setShowConfetti(true);
+      
+      if (isSurvivalMode && onRoundEnd) {
+        // Allow parent component to handle the success, passing the correct brawler name
+        onRoundEnd({ 
+          success: true,
+          brawlerName: currentGuess // Use the brawler name that was just guessed correctly
+        });
+      } else {
+        toast('Correct!', {
+          description: `You found ${dailyChallenge.brawler} in ${attempts + 1} guesses!`,
+        });
+        
+        // For endless mode, prepare for the next round after a delay
+        if (isEndlessMode) {
+          setTimeout(() => {
+            resetGame();
+          }, 3000);
+        }
+      }
+    } else if (attempts + 1 >= maxGuesses) {
+      // Out of guesses
+      setShowResult(true);
+      setIsGameOver(true);
+      
+      if (isSurvivalMode && onRoundEnd) {
+        // Allow parent component to handle the failure
+        onRoundEnd({ success: false });
+      } else {
+        toast('Game Over', {
+          description: `The correct brawler was ${dailyChallenge.brawler}.`,
+        });
+      }
+    }
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    handleGuess();
+  };
+
+  const handleBrawlerSelect = (brawler: Brawler) => {
+    setSelectedBrawler(brawler);
+  };
+
+  // Loading state
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-40">
-        <div className="animate-spin h-8 w-8 border-4 border-brawl-yellow border-t-transparent rounded-full"></div>
+      <div className="flex flex-col items-center justify-center min-h-[70vh]">
+        <div className="animate-pulse flex flex-col items-center gap-4">
+          <div className="w-24 h-24 bg-white/10 rounded-xl"></div>
+          <div className="h-6 w-40 bg-white/10 rounded-full"></div>
+          <div className="h-4 w-60 bg-white/10 rounded-full"></div>
+        </div>
       </div>
     );
   }
 
   if (!dailyChallenge) {
     return (
-      <Card className="brawl-card p-6">
-        <div className="text-center">
-          <h3 className="text-xl font-bold text-brawl-yellow mb-2">No Challenge Available</h3>
-          <p className="text-white/80">Check back later for today's challenge.</p>
-        </div>
-      </Card>
+      <div className="text-center p-8">
+        <h2 className="text-2xl font-bold text-white mb-4">Error Loading Challenge</h2>
+        <p className="text-gray-300 mb-6">There was a problem loading today's star power challenge.</p>
+        <Button onClick={loadChallengeForCurrentMode}>Try Again</Button>
+      </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex flex-col px-1 py-4 md:py-8">
+    <div key={gameKey} className="relative">
+      {/* Confetti effect for correct guesses */}
       {showConfetti && (
         <ReactConfetti
           width={windowSize.width}
           height={windowSize.height}
           recycle={false}
-          numberOfPieces={300}
-          onConfettiComplete={() => setShowConfetti(false)}
-          className="fixed top-0 left-0 w-full h-full z-50 pointer-events-none"
+          numberOfPieces={200}
+          gravity={0.3}
         />
       )}
-      <HomeButton />
-      
-      {/* Game Mode Tracker */}
-      <div className="flex justify-center mb-4 animate-fade-in-down">
-        <GameModeTracker />
-      </div>
-      <div className="mb-4 md:mb-6">
-        <h1 className="text-3xl md:text-4xl font-bold text-brawl-yellow mb-1 text-center">
-          {t('mode.starpower') || 'Star Power Mode'}
-        </h1>
-      </div>
-      <div className="flex-1 flex flex-col items-center">
-        {/* Star Power Image */}
-        <div className="flex flex-col items-center mb-6">
-          {starPowerImage ? (
-            <img src={starPowerImage} alt="Star Power" className="w-32 h-32 md:w-40 md:h-40 object-contain rounded-xl border-4 border-yellow-400 bg-black/70 shadow-lg" />
-          ) : (
-            <div className="w-32 h-32 md:w-40 md:h-40 bg-black/30 rounded-xl flex items-center justify-center text-white/60">Loading...</div>
-          )}
+
+      {/* Only show the infinite mode toggle if not in survival mode */}
+      {!isSurvivalMode && (
+        <div className="flex justify-between items-center mb-4">
+          <div className="flex items-center gap-2">
+            {!isEndlessMode ? (
+              <span className="text-sm text-white/60">Daily Challenge</span>
+            ) : (
+              <span className="text-sm text-white/60">Endless Mode</span>
+            )}
+            <div className="flex items-center gap-1">
+              <Switch 
+                checked={isEndlessMode}
+                onCheckedChange={(checked) => {
+                  setIsEndlessMode(checked);
+                  resetGame();
+                }}
+                className="data-[state=checked]:bg-amber-500"
+              />
+              <InfinityIcon className="h-4 w-4 text-white/60" />
+            </div>
+          </div>
         </div>
-        {/* Autocomplete Guess Input */}
-        <div className="mb-6 w-full max-w-xl mx-auto">
-          <form onSubmit={handleSubmit}>
+      )}
+
+      <div className="flex flex-col min-h-[70vh] w-full max-w-2xl mx-auto">
+        {/* Main Challenge Content */}
+        <div className="flex-1 mb-8">
+          {/* Title */}
+          <h1 className="text-2xl md:text-3xl font-bold text-center text-white mb-3">
+            Guess the Brawler with this Star Power
+          </h1>
+          
+          {/* Star Power Image - with difficulty modifiers */}
+          <div className="flex flex-col items-center mb-6">
+            <div className="relative w-32 h-32 md:w-40 md:h-40 mx-auto mb-4">
+              <img
+                src={starPowerImage}
+                alt="Brawler Star Power"
+                className={cn(
+                  "w-full h-full object-contain transform transition-all duration-300 hover:scale-105",
+                  isGrayscale && "grayscale",
+                )}
+                style={{ transform: isRotated ? `rotate(${rotation}deg)` : 'none' }}
+                onError={(e) => {
+                  e.currentTarget.src = '/StarPowerImages/default_starpower.png';
+                }}
+              />
+            </div>
+            
+            {/* Star Power Name (shown if game is over) */}
+            <div className="text-center">
+              <h2 className="text-xl md:text-2xl font-extrabold text-brawl-yellow mb-2">
+                {showResult ? dailyChallenge.starPowerName : "???"}
+              </h2>
+              <p className="text-sm md:text-base text-white/80 max-w-md mx-auto italic">
+                "{dailyChallenge.tip}"
+              </p>
+            </div>
+          </div>
+          
+          {/* Input Form */}
+          <form onSubmit={handleSubmit} className="mb-4 max-w-md mx-auto px-2">
             <BrawlerAutocomplete
               brawlers={brawlers}
               value={guess}
@@ -330,8 +567,8 @@ const StarPowerMode = () => {
             })}
           </ul>
         </div>
-        {/* Victory Section */}
-        {isGameOver && dailyChallenge && (
+        {/* Victory Section - only show if not in survival mode */}
+        {isGameOver && dailyChallenge && !skipVictoryScreen && (
           <div ref={victoryRef}>
             {(() => {
               try {

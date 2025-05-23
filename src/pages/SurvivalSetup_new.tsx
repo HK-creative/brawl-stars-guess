@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSurvivalStore, defaultSurvivalSettings, GameMode, SurvivalSettings } from '@/stores/useSurvivalStore';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
 import { resetModeSelectionState } from '@/lib/survival-logic';
 import { Timer, Volume2, Image, Zap } from 'lucide-react';
@@ -141,59 +143,84 @@ const SurvivalSetupPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-900 to-black flex flex-col items-center justify-center p-4">
-      <div className="bg-black/60 backdrop-blur-md rounded-xl overflow-hidden w-full max-w-lg border border-white/5 shadow-2xl">
-        {/* Minimal header */}
-        <div className="bg-gradient-to-r from-amber-600 to-pink-600 py-3 px-4">
-          <h1 className="text-xl text-white font-bold text-center">Survival Mode</h1>
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black flex flex-col items-center justify-center p-4 sm:p-6">
+      <Card className="border-0 shadow-xl w-full max-w-xl bg-black/40 backdrop-blur-md rounded-xl overflow-hidden border-t border-white/10">
+        {/* Title banner with game-like styling */}
+        <div className="bg-gradient-to-r from-amber-600 to-pink-600 py-4 px-6 relative">
+          <CardTitle className="text-2xl sm:text-3xl text-white font-bold text-center drop-shadow-md">
+            Survival Mode
+          </CardTitle>
+          <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-white/30 to-transparent"></div>
         </div>
         
-        {/* Simple instruction */}
-        <div className="px-4 pt-4 pb-2 text-center">
-          <p className="text-white/70 text-sm">Select game modes to play</p>
-        </div>
+        {/* Header with game info */}
+        <CardHeader className="text-center">
+          <CardDescription className="text-white/80 text-sm">
+            Select the game modes you want to play in survival. 
+            Each round has a fixed timer of 150 seconds, and modes will be randomly selected from your choices.
+          </CardDescription>
+        </CardHeader>
         
-        {/* Game mode selection grid */}
-        <div className="p-4">
-          <div className="grid grid-cols-2 gap-3">
+        {/* Game mode selection */}
+        <CardContent className="pb-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {gameModeDetails.map(mode => (
               <div
                 key={mode.id}
-                className={`rounded-lg cursor-pointer transition-all
-                           border ${localSettings.modes.includes(mode.id as GameMode) 
-                             ? 'border-white/50 bg-white/10' 
-                             : 'border-white/10 bg-black/40 hover:bg-black/30'}`}
+                className={`relative rounded-lg overflow-hidden cursor-pointer transition-all duration-300 
+                           border-2 hover:border-white/40 ${localSettings.modes.includes(mode.id as GameMode) 
+                             ? 'border-white/70 shadow-glow' 
+                             : 'border-white/10'}`}
                 onClick={() => handleModeChange(mode.id)}
               >
-                <div className="p-3 flex flex-col items-center text-center gap-2">
-                  <div className={`p-2 rounded-full ${localSettings.modes.includes(mode.id as GameMode) 
-                    ? 'bg-gradient-to-br ' + mode.color + ' text-white'
-                    : 'bg-black/40 text-white/60'}`}
-                  >
+                <div className={`absolute inset-0 bg-gradient-to-br ${mode.color} opacity-${
+                  localSettings.modes.includes(mode.id as GameMode) ? '70' : '20'
+                } transition-opacity duration-300`}></div>
+                
+                <div className="relative p-4 flex items-start gap-3">
+                  <div className={`p-2 rounded-full bg-black/30 text-white ${
+                    localSettings.modes.includes(mode.id as GameMode) ? 'bg-white/30' : ''
+                  }`}>
                     {mode.icon}
                   </div>
+                  
                   <div>
-                    <h3 className="font-medium text-white text-sm">{mode.label}</h3>
+                    <h3 className="font-bold text-white">{mode.label}</h3>
+                    <p className="text-xs text-white/70">{mode.description}</p>
+                  </div>
+                  
+                  <div className="ml-auto">
+                    <Checkbox 
+                      checked={localSettings.modes.includes(mode.id as GameMode)} 
+                      className="rounded-full data-[state=checked]:bg-white data-[state=checked]:text-black" 
+                      onCheckedChange={() => handleModeChange(mode.id)}
+                    />
                   </div>
                 </div>
               </div>
             ))}
           </div>
           
-          {/* Minimal timer info */}
-          <div className="mt-5 py-3 border-t border-white/5 flex items-center justify-center gap-2 text-white/60">
-            <Timer className="h-4 w-4" />
-            <span className="text-xs">150s per round</span>
+          {/* Timer info card */}
+          <div className="mt-6 bg-gradient-to-r from-indigo-900/40 to-indigo-700/40 rounded-lg p-3 border border-indigo-500/30">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-indigo-500/20 rounded-full">
+                <Timer className="h-5 w-5 text-indigo-300" />
+              </div>
+              <div>
+                <h3 className="text-sm font-medium text-white">Fixed Timer: 150 seconds</h3>
+                <p className="text-xs text-white/70">Each round has the same time limit regardless of difficulty.</p>
+              </div>
+            </div>
           </div>
-        </div>
+        </CardContent>
         
-        {/* Footer with just the buttons */}
-        <div className="p-4 flex justify-between border-t border-white/5">
+        {/* Card Footer */}
+        <CardFooter className="flex justify-between pt-6 pb-6 bg-black/30 border-t border-white/5">
           <Button 
-            variant="ghost" 
+            variant="outline" 
             onClick={() => navigate('/')}
-            className="text-white/70 hover:text-white hover:bg-white/5"
-            size="sm"
+            className="border-white/20 hover:bg-white/10 text-white"
           >
             Cancel
           </Button>
@@ -201,22 +228,19 @@ const SurvivalSetupPage: React.FC = () => {
           <Button 
             onClick={handleStartGame} 
             disabled={!isValidationPassed}
-            size="sm"
-            className={`${!isValidationPassed ? 'opacity-50' : ''} 
+            className={`${!isValidationPassed ? 'cursor-not-allowed opacity-70' : ''} 
                       bg-gradient-to-r from-amber-600 to-pink-600 hover:from-amber-500 
-                      hover:to-pink-500 text-white`}
+                      hover:to-pink-500 border-none text-white font-bold`}
           >
-            Start
+            Start Game
           </Button>
-        </div>
-      </div>
+        </CardFooter>
+      </Card>
       
-      {/* Minimal mode selection indicator */}
-      {localSettings.modes.length > 0 && (
-        <div className="mt-3 px-3 py-1 rounded-full bg-white/10 text-xs text-white/60">
-          {localSettings.modes.length} selected
-        </div>
-      )}
+      {/* Mode selection count */}
+      <div className="mt-4 text-sm text-white/60">
+        {localSettings.modes.length} mode{localSettings.modes.length !== 1 ? 's' : ''} selected
+      </div>
     </div>
   );
 };

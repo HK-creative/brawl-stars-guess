@@ -7,10 +7,11 @@ import { brawlers } from '@/data/brawlers';
 export type GameMode = 'classic' | 'starpower' | 'gadget' | 'audio';
 
 export interface SurvivalSettings {
-  hearts: 1 | 2 | 3;
+  // Only modes are configurable now
   modes: GameMode[]; // Array of selected game modes
-  rotation: 'repeat' | 'cycle'; // How to rotate through selected modes
-  timer?: number; // Optional timer in seconds for each round
+  // Fixed settings
+  rotation: 'repeat'; // Always randomly pick from selected modes
+  timer: 150; // Always 150 seconds timer
 }
 
 export interface SurvivalRoundState {
@@ -25,7 +26,6 @@ export interface SurvivalRoundState {
 
 export interface SurvivalGameState {
   settings: SurvivalSettings | null;
-  heartsLeft: number;
   currentRound: number; // Overall round number in the survival game
   gameStatus: 'setup' | 'playing' | 'paused' | 'gameover';
   // Individual round state could be part of this or separate
@@ -40,9 +40,8 @@ interface SurvivalActions {
   initializeGame: (settings: SurvivalSettings) => void;
   updateSettings: (newSettings: Partial<SurvivalSettings>) => void;
   // Gameplay actions
-  startNextRound: () => void; // Logic to set up brawler, mode, quota
+  startNextRound: (specificMode?: GameMode) => void; // Logic to set up brawler, mode, quota (can specify a mode)
   decrementGuess: () => void;
-  decrementHeart: () => void;
   setTimerLeft: (time: number) => void;
   pauseGame: () => void;
   resumeGame: () => void;
@@ -53,10 +52,9 @@ interface SurvivalActions {
 }
 
 const initialSettings: SurvivalSettings = {
-  hearts: 3,
   modes: ['classic', 'gadget', 'starpower', 'audio'], // Default to all modes
-  rotation: 'cycle',
-  timer: undefined,
+  rotation: 'repeat', // Fixed setting - always random
+  timer: 150, // Fixed setting - always 150 seconds
 };
 
 const initialRoundState: SurvivalRoundState = {
@@ -71,7 +69,6 @@ const initialRoundState: SurvivalRoundState = {
 
 const initialGameState: SurvivalGameState = {
   settings: null, // Initialized by player
-  heartsLeft: 0,
   currentRound: 0,
   gameStatus: 'setup',
   activeRoundState: null,
@@ -87,7 +84,6 @@ export const useSurvivalStore = create<SurvivalGameState & SurvivalActions>()(
       initializeGame: (settings) => set((state) => ({
         ...initialGameState, // Reset most game state fields
         settings: settings,
-        heartsLeft: settings.hearts,
         gameStatus: 'playing', // Or 'setup' if first round needs explicit start
         currentRound: 0, // Will be incremented by startNextRound
         // activeRoundState will be set by startNextRound
@@ -96,42 +92,123 @@ export const useSurvivalStore = create<SurvivalGameState & SurvivalActions>()(
       updateSettings: (newSettings) => set((state) => ({
         settings: state.settings ? { ...state.settings, ...newSettings } : null,
       })),
-
-      startNextRound: () => {
+      
+      startNextRound: (specificMode?: GameMode) => {
         set((state) => {
-          if (!state.settings) return {}; // Should not happen if game is initialized
+          if (!state.settings) {
+            console.error('Cannot start next round: Settings not initialized');
+            return {}; // Should not happen if game is initialized
+          }
           
-          const newRoundNumber = state.currentRound + 1;
-          
-          // Calculate next round's guesses quota
-          const newGuessesQuota = calculateNextGuessesQuota(newRoundNumber);
-          
-          // Convert brawlers to format expected by selectNextBrawlerAndMode
-          const brawlersWithId = brawlers.map((b, index) => ({
-            id: index + 1, // Generate sequential IDs
-            name: b.name
-          }));
-          
-          // Select next brawler and mode based on current state and settings
-          const { brawlerId, mode } = selectNextBrawlerAndMode(
-            brawlersWithId,
-            state.settings,
-            state.activeRoundState?.currentBrawlerId
-          );
-
-          return {
-            currentRound: newRoundNumber,
-            gameStatus: 'playing',
-            activeRoundState: {
-              roundNumber: newRoundNumber,
-              currentBrawlerId: brawlerId,
-              currentMode: mode,
-              guessesQuota: newGuessesQuota,
-              guessesLeft: newGuessesQuota,
-              timerLeft: state.settings?.timer, // Reset timer if enabled
-              isRoundActive: true,
+          try {
+            const newRoundNumber = state.currentRound + 1;
+            console.log(`Starting round ${newRoundNumber} in Survival Mode`);
+            
+            // Calculate next round's guesses quota
+            const newGuessesQuota = calculateNextGuessesQuota(newRoundNumber);
+            console.log(`Guesses quota for round ${newRoundNumber}: ${newGuessesQuota}`);
+            
+            // Convert brawlers to format expected by selectNextBrawlerAndMode
+            // IMPORTANT: Preserve each brawler's original ID if it exists, or assign a valid one
+            const brawlersWithId = brawlers.map((b) => ({
+              id: b.id || brawlers.indexOf(b) + 1, // Use existing ID or generate sequential IDs
+              name: b.name || `Unknown Brawler ${brawlers.indexOf(b) + 1}` // Ensure name is present
+            }));
+            
+            // Log the valid brawler IDs for debugging
+            console.log(`Valid brawler IDs range: 1 to ${brawlersWithId.length}`);
+            if (brawlersWithId.length > 0) {
+              console.log(`Sample brawler: ${brawlersWithId[0].name} with ID ${brawlersWithId[0].id}`);
             }
-          };
+            
+            // Ensure we have at least one valid brawler
+            if (brawlersWithId.length === 0) {
+              console.error('No brawlers available for selection');
+              // Create at least one fallback brawler to prevent errors
+              brawlersWithId.push({
+                id: 1,
+                name: 'Shelly' // Default brawler as fallback
+              });
+            }
+            
+            console.log(`Prepared ${brawlersWithId.length} brawlers for selection`);
+            
+            // Ensure we have a valid array of modes
+            if (!state.settings.modes || state.settings.modes.length === 0) {
+              console.error('No game modes available in settings');
+              return {
+                gameStatus: 'setup',
+              };
+            }
+            
+            let selectedBrawlerId: number;
+            let selectedMode: GameMode;
+            
+            try {
+              if (specificMode) {
+                // If a specific mode is requested, use it directly
+                selectedMode = specificMode;
+                console.log(`Using specified mode: ${selectedMode}`);
+                
+                // Still need to select a random brawler
+                const filteredBrawlers = brawlersWithId.filter(
+                  b => b.id !== state.activeRoundState?.currentBrawlerId
+                );
+                
+                // Make sure we have brawlers to select from
+                if (filteredBrawlers.length === 0) {
+                  console.warn('No brawlers available after filtering, using all brawlers');
+                  const randomBrawlerIndex = Math.floor(Math.random() * brawlersWithId.length);
+                  selectedBrawlerId = brawlersWithId[randomBrawlerIndex].id;
+                } else {
+                  const randomBrawlerIndex = Math.floor(Math.random() * filteredBrawlers.length);
+                  selectedBrawlerId = filteredBrawlers[randomBrawlerIndex].id;
+                }
+              } else {
+                // Otherwise use the standard selection logic
+                console.log('Using standard brawler and mode selection logic');
+                const { brawlerId, mode } = selectNextBrawlerAndMode(
+                  brawlersWithId,
+                  state.settings,
+                  state.activeRoundState?.currentBrawlerId
+                );
+                selectedBrawlerId = brawlerId;
+                selectedMode = mode;
+              }
+              
+              console.log(`Selected: Brawler ID ${selectedBrawlerId}, Mode: ${selectedMode}`);
+            } catch (error) {
+              // Fallback if selection fails
+              console.error('Error selecting brawler or mode:', error);
+              selectedBrawlerId = 1; // Use first brawler as fallback
+              selectedMode = state.settings.modes[0]; // Use first mode as fallback
+              console.log(`Using fallback selection: Brawler ID ${selectedBrawlerId}, Mode: ${selectedMode}`);
+            }
+            
+            return {
+              currentRound: newRoundNumber,
+              gameStatus: 'playing',
+              activeRoundState: {
+                roundNumber: newRoundNumber,
+                currentBrawlerId: selectedBrawlerId,
+                currentMode: selectedMode,
+                guessesQuota: newGuessesQuota,
+                guessesLeft: newGuessesQuota,
+                timerLeft: state.settings.timer, // Reset timer if enabled
+                isRoundActive: true,
+              }
+            };
+          } catch (error) {
+            console.error('Fatal error in startNextRound:', error);
+            // Return to setup if something goes wrong
+            return {
+              gameStatus: 'setup',
+              currentRound: 0,
+              activeRoundState: null
+            };
+          }
+
+          // The return statement has been moved inside the try block to fix scope issues
         });
       },
 
@@ -143,17 +220,6 @@ export const useSurvivalStore = create<SurvivalGameState & SurvivalActions>()(
             ...state.activeRoundState,
             guessesLeft: newGuessesLeft,
           }
-        };
-      }),
-
-      decrementHeart: () => set((state) => {
-        if (state.heartsLeft <= 0) return {};
-        const newHeartsLeft = state.heartsLeft - 1;
-        if (newHeartsLeft === 0) {
-          // Game over will be called separately
-        }
-        return {
-          heartsLeft: newHeartsLeft,
         };
       }),
 

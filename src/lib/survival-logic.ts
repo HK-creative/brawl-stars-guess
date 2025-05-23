@@ -40,40 +40,56 @@ let lastSelectedModeIndex = -1; // State for 'cycle' rotation within this module
 export const selectNextBrawlerAndMode = (
   allBrawlers: Brawler[],
   settings: SurvivalSettings,
-  previousBrawlerId?: number,
+  previousBrawlerId?: number | null,
   // previousMode?: GameMode, // Not strictly needed for brawler/mode selection here, but for cycle state
   currentRoundNumberForModeSelection?: number // To help reset cycle if needed, or use static index
 ): SelectionResult => {
   if (settings.modes.length === 0) {
-    throw new Error('Cannot select mode: No game modes selected in settings.');
+    throw new Error('No game modes available in settings');
   }
-  if (allBrawlers.length === 0) {
-    throw new Error('Cannot select brawler: Empty brawler list.');
+  
+  // Ensure we have valid brawlers to work with
+  if (!allBrawlers || allBrawlers.length === 0) {
+    console.error('No brawlers data available for selection');
+    // Create a fallback return with default values
+    return {
+      brawlerId: 1, // Default to ID 1
+      mode: settings.modes[0] // Use first available mode
+    };
   }
-
-  // 1. Select Next Game Mode
+  
+  // Select next mode based on rotation setting
   let nextMode: GameMode;
-  if (settings.rotation === 'cycle') {
-    lastSelectedModeIndex = (lastSelectedModeIndex + 1) % settings.modes.length;
-    nextMode = settings.modes[lastSelectedModeIndex];
-  } else { // 'repeat' (random)
-    const randomIndex = Math.floor(Math.random() * settings.modes.length);
-    nextMode = settings.modes[randomIndex];
-  }
-
-  // 2. Select Next Brawler
+  
+  // Always use random mode selection for simplicity
+  const randomModeIndex = Math.floor(Math.random() * settings.modes.length);
+  nextMode = settings.modes[randomModeIndex];
+  
+  // Initialize availableBrawlers with the complete list
   let availableBrawlers = [...allBrawlers];
-  if (previousBrawlerId !== undefined && availableBrawlers.length > 1) {
+  
+  if (previousBrawlerId !== undefined && previousBrawlerId !== null && availableBrawlers.length > 1) {
+    // Try to avoid selecting the same brawler twice in a row
     availableBrawlers = availableBrawlers.filter(b => b.id !== previousBrawlerId);
-    // If filtering leaves no brawlers (e.g., only one brawler in total and it was previous),
-    // then reset to full list to allow picking the same one.
+    // If filtering leaves no brawlers, reset to full list
     if (availableBrawlers.length === 0) {
-        availableBrawlers = [...allBrawlers];
+      availableBrawlers = [...allBrawlers];
     }
   }
   
+  // Safely select a random brawler
   const randomBrawlerIndex = Math.floor(Math.random() * availableBrawlers.length);
-  const nextBrawlerId = availableBrawlers[randomBrawlerIndex].id;
+  const selectedBrawler = availableBrawlers[randomBrawlerIndex];
+  
+  if (!selectedBrawler) {
+    console.error('Failed to select a brawler from', availableBrawlers);
+    // Fallback to the first brawler if selection fails
+    const fallbackBrawlerId = allBrawlers[0]?.id || 1;
+    console.log('Using fallback brawler ID:', fallbackBrawlerId);
+    return { brawlerId: fallbackBrawlerId, mode: nextMode };
+  }
+  
+  const nextBrawlerId = selectedBrawler.id;
 
   return {
     brawlerId: nextBrawlerId,

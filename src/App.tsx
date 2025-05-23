@@ -58,8 +58,7 @@ const App = () => {
               <Routes>
                   <Route path="/auth" element={<AuthPage />} />
                   <Route path="/auth/callback" element={<AuthCallback />} />
-                  <Route path="/survival" element={<SurvivalSetupPage />} />
-                  <Route path="/survival/play" element={<SurvivalModePage />} />
+                  <Route path="/survival" element={<SurvivalModePage />} />
                   <Route element={<Layout />}>
                     <Route index element={<Index />} />
                 <Route path="/classic" element={<ClassicMode />} />

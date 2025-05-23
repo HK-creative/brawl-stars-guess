@@ -69,23 +69,51 @@ export default {
       },
       keyframes: {
         "accordion-down": {
-          from: { height: 0 },
+          from: { height: "0" },
           to: { height: "var(--radix-accordion-content-height)" },
         },
         "accordion-up": {
           from: { height: "var(--radix-accordion-content-height)" },
-          to: { height: 0 },
+          to: { height: "0" },
         },
         "card-reveal": {
           "0%": { transform: "scale(0.5)", opacity: "0" },
           "60%": { transform: "scale(1.1)" },
           "100%": { transform: "scale(1)", opacity: "1" }
         },
+        "heartbeat": {
+          "0%": { transform: "scale(1)" },
+          "25%": { transform: "scale(1.1)" },
+          "40%": { transform: "scale(1)" },
+          "60%": { transform: "scale(1.1)" },
+          "100%": { transform: "scale(1)" }
+        },
+        "heartbreak": {
+          "0%": { transform: "scale(1)", opacity: "1" },
+          "10%": { transform: "scale(1.2)" },
+          "20%": { transform: "scale(0.9)" },
+          "30%": { transform: "scale(1.2)" },
+          "40%": { transform: "scale(0.9)" },
+          "50%": { transform: "scale(1.2)" },
+          "60%": { transform: "rotate(0deg)" },
+          "70%": { transform: "rotate(45deg) scale(0.9)" },
+          "80%": { transform: "rotate(-45deg) scale(0.7)" },
+          "90%": { transform: "rotate(20deg) scale(0.5)" },
+          "100%": { transform: "rotate(0deg) scale(1)", opacity: "0.6" }
+        },
+        "gameoverPulse": {
+          "0%": { boxShadow: "0 0 0 0 rgba(239, 68, 68, 0.4)" },
+          "70%": { boxShadow: "0 0 0 15px rgba(239, 68, 68, 0)" },
+          "100%": { boxShadow: "0 0 0 0 rgba(239, 68, 68, 0)" }
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "card-reveal": "card-reveal 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards",
+        "heartbeat": "heartbeat 1.5s ease-in-out infinite",
+        "heartbreak": "heartbreak 2s ease-in-out forwards",
+        "gameoverPulse": "gameoverPulse 2s infinite",
       },
     },
   },

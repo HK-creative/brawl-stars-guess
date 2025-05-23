@@ -23,7 +23,7 @@ export const modeColors = {
   audio: "from-purple-500 to-purple-600",
   gadget: "from-yellow-500 to-yellow-600",
   starpower: "from-yellow-500 to-yellow-600",
-  survival: "from-red-500 to-red-600",
+  survival: "from-red-600 via-amber-600 to-amber-400",
 };
 
 export const modeIcons: Record<string, string> = {
@@ -32,7 +32,7 @@ export const modeIcons: Record<string, string> = {
   audio: "/AudioIcon.png",
   gadget: "/GadgetIcon.png",
   starpower: "/StarpowerIcon.png",
-  survival: "/images/icons/heart-icon.png",
+  survival: "/images/icons/flame-icon.png",
 };
 
 export const modeCardBackgrounds: Record<string, string> = {
@@ -50,7 +50,7 @@ export const modeDisplayNames: Record<string, string> = {
   audio: "Audio Mode",
   gadget: "Gadget Mode",
   starpower: "Star Power Mode",
-  survival: "Survival / Hard Mode",
+  survival: "Survival Mode",
 };
 
 export const modeOrder = [
@@ -152,7 +152,13 @@ const GameModeCard: React.FC<GameModeCardProps> = ({
       </div>
       {/* Desktop layout: icon absolutely positioned, card full width with left padding */}
       <div className="hidden md:block relative w-full">
-        <div className="absolute -left-16 z-20 flex items-center justify-center w-20 h-20 rounded-2xl bg-black/60 backdrop-blur-md border-2 border-white/30 shadow-lg">
+        <div className={cn(
+          "absolute -left-16 z-20 flex items-center justify-center w-20 h-20 rounded-2xl",
+          "backdrop-blur-md border-2 shadow-lg transition-all duration-300",
+          mode === 'survival' 
+            ? 'bg-gradient-to-br from-red-900/80 to-amber-900/80 border-amber-400/50 shadow-amber-500/20 group-hover:shadow-amber-500/40 group-hover:border-amber-300/70 animate-pulse' 
+            : 'bg-black/60 border-white/30'
+        )}>
           {typeof icon === 'string' && icon.startsWith('/') ? (
             <img src={icon} alt={`${displayTitle} icon`} className="w-16 h-16 object-contain" />
           ) : (
@@ -168,7 +174,10 @@ const GameModeCard: React.FC<GameModeCardProps> = ({
           )}
         >
           <Card className={cn(
-            "relative h-28 flex items-center justify-center overflow-hidden rounded-2xl border border-white/20 transition-all duration-300 pl-24",
+            "relative h-28 flex items-center justify-center overflow-hidden rounded-2xl transition-all duration-300 pl-24",
+            mode === 'survival' 
+              ? 'bg-gradient-to-br from-red-900/30 via-amber-900/20 to-transparent border-2 border-amber-400/20 group-hover:border-amber-300/40 shadow-[0_0_25px_rgba(251,191,36,0.15)] group-hover:shadow-[0_0_35px_rgba(251,191,36,0.25)]' 
+              : 'border border-white/20',
             isClickable && [
               "hover:scale-[1.02]",
               "hover:shadow-xl",
@@ -187,12 +196,32 @@ const GameModeCard: React.FC<GameModeCardProps> = ({
               <div className={cn("absolute inset-0", "bg-black/60")} />
           </div>
             <div className="relative w-full flex items-center justify-center z-10">
-            <h3 className={cn(
-                "text-5xl font-extrabold text-white text-center uppercase tracking-wide drop-shadow-[0_4px_12px_rgba(0,0,0,0.9)]",
-                "[text-shadow:_0_2px_8px_rgba(0,0,0,0.8),_0_0_2px_#000,0_0_8px_#000]"
-            )}>
-              {displayTitle}
-            </h3>
+              <div className="flex flex-col items-center">
+                <div className="relative">
+                  <h3 className={cn(
+                    "text-5xl font-extrabold text-center uppercase tracking-wide",
+                    "drop-shadow-[0_4px_12px_rgba(0,0,0,0.9)]",
+                    "[text-shadow:_0_2px_8px_rgba(0,0,0,0.8),_0_0_2px_#000,0_0_8px_#000]",
+                    mode === 'survival' 
+                      ? 'text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-300 to-amber-100' 
+                      : 'text-white'
+                  )}>
+                    {displayTitle}
+                  </h3>
+                  {mode === 'survival' && (
+                    <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2">
+                      <div className="px-3 py-1 bg-gradient-to-r from-amber-600 to-red-600 rounded-full text-xs font-bold text-amber-100 whitespace-nowrap">
+                        SURVIVE IF YOU CAN
+                      </div>
+                    </div>
+                  )}
+                </div>
+                {mode === 'survival' && (
+                  <p className="mt-8 text-amber-200/80 text-sm font-medium">
+                    How many brawlers can you guess in a row?
+                  </p>
+                )}
+              </div>
           </div>
         {comingSoon && (
           <div className={cn(
