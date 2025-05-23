@@ -65,71 +65,131 @@ const Index = () => {
     await logout();
   };
 
+  // Separate regular modes from survival
+  const regularModes = gameModes.slice(0, 4);
+  const survivalMode = gameModes[4];
+
   return (
     <div className="min-h-screen flex flex-col relative">
-      {/* Top-left section for Auth or Profile - Made Fixed */}
-      <div className={cn(
-        "fixed top-4 left-4 z-50",
-        "flex flex-col items-start gap-1.5"
-      )}>
-        {!isLoggedIn ? (
-          <div className="flex flex-row gap-2">
-            <AuthButton variant="outline" size="sm" className="text-xs py-1.5 bg-black/50 backdrop-blur-sm" hideSubtext={true} />
-            <AuthButton showSignUp={true} variant="outline" size="sm" className="text-xs py-1.5 bg-black/50 backdrop-blur-sm" hideSubtext={true} />
-          </div>
-        ) : user && (
-          <div className="flex flex-col items-start gap-1.5 w-full">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={handleProfileClick}
-              className="text-white hover:bg-white/10 flex items-center gap-2 w-full justify-start text-xs sm:text-sm px-2 py-1.5"
-            >
-              <User size={16} />
-              <span>Profile/Settings</span>
-            </Button>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={handleLogout}
-              className="text-red-400 hover:bg-red-500/20 hover:text-red-300 flex items-center gap-2 w-full justify-start text-xs sm:text-sm px-2 py-1.5"
-            >
-              <LogOut size={16} />
-              <span>Log Out</span>
-            </Button>
-          </div>
-        )}
-      </div>
-
-      {/* Main content container with adjusted spacing */}
+      {/* Main content container */}
       <div className={cn(
         "flex-1 flex flex-col",
         "px-4 md:px-6",
         "pt-0",
         "pb-8 md:pb-12"
       )}>
-        {/* Header Section */}
+        {/* Auth Section - Positioned in document flow, scrolls with content */}
+        <div className="absolute -top-1 left-4 md:-top-16 md:left-1/2 md:translate-x-96 z-50">
+          {!isLoggedIn ? (
+            <div className="relative">
+              {/* Background decoration removed */}
+              
+              {/* Main auth container - Very subtle background */}
+              <div className="relative bg-black/10 backdrop-blur-sm rounded-xl border border-white/10 p-3 shadow-sm">
+                {/* Desktop design - with text and center aligned buttons */}
+                <div className="hidden md:block">
+                  <div className="text-center mb-3">
+                    <h3 className="text-lg font-bold text-amber-100 mb-1">Ready to Play?</h3>
+                    <p className="text-xs text-slate-300">Save progress & compete!</p>
+                  </div>
+                  
+                  <div className="flex justify-center gap-3">
+                    <AuthButton 
+                      showSignUp={true} 
+                      variant="default" 
+                      size="sm"
+                      className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold shadow-lg hover:shadow-amber-500/50 transform hover:scale-105 transition-all duration-300" 
+                      hideSubtext={true}
+                    />
+                    <AuthButton 
+                      variant="outline" 
+                      size="sm"
+                      className="border-amber-400/60 text-amber-100 hover:bg-amber-500/20 hover:border-amber-300 backdrop-blur-sm" 
+                      hideSubtext={true}
+                    />
+                  </div>
+                </div>
+
+                {/* Mobile design - buttons only, compact, subtle background */}
+                <div className="block md:hidden">
+                  <div className="flex gap-2">
+                    <AuthButton 
+                      showSignUp={true} 
+                      variant="default" 
+                      size="sm"
+                      className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold shadow-lg text-xs px-3 py-1" 
+                      hideSubtext={true}
+                    />
+                    <AuthButton 
+                      variant="outline" 
+                      size="sm"
+                      className="border-amber-400/60 text-amber-100 hover:bg-amber-500/20 hover:border-amber-300 text-xs px-3 py-1" 
+                      hideSubtext={true}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : user && (
+            <div className="relative">
+              {/* Background decoration removed */}
+              
+              {/* Main profile container - No background */}
+              <div className="relative">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center">
+                      <User size={16} className="text-white" />
+                    </div>
+                    <div>
+                      <p className="text-white font-semibold text-sm">{user.email?.split('@')[0] || 'Player'}</p>
+                      <p className="text-slate-300 text-xs">Logged in</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex gap-1">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={handleProfileClick}
+                      className="text-white hover:bg-white/10 px-2 py-1 text-xs"
+                    >
+                      Settings
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={handleLogout}
+                      className="text-red-400 hover:bg-red-500/20 hover:text-red-300 px-2 py-1"
+                    >
+                      <LogOut size={12} />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Header Section with responsive spacing */}
         <div className={cn(
           "text-center",
-          "mt-4"
+          "-mt-4 md:-mt-16" // Reduced mobile spacing, keep PC spacing
         )}>
           <SparklesPreview />
         </div>
 
-        {/* Game Modes Section - Increased mobile spacing */}
+        {/* Game Modes Section */}
         <div className={cn(
           "w-full max-w-lg mx-auto",
           "flex flex-col",
-          "gap-8 md:gap-6",
-          "[&>*:not(:first-child)]:mt-4 md:[&>*:not(:first-child)]:mt-0"
+          "gap-8 md:gap-6"
         )}>
-          {gameModes.map((mode, index) => (
-            <div 
-              key={mode.mode}
-              className={cn(
-                index > 0 && "mt-8 md:mt-0"
-              )}
-            >
+          {/* Regular 4 game modes */}
+          {regularModes.map((mode, index) => (
+            <div key={mode.mode} className={cn(
+              index === 0 ? "mt-0 md:mt-4" : "" // A bit more spacing above first (classic) card on PC only
+            )}>
               <GameModeCard 
                 mode={mode.mode}
                 icon={mode.icon}
@@ -140,6 +200,56 @@ const Index = () => {
               />
             </div>
           ))}
+
+          {/* Unified separator with reduced opacity for both mobile and PC */}
+          <div className="relative my-2 md:my-0 md:-mb-4">
+            {/* Subtle background glow */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-16 h-2 bg-gradient-to-r from-amber-500/10 via-orange-500/20 to-red-500/10 rounded-full blur-sm" />
+            </div>
+            
+            {/* Unified separator line design */}
+            <div className="relative flex items-center justify-center">
+              {/* Mobile: simplified design without circle, reduced opacity */}
+              <div className="md:hidden w-full h-px bg-gradient-to-r from-transparent via-slate-400/30 to-transparent" />
+              
+              {/* PC: reduced opacity line without circle */}
+              <div className="hidden md:block w-full h-1 bg-gradient-to-r from-transparent via-slate-400/30 to-transparent shadow-sm" />
+            </div>
+          </div>
+
+          {/* Survival Mode with subtle radial fading glow */}
+          <div className="relative">
+            {/* Subtle radial glow that fades to transparent */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div 
+                className="w-96 h-96 rounded-full blur-3xl opacity-70"
+                style={{
+                  background: 'radial-gradient(circle, rgba(239,68,68,0.15) 0%, rgba(245,158,11,0.10) 40%, rgba(249,115,22,0.08) 60%, transparent 100%)'
+                }}
+              />
+            </div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div 
+                className="w-64 h-64 rounded-full blur-2xl opacity-60"
+                style={{
+                  background: 'radial-gradient(circle, rgba(245,158,11,0.20) 0%, rgba(249,115,22,0.12) 50%, transparent 100%)'
+                }}
+              />
+            </div>
+            
+            {/* Survival Mode Card */}
+            <div className="relative z-10">
+              <GameModeCard 
+                mode={survivalMode.mode}
+                icon={survivalMode.icon}
+                bgColor={survivalMode.bgColor}
+                previewImage={survivalMode.previewImage}
+                cardBackground={survivalMode.cardBackground}
+                customPath={survivalMode.path}
+              />
+            </div>
+          </div>
         </div>
       </div>
     </div>

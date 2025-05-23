@@ -24,7 +24,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           <RotatingBackground />
         </div>
 
-        <div className="absolute top-4 right-4 z-50 flex gap-2">
+        <div className="absolute top-2 right-4 md:top-16 md:left-1/2 md:-translate-x-96 z-50 flex gap-2">
           <button
             onClick={() => changeLanguage('en')}
             className={cn(

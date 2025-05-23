@@ -2,9 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-// Update the background image path to match case-sensitive filenames and lowercase extensions
-const pcBackgroundImage = '/BRAWLDLE-HOME-BACKGROUND.png';
-const mobileBackgroundImage = '/BRAWLDLE-HOME-BACKGROUND-MOBILE.png';
+// Use mobile background image for both mobile and PC
+const backgroundImage = '/BRAWLDLE-HOME-BACKGROUND-MOBILE.png';
 
 interface RotatingBackgroundProps {
   showNextButton?: boolean;
@@ -51,20 +50,20 @@ const RotatingBackground: React.FC<RotatingBackgroundProps> = ({ showNextButton 
   // Apply styles based on screen size
   const isMobile = window.innerWidth <= 768;
   const cardStyle = isMobile ? cardStyles.mobile : cardStyles.pc;
-
-  const currentBackgroundImage = isMobile ? mobileBackgroundImage : pcBackgroundImage;
   
   return (
     <div 
       className="fixed inset-0 z-0 bg-cover bg-center transition-all duration-1000 ease-in-out"
       style={{
-        backgroundImage: `url('${currentBackgroundImage}')`,
+        backgroundImage: `url('${backgroundImage}')`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
       }}
     >
-      {/* Dark overlay with increased opacity */}
-      <div className="absolute inset-0 bg-black/50" /> {/* 50% opacity black overlay */}
+      {/* Reduced opacity overlay - positioned behind all other elements */}
+      <div className="absolute inset-0 z-0 bg-gradient-to-b from-slate-900/40 via-slate-800/30 to-slate-900/50" />
+      <div className="absolute inset-0 z-0 bg-gradient-to-r from-blue-900/10 via-transparent to-purple-900/10" />
+      <div className="absolute inset-0 z-0 bg-black/15" />
     </div>
   );
 };
