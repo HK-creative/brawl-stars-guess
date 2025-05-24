@@ -328,14 +328,14 @@ const GameModeCard: React.FC<GameModeCardProps> = ({
                 <img src={cardBackground} alt={`${displayTitle} background`} className="w-full h-full object-cover opacity-60" />
               ) : previewImage ? (
                 <img src={previewImage} alt={displayTitle} className="w-full h-full object-cover opacity-60" />
-              ) : (
+            ) : (
                 <div className={cn("w-full h-full", "bg-gradient-to-br", gradientColor)} />
               )}
               <div className={cn(
                 "absolute inset-0 transition-all duration-300",
                 "bg-gradient-to-r from-black/50 via-black/30 to-black/50 group-hover:from-black/40 group-hover:via-black/20 group-hover:to-black/40"
               )} />
-            </div>
+          </div>
             <div className="relative w-full flex items-center justify-center z-10">
               <div className="flex flex-col items-center">
                 <div className="relative">

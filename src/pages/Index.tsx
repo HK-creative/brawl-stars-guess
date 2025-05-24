@@ -1,5 +1,6 @@
 import React from 'react';
 import GameModeCard from '@/components/GameModeCard';
+import SurvivalCardAnimated from '@/components/SurvivalCardAnimated';
 import { t } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 import { SparklesPreview } from '@/components/ui/sparkles-preview';
@@ -218,38 +219,8 @@ const Index = () => {
             </div>
           </div>
 
-          {/* Survival Mode with subtle radial fading glow */}
-          <div className="relative">
-            {/* Subtle radial glow that fades to transparent */}
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div 
-                className="w-96 h-96 rounded-full blur-3xl opacity-70"
-                style={{
-                  background: 'radial-gradient(circle, rgba(239,68,68,0.15) 0%, rgba(245,158,11,0.10) 40%, rgba(249,115,22,0.08) 60%, transparent 100%)'
-                }}
-              />
-            </div>
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div 
-                className="w-64 h-64 rounded-full blur-2xl opacity-60"
-                style={{
-                  background: 'radial-gradient(circle, rgba(245,158,11,0.20) 0%, rgba(249,115,22,0.12) 50%, transparent 100%)'
-                }}
-              />
-            </div>
-            
-            {/* Survival Mode Card */}
-            <div className="relative z-10">
-              <GameModeCard 
-                mode={survivalMode.mode}
-                icon={survivalMode.icon}
-                bgColor={survivalMode.bgColor}
-                previewImage={survivalMode.previewImage}
-                cardBackground={survivalMode.cardBackground}
-                customPath={survivalMode.path}
-              />
-            </div>
-          </div>
+          {/* Survival Mode with animated glow effects */}
+          <SurvivalCardAnimated />
         </div>
       </div>
     </div>

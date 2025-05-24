@@ -1,0 +1,68 @@
+.lava-glow {
+  background: radial-gradient(circle at 50% 80%, #ff871a 0%, #ff4800 40%, transparent 70%);
+  animation: glowPulse 4s ease-in-out infinite;
+  filter: blur(40px);
+}
+
+@keyframes glowPulse {
+  0%, 100% { 
+    opacity: 0.55; 
+    transform: scale(1); 
+  }
+  50% { 
+    opacity: 0.85; 
+    transform: scale(1.1); 
+  }
+}
+
+.lava-particles { 
+  position: absolute; 
+  inset: 0; 
+}
+
+.lava-particles span {
+  --size: calc(2px + 4px * var(--random));
+  position: absolute;
+  bottom: -10px;
+  left: calc(var(--x) * 1%);
+  width: var(--size); 
+  height: var(--size);
+  background: #ff871a; 
+  border-radius: 9999px; 
+  opacity: 0.7;
+  animation: rise calc(4s + 3s * var(--random)) linear infinite;
+  animation-delay: calc(var(--delay) * 1s);
+}
+
+@keyframes rise {
+  0% { 
+    transform: translateY(0) scale(1); 
+    opacity: 0.7; 
+  }
+  100% { 
+    transform: translateY(-140%) scale(0.5); 
+    opacity: 0; 
+  }
+}
+
+/* Enhanced text styling */
+.survival-title {
+  font-weight: 800;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+  animation: titleJitter 6s ease-in-out infinite;
+}
+
+@keyframes titleJitter {
+  0%, 100% { 
+    transform: translateX(0); 
+  }
+  10% { 
+    transform: translateX(1px); 
+  }
+  20% { 
+    transform: translateX(-1px); 
+  }
+  30% { 
+    transform: translateX(0); 
+  }
+} 

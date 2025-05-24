@@ -115,6 +115,9 @@ export default {
         "heartbreak": "heartbreak 2s ease-in-out forwards",
         "gameoverPulse": "gameoverPulse 2s infinite",
       },
+      filter: {
+        'glow': 'drop-shadow(0 0 6px rgba(251,191,36,0.9))',
+      },
     },
   },
   plugins: [require("tailwindcss-animate")],
