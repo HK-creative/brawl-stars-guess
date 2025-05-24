@@ -255,15 +255,15 @@ const GameModeCard: React.FC<GameModeCardProps> = ({
       )}>
         <div className="absolute inset-0">
           {cardBackground ? (
-                <img src={cardBackground} alt={`${displayTitle} background`} className="w-full h-full object-cover opacity-60" />
+                <img src={cardBackground} alt={`${displayTitle} background`} className="w-full h-full object-cover" />
           ) : previewImage ? (
-                <img src={previewImage} alt={displayTitle} className="w-full h-full object-cover opacity-60" />
+                <img src={previewImage} alt={displayTitle} className="w-full h-full object-cover" />
           ) : (
                 <div className={cn("w-full h-full", "bg-gradient-to-br", gradientColor)} />
               )}
               <div className={cn(
                 "absolute inset-0 transition-all duration-300",
-                "bg-gradient-to-r from-black/50 via-black/30 to-black/50 group-hover:from-black/40 group-hover:via-black/20 group-hover:to-black/40"
+                "backdrop-blur-sm bg-white/20 border-white/10 group-hover:backdrop-blur-none group-hover:bg-white/10"
               )} />
             </div>
             <div className="relative w-full flex items-center justify-center z-10">
@@ -325,15 +325,15 @@ const GameModeCard: React.FC<GameModeCardProps> = ({
           )}>
             <div className="absolute inset-0">
               {cardBackground ? (
-                <img src={cardBackground} alt={`${displayTitle} background`} className="w-full h-full object-cover opacity-60" />
+                <img src={cardBackground} alt={`${displayTitle} background`} className="w-full h-full object-cover" />
               ) : previewImage ? (
-                <img src={previewImage} alt={displayTitle} className="w-full h-full object-cover opacity-60" />
+                <img src={previewImage} alt={displayTitle} className="w-full h-full object-cover" />
             ) : (
                 <div className={cn("w-full h-full", "bg-gradient-to-br", gradientColor)} />
               )}
               <div className={cn(
                 "absolute inset-0 transition-all duration-300",
-                "bg-gradient-to-r from-black/50 via-black/30 to-black/50 group-hover:from-black/40 group-hover:via-black/20 group-hover:to-black/40"
+                "backdrop-blur-sm bg-white/20 border-white/10 group-hover:backdrop-blur-none group-hover:bg-white/10"
               )} />
           </div>
             <div className="relative w-full flex items-center justify-center z-10">

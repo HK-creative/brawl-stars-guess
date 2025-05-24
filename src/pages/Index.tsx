@@ -1,6 +1,5 @@
 import React from 'react';
 import GameModeCard from '@/components/GameModeCard';
-import SurvivalCardAnimated from '@/components/SurvivalCardAnimated';
 import { t } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 import { SparklesPreview } from '@/components/ui/sparkles-preview';
@@ -81,7 +80,7 @@ const Index = () => {
       )}>
         {/* Auth Section - Positioned in document flow, scrolls with content */}
         <div className="absolute -top-1 left-4 md:-top-16 md:left-1/2 md:translate-x-96 z-50">
-          {!isLoggedIn ? (
+        {!isLoggedIn ? (
             <div className="relative">
               {/* Background decoration removed */}
               
@@ -130,8 +129,8 @@ const Index = () => {
                   </div>
                 </div>
               </div>
-            </div>
-          ) : user && (
+          </div>
+        ) : user && (
             <div className="relative">
               {/* Background decoration removed */}
               
@@ -149,28 +148,28 @@ const Index = () => {
                   </div>
                   
                   <div className="flex gap-1">
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      onClick={handleProfileClick}
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={handleProfileClick}
                       className="text-white hover:bg-white/10 px-2 py-1 text-xs"
-                    >
+            >
                       Settings
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      onClick={handleLogout}
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={handleLogout}
                       className="text-red-400 hover:bg-red-500/20 hover:text-red-300 px-2 py-1"
-                    >
+            >
                       <LogOut size={12} />
-                    </Button>
+            </Button>
                   </div>
                 </div>
               </div>
-            </div>
-          )}
-        </div>
+          </div>
+        )}
+      </div>
 
         {/* Header Section with responsive spacing */}
         <div className={cn(
@@ -219,8 +218,38 @@ const Index = () => {
             </div>
           </div>
 
-          {/* Survival Mode with animated glow effects */}
-          <SurvivalCardAnimated />
+          {/* Survival Mode with subtle radial fading glow */}
+          <div className="relative">
+            {/* Subtle radial glow that fades to transparent */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div 
+                className="w-96 h-96 rounded-full blur-3xl opacity-70"
+                style={{
+                  background: 'radial-gradient(circle, rgba(239,68,68,0.15) 0%, rgba(245,158,11,0.10) 40%, rgba(249,115,22,0.08) 60%, transparent 100%)'
+                }}
+              />
+            </div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div 
+                className="w-64 h-64 rounded-full blur-2xl opacity-60"
+                style={{
+                  background: 'radial-gradient(circle, rgba(245,158,11,0.20) 0%, rgba(249,115,22,0.12) 50%, transparent 100%)'
+                }}
+              />
+            </div>
+            
+            {/* Survival Mode Card */}
+            <div className="relative z-10">
+              <GameModeCard 
+                mode={survivalMode.mode}
+                icon={survivalMode.icon}
+                bgColor={survivalMode.bgColor}
+                previewImage={survivalMode.previewImage}
+                cardBackground={survivalMode.cardBackground}
+                customPath={survivalMode.path}
+              />
+            </div>
+          </div>
         </div>
       </div>
     </div>
