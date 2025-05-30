@@ -39,10 +39,19 @@ const SurvivalModePage: React.FC = () => {
     const style = document.createElement('style');
     style.innerHTML = `
       @keyframes award-glow {
-        0%, 100% { filter: drop-shadow(0 0 24px #FFD70088); }
-        50% { filter: drop-shadow(0 0 48px #FFB300); }
+        0%, 100% { 
+          text-shadow: 0 0 20px rgba(255, 215, 0, 0.6), 0 0 40px rgba(255, 179, 0, 0.4);
+          transform: scale(1);
+        }
+        50% { 
+          text-shadow: 0 0 30px rgba(255, 215, 0, 0.8), 0 0 60px rgba(255, 179, 0, 0.6);
+          transform: scale(1.02);
+        }
       }
-      .animate-award-glow { animation: award-glow 2s infinite alternate; }
+      .animate-award-glow { 
+        animation: award-glow 2s infinite alternate; 
+        will-change: transform, text-shadow;
+      }
       @keyframes award-bar {
         0% { opacity: 0.5; }
         50% { opacity: 1; }
@@ -89,6 +98,13 @@ const SurvivalModePage: React.FC = () => {
   const [lastCorrectBrawler, setLastCorrectBrawler] = useState("");
   const [correctBrawlerForLoss, setCorrectBrawlerForLoss] = useState("");
   
+  // Add state to store round completion data for victory popup
+  const [lastRoundGuessesUsed, setLastRoundGuessesUsed] = useState(0);
+  const [lastRoundTimeLeft, setLastRoundTimeLeft] = useState(0);
+  
+  // Add local timer state to fix closure issues
+  const [currentTimerValue, setCurrentTimerValue] = useState<number | null>(null);
+  
   // Add a key to force remount of game mode components
   const [modeKey, setModeKey] = useState<string>("initial");
 
@@ -110,12 +126,16 @@ const SurvivalModePage: React.FC = () => {
     // Base points
     let points = 100;
     
-    // Bonus for unused guesses
-    const guessBonus = (10 - guessesUsed) * 5; // 5 points per unused guess
+    // Bonus for correct guessing (starts at 55, reduces by 5 for each guess including the correct one)
+    // If guessed correctly on first try: 55 - (1 * 5) = 50 bonus
+    // If guessed wrong 3 times then correct: 55 - (4 * 5) = 35 bonus
+    const guessBonus = Math.max(0, 55 - (guessesUsed * 5));
     points += guessBonus;
     
-    // Bonus for time left
-    const timeBonus = Math.floor(timeLeft / 10); // 1 point per 10 seconds left
+    // Bonus for time left (starts at 30, reduces by 1 for every 5 seconds elapsed)
+    // Timer starts at 150 seconds, so elapsed time = 150 - timeLeft
+    const elapsedTime = 150 - timeLeft;
+    const timeBonus = Math.max(0, 30 - Math.floor(elapsedTime / 5));
     points += timeBonus;
     
     return points;
@@ -147,7 +167,7 @@ const SurvivalModePage: React.FC = () => {
       // Success - player completed the round
       // Calculate points earned for this round
       const guessesUsed = activeRoundState ? (activeRoundState.guessesQuota - activeRoundState.guessesLeft) : 0;
-      const timeLeft = activeRoundState?.timerLeft || 0;
+      const timeLeft = currentTimerValue ?? activeRoundState?.timerLeft ?? 0;
       const points = calculateRoundPoints(guessesUsed, timeLeft);
       
       // Update score
@@ -160,6 +180,8 @@ const SurvivalModePage: React.FC = () => {
         console.log(`Using provided brawler name for victory popup: ${brawlerName}`);
         setLastCorrectBrawler(brawlerName);
         setShowVictoryPopup(true);
+        setLastRoundGuessesUsed(guessesUsed);
+        setLastRoundTimeLeft(timeLeft);
         return;
       }
       
@@ -170,6 +192,8 @@ const SurvivalModePage: React.FC = () => {
           console.log(`Using fallback brawler from activeRoundState: ${brawler.name}`);
           setLastCorrectBrawler(brawler.name);
           setShowVictoryPopup(true);
+          setLastRoundGuessesUsed(guessesUsed);
+          setLastRoundTimeLeft(timeLeft);
           return; // Don't proceed to next round yet
         }
       }
@@ -241,6 +265,9 @@ const SurvivalModePage: React.FC = () => {
 
     // Start the timer
     if (activeRoundState.isRoundActive && activeRoundState.timerLeft !== undefined) {
+      // Initialize local timer state
+      setCurrentTimerValue(activeRoundState.timerLeft);
+      
       // Clear any existing interval
       if (timerRef.current) {
         clearInterval(timerRef.current);
@@ -248,27 +275,33 @@ const SurvivalModePage: React.FC = () => {
 
       // Set up new interval
       timerRef.current = setInterval(() => {
-        if (activeRoundState.timerLeft && activeRoundState.timerLeft > 0) {
-          setTimerLeft(activeRoundState.timerLeft - 1);
-        } else {
-          // Time's up - game over
-          if (timerRef.current) {
-            clearInterval(timerRef.current);
-            timerRef.current = null;
-          }
-          gameOver();
-          
-          // Find the correct brawler for the loss popup
-          if (activeRoundState?.currentBrawlerId) {
-            const brawler = brawlerData.find(b => b.id === activeRoundState.currentBrawlerId);
-            if (brawler) {
-              setCorrectBrawlerForLoss(brawler.name);
+        setCurrentTimerValue(prevTime => {
+          if (prevTime && prevTime > 0) {
+            const newTime = prevTime - 1;
+            // Update the store as well
+            setTimerLeft(newTime);
+            return newTime;
+          } else {
+            // Time's up - game over
+            if (timerRef.current) {
+              clearInterval(timerRef.current);
+              timerRef.current = null;
             }
+            gameOver();
+            
+            // Find the correct brawler for the loss popup
+            if (activeRoundState?.currentBrawlerId) {
+              const brawler = brawlerData.find(b => b.id === activeRoundState.currentBrawlerId);
+              if (brawler) {
+                setCorrectBrawlerForLoss(brawler.name);
+              }
+            }
+            
+            // Show loss popup
+            setShowLossPopup(true);
+            return 0;
           }
-          
-          // Show loss popup
-          setShowLossPopup(true);
-        }
+        });
       }, 1000);
     }
 
@@ -277,7 +310,7 @@ const SurvivalModePage: React.FC = () => {
         clearInterval(timerRef.current);
       }
     };
-  }, [activeRoundState, settings, gameStatus, gameOver, brawlerData, setTimerLeft]);
+  }, [activeRoundState?.isRoundActive, activeRoundState?.timerLeft, settings, gameStatus, gameOver, brawlerData, setTimerLeft]);
 
   // Render the component
   return (
@@ -351,10 +384,14 @@ const SurvivalModePage: React.FC = () => {
             </div>
             <div className="flex flex-row items-center gap-4 mt-2">
               <span className="text-3xl font-extrabold bg-gradient-to-r from-yellow-300 via-amber-400 to-pink-400 bg-clip-text text-transparent drop-shadow-[0_2px_12px_rgba(255,214,0,0.7)] animate-award-glow">Round {currentRound}</span>
+              <span className="flex items-center gap-2 px-3 py-1 rounded-full bg-gradient-to-r from-green-500/80 to-emerald-400/70 shadow-lg border-2 border-green-300 text-lg font-bold text-white animate-award-glow">
+                <Circle className="h-6 w-6 text-white/80 fill-current" />
+                {totalScore} pts
+              </span>
               {settings?.timer && (
                 <span className="flex items-center gap-2 px-3 py-1 rounded-full bg-gradient-to-r from-yellow-500/80 to-pink-400/70 shadow-lg border-2 border-yellow-300 text-lg font-bold text-white animate-award-glow">
                   <Timer className="h-6 w-6 text-white/80" />
-                  {activeRoundState.timerLeft}s
+                  {currentTimerValue ?? activeRoundState.timerLeft}s
                 </span>
               )}
             </div>
@@ -445,8 +482,8 @@ const SurvivalModePage: React.FC = () => {
             brawlerName={lastCorrectBrawler}
             pointsEarned={currentRoundPoints}
             totalScore={totalScore}
-            guessesUsed={activeRoundState ? (activeRoundState.guessesQuota - activeRoundState.guessesLeft) : 0}
-            timeLeft={activeRoundState?.timerLeft || 0}
+            guessesUsed={lastRoundGuessesUsed}
+            timeLeft={lastRoundTimeLeft}
             onNextRound={() => {
               // Hide victory popup and continue to next round
               setShowVictoryPopup(false);

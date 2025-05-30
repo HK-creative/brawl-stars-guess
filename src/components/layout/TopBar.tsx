@@ -1,7 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Home } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import Image from '@/components/ui/image';
@@ -45,7 +44,11 @@ const TopBar: React.FC = () => {
                   "transition-all duration-300"
                 )}
               >
-                <Home className="h-5 w-5" />
+                <img 
+                  src="/bs_home_icon.png"
+                  alt="Home"
+                  className="h-8 w-8"
+                />
               </Button>
             </Link>
           )}

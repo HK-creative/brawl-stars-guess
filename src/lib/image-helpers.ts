@@ -1,12 +1,11 @@
-
 /**
  * Image helper functions for accessing pin and portrait images
  * Updated to work with images directly in the public folder
  */
 
-// Default fallback images 
-export const DEFAULT_PIN = "/default_pin.png";
-export const DEFAULT_PORTRAIT = "/default_portrait.png";
+// Default fallback images - using existing files
+export const DEFAULT_PIN = "/amber_pin.png";
+export const DEFAULT_PORTRAIT = "/shelly_portrait.png";
 
 /**
  * Generate path for pin images

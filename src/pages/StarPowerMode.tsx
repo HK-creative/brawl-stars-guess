@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { t } from '@/lib/i18n';
 import { Switch } from '@/components/ui/switch';
-import { Home, Check, X, Infinity as InfinityIcon } from 'lucide-react';
+import { Check, X, Infinity as InfinityIcon } from 'lucide-react';
 import BrawlerAutocomplete from '@/components/BrawlerAutocomplete';
 import { brawlers, Brawler } from '@/data/brawlers';
 import { toast } from 'sonner';
@@ -32,6 +32,27 @@ function parseBrawlerNameFromStarPower(filename: string): string {
   const raw = match[1];
   // Capitalize first letter, handle special cases if needed
   return raw.charAt(0).toUpperCase() + raw.slice(1);
+}
+
+// Helper function to generate star power image path with fallbacks
+function getStarPowerImagePath(brawlerName: string, starPowerIndex: number): string {
+  // Convert brawler name to lowercase and replace spaces with underscores
+  let brawlerFileName = brawlerName.toLowerCase().replace(/ /g, '_');
+  
+  // Handle special cases for brawler names
+  if (brawlerName === "8-Bit") {
+    brawlerFileName = "8bit";
+  } else if (brawlerName === "Mr. P") {
+    brawlerFileName = "mrp";
+  } else if (brawlerName === "R-T") {
+    brawlerFileName = "rt";
+  } else if (brawlerName === "Larry & Lawrie") {
+    brawlerFileName = "larry_lawrie";
+  }
+  
+  // Try zero-padded format first (_01, _02)
+  const paddedNum = starPowerIndex.toString().padStart(2, '0');
+  return `/${brawlerFileName}_starpower_${paddedNum}.png`;
 }
 
 const modeOrder = [
@@ -63,8 +84,9 @@ const StarPowerMode = ({
   const [selectedBrawler, setSelectedBrawler] = useState<Brawler | null>(null);
   const [dailyChallenge, setDailyChallenge] = useState<StarPowerChallenge | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [timeUntilNext, setTimeUntilNext] = useState<{ hours: number; minutes: number; seconds?: number }>({ hours: 0, minutes: 0, seconds: 0 });
+  const [timeUntilNext, setTimeUntilNext] = useState<{ hours: number; minutes: number; seconds: number }>({ hours: 0, minutes: 0, seconds: 0 });
   const [attempts, setAttempts] = useState(0);
+  const [guessesLeft, setGuessesLeft] = useState(maxGuesses);
   const [isCorrect, setIsCorrect] = useState(false);
   const [showResult, setShowResult] = useState(false);
   const [gameKey, setGameKey] = useState(Date.now().toString()); // Key to force re-render
@@ -79,7 +101,7 @@ const StarPowerMode = ({
     brawler: "Bo",
     starPowerName: "Circling Eagle",
     tip: "This star power increases Bo's vision range in bushes.",
-    image: "bo_starpower_01.png"
+    image: "/bo_starpower_01.png"
   };
 
   const [starPowerImage, setStarPowerImage] = useState<string>('');
@@ -105,13 +127,15 @@ const StarPowerMode = ({
 
   // CRITICAL: This effect detects when brawlerId changes and resets the game
   useEffect(() => {
-    console.log(`StarPowerMode: brawlerId changed to ${brawlerId}`);
+    if (isSurvivalMode) {
+      console.log(`StarPowerMode: brawlerId changed to ${brawlerId} in survival mode`);
     
     // Reset game state when brawlerId changes (critical for Survival Mode)
     setGuess('');
     setGuesses([]);
     setSelectedBrawler(null);
     setAttempts(0);
+      setGuessesLeft(maxGuesses);
     setIsCorrect(false);
     setShowResult(false);
     setIsGameOver(false);
@@ -121,9 +145,10 @@ const StarPowerMode = ({
     // Generate a new key to force complete component re-initialization
     setGameKey(Date.now().toString());
     
-    // Load the new challenge with the changed brawlerId
+      // Load the new challenge
     loadChallengeForCurrentMode();
-  }, [brawlerId]); // Re-run when brawlerId changes
+    }
+  }, [brawlerId, maxGuesses, isSurvivalMode]); // Re-run when brawlerId, maxGuesses, or isSurvivalMode changes
 
   // Helper function to get a random star power for a specific brawler
   const getRandomStarPowerForBrawler = (brawlerName: string): StarPowerChallenge => {
@@ -138,22 +163,15 @@ const StarPowerMode = ({
     const randomIndex = Math.floor(Math.random() * brawler.starPowers.length);
     const starPower = brawler.starPowers[randomIndex];
     
-    // Generate image path based on naming convention
-    // Example: "bo_starpower_01.png"
-    // Get the number from the star power name if possible
-    let num = '01';
-    const match = starPower.name.match(/(\d+)/);
-    if (match) {
-      num = match[1].padStart(2, '0');
-    }
-    
-    const imageFileName = `${brawler.name.toLowerCase().replace(/ /g, '_')}_starpower_${num}.png`;
+    // Generate image path using the correct index (1-based for image naming)
+    const starPowerIndex = randomIndex + 1;
+    const imageFileName = getStarPowerImagePath(brawler.name, starPowerIndex);
     
     return {
       brawler: brawler.name,
       starPowerName: starPower.name,
       tip: starPower.tip || "No tip available",
-      image: `/StarPowerImages/${imageFileName}`
+      image: imageFileName
     };
   };
 
@@ -216,7 +234,81 @@ const StarPowerMode = ({
     setIsLoading(true);
     
     try {
-      // If we have a specified brawlerId, use that brawler (for SurvivalMode)
+      // If in survival mode, pick a random brawler with star powers (like GadgetMode does)
+      if (isSurvivalMode) {
+        console.log('Loading random brawler for Survival Mode Star Power challenge');
+        
+        // Get all brawlers that have star powers
+        const brawlersWithStarPowers = brawlers.filter(b => 
+          b.starPowers && b.starPowers.length > 0
+        );
+        
+        // Make sure we have brawlers with star powers
+        const eligibleBrawlers = brawlersWithStarPowers.length > 0 ?
+          brawlersWithStarPowers :
+          brawlers; // Fallback to all brawlers if none have star powers
+        
+        // Shuffle the brawlers array to pick a random one
+        const shuffledBrawlers = [...eligibleBrawlers];
+        for (let i = shuffledBrawlers.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [shuffledBrawlers[i], shuffledBrawlers[j]] = [shuffledBrawlers[j], shuffledBrawlers[i]];
+        }
+        
+        // Pick the first brawler from shuffled array
+        const randomBrawler = shuffledBrawlers[0] || brawlers[0];
+        console.log(`Selected random brawler: ${randomBrawler.name} (ID: ${randomBrawler.id})`);
+
+        // Get a random star power from the brawler
+        let selectedStarPower = null;
+        let starPowerImagePath = '';
+        
+        if (randomBrawler.starPowers && randomBrawler.starPowers.length > 0) {
+          // Shuffle star powers to pick a random one
+          const shuffledStarPowers = [...randomBrawler.starPowers];
+          for (let i = shuffledStarPowers.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffledStarPowers[i], shuffledStarPowers[j]] = [shuffledStarPowers[j], shuffledStarPowers[i]];
+          }
+          
+          selectedStarPower = shuffledStarPowers[0];
+          
+          // Find the index of the selected star power in the original array
+          const originalStarPowerIndex = randomBrawler.starPowers.findIndex(sp => sp.name === selectedStarPower.name);
+          const starPowerIndex = originalStarPowerIndex + 1; // Convert to 1-based index for image naming
+          starPowerImagePath = getStarPowerImagePath(randomBrawler.name, starPowerIndex);
+          
+          console.log(`Selected star power: ${selectedStarPower.name} (index: ${originalStarPowerIndex}, image index: ${starPowerIndex})`);
+        } else {
+          // Fallback if no star powers
+          starPowerImagePath = getStarPowerImagePath(randomBrawler.name, 1);
+          console.log(`No star powers found for ${randomBrawler.name}, using default image`);
+        }
+
+        const starPowerChallenge: StarPowerChallenge = {
+          brawler: randomBrawler.name,
+          starPowerName: selectedStarPower ? selectedStarPower.name : `${randomBrawler.name}'s Star Power`,
+          tip: selectedStarPower && selectedStarPower.tip ? selectedStarPower.tip : `Special star power for ${randomBrawler.name}.`,
+          image: starPowerImagePath
+        };
+
+        console.log('StarPower Challenge Debug:', {
+          selectedBrawlerName: randomBrawler.name,
+          selectedBrawlerId: randomBrawler.id,
+          selectedStarPowerName: selectedStarPower?.name,
+          starPowerImagePath: starPowerImagePath,
+          challengeBrawler: starPowerChallenge.brawler,
+          isSurvivalMode: isSurvivalMode
+        });
+
+        setDailyChallenge(starPowerChallenge);
+        setStarPowerImage(starPowerImagePath);
+        setCorrectBrawlerForVictory(randomBrawler.name);
+        setIsLoading(false);
+        return;
+      }
+      
+      // If we have a specified brawlerId (for non-survival modes), use that brawler
       if (brawlerId !== undefined) {
         // Check if the brawlerId is within a valid range
         if (brawlerId <= 0 || brawlerId > brawlers.length) {
@@ -278,7 +370,7 @@ const StarPowerMode = ({
             brawler: starpower.brawler,
             starPowerName: starpower.name,
             tip: starpower.tip || "No tip available",
-            image: `/StarPowerImages/${starpower.image || 'default_starpower.png'}`
+            image: `/${starpower.image || 'default_starpower.png'}`
           };
           setDailyChallenge(challenge);
           
@@ -337,6 +429,7 @@ const StarPowerMode = ({
     setGuesses([]);
     setSelectedBrawler(null);
     setAttempts(0);
+    setGuessesLeft(maxGuesses);
     setIsCorrect(false);
     setShowResult(false);
     setIsGameOver(false);
@@ -368,6 +461,10 @@ const StarPowerMode = ({
     setAttempts(attempts + 1);
     setGuessCount(guessCount + 1);
     
+    if (isSurvivalMode) {
+      setGuessesLeft(prev => prev - 1);
+    }
+    
     // Check if correct
     const isThisGuessCorrect = currentGuess.toLowerCase() === dailyChallenge.brawler.toLowerCase();
     
@@ -395,18 +492,23 @@ const StarPowerMode = ({
           }, 3000);
         }
       }
-    } else if (attempts + 1 >= maxGuesses) {
+    } else {
+      // Check if out of guesses
+      const outOfGuesses = isSurvivalMode ? guessesLeft <= 1 : attempts + 1 >= maxGuesses;
+      
+      if (outOfGuesses) {
       // Out of guesses
       setShowResult(true);
       setIsGameOver(true);
       
       if (isSurvivalMode && onRoundEnd) {
         // Allow parent component to handle the failure
-        onRoundEnd({ success: false });
+        onRoundEnd({ success: false, brawlerName: dailyChallenge.brawler });
       } else {
         toast('Game Over', {
           description: `The correct brawler was ${dailyChallenge.brawler}.`,
         });
+        }
       }
     }
   };
@@ -491,6 +593,7 @@ const StarPowerMode = ({
           {/* Star Power Image - with difficulty modifiers */}
           <div className="flex flex-col items-center mb-6">
             <div className="relative w-32 h-32 md:w-40 md:h-40 mx-auto mb-4">
+              {starPowerImage && (
               <img
                 src={starPowerImage}
                 alt="Brawler Star Power"
@@ -500,19 +603,81 @@ const StarPowerMode = ({
                 )}
                 style={{ transform: isRotated ? `rotate(${rotation}deg)` : 'none' }}
                 onError={(e) => {
-                  e.currentTarget.src = '/StarPowerImages/default_starpower.png';
-                }}
-              />
+                    console.log(`Failed to load star power image: ${starPowerImage}`);
+                    
+                    // Try to extract brawler name from the failed path and try alternative formats
+                    const currentSrc = e.currentTarget.src;
+                    
+                    // Handle Larry & Lawrie special case (double underscore)
+                    if (currentSrc.includes('larry_lawrie_starpower_01.png')) {
+                      console.log('Trying Larry & Lawrie double underscore format');
+                      e.currentTarget.src = '/larry_lawrie__starpower_01.png';
+                      
+                      e.currentTarget.onerror = () => {
+                        console.log('Larry & Lawrie double underscore failed, trying Shelly fallback');
+                        e.currentTarget.src = '/shelly_starpower_01.png';
+                        
+                        e.currentTarget.onerror = () => {
+                          console.log('All star power images failed, hiding image');
+                          e.currentTarget.style.display = 'none';
+                        };
+                      };
+                    } else if (currentSrc.includes('_starpower_01.png')) {
+                      // Try _1 format instead of _01
+                      const newSrc = currentSrc.replace('_starpower_01.png', '_starpower_1.png');
+                      console.log(`Trying alternative format: ${newSrc}`);
+                      e.currentTarget.src = newSrc;
+                      
+                      e.currentTarget.onerror = () => {
+                        // If that fails, try Shelly as fallback
+                        console.log('Alternative format failed, trying Shelly fallback');
+                        e.currentTarget.src = '/shelly_starpower_01.png';
+                        
+                        e.currentTarget.onerror = () => {
+                          console.log('All star power images failed, hiding image');
+                          e.currentTarget.style.display = 'none';
+                        };
+                      };
+                    } else if (currentSrc.includes('_starpower_02.png')) {
+                      // Try _2 format instead of _02
+                      const newSrc = currentSrc.replace('_starpower_02.png', '_starpower_2.png');
+                      console.log(`Trying alternative format: ${newSrc}`);
+                      e.currentTarget.src = newSrc;
+                      
+                      e.currentTarget.onerror = () => {
+                        // If that fails, try Shelly as fallback
+                        console.log('Alternative format failed, trying Shelly fallback');
+                        e.currentTarget.src = '/shelly_starpower_01.png';
+                        
+                        e.currentTarget.onerror = () => {
+                          console.log('All star power images failed, hiding image');
+                          e.currentTarget.style.display = 'none';
+                        };
+                      };
+                    } else {
+                      // Direct fallback to Shelly
+                      e.currentTarget.src = '/shelly_starpower_01.png';
+                      
+                      e.currentTarget.onerror = () => {
+                        console.log('All star power images failed, hiding image');
+                        e.currentTarget.style.display = 'none';
+                      };
+                    }
+                  }}
+                />
+              )}
             </div>
             
-            {/* Star Power Name (shown if game is over) */}
+            {/* Star Power Name (only shown if game is over) */}
             <div className="text-center">
               <h2 className="text-xl md:text-2xl font-extrabold text-brawl-yellow mb-2">
-                {showResult ? dailyChallenge.starPowerName : "???"}
+                {showResult && dailyChallenge ? dailyChallenge.starPowerName : ""}
               </h2>
+              {showResult && dailyChallenge && (
               <p className="text-sm md:text-base text-white/80 max-w-md mx-auto italic">
                 "{dailyChallenge.tip}"
               </p>
+              )}
             </div>
           </div>
           
@@ -530,10 +695,17 @@ const StarPowerMode = ({
           </form>
           {/* Guess Counter */}
           <div className="w-full flex justify-center gap-4 mt-4">
+            {isSurvivalMode ? (
+              <div className="flex items-center gap-2 bg-black/70 border-2 border-brawl-yellow px-6 py-2 rounded-full shadow-xl animate-pulse">
+                <span className="text-brawl-yellow text-lg font-bold tracking-wide">Guesses Left</span>
+                <span className={`text-2xl font-extrabold ${guessesLeft <= 2 ? 'text-brawl-red animate-bounce' : 'text-white'}`}>{guessesLeft}</span>
+              </div>
+            ) : (
             <div className="flex items-center gap-2 bg-black/50 backdrop-blur px-4 py-1 rounded-full shadow-lg">
               <span className="text-white text-base font-semibold">Number of Guesses</span>
               <span className="text-white text-base font-bold">{guessCount}</span>
             </div>
+            )}
           </div>
         </div>
         {/* Previous Guesses */}
@@ -572,10 +744,18 @@ const StarPowerMode = ({
           <div ref={victoryRef}>
             {(() => {
               try {
+                const finalBrawlerName = dailyChallenge.brawler || correctBrawlerForVictory;
+                console.log('VictorySection Debug:', {
+                  dailyChallengeBrawler: dailyChallenge.brawler,
+                  correctBrawlerForVictory: correctBrawlerForVictory,
+                  finalBrawlerName: finalBrawlerName,
+                  isSurvivalMode: isSurvivalMode
+                });
+                
                 return (
                   <VictorySection
-                    brawlerName={correctBrawlerForVictory}
-                    brawlerPortrait={getPortrait(correctBrawlerForVictory)}
+                    brawlerName={finalBrawlerName}
+                    brawlerPortrait={getPortrait(finalBrawlerName)}
                     tries={guessCount}
                     mode="starpower"
                     nextModeKey="classic" 
@@ -590,7 +770,7 @@ const StarPowerMode = ({
                 return (
                   <div className="p-6 bg-red-800/30 rounded-xl text-white">
                     <h2 className="text-2xl font-bold mb-4">Victory!</h2>
-                    <p>You guessed the brawler: <strong>{correctBrawlerForVictory}</strong></p>
+                    <p>You guessed the brawler: <strong>{dailyChallenge.brawler || correctBrawlerForVictory}</strong></p>
                     <p className="mt-2">Number of tries: {guessCount}</p>
                     <button
                       onClick={() => navigate('/classic')}

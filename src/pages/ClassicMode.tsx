@@ -37,6 +37,7 @@ const ClassicMode = ({
   const [guesses, setGuesses] = useState<Brawler[]>([]);
   const [isGameOver, setIsGameOver] = useState(false);
   const [guessCount, setGuessCount] = useState(0);
+  const [guessesLeft, setGuessesLeft] = useState(maxGuesses);
   const [correctBrawlerName, setCorrectBrawlerName] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
   const [timeUntilNext, setTimeUntilNext] = useState({ hours: 0, minutes: 0 });
@@ -80,6 +81,7 @@ const ClassicMode = ({
     setGuesses([]);
     setIsGameOver(false);
     setGuessCount(0);
+    setGuessesLeft(maxGuesses);
     setGuessedBrawlerNames([]);
     
     // Reset available brawlers to full set
@@ -107,6 +109,7 @@ const ClassicMode = ({
     setGuesses([]);
     setIsGameOver(false);
     setGuessCount(0);
+    setGuessesLeft(maxGuesses);
     setLastGuessIndex(null);
     setGuessedBrawlerNames([]);
     setAvailableBrawlers([...brawlers]);
@@ -123,7 +126,27 @@ const ClassicMode = ({
     setIsLoading(true);
     
     try {
-      // If we have a specified brawlerId, use that brawler (for SurvivalMode)
+      // If in survival mode, pick a random brawler (like GadgetMode and StarPowerMode do)
+      if (isSurvivalMode) {
+        console.log('Loading random brawler for Survival Mode Classic challenge');
+        
+        // Shuffle the brawlers array to pick a random one
+        const shuffledBrawlers = [...brawlers];
+        for (let i = shuffledBrawlers.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [shuffledBrawlers[i], shuffledBrawlers[j]] = [shuffledBrawlers[j], shuffledBrawlers[i]];
+        }
+        
+        // Pick the first brawler from shuffled array
+        const randomBrawler = shuffledBrawlers[0] || brawlers[0];
+        console.log(`Selected random brawler: ${randomBrawler.name} (ID: ${randomBrawler.id})`);
+
+        setCorrectBrawlerName(randomBrawler.name);
+        setIsLoading(false);
+        return;
+      }
+      
+      // If we have a specified brawlerId (for non-survival modes), use that brawler
       if (brawlerId !== undefined) {
         // Check if the brawlerId is within a valid range
         if (brawlerId <= 0 || brawlerId > brawlers.length) {
@@ -271,13 +294,18 @@ const ClassicMode = ({
       return;
     }
     
-    // Add the guess
-    setGuesses(prevGuesses => [...prevGuesses, selectedBrawler]);
+    // Add the guess at the beginning of the array (newest first)
+    setGuesses(prevGuesses => [selectedBrawler, ...prevGuesses]);
     setGuessedBrawlerNames(prev => [...prev, selectedBrawler.name]);
     setGuessCount(prevCount => prevCount + 1);
+    
+    if (isSurvivalMode) {
+      setGuessesLeft(prevLeft => prevLeft - 1);
+    }
+    
     setInputValue('');
     setSelectedBrawler(null);
-    setLastGuessIndex(guesses.length); // Set the index of the newest guess for animation
+    setLastGuessIndex(0); // Set to 0 since newest guess is now at the top
     
     // Check if correct guess
     const isCorrect = selectedBrawler.name.toLowerCase() === correctBrawlerName.toLowerCase();
@@ -307,21 +335,25 @@ const ClassicMode = ({
       }
     }
     // Check if out of guesses
-    else if (guessCount + 1 >= maxGuesses) {
-      // For survival mode, defer to the parent component to handle loss
-      if (isSurvivalMode && onRoundEnd) {
-        onRoundEnd({ success: false });
-        return;
+    else {
+      const outOfGuesses = isSurvivalMode ? guessesLeft <= 1 : guessCount + 1 >= maxGuesses;
+      
+      if (outOfGuesses) {
+        // For survival mode, defer to the parent component to handle loss
+        if (isSurvivalMode && onRoundEnd) {
+          onRoundEnd({ success: false, brawlerName: correctBrawlerName });
+          return;
+        }
+        
+        // Standard game over handling
+        toast({
+          title: 'Game Over',
+          description: `The correct answer was ${correctBrawlerName}.`,
+          variant: 'destructive',
+        });
+        
+        setIsGameOver(true);
       }
-      
-      // Standard game over handling
-      toast({
-        title: 'Game Over',
-        description: `The correct answer was ${correctBrawlerName}.`,
-        variant: 'destructive',
-      });
-      
-      setIsGameOver(true);
     }
   };
 
@@ -330,16 +362,10 @@ const ClassicMode = ({
   
   // Define the structure for the guess grid based on the device type
   const gridWidthClass = isMobile ? "w-full" : "w-full max-w-4xl mx-auto";
-  const gridTemplateClass = isMobile ? "grid-cols-5" : "grid-cols-5";
+  const gridTemplateClass = "grid-cols-6"; // Use 6 columns for all attributes
   
   // Attribute labels for the header
-  const attributeLabels = [
-    { name: "Name", fontSize: "text-sm" },
-    { name: "Rarity", fontSize: "text-sm" },
-    { name: "Class", fontSize: "text-sm" },
-    { name: "Gender", fontSize: "text-sm" },
-    { name: "Chromatic", fontSize: isMobile ? "text-xs" : "text-sm" },
-  ];
+  const attributeLabels = ["Brawler", "Rarity", "Class", "Range", "Wallbreak", "Release Year"];
   
   if (isLoading) {
     return (
@@ -400,46 +426,61 @@ const ClassicMode = ({
               Guess
             </Button>
           </form>
+          
+          {/* Guess Counter - only show in survival mode */}
+          {isSurvivalMode && (
+            <div className="w-full flex justify-center gap-4 mt-4">
+              <div className="flex items-center gap-2 bg-black/70 border-2 border-brawl-yellow px-6 py-2 rounded-full shadow-xl animate-pulse">
+                <span className="text-brawl-yellow text-lg font-bold tracking-wide">Guesses Left</span>
+                <span className={`text-2xl font-extrabold ${guessesLeft <= 2 ? 'text-brawl-red animate-bounce' : 'text-white'}`}>{guessesLeft}</span>
+              </div>
+            </div>
+          )}
         </div>
         
         <div className={gridWidthClass}>
           <div className="w-full rounded-lg overflow-hidden flex flex-col">
-            {/* Header section with guess count and time until next challenge */}
-            <div className="flex justify-between items-center mb-1 px-1">
-              <div className="flex items-center gap-1.5">
-                <div className="text-white text-sm font-medium">
-                  Guesses: {guessCount}
+            {/* Only show header section for non-survival mode */}
+            {!isSurvivalMode && (
+              <div className="flex justify-between items-center mb-1 px-1">
+                <div className="flex items-center gap-1.5">
+                  <div className="text-white text-sm font-medium">
+                    Guesses: {guessCount}
+                  </div>
+                  <div className="text-xs flex items-center text-white/60 gap-0.5">
+                    <Clock className="w-3 h-3" />
+                    <span>{timeUntilNext.hours}h {timeUntilNext.minutes}m</span>
+                  </div>
                 </div>
-                <div className="text-xs flex items-center text-white/60 gap-0.5">
-                  <Clock className="w-3 h-3" />
-                  <span>{timeUntilNext.hours}h {timeUntilNext.minutes}m</span>
+                <div className="text-xs text-white/60 bg-white/10 px-1.5 py-0.5 rounded-full">
+                  {guessCount}/6
                 </div>
               </div>
-              <div className="text-xs text-white/60 bg-white/10 px-1.5 py-0.5 rounded-full">
-                {guessCount}/6
-              </div>
-            </div>
+            )}
             
             {/* Attribute labels with glass effect and perfect square aspect ratio */}
             <div className={cn(
               "grid",
               gridTemplateClass,
-              isMobile ? "gap-1 mb-1" : "gap-5 mb-2", // Reduced bottom margin
-              "w-full px-1" // Full width to match guess rows and search bar
+              isMobile ? "gap-1 mb-1" : "gap-5 mb-2",
+              "w-full px-1"
             )}>
               {attributeLabels.map((label, index) => {
                 return (
-                  <div key={label.name} className="w-full relative h-10">
+                  <div key={label} className={cn(
+                    "w-full relative",
+                    isMobile ? "h-6" : "h-10"
+                  )}>
                     {/* Yellow accent line */}
                     <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-brawl-yellow"></div>
                     
                     {/* Text with adaptive sizing - positioned near the bottom */}
-                    <div className="w-full flex items-end justify-center pb-2">
+                    <div className="w-full flex items-end justify-center pb-1">
                       <span className={cn(
-                        label.fontSize,
+                        isMobile ? "text-xs" : "text-sm",
                         "font-extrabold text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]"
                       )}>
-                        {label.name}
+                        {label}
                       </span>
                     </div>
                   </div>
@@ -448,11 +489,11 @@ const ClassicMode = ({
             </div>
             
             {/* Guesses display */}
-            <div className="overflow-auto flex-1 min-h-0 max-h-[calc(100vh-250px)] p-1">
+            <div className="overflow-auto flex-1 min-h-0 max-h-[calc(100vh-250px)]">
               <div className="space-y-3">
                 {guesses.map((guess, index) => (
                   <BrawlerGuessRow 
-                    key={index} 
+                    key={`${guess.name}-${index}`} 
                     guess={guess} 
                     correctAnswer={correctBrawler} 
                     isMobile={isMobile}
@@ -480,34 +521,36 @@ const ClassicMode = ({
         />
       )}
 
-      {/* Modified game info display */}
-      <div className="flex justify-between items-center mb-4">
-        <div className="flex items-center space-x-4">
-          {isEndlessMode ? (
-            <div className="text-white/80">
-              <span className="font-medium">Brawlers guessed:</span>{' '}
-              <span className="text-brawl-yellow">{guessedBrawlerNames.length}</span>
-            </div>
-          ) : (
-            <div className="flex items-center text-white/80">
-              <Clock className="w-4 h-4 mr-2" />
-              <span>Next in: {timeUntilNext.hours}h {timeUntilNext.minutes}m</span>
-            </div>
+      {/* Modified game info display - only show for non-survival mode */}
+      {!isSurvivalMode && (
+        <div className="flex justify-between items-center mb-4">
+          <div className="flex items-center space-x-4">
+            {isEndlessMode ? (
+              <div className="text-white/80">
+                <span className="font-medium">Brawlers guessed:</span>{' '}
+                <span className="text-brawl-yellow">{guessedBrawlerNames.length}</span>
+              </div>
+            ) : (
+              <div className="flex items-center text-white/80">
+                <Clock className="w-4 h-4 mr-2" />
+                <span>Next in: {timeUntilNext.hours}h {timeUntilNext.minutes}m</span>
+              </div>
+            )}
+          </div>
+
+          {isGameOver && !isEndlessMode && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleShare}
+              className="text-white/80 hover:text-white"
+            >
+              <Share2 className="w-4 h-4 mr-2" />
+              Share
+            </Button>
           )}
         </div>
-
-        {isGameOver && !isEndlessMode && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleShare}
-            className="text-white/80 hover:text-white"
-          >
-            <Share2 className="w-4 h-4 mr-2" />
-            Share
-          </Button>
-        )}
-      </div>
+      )}
     </div>
   );
 };

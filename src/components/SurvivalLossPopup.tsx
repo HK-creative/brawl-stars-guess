@@ -2,7 +2,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import Image from '@/components/ui/image';
 import { getPortrait } from '@/lib/image-helpers';
-import { Trophy, Home, RotateCcw } from 'lucide-react';
+import { Trophy, RotateCcw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface SurvivalLossPopupProps {
@@ -76,7 +76,11 @@ const SurvivalLossPopup: React.FC<SurvivalLossPopupProps> = ({
               "bg-gradient-to-r from-slate-700 to-slate-800 hover:from-slate-600 hover:to-slate-700"
             )}
           >
-            <Home className="mr-2 h-5 w-5" />
+            <img 
+              src="/bs_home_icon.png"
+              alt="Home"
+              className="mr-2 h-8 w-8"
+            />
             Home
           </Button>
         </div>

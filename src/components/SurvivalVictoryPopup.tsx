@@ -21,9 +21,15 @@ const SurvivalVictoryPopup: React.FC<SurvivalVictoryPopupProps> = ({
   timeLeft,
   onNextRound,
 }) => {
-  // Calculate the bonus info to display
-  const guessBonus = 10 - guessesUsed; // Each unused guess gives a bonus
-  const timeBonus = Math.floor(timeLeft / 10); // Every 10 seconds left gives a bonus point
+  // Calculate the bonus info to display - using the correct formula
+  // Guess bonus starts at 55 and reduces by 5 for each guess (including the correct one)
+  // guessesUsed includes all guesses made (wrong + correct)
+  const actualGuessBonus = Math.max(0, 55 - (guessesUsed * 5));
+  
+  // Time bonus starts at 30 and reduces by 1 for every 5 seconds elapsed
+  // Timer starts at 150 seconds, so elapsed time = 150 - timeLeft
+  const elapsedTime = 150 - timeLeft;
+  const timeBonus = Math.max(0, 30 - Math.floor(elapsedTime / 5));
   
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-fade-in">
@@ -65,15 +71,15 @@ const SurvivalVictoryPopup: React.FC<SurvivalVictoryPopupProps> = ({
               <span>Base points:</span>
               <span>100</span>
             </div>
-            {guessBonus > 0 && (
+            {actualGuessBonus > 0 && (
               <div className="flex justify-between">
-                <span>Guess bonus ({guessBonus} guesses unused):</span>
-                <span className="text-green-400">+{guessBonus * 5}</span>
+                <span>Guess bonus ({guessesUsed} guesses used):</span>
+                <span className="text-green-400">+{actualGuessBonus}</span>
               </div>
             )}
             {timeBonus > 0 && (
               <div className="flex justify-between">
-                <span>Time bonus ({timeLeft}s remaining):</span>
+                <span>Time bonus ({elapsedTime}s elapsed):</span>
                 <span className="text-green-400">+{timeBonus}</span>
               </div>
             )}

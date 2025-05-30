@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Home } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface HomeButtonProps {
@@ -45,14 +44,14 @@ const HomeButton: React.FC<HomeButtonProps> = ({ className }) => {
         "border-2 border-amber-400/50",
         isHovered ? 'shadow-inner shadow-amber-400/20' : ''
       )}>
-        <Home 
-          size={28} 
+        <img 
+          src="/bs_home_icon.png"
+          alt="Home"
           className={cn(
-            "text-amber-300 transition-all duration-300",
-            isHovered ? 'scale-110 text-amber-200' : 'scale-100',
+            "w-12 h-12 transition-all duration-300",
+            isHovered ? 'scale-110' : 'scale-100',
             "drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]"
-          )} 
-          strokeWidth={2.5}
+          )}
         />
         
         {/* Animated ring effect on hover */}

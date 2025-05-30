@@ -9,7 +9,7 @@ import { getRandomBrawler } from '@/lib/daily-challenges';
 import { getPortrait, DEFAULT_PORTRAIT } from '@/lib/image-helpers';
 import ShareResultModal from '@/components/ShareResultModal';
 import Image from '@/components/ui/image';
-import { RefreshCw, Share2, Home } from 'lucide-react';
+import { RefreshCw, Share2 } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 import ReactConfetti from 'react-confetti';

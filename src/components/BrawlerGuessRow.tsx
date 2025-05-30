@@ -181,7 +181,7 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({
 
   // --- ARROW HELPERS ---
   // Order arrays for comparison
-  const rarityOrder = ["Starter", "Rare", "Super Rare", "Epic", "Mythic", "Legendary"];
+  const rarityOrder = ["Starter", "Rare", "Super Rare", "Epic", "Mythic", "Legendary", "Ultra legendary"];
   const rangeOrder = ["Short", "Normal", "Long", "Very Long"];
 
   // Returns 'up', 'down', or null
@@ -230,7 +230,7 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({
         "grid",
         gridTemplateClass,
         isMobile ? "gap-1" : "gap-5", // Match exactly with the labels (gap-5 on desktop)
-        "w-full px-1" // Match exactly with the labels
+        "w-full" // Remove px-1 to match the label width exactly
       )}>
           {/* Brawler Portrait */}
           <div className="aspect-square">

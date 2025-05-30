@@ -817,5 +817,14 @@
     "range": "Long",
     "reload": "Fast",
     "released": "2025"
+  },
+  {
+    "name": "Kaze",
+    "rarity": "Ultra legendary",
+    "class": "Assassin",
+    "movement": "Very Fast",
+    "range": "Short",
+    "reload": "Fast",
+    "released": "2025"
   }
 ]

@@ -2,6 +2,30 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Performance optimizations to prevent flickering */
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+body {
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+}
+
+/* Optimize animations for better performance */
+@media (prefers-reduced-motion: no-preference) {
+  * {
+    scroll-behavior: smooth;
+  }
+}
+
 @layer base {
   :root {
     /* Brawl Time Ninja Palette */
@@ -51,8 +75,6 @@
   /* Better font rendering */
   html {
     text-rendering: optimizeLegibility;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
   }
 }
 

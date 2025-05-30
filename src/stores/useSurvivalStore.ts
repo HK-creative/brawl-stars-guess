@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { calculateNextGuessesQuota, selectNextBrawlerAndMode, resetModeSelectionState } from '@/lib/survival-logic';
+import { calculateNextGuessesQuota, selectNextBrawlerAndMode, resetModeSelectionState, updateRecentlyUsedBrawlers } from '@/lib/survival-logic';
 import { brawlers } from '@/data/brawlers';
 
 // Define the available game modes explicitly based on existing pages
@@ -30,6 +30,8 @@ export interface SurvivalGameState {
   gameStatus: 'setup' | 'playing' | 'paused' | 'gameover';
   // Individual round state could be part of this or separate
   activeRoundState: SurvivalRoundState | null;
+  // Track recently used brawlers for 2-round cooldown system
+  recentlyUsedBrawlers: number[]; // Array of brawler IDs used in recent rounds (max 2)
   // Potentially an array to store history of rounds if needed for summary
   // roundHistory: SurvivalRoundState[]; 
 }
@@ -72,6 +74,7 @@ const initialGameState: SurvivalGameState = {
   currentRound: 0,
   gameStatus: 'setup',
   activeRoundState: null,
+  recentlyUsedBrawlers: [], // Initialize empty cooldown list
 };
 
 export const useSurvivalStore = create<SurvivalGameState & SurvivalActions>()(
@@ -86,6 +89,7 @@ export const useSurvivalStore = create<SurvivalGameState & SurvivalActions>()(
         settings: settings,
         gameStatus: 'playing', // Or 'setup' if first round needs explicit start
         currentRound: 0, // Will be incremented by startNextRound
+        recentlyUsedBrawlers: [], // Reset cooldown list for new game
         // activeRoundState will be set by startNextRound
       })),
       
@@ -132,6 +136,7 @@ export const useSurvivalStore = create<SurvivalGameState & SurvivalActions>()(
             }
             
             console.log(`Prepared ${brawlersWithId.length} brawlers for selection`);
+            console.log(`Recently used brawlers (in cooldown): [${state.recentlyUsedBrawlers.join(', ')}]`);
             
             // Ensure we have a valid array of modes
             if (!state.settings.modes || state.settings.modes.length === 0) {
@@ -150,14 +155,14 @@ export const useSurvivalStore = create<SurvivalGameState & SurvivalActions>()(
                 selectedMode = specificMode;
                 console.log(`Using specified mode: ${selectedMode}`);
                 
-                // Still need to select a random brawler
+                // Apply cooldown filtering for specific mode selection too
                 const filteredBrawlers = brawlersWithId.filter(
-                  b => b.id !== state.activeRoundState?.currentBrawlerId
+                  b => !state.recentlyUsedBrawlers.includes(b.id)
                 );
                 
                 // Make sure we have brawlers to select from
                 if (filteredBrawlers.length === 0) {
-                  console.warn('No brawlers available after filtering, using all brawlers');
+                  console.warn('No brawlers available after cooldown filtering, using all brawlers');
                   const randomBrawlerIndex = Math.floor(Math.random() * brawlersWithId.length);
                   selectedBrawlerId = brawlersWithId[randomBrawlerIndex].id;
                 } else {
@@ -165,12 +170,12 @@ export const useSurvivalStore = create<SurvivalGameState & SurvivalActions>()(
                   selectedBrawlerId = filteredBrawlers[randomBrawlerIndex].id;
                 }
               } else {
-                // Otherwise use the standard selection logic
-                console.log('Using standard brawler and mode selection logic');
+                // Use the standard selection logic with cooldown system
+                console.log('Using standard brawler and mode selection logic with cooldown system');
                 const { brawlerId, mode } = selectNextBrawlerAndMode(
                   brawlersWithId,
                   state.settings,
-                  state.activeRoundState?.currentBrawlerId
+                  state.recentlyUsedBrawlers // Pass the cooldown array instead of single previous ID
                 );
                 selectedBrawlerId = brawlerId;
                 selectedMode = mode;
@@ -185,9 +190,14 @@ export const useSurvivalStore = create<SurvivalGameState & SurvivalActions>()(
               console.log(`Using fallback selection: Brawler ID ${selectedBrawlerId}, Mode: ${selectedMode}`);
             }
             
+            // Update the recently used brawlers list with the new selection
+            const updatedRecentlyUsed = updateRecentlyUsedBrawlers(state.recentlyUsedBrawlers, selectedBrawlerId);
+            console.log(`Updated recently used brawlers: [${updatedRecentlyUsed.join(', ')}]`);
+            
             return {
               currentRound: newRoundNumber,
               gameStatus: 'playing',
+              recentlyUsedBrawlers: updatedRecentlyUsed, // Update the cooldown list
               activeRoundState: {
                 roundNumber: newRoundNumber,
                 currentBrawlerId: selectedBrawlerId,
@@ -239,6 +249,7 @@ export const useSurvivalStore = create<SurvivalGameState & SurvivalActions>()(
       quitGame: () => set((state) => ({
         ...initialGameState, // Reset to initial setup state
         settings: state.settings, // Optionally keep settings for quick restart setup
+        recentlyUsedBrawlers: [], // Reset cooldown list when quitting
       })),
 
       gameOver: () => set({ 

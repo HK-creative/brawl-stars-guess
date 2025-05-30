@@ -26,6 +26,12 @@ import AuthCallback from "./pages/AuthCallback";
 import SurvivalSetupPage from './pages/SurvivalSetup';
 import SurvivalModePage from './pages/SurvivalMode';
 
+// Daily Mode Pages
+import DailyClassicMode from "./pages/DailyClassicMode";
+import DailyGadgetMode from "./pages/DailyGadgetMode";
+import DailyStarPowerMode from "./pages/DailyStarPowerMode";
+import DailyAudioMode from "./pages/DailyAudioMode";
+
 // Layout
 import Layout from "./components/layout/Layout";
 
@@ -59,6 +65,13 @@ const App = () => {
                   <Route path="/auth" element={<AuthPage />} />
                   <Route path="/auth/callback" element={<AuthCallback />} />
                   <Route path="/survival" element={<SurvivalModePage />} />
+                  
+                  {/* Daily Mode Routes - Outside Layout to remove language selection */}
+                  <Route path="/daily/classic" element={<DailyClassicMode />} />
+                  <Route path="/daily/gadget" element={<DailyGadgetMode />} />
+                  <Route path="/daily/starpower" element={<DailyStarPowerMode />} />
+                  <Route path="/daily/audio" element={<DailyAudioMode />} />
+                  
                   <Route element={<Layout />}>
                     <Route index element={<Index />} />
                 <Route path="/classic" element={<ClassicMode />} />
@@ -66,6 +79,7 @@ const App = () => {
                 <Route path="/gadget" element={<GadgetMode />} />
                 <Route path="/audio" element={<AudioMode />} />
                 <Route path="/endless" element={<EndlessMode />} />
+                
                 <Route path="/score" element={<ScorePage />} />
                 <Route path="/settings" element={<SettingsPage />} />
                 <Route path="*" element={<NotFound />} />

@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { t } from '@/lib/i18n';
 import { Switch } from '@/components/ui/switch';
-import { Check, X, Home, Infinity as InfinityIcon } from 'lucide-react';
+import { Check, X, Infinity as InfinityIcon } from 'lucide-react';
 import BrawlerAutocomplete from '@/components/BrawlerAutocomplete';
 import { brawlers, Brawler } from '@/data/brawlers';
 import { toast } from 'sonner';
@@ -233,7 +233,7 @@ const GadgetMode = ({
         setIsGameOver(true);
         
         if (onRoundEnd) {
-          onRoundEnd({ success: false });
+          onRoundEnd({ success: false, brawlerName: dailyChallenge.brawler });
         }
         
         toast.error(`Game over! The correct brawler was ${dailyChallenge.brawler}.`);

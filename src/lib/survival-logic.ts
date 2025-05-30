@@ -34,13 +34,14 @@ let lastSelectedModeIndex = -1; // State for 'cycle' rotation within this module
 
 /**
  * Selects the next brawler and game mode for a survival round.
- * - Tries to avoid picking the same brawler consecutively if possible.
+ * - Implements a 2-round cooldown system: brawlers cannot be selected for 2 rounds after being picked
+ * - Ensures truly random selection from available brawlers (excluding those in cooldown)
  * - Handles 'cycle' and 'repeat' rotation for game modes.
  */
 export const selectNextBrawlerAndMode = (
   allBrawlers: Brawler[],
   settings: SurvivalSettings,
-  previousBrawlerId?: number | null,
+  recentlyUsedBrawlerIds?: number[], // Array of brawler IDs used in recent rounds (last 2)
   // previousMode?: GameMode, // Not strictly needed for brawler/mode selection here, but for cycle state
   currentRoundNumberForModeSelection?: number // To help reset cycle if needed, or use static index
 ): SelectionResult => {
@@ -68,17 +69,33 @@ export const selectNextBrawlerAndMode = (
   // Initialize availableBrawlers with the complete list
   let availableBrawlers = [...allBrawlers];
   
-  if (previousBrawlerId !== undefined && previousBrawlerId !== null && availableBrawlers.length > 1) {
-    // Try to avoid selecting the same brawler twice in a row
-    availableBrawlers = availableBrawlers.filter(b => b.id !== previousBrawlerId);
-    // If filtering leaves no brawlers, reset to full list
+  // Apply 2-round cooldown system
+  if (recentlyUsedBrawlerIds && recentlyUsedBrawlerIds.length > 0 && availableBrawlers.length > recentlyUsedBrawlerIds.length) {
+    // Filter out recently used brawlers (those in cooldown)
+    const originalCount = availableBrawlers.length;
+    availableBrawlers = availableBrawlers.filter(b => !recentlyUsedBrawlerIds.includes(b.id));
+    
+    console.log(`Brawler selection: Filtered out ${originalCount - availableBrawlers.length} recently used brawlers. Available: ${availableBrawlers.length}`);
+    
+    // If filtering leaves no brawlers (shouldn't happen with proper cooldown management), reset to full list
     if (availableBrawlers.length === 0) {
+      console.warn('No brawlers available after cooldown filtering, resetting to full list');
       availableBrawlers = [...allBrawlers];
     }
   }
   
-  // Safely select a random brawler
-  const randomBrawlerIndex = Math.floor(Math.random() * availableBrawlers.length);
+  // Ensure truly random selection using crypto.getRandomValues for better randomness
+  let randomBrawlerIndex: number;
+  if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+    // Use crypto for better randomness
+    const randomArray = new Uint32Array(1);
+    crypto.getRandomValues(randomArray);
+    randomBrawlerIndex = randomArray[0] % availableBrawlers.length;
+  } else {
+    // Fallback to Math.random with additional shuffling for better distribution
+    randomBrawlerIndex = Math.floor(Math.random() * availableBrawlers.length);
+  }
+  
   const selectedBrawler = availableBrawlers[randomBrawlerIndex];
   
   if (!selectedBrawler) {
@@ -90,11 +107,25 @@ export const selectNextBrawlerAndMode = (
   }
   
   const nextBrawlerId = selectedBrawler.id;
+  
+  console.log(`Brawler selection: Selected ${selectedBrawler.name} (ID: ${nextBrawlerId}) from ${availableBrawlers.length} available options`);
 
   return {
     brawlerId: nextBrawlerId,
     mode: nextMode,
   };
+};
+
+/**
+ * Updates the recently used brawlers list with 2-round cooldown
+ * @param recentlyUsed Current list of recently used brawler IDs
+ * @param newBrawlerId The newly selected brawler ID to add
+ * @returns Updated list maintaining only the last 2 brawlers
+ */
+export const updateRecentlyUsedBrawlers = (recentlyUsed: number[], newBrawlerId: number): number[] => {
+  const updated = [newBrawlerId, ...recentlyUsed];
+  // Keep only the last 2 brawlers (current + previous)
+  return updated.slice(0, 2);
 };
 
 /**

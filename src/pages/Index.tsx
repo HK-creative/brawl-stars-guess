@@ -16,7 +16,8 @@ const gameModes = [
     icon: "/ClassicIcon.png",
     bgColor: "from-pink-500 to-pink-600",
     previewImage: "/images/modes/classic-preview.jpg",
-    cardBackground: "/ClassicMode_Background.png"
+    cardBackground: "/ClassicMode_Background.png",
+    path: "/daily/classic"
   },
   {
     mode: "audio",
@@ -24,7 +25,8 @@ const gameModes = [
     icon: "/AudioIcon.png",
     bgColor: "from-orange-500 to-orange-600",
     previewImage: "/images/modes/audio-preview.jpg",
-    cardBackground: "/AudioMode_Background.png"
+    cardBackground: "/AudioMode_Background.png",
+    path: "/daily/audio"
   },
   {
     mode: "gadget",
@@ -32,7 +34,8 @@ const gameModes = [
     icon: "/GadgetIcon.png",
     bgColor: "from-purple-500 to-purple-600",
     previewImage: "/images/modes/gadget-preview.jpg",
-    cardBackground: "/GadgetMode_Background.png"
+    cardBackground: "/GadgetMode_Background.png",
+    path: "/daily/gadget"
   },
   {
     mode: "starpower",
@@ -40,7 +43,8 @@ const gameModes = [
     icon: "/StarpowerIcon.png",
     bgColor: "from-yellow-500 to-yellow-600",
     previewImage: "/images/modes/starpower-preview.jpg",
-    cardBackground: "/StarPowerMode_Background.png"
+    cardBackground: "/StarPowerMode_Background.png",
+    path: "/daily/starpower"
   },
   {
     mode: "survival",

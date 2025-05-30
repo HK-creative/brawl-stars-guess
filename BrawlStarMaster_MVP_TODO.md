@@ -38,7 +38,7 @@ Please complete each task **one at a time**, in the order listed below.
 
 ---
 
-## ✅ Phase 6 – Daily Challenge System (Optional/Advanced)
+## ✅ Phase 6 – Daily Challenge System
 14. Make daily reset functional AND ACTUALLY WORKING.
 15. Set the daily reset to occur at 00:00 Israel time.
 16. Add a daily streak tracker for users.

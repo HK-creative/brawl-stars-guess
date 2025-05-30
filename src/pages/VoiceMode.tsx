@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 import { fetchDailyChallenge, getTimeUntilNextChallenge } from '@/lib/daily-challenges';
 import BrawlerAutocomplete from '@/components/BrawlerAutocomplete';
 import { brawlers, Brawler } from '@/data/brawlers';
-import { Home, Check, X, Volume2, Share2 } from 'lucide-react';
+import { Check, X, Volume2, Share2 } from 'lucide-react';
 import ShareResultModal from '@/components/ShareResultModal';
 import { getPortrait, DEFAULT_PIN } from '@/lib/image-helpers';
 import Image from '@/components/ui/image';

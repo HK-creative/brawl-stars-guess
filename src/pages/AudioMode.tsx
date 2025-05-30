@@ -8,7 +8,7 @@ import { fetchDailyChallenge, getTimeUntilNextChallenge, fetchYesterdayChallenge
 import Image from '@/components/ui/image';
 import { cn } from '@/lib/utils';
 import Confetti from 'react-confetti';
-import { Play, Volume2, Home } from 'lucide-react';
+import { Play, Volume2 } from 'lucide-react';
 import { getPortrait } from '@/lib/image-helpers';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -18,6 +18,103 @@ import VictorySection from '../components/VictoryPopup';
 import GameModeTracker from '@/components/GameModeTracker';
 import HomeButton from '@/components/ui/home-button';
 
+// Helper to get a hardcoded list of available audio files
+const getAvailableAudioFiles = (): string[] => {
+  return [
+    'kaze_atk_sfx_01.ogg',
+    'kaze_atk_sfx_02.ogg',
+    'jae_atk_2_01.ogg',
+    'jae_atk_1_01.ogg',
+    'meeple_atk_01.ogg',
+    'shade_atk_vo_03.ogg',
+    'shade_atk_vo_01.ogg',
+    'shade_atk_vo_02.ogg',
+    'shade_atk_02.ogg',
+    'juju_water_atk_01.ogg',
+    'juju_forest_atk_01.ogg',
+    'juju_earth_atk_01.ogg',
+    'kenji_atk_vo_09.ogg',
+    'kenji_atk_vo_07.ogg',
+    'kenji_atk_vo_08.ogg',
+    'kenji_atk_vo_06.ogg',
+    'kenji_atk_vo_04.ogg',
+    'kenji_atk_vo_05.ogg',
+    'kenji_atk_vo_02.ogg',
+    'kenji_atk_vo_03.ogg',
+    'kenji_atk_vo_01.ogg',
+    'kenji_atk_sfx_01.ogg',
+    'kenji_atk_sfx_02.ogg',
+    'moe_drill_atk_vo_06.ogg',
+    'moe_rockthrow_atk_01.ogg',
+    'moe_drill_atk_vo_05.ogg',
+    'moe_drill_atk_vo_03.ogg',
+    'moe_drill_atk_vo_04.ogg',
+    'moe_drill_atk_vo_01.ogg',
+    'moe_drill_atk_vo_02.ogg',
+    'moe_drill_atk_sfx_01.ogg',
+    'moe_atk_vo_05.ogg',
+    'moe_atk_vo_06.ogg',
+    'moe_atk_vo_03.ogg',
+    'moe_atk_vo_04.ogg',
+    'moe_atk_vo_02.ogg',
+    'moe_atk_vo_01.ogg',
+    'ddracos_atk_vo_07.ogg',
+    'ddracos_atk_vo_08.ogg',
+    'ddracos_atk_vo_06.ogg',
+    'ddracos_atk_vo_04.ogg',
+    'ddracos_atk_vo_05.ogg',
+    'ddracos_atk_vo_03.ogg',
+    'ddracos_atk_vo_01.ogg',
+    'ddracos_atk_vo_02.ogg',
+    'amber_ice_atk_vo_02.ogg',
+    'amber_ice_atk_vo_03.ogg',
+    'amber_ice_atk_vo_01.ogg',
+    'amber_ice_atk_vo_06.ogg',
+    'amber_ice_atk_vo_05.ogg',
+    'amber_ice_atk_vo_04.ogg',
+    'amber_ice_atk_vo_07.ogg',
+    'lily_atk_01.ogg',
+    'lily_ulti_atk_01.ogg',
+    'draco_atk_vo_08.ogg',
+    'draco_atk_gui_08.ogg',
+    'draco_atk_gui_09.ogg',
+    'draco_atk_gui_14.ogg',
+    'draco_atk_gui_15.ogg',
+    'draco_atk_gui_02.ogg',
+    'draco_atk_gui_03.ogg',
+    'draco_atk_gui_01.ogg',
+    'draco_atk_gui_12.ogg',
+    'draco_atk_gui_13.ogg',
+    'draco_atk_gui_11.ogg',
+    'draco_atk_gui_06.ogg',
+    'draco_atk_gui_07.ogg',
+    'draco_atk_gui_05.ogg',
+    'draco_atk_vo_03.ogg',
+    'draco_atk_gui_10.ogg',
+    'draco_atk_gui_04.ogg',
+    'draco_ulti_atk_sfx_01.ogg',
+    'draco_atk_vo_06.ogg',
+    'draco_atk_vo_07.ogg',
+    'draco_atk_vo_05.ogg',
+    'draco_atk_vo_02.ogg',
+    'draco_atk_vo_04.ogg',
+    'draco_atk_vo_01.ogg',
+    'draco_atk_sfx_01.ogg',
+    'melodie_atk_sfx_01.ogg',
+    'angelo_atk_01.ogg',
+    'kit_ulti_atk_01.ogg',
+    'kit_atk_vo_03.ogg',
+    'kit_atk_vo_04.ogg',
+    'kit_atk_vo_02.ogg',
+    'kit_atk_vo_01.ogg',
+    'kit_atk_01.ogg',
+    'lawrie_win_atk_01.ogg',
+    'mico_ulti_atk_01.ogg',
+    'chuck_atk_01.ogg',
+    'mico_atk_01.ogg'
+  ];
+};
+
 // Helper to get a random audio file for a brawler from the AttackSounds folder
 const getRandomAudioFile = (brawler: string, files: string[]) => {
   if (!brawler) return '';
@@ -25,7 +122,69 @@ const getRandomAudioFile = (brawler: string, files: string[]) => {
   // Find all files that start with the brawler's name (case-insensitive)
   const matches = files.filter(f => f.toLowerCase().startsWith(normalized));
   if (matches.length === 0) return '';
-  return `/AttackSounds/${matches[Math.floor(Math.random() * matches.length)]}`;
+  return matches[Math.floor(Math.random() * matches.length)]; // Return just the filename
+};
+
+// Helper to extract brawler name from audio filename
+const extractBrawlerNameFromFilename = (filename: string): string | null => {
+  if (!filename) return null;
+  
+  // Remove the file extension and get just the filename
+  const nameWithoutExt = filename.replace(/\.ogg$/, '');
+  
+  // Extract the part before the first underscore
+  const brawlerPart = nameWithoutExt.split('_')[0];
+  
+  if (!brawlerPart) return null;
+  
+  // Handle special cases and normalize the name
+  const normalizedName = brawlerPart.toLowerCase();
+  
+  // Map of filename prefixes to actual brawler names
+  const nameMapping: { [key: string]: string } = {
+    'elprimo': 'El Primo',
+    '8bit': '8-Bit',
+    'mrp': 'Mr. P',
+    'rt': 'R-T',
+    'larry': 'Larry & Lawrie',
+    'lawrie': 'Larry & Lawrie',
+    'ddracos': 'Draco', // Assuming ddracos is a variant of draco
+    'evil_mortis': 'Mortis',
+    'mecha_mortis': 'Mortis', 
+    'mech_crow': 'Crow',
+    'mech_spike': 'Spike',
+    'amber_ice': 'Amber',
+    'bea_mon': 'Bea',
+    'buzz_ulti': 'Buzz',
+    'buzz_ulti_dog': 'Buzz',
+    'buzzilla': 'Buzz', // Buzzilla skin for Buzz
+    'barley_fire': 'Barley',
+    'jacky_summer': 'Jacky',
+    'juju_water': 'Juju',
+    'juju_forest': 'Juju', 
+    'juju_earth': 'Juju',
+    'lawrie_win': 'Larry & Lawrie',
+    'kit_ulti': 'Kit',
+    'lily_ulti': 'Lily',
+    'mico_ulti': 'Mico',
+    'fang_ulti': 'Fang',
+    'grom_ulti': 'Grom',
+    'draco_ulti': 'Draco',
+    'moe_drill': 'Moe',
+    'moe_rockthrow': 'Moe',
+    'jae': 'Jae-Yong',
+    'kaze': 'Kaze',
+    'meeple': 'Meeple',
+    'shade': 'Shade'
+  };
+  
+  // Check if there's a mapping for this name
+  if (nameMapping[normalizedName]) {
+    return nameMapping[normalizedName];
+  }
+  
+  // For regular names, capitalize first letter
+  return brawlerPart.charAt(0).toUpperCase() + brawlerPart.slice(1).toLowerCase();
 };
 
 const DEFAULT_AUDIO = '';
@@ -64,6 +223,7 @@ const AudioMode = ({
   const [isCorrect, setIsCorrect] = useState(false);
   const [selectedBrawler, setSelectedBrawler] = useState<Brawler | null>(null);
   const [attempts, setAttempts] = useState(0);
+  const [guessesLeft, setGuessesLeft] = useState(maxGuesses);
   const [showResult, setShowResult] = useState(false);
   const [dailyChallenge, setDailyChallenge] = useState<AudioChallenge | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -102,6 +262,7 @@ const AudioMode = ({
     setGuesses([]);
     setSelectedBrawler(null);
     setAttempts(0);
+    setGuessesLeft(maxGuesses);
     setIsCorrect(false);
     setShowResult(false);
     setIsGameOver(false);
@@ -112,37 +273,35 @@ const AudioMode = ({
     // Generate a new key to force complete component re-initialization
     setGameKey(Date.now().toString());
     
-    if (brawlerId !== undefined) {
-      // Load the new audio challenge for this specific brawler
+    // For survival mode, we should call loadChallenge to pick random audio
+    // For non-survival mode with brawlerId, we can still use the old logic
+    if (isSurvivalMode) {
+      // Only load if audio files are already available
+      if (audioFiles.length > 0) {
+        loadChallenge();
+      }
+    } else if (brawlerId !== undefined) {
+      // Load the new audio challenge for this specific brawler (non-survival mode)
       loadSurvivalModeAudio(brawlerId);
     }
   }, [brawlerId]); // Re-run when brawlerId changes
-
-  // Load all audio file names from the AttackSounds folder (client-side fetch)
+  
+  // Effect to load challenge when audioFiles are ready and we're in survival mode
   useEffect(() => {
-    // Simulate fetch of audio files (replace with your actual audio file list or API)
-    const mockAudioFiles = [
-      'shelly_attack_1.mp3', 'shelly_attack_2.mp3',
-      'colt_attack_1.mp3', 'colt_attack_2.mp3',
-      'brock_attack_1.mp3', 'brock_attack_2.mp3',
-      'jessie_attack_1.mp3', 'jessie_attack_2.mp3',
-      'nita_attack_1.mp3', 'nita_attack_2.mp3',
-      'bo_attack_1.mp3', 'bo_attack_2.mp3',
-      'spike_attack_1.mp3', 'spike_attack_2.mp3',
-      'crow_attack_1.mp3', 'crow_attack_2.mp3',
-      'poco_attack_1.mp3', 'poco_attack_2.mp3',
-      'el_primo_attack_1.mp3', 'el_primo_attack_2.mp3',
-      'barley_attack_1.mp3', 'barley_attack_2.mp3',
-      'dynamike_attack_1.mp3', 'dynamike_attack_2.mp3',
-      'bull_attack_1.mp3', 'bull_attack_2.mp3',
-    ];
-    
-    setAudioFiles(mockAudioFiles);
-    
-    // Initial load for non-survival mode
-    if (!isSurvivalMode && !brawlerId) {
+    if (isSurvivalMode && audioFiles.length > 0 && !dailyChallenge) {
+      console.log('Audio files loaded, loading survival mode challenge');
       loadChallenge();
     }
+  }, [audioFiles, isSurvivalMode]); // Re-run when audioFiles or isSurvivalMode changes
+
+  // Load all audio file names - using hardcoded list for reliability
+  useEffect(() => {
+    console.log('Loading audio files for AudioMode');
+    
+    // Use the hardcoded list of known audio files
+    const files = getAvailableAudioFiles();
+    console.log(`Loaded ${files.length} audio files`);
+    setAudioFiles(files);
     
     // Load previous day's challenge
     fetchYesterday();
@@ -176,11 +335,11 @@ const AudioMode = ({
         
         const challenge: AudioChallenge = {
           brawler: fallbackBrawler.name,
-          audioFile: fallbackAudio
+          audioFile: fallbackAudio ? `/AttackSounds/${fallbackAudio}` : ''
         };
         
         setDailyChallenge(challenge);
-        setAudioFile(fallbackAudio);
+        setAudioFile(fallbackAudio ? `/AttackSounds/${fallbackAudio}` : '');
         setCorrectBrawlerName(fallbackBrawler.name);
         setIsLoading(false);
         setAudioError(false);
@@ -199,11 +358,11 @@ const AudioMode = ({
         
         const challenge: AudioChallenge = {
           brawler: fallbackBrawler.name,
-          audioFile: fallbackAudio
+          audioFile: fallbackAudio ? `/AttackSounds/${fallbackAudio}` : ''
         };
         
         setDailyChallenge(challenge);
-        setAudioFile(fallbackAudio);
+        setAudioFile(fallbackAudio ? `/AttackSounds/${fallbackAudio}` : '');
         setCorrectBrawlerName(fallbackBrawler.name);
         setIsLoading(false);
         setAudioError(false);
@@ -224,11 +383,11 @@ const AudioMode = ({
         
         const challenge: AudioChallenge = {
           brawler: brawler.name,
-          audioFile: fallbackAudio
+          audioFile: fallbackAudio ? `/AttackSounds/${fallbackAudio}` : ''
         };
         
         setDailyChallenge(challenge);
-        setAudioFile(fallbackAudio);
+        setAudioFile(fallbackAudio ? `/AttackSounds/${fallbackAudio}` : '');
         setCorrectBrawlerName(brawler.name);
         setIsLoading(false);
         setAudioError(false);
@@ -239,11 +398,11 @@ const AudioMode = ({
       // Set the challenge with the found audio
       const challenge: AudioChallenge = {
         brawler: brawler.name,
-        audioFile: audio
+        audioFile: audio ? `/AttackSounds/${audio}` : ''
       };
       
       setDailyChallenge(challenge);
-      setAudioFile(audio);
+      setAudioFile(audio ? `/AttackSounds/${audio}` : '');
       setCorrectBrawlerName(brawler.name);
       setIsLoading(false);
       setAudioError(false);
@@ -260,8 +419,89 @@ const AudioMode = ({
     setIsLoading(true);
     
     try {
-      // For survival mode, the audio is loaded by the specific brawlerId effect
-      if (isSurvivalMode && brawlerId !== undefined) {
+      // If in survival mode, pick a random audio file and extract brawler name
+      if (isSurvivalMode) {
+        console.log('Loading random audio file for Survival Mode Audio challenge');
+        
+        if (audioFiles.length === 0) {
+          console.warn('No audio files available for survival mode');
+          setIsLoading(false);
+          setAudioError(true);
+          return;
+        }
+        
+        // Pick a random audio file
+        const randomIndex = Math.floor(Math.random() * audioFiles.length);
+        const selectedAudioFile = audioFiles[randomIndex];
+        
+        console.log(`Selected random audio file: ${selectedAudioFile}`);
+        
+        // Extract brawler name from filename
+        const extractedBrawlerName = extractBrawlerNameFromFilename(selectedAudioFile);
+        
+        if (!extractedBrawlerName) {
+          console.error(`Could not extract brawler name from filename: ${selectedAudioFile}`);
+          // Try another file or use fallback
+          const fallbackBrawler = "Amber";
+          const fallbackAudio = "amber_atk_01.ogg";
+          
+          const challenge: AudioChallenge = {
+            brawler: fallbackBrawler,
+            audioFile: `/AttackSounds/${fallbackAudio}`
+          };
+          
+          setDailyChallenge(challenge);
+          setAudioFile(`/AttackSounds/${fallbackAudio}`);
+          setCorrectBrawlerName(fallbackBrawler);
+          setIsLoading(false);
+          setAudioReady(true);
+          setAudioError(false);
+          return;
+        }
+        
+        // Verify the extracted brawler name exists in our brawlers data
+        const matchingBrawler = brawlers.find(b => 
+          b.name.toLowerCase() === extractedBrawlerName.toLowerCase()
+        );
+        
+        if (!matchingBrawler) {
+          console.warn(`Extracted brawler name "${extractedBrawlerName}" not found in brawlers data. Available brawlers:`, brawlers.map(b => b.name));
+          // Try to find a close match or use fallback
+          const fallbackBrawler = "Amber";
+          const fallbackAudio = "amber_atk_01.ogg";
+          
+          const challenge: AudioChallenge = {
+            brawler: fallbackBrawler,
+            audioFile: `/AttackSounds/${fallbackAudio}`
+          };
+          
+          setDailyChallenge(challenge);
+          setAudioFile(`/AttackSounds/${fallbackAudio}`);
+          setCorrectBrawlerName(fallbackBrawler);
+          setIsLoading(false);
+          setAudioReady(true);
+          setAudioError(false);
+          return;
+        }
+        
+        console.log(`Successfully matched brawler: ${matchingBrawler.name}`);
+        
+        const challenge: AudioChallenge = {
+          brawler: matchingBrawler.name,
+          audioFile: `/AttackSounds/${selectedAudioFile}`
+        };
+        
+        setDailyChallenge(challenge);
+        setAudioFile(`/AttackSounds/${selectedAudioFile}`);
+        setCorrectBrawlerName(matchingBrawler.name);
+        setIsLoading(false);
+        setAudioReady(true);
+        setAudioError(false);
+        return;
+      }
+      
+      // For non-survival modes, use the brawlerId if provided
+      if (brawlerId !== undefined) {
         await loadSurvivalModeAudio(brawlerId);
         return;
       }
@@ -271,9 +511,10 @@ const AudioMode = ({
         const data = await fetchDailyChallenge('audio');
         if (data?.success) {
           const audio = data.audio;
+          const randomAudioFile = getRandomAudioFile(audio.brawler, audioFiles);
           const challenge: AudioChallenge = {
             brawler: audio.brawler,
-            audioFile: audio.file || getRandomAudioFile(audio.brawler, audioFiles)
+            audioFile: audio.file || (randomAudioFile ? `/AttackSounds/${randomAudioFile}` : '')
           };
           
           setDailyChallenge(challenge);
@@ -291,11 +532,11 @@ const AudioMode = ({
         
         const challenge: AudioChallenge = {
           brawler: fallbackBrawler,
-          audioFile: fallbackAudio
+          audioFile: fallbackAudio ? `/AttackSounds/${fallbackAudio}` : ''
         };
         
         setDailyChallenge(challenge);
-        setAudioFile(fallbackAudio);
+        setAudioFile(fallbackAudio ? `/AttackSounds/${fallbackAudio}` : '');
         setCorrectBrawlerName(fallbackBrawler);
         
         toast("Offline Mode", {
@@ -320,7 +561,7 @@ const AudioMode = ({
         const audioFile = getRandomAudioFile(yesterdayBrawler, audioFiles);
         setYesterdayAudio({
           brawler: yesterdayBrawler,
-          audio: audioFile
+          audio: audioFile ? `/AttackSounds/${audioFile}` : ''
         });
       }
     } catch (error) {
@@ -335,6 +576,7 @@ const AudioMode = ({
     setGuesses([]);
     setSelectedBrawler(null);
     setAttempts(0);
+    setGuessesLeft(maxGuesses);
     setIsCorrect(false);
     setShowResult(false);
     setIsGameOver(false);
@@ -351,11 +593,11 @@ const AudioMode = ({
       
       const challenge: AudioChallenge = {
         brawler: randomBrawler.name,
-        audioFile: randomAudio
+        audioFile: randomAudio ? `/AttackSounds/${randomAudio}` : ''
       };
       
       setDailyChallenge(challenge);
-      setAudioFile(randomAudio);
+      setAudioFile(randomAudio ? `/AttackSounds/${randomAudio}` : '');
       setCorrectBrawlerName(randomBrawler.name);
       setAudioReady(true);
     }
@@ -364,30 +606,47 @@ const AudioMode = ({
   const playAudio = () => {
     if (!audioFile || isPlaying) return;
     
+    console.log(`Attempting to play audio: ${audioFile}`);
     setIsPlaying(true);
     
-    // Create and configure an audio element
-    if (!audioRef.current) {
-      audioRef.current = new Audio(audioFile);
-      
-      // Set up event listeners
-      audioRef.current.addEventListener('ended', () => {
-        setIsPlaying(false);
-      });
-      
-      audioRef.current.addEventListener('error', () => {
-        setIsPlaying(false);
-        setAudioError(true);
-        toast.error('Error playing audio');
-      });
+    // Clean up any existing audio element
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.removeEventListener('ended', () => {});
+      audioRef.current.removeEventListener('error', () => {});
+      audioRef.current = null;
     }
+    
+    // Create and configure a new audio element
+    audioRef.current = new Audio(audioFile);
+    
+    // Set up event listeners
+    audioRef.current.addEventListener('ended', () => {
+      setIsPlaying(false);
+      console.log('Audio playback ended');
+    });
+    
+    audioRef.current.addEventListener('error', (error) => {
+      console.error('Audio playback error:', error);
+      setIsPlaying(false);
+      setAudioError(true);
+      toast.error(`Error playing audio: ${audioFile}`);
+    });
+    
+    audioRef.current.addEventListener('loadstart', () => {
+      console.log('Audio loading started');
+    });
+    
+    audioRef.current.addEventListener('canplay', () => {
+      console.log('Audio can start playing');
+    });
     
     // Play the audio
     audioRef.current.play().catch(error => {
       console.error('Error playing audio:', error);
       setIsPlaying(false);
       setAudioError(true);
-      toast.error('Error playing audio');
+      toast.error(`Error playing audio: ${error.message}`);
     });
   };
 
@@ -410,6 +669,10 @@ const AudioMode = ({
     setSelectedBrawler(null);
     setAttempts(attempts + 1);
     setGuessCount(guessCount + 1);
+    
+    if (isSurvivalMode) {
+      setGuessesLeft(prev => prev - 1);
+    }
     
     // Check if correct
     const isThisGuessCorrect = currentGuess.toLowerCase() === dailyChallenge.brawler.toLowerCase();
@@ -438,18 +701,24 @@ const AudioMode = ({
           }, 3000);
         }
       }
-    } else if (attempts + 1 >= maxGuesses) {
-      // Out of guesses
-      setShowResult(true);
-      setIsGameOver(true);
+    }
+    // Check if out of guesses
+    else {
+      const outOfGuesses = isSurvivalMode ? guessesLeft <= 1 : attempts + 1 >= maxGuesses;
       
-      if (isSurvivalMode && onRoundEnd) {
-        // Allow parent component to handle the failure
-        onRoundEnd({ success: false });
-      } else {
-        toast('Game Over', {
-          description: `The correct brawler was ${dailyChallenge.brawler}.`,
-        });
+      if (outOfGuesses) {
+        // Out of guesses
+        setShowResult(true);
+        setIsGameOver(true);
+        
+        if (isSurvivalMode && onRoundEnd) {
+          // Allow parent component to handle the failure
+          onRoundEnd({ success: false, brawlerName: dailyChallenge.brawler });
+        } else {
+          toast('Game Over', {
+            description: `The correct brawler was ${dailyChallenge.brawler}.`,
+          });
+        }
       }
     }
   };
@@ -590,10 +859,17 @@ const AudioMode = ({
           </form>
           {/* Guess Counter */}
           <div className="w-full flex justify-center gap-4 mt-4">
-            <div className="flex items-center gap-2 bg-black/50 backdrop-blur px-4 py-1 rounded-full shadow-lg">
-              <span className="text-white text-base font-semibold">Number of Guesses</span>
-              <span className="text-white text-base font-bold">{attempts}</span>
-            </div>
+            {isSurvivalMode ? (
+              <div className="flex items-center gap-2 bg-black/70 border-2 border-brawl-yellow px-6 py-2 rounded-full shadow-xl animate-pulse">
+                <span className="text-brawl-yellow text-lg font-bold tracking-wide">Guesses Left</span>
+                <span className={`text-2xl font-extrabold ${guessesLeft <= 2 ? 'text-brawl-red animate-bounce' : 'text-white'}`}>{guessesLeft}</span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 bg-black/50 backdrop-blur px-4 py-1 rounded-full shadow-lg">
+                <span className="text-white text-base font-semibold">Number of Guesses</span>
+                <span className="text-white text-base font-bold">{attempts}</span>
+              </div>
+            )}
           </div>
         </div>
         {/* Previous Guesses */}
