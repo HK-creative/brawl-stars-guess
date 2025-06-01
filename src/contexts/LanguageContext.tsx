@@ -1,8 +1,5 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { initLanguage, setLanguage, getLanguage } from '@/lib/i18n';
-
-type SupportedLanguages = 'en' | 'he';
+import { SupportedLanguages, setLanguage, getLanguage, initLanguage } from '@/lib/i18n';
 
 interface LanguageContextType {
   language: SupportedLanguages;
@@ -25,8 +22,19 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   }, []);
 
   const changeLanguage = (lang: SupportedLanguages) => {
+    // Immediately set the language in the i18n system
     setLanguage(lang);
+    // Update the React state to trigger re-renders
     setLang(lang);
+    
+    // Force immediate DOM update for RTL/LTR direction
+    requestAnimationFrame(() => {
+      document.documentElement.dir = lang === 'he' ? 'rtl' : 'ltr';
+      document.documentElement.lang = lang;
+      
+      // Refresh the page to ensure all changes are applied
+      window.location.reload();
+    });
   };
 
   return (

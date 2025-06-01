@@ -15,6 +15,7 @@ import { cn } from '@/lib/utils';
 import SurvivalVictoryPopup from '@/components/SurvivalVictoryPopup';
 import SurvivalLossPopup from '@/components/SurvivalLossPopup';
 import SurvivalSetupPopup from '@/components/SurvivalSetupPopup';
+import { t } from '@/lib/i18n';
 
 // Import brawler data
 import { brawlers } from '@/data/brawlers';
@@ -383,15 +384,15 @@ const SurvivalModePage: React.FC = () => {
               <Trophy className="h-20 w-20 text-yellow-400 drop-shadow-[0_0_24px_gold] animate-bounce-slow z-10" />
             </div>
             <div className="flex flex-row items-center gap-4 mt-2">
-              <span className="text-3xl font-extrabold bg-gradient-to-r from-yellow-300 via-amber-400 to-pink-400 bg-clip-text text-transparent drop-shadow-[0_2px_12px_rgba(255,214,0,0.7)] animate-award-glow">Round {currentRound}</span>
+              <span className="text-3xl font-extrabold bg-gradient-to-r from-yellow-300 via-amber-400 to-pink-400 bg-clip-text text-transparent drop-shadow-[0_2px_12px_rgba(255,214,0,0.7)] animate-award-glow">{t('survival.round')} {currentRound}</span>
               <span className="flex items-center gap-2 px-3 py-1 rounded-full bg-gradient-to-r from-green-500/80 to-emerald-400/70 shadow-lg border-2 border-green-300 text-lg font-bold text-white animate-award-glow">
                 <Circle className="h-6 w-6 text-white/80 fill-current" />
-                {totalScore} pts
+                {totalScore} {t('survival.pts')}
               </span>
               {settings?.timer && (
                 <span className="flex items-center gap-2 px-3 py-1 rounded-full bg-gradient-to-r from-yellow-500/80 to-pink-400/70 shadow-lg border-2 border-yellow-300 text-lg font-bold text-white animate-award-glow">
                   <Timer className="h-6 w-6 text-white/80" />
-                  {currentTimerValue ?? activeRoundState.timerLeft}s
+                  {currentTimerValue ?? activeRoundState.timerLeft}{t('survival.seconds')}
                 </span>
               )}
             </div>

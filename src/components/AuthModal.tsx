@@ -15,6 +15,7 @@ import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2, LogIn, Mail, Lock, X } from 'lucide-react';
 import { DialogClose } from '@radix-ui/react-dialog';
+import { t } from '@/lib/i18n';
 
 const AuthModal: React.FC = () => {
   const { isAuthModalOpen, closeAuthModal, authModalMode, openAuthModal } = useAuthModal();
@@ -123,22 +124,22 @@ const AuthModal: React.FC = () => {
   if (!isAuthModalOpen) return null;
 
   const currentTitle = authModalMode === 'signin' 
-    ? 'Sign in with email' 
+    ? t('auth.signin.email')
     : authModalMode === 'signup' 
       ? 'Create your Brawldle account' 
       : 'Reset your password';
 
   const currentDescription = authModalMode === 'signin'
-    ? 'Access your Brawldle stats, save progress, and compete on leaderboards!'
+    ? t('auth.access.stats')
     : authModalMode === 'signup'
-      ? 'Join Brawldle to unlock achievements and climb the ranks!'
-      : 'Enter your email to receive password reset instructions.';
+      ? t('auth.join.unlock')
+      : t('auth.reset.instructions');
       
   const currentButtonText = authModalMode === 'reset' 
     ? 'Send Reset Link' 
     : authModalMode === 'signup' 
-      ? 'Create Account' 
-      : 'Get Started';
+      ? t('auth.signup')
+      : t('auth.get.started');
 
 
   return (
@@ -180,31 +181,31 @@ const AuthModal: React.FC = () => {
         ) : (
           <form onSubmit={authModalMode === 'reset' ? handlePasswordReset : handleSubmit} className="space-y-4">
             <div className="space-y-1.5 relative flex items-center">
-              <Label htmlFor="email-modal" className="sr-only">Email</Label>
+              <Label htmlFor="email-modal" className="sr-only">{t('auth.email')}</Label>
               <Mail className="absolute left-3 h-5 w-5 text-gray-400 pointer-events-none" />
               <Input
                 id="email-modal"
                 type="email"
-                placeholder="Email"
+                placeholder={t('auth.email')}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full pl-10 pr-3 h-12 border border-gray-300 rounded-md focus:ring-2 focus:ring-amber-500 focus:border-amber-500 placeholder-gray-400"
+                className="w-full pl-10 pr-3 h-12 border border-gray-300 rounded-md focus:ring-2 focus:ring-amber-500 focus:border-amber-500 placeholder-gray-400 bg-white text-gray-900"
               />
             </div>
             
             {authModalMode !== 'reset' && (
               <div className="space-y-1.5 relative flex items-center">
-                <Label htmlFor="password-modal" className="sr-only">Password</Label>
+                <Label htmlFor="password-modal" className="sr-only">{t('auth.password')}</Label>
                 <Lock className="absolute left-3 h-5 w-5 text-gray-400 pointer-events-none" />
                 <Input
                   id="password-modal"
                   type="password"
-                  placeholder="Password"
+                  placeholder={t('auth.password')}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="w-full pl-10 pr-3 h-12 border border-gray-300 rounded-md focus:ring-2 focus:ring-amber-500 focus:border-amber-500 placeholder-gray-400"
+                  className="w-full pl-10 pr-3 h-12 border border-gray-300 rounded-md focus:ring-2 focus:ring-amber-500 focus:border-amber-500 placeholder-gray-400 bg-white text-gray-900"
                 />
               </div>
             )}
@@ -217,7 +218,7 @@ const AuthModal: React.FC = () => {
                       className="text-xs text-amber-600 hover:text-amber-500 hover:underline focus:outline-none font-medium"
                       disabled={loading}
                     >
-                      Forgot password?
+                      {t('auth.forgot.password')}
                     </button>
                 </div>
             )}
@@ -236,23 +237,23 @@ const AuthModal: React.FC = () => {
             <div className="mt-6 text-center">
             {authModalMode === 'signin' && (
                 <p className="text-sm text-gray-500">
-                Don't have an account?{' '}
+                {t('auth.no.account')}{' '}
                 <button 
                     onClick={() => openAuthModal('signup')} 
                     className="font-medium text-amber-600 hover:text-amber-500 hover:underline focus:outline-none"
                 >
-                    Sign up
+                    {t('auth.signup')}
                 </button>
                 </p>
             )}
             {authModalMode === 'signup' && (
                 <p className="text-sm text-gray-500">
-                Already have an account?{' '}
+                {t('auth.have.account')}{' '}
                 <button 
                     onClick={() => openAuthModal('signin')} 
                     className="font-medium text-amber-600 hover:text-amber-500 hover:underline focus:outline-none"
                 >
-                    Log in
+                    {t('auth.login')}
                 </button>
                 </p>
             )}

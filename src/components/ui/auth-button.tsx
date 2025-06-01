@@ -5,6 +5,7 @@ import { useStreak } from '@/contexts/StreakContext';
 import { cn } from '@/lib/utils';
 import { useAuthModal } from '@/contexts/AuthModalContext'; // Import useAuthModal
 import { toast } from 'sonner';
+import { t } from '@/lib/i18n';
 
 interface AuthButtonProps {
   variant?: 'default' | 'outline' | 'ghost';
@@ -63,11 +64,11 @@ const AuthButton: React.FC<AuthButtonProps> = ({
         )}
         onClick={handleAuth} // This now opens the modal
       >
-        {showSignUp ? 'Sign up' : 'Log in'}
+        {showSignUp ? t('auth.signup') : t('auth.login')}
       </Button>
       {showSignUp && !hideSubtext && (
         <span className="text-sm text-white/80 font-medium">
-          to save your progress
+          {t('auth.save.subtext')}
         </span>
       )}
     </div>

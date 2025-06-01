@@ -2,6 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Abraham Font Definition for Hebrew Headlines and Labels */
+@font-face {
+  font-family: 'Abraham';
+  src: url('/HebrewFont/Abraham-Regular.eot'); /* IE9 Compat Modes */
+  src: url('/HebrewFont/Abraham-Regular.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+       url('/HebrewFont/Abraham-Regular.woff') format('woff'), /* Modern Browsers */
+       url('/HebrewFont/Abraham-Regular.ttf') format('truetype'); /* Safari, Android, iOS */
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap; /* Improves loading performance */
+}
+
 /* Performance optimizations to prevent flickering */
 * {
   -webkit-font-smoothing: antialiased;
@@ -112,6 +124,95 @@ body {
   
   .brawl-icon-box {
     @apply flex items-center justify-center p-2 rounded-full bg-secondary/50 text-primary;
+  }
+
+  /* Abraham Font for Hebrew Headlines and Labels */
+  .font-brawl {
+    font-family: 'Abraham', 'Inter', system-ui, sans-serif;
+  }
+  
+  /* Apply Abraham font only when document direction is RTL (Hebrew) */
+  html[dir="rtl"] .font-brawl {
+    font-family: 'Abraham', 'Inter', system-ui, sans-serif;
+  }
+  
+  /* Keep default font for LTR (English) */
+  html[dir="ltr"] .font-brawl {
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  /* Selective Abraham font application for Hebrew - only for specific headlines and titles */
+  /* Game mode card titles and major headlines */
+  html[dir="rtl"] h1,
+  html[dir="rtl"] h2,
+  html[dir="rtl"] h3 {
+    font-family: 'Abraham', 'Inter', system-ui, sans-serif;
+  }
+  
+  /* Specific game mode title selectors */
+  html[dir="rtl"] .game-mode-title,
+  html[dir="rtl"] .mode-title,
+  html[dir="rtl"] .survival-title,
+  html[dir="rtl"] .page-title {
+    font-family: 'Abraham', 'Inter', system-ui, sans-serif;
+  }
+  
+  /* Exclude numbers, counters, timers, and login elements from Abraham font */
+  html[dir="rtl"] .auth-section *,
+  html[dir="rtl"] .login-section *,
+  html[dir="rtl"] .signup-section *,
+  html[dir="rtl"] [class*="timer"] *,
+  html[dir="rtl"] [class*="counter"] *,
+  html[dir="rtl"] [class*="number"] *,
+  html[dir="rtl"] [class*="point"] *,
+  html[dir="rtl"] [class*="score"] *,
+  html[dir="rtl"] [class*="guess"] *,
+  html[dir="rtl"] .attribute-label,
+  html[dir="rtl"] [data-attribute],
+  html[dir="rtl"] .text-xs,
+  html[dir="rtl"] .text-sm,
+  html[dir="rtl"] [class*="tries"],
+  html[dir="rtl"] [class*="round"],
+  html[dir="rtl"] span:has-text(/\d/),
+  html[dir="rtl"] .brawler-stats *,
+  html[dir="rtl"] .stats-grid *,
+  html[dir="rtl"] .guess-row *,
+  html[dir="rtl"] [class*="AuthButton"] *,
+  html[dir="rtl"] .auth-button *,
+  html[dir="rtl"] [data-testid*="auth"] *,
+  html[dir="rtl"] .attribute-cell,
+  html[dir="rtl"] .brawler-attribute,
+  html[dir="rtl"] [class*="attribute"],
+  html[dir="rtl"] button span,
+  html[dir="rtl"] .button-text,
+  html[dir="rtl"] [class*="left"]:has-text(/\d/),
+  html[dir="rtl"] [class*="time"]:has-text(/\d/),
+  html[dir="rtl"] .font-bold:has-text(/\d/),
+  html[dir="rtl"] .font-extrabold:has-text(/\d/) {
+    font-family: 'Inter', system-ui, sans-serif !important;
+  }
+  
+  /* Specifically exclude auth modal and buttons */
+  html[dir="rtl"] [class*="auth"] *,
+  html[dir="rtl"] [class*="Auth"] *,
+  html[dir="rtl"] .auth-button,
+  html[dir="rtl"] [aria-describedby*="auth"] *,
+  html[dir="rtl"] [role="dialog"] *,
+  html[dir="rtl"] .auth-modal *,
+  html[dir="rtl"] .login-modal *,
+  html[dir="rtl"] .signup-modal *,
+  html[dir="rtl"] button[class*="auth"] *,
+  html[dir="rtl"] button[class*="Auth"] *,
+  html[dir="rtl"] .AuthModal *,
+  html[dir="rtl"] .AuthButton * {
+    font-family: 'Inter', system-ui, sans-serif !important;
+  }
+  
+  /* Keep default fonts for English */
+  html[dir="ltr"] .font-bold,
+  html[dir="ltr"] .font-extrabold,
+  html[dir="ltr"] .font-black {
+    font-family: 'Inter', system-ui, sans-serif;
   }
 }
 
@@ -239,4 +340,190 @@ body {
 /* Focus styles */
 :focus-visible {
   @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+}
+
+/* Enhanced animations for Survival Mode Card */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes float-delayed {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes borderShift {
+  0%, 100% {
+    border-image: linear-gradient(45deg, #f59e0b, #ea580c, #dc2626, #f59e0b) 1;
+  }
+  25% {
+    border-image: linear-gradient(45deg, #ea580c, #dc2626, #f97316, #f59e0b) 1;
+  }
+  50% {
+    border-image: linear-gradient(45deg, #dc2626, #f97316, #f59e0b, #ea580c) 1;
+  }
+  75% {
+    border-image: linear-gradient(45deg, #f97316, #f59e0b, #ea580c, #dc2626) 1;
+  }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-float-delayed {
+  animation: float-delayed 4s ease-in-out infinite;
+}
+
+.animate-spin-slow {
+  animation: spin-slow 8s linear infinite;
+}
+
+/* Breathing animation for survival card */
+@keyframes breathe {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+}
+
+.animate-breathe {
+  animation: breathe 4s ease-in-out infinite;
+}
+
+/* Hebrew attribute labels - larger and bolder */
+html[dir="rtl"] .attribute-label,
+html[dir="rtl"] [class*="attribute"] .text-xs,
+html[dir="rtl"] [class*="attribute"] .text-sm {
+  font-weight: 800 !important;
+  font-size: 1.25rem !important; /* Significantly increased from 0.875rem */
+}
+
+/* HEBREW HOME SCREEN HEADLINES - MASSIVE SIZE INCREASE */
+/* Main title "Brawldle" on home screen */
+html[dir="rtl"] h1 {
+  font-size: 8rem !important; /* Massive increase from default */
+  line-height: 0.9 !important;
+  font-weight: 900 !important;
+}
+
+/* Mobile main title */
+@media (max-width: 768px) {
+  html[dir="rtl"] h1 {
+    font-size: 4.5rem !important; /* Much larger on mobile too */
+    line-height: 0.95 !important;
+  }
+}
+
+/* Subtitle "The Ultimate Daily Brawl Stars Challenge" */
+html[dir="rtl"] h2 {
+  font-size: 3rem !important; /* Much larger subtitle */
+  line-height: 1.1 !important;
+  font-weight: 700 !important;
+}
+
+/* Mobile subtitle */
+@media (max-width: 768px) {
+  html[dir="rtl"] h2 {
+    font-size: 2rem !important; /* Larger on mobile */
+    line-height: 1.2 !important;
+  }
+}
+
+/* Game mode card titles on home screen */
+html[dir="rtl"] h3 {
+  font-size: 4rem !important; /* Much larger game mode titles */
+  line-height: 1 !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.05em !important;
+}
+
+/* Mobile game mode card titles */
+@media (max-width: 768px) {
+  html[dir="rtl"] h3 {
+    font-size: 2.5rem !important; /* Much larger on mobile */
+    line-height: 1.1 !important;
+  }
+}
+
+/* Survival mode special title - even larger */
+html[dir="rtl"] .survival-title,
+html[dir="rtl"] [class*="survival"] h3 {
+  font-size: 5rem !important;
+  font-weight: 900 !important;
+  line-height: 0.9 !important;
+}
+
+@media (max-width: 768px) {
+  html[dir="rtl"] .survival-title,
+  html[dir="rtl"] [class*="survival"] h3 {
+    font-size: 3rem !important;
+    line-height: 1 !important;
+  }
+}
+
+/* Mobile-specific Hebrew attribute styling */
+@media (max-width: 768px) {
+  /* Hebrew attribute labels on mobile - much larger and bolder */
+  html[dir="rtl"] .attribute-label,
+  html[dir="rtl"] [class*="attribute"] .text-xs,
+  html[dir="rtl"] [class*="attribute"] .text-sm {
+    font-weight: 900 !important;
+    font-size: 1.5rem !important; /* Significantly increased from 1rem */
+    line-height: 1.2 !important;
+  }
+  
+  /* Hebrew attribute card text content on mobile - larger but controlled */
+  html[dir="rtl"] [class*="guess-row"] .text-xs,
+  html[dir="rtl"] [class*="brawler-card"] .text-xs,
+  html[dir="rtl"] [class*="card"] .text-xs:not(.attribute-label) {
+    font-size: 1rem !important; /* Increased from 0.8rem */
+    font-weight: 600 !important;
+    line-height: 1.1 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+  
+  /* Hebrew attribute card medium text on mobile */
+  html[dir="rtl"] [class*="guess-row"] .text-sm,
+  html[dir="rtl"] [class*="brawler-card"] .text-sm,
+  html[dir="rtl"] [class*="card"] .text-sm:not(.attribute-label) {
+    font-size: 1.125rem !important; /* Increased from 0.9rem */
+    font-weight: 600 !important;
+    line-height: 1.1 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+}
+
+/* Desktop-specific Hebrew attribute styling */
+@media (min-width: 769px) {
+  html[dir="rtl"] .attribute-label,
+  html[dir="rtl"] [class*="attribute"] .text-xs,
+  html[dir="rtl"] [class*="attribute"] .text-sm {
+    font-weight: 700 !important;
+    font-size: 1.125rem !important; /* Significantly increased from 0.9rem */
+  }
 }

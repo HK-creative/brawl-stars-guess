@@ -23,7 +23,7 @@ const HomeButton: React.FC<HomeButtonProps> = ({ className }) => {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       className={cn(
-        "fixed top-6 left-6 z-[100] group",
+        "fixed top-2 left-4 md:top-4 md:left-6 z-[100] group",
         "rounded-2xl p-0.5 transition-all duration-500 ease-out",
         "bg-gradient-to-br from-yellow-400 via-amber-500 to-orange-500",
         "shadow-lg hover:shadow-2xl hover:shadow-amber-500/30",

@@ -12,7 +12,7 @@ import { useNavigate } from 'react-router-dom';
 const gameModes = [
   {
     mode: "classic",
-    description: "Guess today's mystery brawler",
+    descriptionKey: "mode.classic.description",
     icon: "/ClassicIcon.png",
     bgColor: "from-pink-500 to-pink-600",
     previewImage: "/images/modes/classic-preview.jpg",
@@ -21,7 +21,7 @@ const gameModes = [
   },
   {
     mode: "audio",
-    description: "Guess by brawler voice lines",
+    descriptionKey: "mode.audio.description",
     icon: "/AudioIcon.png",
     bgColor: "from-orange-500 to-orange-600",
     previewImage: "/images/modes/audio-preview.jpg",
@@ -30,7 +30,7 @@ const gameModes = [
   },
   {
     mode: "gadget",
-    description: "Guess by gadget description",
+    descriptionKey: "mode.gadget.description",
     icon: "/GadgetIcon.png",
     bgColor: "from-purple-500 to-purple-600",
     previewImage: "/images/modes/gadget-preview.jpg",
@@ -39,7 +39,7 @@ const gameModes = [
   },
   {
     mode: "starpower",
-    description: "Guess by star power description",
+    descriptionKey: "mode.starpower.description",
     icon: "/StarpowerIcon.png",
     bgColor: "from-yellow-500 to-yellow-600",
     previewImage: "/images/modes/starpower-preview.jpg",
@@ -48,7 +48,7 @@ const gameModes = [
   },
   {
     mode: "survival",
-    description: "Test your skills in hard mode",
+    descriptionKey: "mode.survival.description",
     icon: "/images/icons/heart-icon.png",
     bgColor: "from-red-500 to-red-600",
     previewImage: "/images/modes/survival-preview.jpg",
@@ -82,103 +82,10 @@ const Index = () => {
         "pt-0",
         "pb-8 md:pb-12"
       )}>
-        {/* Auth Section - Positioned in document flow, scrolls with content */}
-        <div className="absolute -top-1 left-4 md:-top-16 md:left-1/2 md:translate-x-96 z-50">
-        {!isLoggedIn ? (
-            <div className="relative">
-              {/* Background decoration removed */}
-              
-              {/* Main auth container - Very subtle background */}
-              <div className="relative bg-black/10 backdrop-blur-sm rounded-xl border border-white/10 p-3 shadow-sm">
-                {/* Desktop design - with text and center aligned buttons */}
-                <div className="hidden md:block">
-                  <div className="text-center mb-3">
-                    <h3 className="text-lg font-bold text-amber-100 mb-1">Ready to Play?</h3>
-                    <p className="text-xs text-slate-300">Save progress & compete!</p>
-                  </div>
-                  
-                  <div className="flex justify-center gap-3">
-                    <AuthButton 
-                      showSignUp={true} 
-                      variant="default" 
-                      size="sm"
-                      className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold shadow-lg hover:shadow-amber-500/50 transform hover:scale-105 transition-all duration-300" 
-                      hideSubtext={true}
-                    />
-                    <AuthButton 
-                      variant="outline" 
-                      size="sm"
-                      className="border-amber-400/60 text-amber-100 hover:bg-amber-500/20 hover:border-amber-300 backdrop-blur-sm" 
-                      hideSubtext={true}
-                    />
-                  </div>
-                </div>
-
-                {/* Mobile design - buttons only, compact, subtle background */}
-                <div className="block md:hidden">
-                  <div className="flex gap-2">
-                    <AuthButton 
-                      showSignUp={true} 
-                      variant="default" 
-                      size="sm"
-                      className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold shadow-lg text-xs px-3 py-1" 
-                      hideSubtext={true}
-                    />
-                    <AuthButton 
-                      variant="outline" 
-                      size="sm"
-                      className="border-amber-400/60 text-amber-100 hover:bg-amber-500/20 hover:border-amber-300 text-xs px-3 py-1" 
-                      hideSubtext={true}
-                    />
-                  </div>
-                </div>
-              </div>
-          </div>
-        ) : user && (
-            <div className="relative">
-              {/* Background decoration removed */}
-              
-              {/* Main profile container - No background */}
-              <div className="relative">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center">
-                      <User size={16} className="text-white" />
-                    </div>
-                    <div>
-                      <p className="text-white font-semibold text-sm">{user.email?.split('@')[0] || 'Player'}</p>
-                      <p className="text-slate-300 text-xs">Logged in</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex gap-1">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={handleProfileClick}
-                      className="text-white hover:bg-white/10 px-2 py-1 text-xs"
-            >
-                      Settings
-            </Button>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={handleLogout}
-                      className="text-red-400 hover:bg-red-500/20 hover:text-red-300 px-2 py-1"
-            >
-                      <LogOut size={12} />
-            </Button>
-                  </div>
-                </div>
-              </div>
-          </div>
-        )}
-      </div>
-
-        {/* Header Section with responsive spacing */}
+        {/* Header Section with drastically reduced mobile spacing */}
         <div className={cn(
           "text-center",
-          "-mt-4 md:-mt-16" // Reduced mobile spacing, keep PC spacing
+          "-mt-12 md:-mt-16" // Drastically reduced mobile spacing - negative margin to pull it up
         )}>
           <SparklesPreview />
         </div>
@@ -187,7 +94,7 @@ const Index = () => {
         <div className={cn(
           "w-full max-w-lg mx-auto",
           "flex flex-col",
-          "gap-8 md:gap-6"
+          "gap-4 md:gap-6" // Reduced mobile gap from 8 to 4
         )}>
           {/* Regular 4 game modes */}
           {regularModes.map((mode, index) => (
@@ -201,12 +108,14 @@ const Index = () => {
                 previewImage={mode.previewImage}
                 cardBackground={mode.cardBackground}
                 customPath={mode.path}
+                enabled={true}
+                comingSoon={false}
               />
             </div>
           ))}
 
-          {/* Unified separator with reduced opacity for both mobile and PC */}
-          <div className="relative my-2 md:my-0 md:-mb-4">
+          {/* Reduced separator spacing for mobile */}
+          <div className="relative my-1 md:my-0 md:-mb-4">
             {/* Subtle background glow */}
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="w-16 h-2 bg-gradient-to-r from-amber-500/10 via-orange-500/20 to-red-500/10 rounded-full blur-sm" />
@@ -222,9 +131,21 @@ const Index = () => {
             </div>
           </div>
 
-          {/* Survival Mode with subtle radial fading glow */}
-          <div className="relative">
-            {/* Subtle radial glow that fades to transparent */}
+          {/* Survival Mode with enhanced animated effects and reduced bottom spacing */}
+          <div className="relative mb-2 md:mb-0">
+            {/* Enhanced floating particles background */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+              <div className="absolute top-4 left-8 w-1 h-1 bg-amber-400 rounded-full animate-pulse opacity-60"></div>
+              <div className="absolute top-16 right-12 w-0.5 h-0.5 bg-orange-400 rounded-full opacity-50"></div>
+              <div className="absolute bottom-8 left-16 w-1.5 h-1.5 bg-red-400 rounded-full opacity-40"></div>
+              <div className="absolute bottom-12 right-8 w-0.5 h-0.5 bg-amber-300 rounded-full animate-pulse opacity-70"></div>
+              <div className="absolute top-24 left-24 w-1 h-1 bg-orange-300 rounded-full opacity-55"></div>
+              <div className="absolute top-8 right-20 w-0.5 h-0.5 bg-red-300 rounded-full opacity-65"></div>
+              <div className="absolute bottom-4 left-12 w-1 h-1 bg-amber-500 rounded-full opacity-45"></div>
+              <div className="absolute top-20 right-16 w-0.5 h-0.5 bg-orange-500 rounded-full animate-pulse opacity-60"></div>
+            </div>
+
+            {/* Enhanced multi-layer radial glows with breathing effect */}
             <div className="absolute inset-0 flex items-center justify-center">
               <div 
                 className="w-96 h-96 rounded-full blur-3xl opacity-70"
@@ -241,8 +162,16 @@ const Index = () => {
                 }}
               />
             </div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div 
+                className="w-48 h-48 rounded-full blur-xl opacity-50"
+                style={{
+                  background: 'radial-gradient(circle, rgba(249,115,22,0.25) 0%, rgba(234,88,12,0.15) 40%, transparent 70%)'
+                }}
+              />
+            </div>
             
-            {/* Survival Mode Card */}
+            {/* Survival Mode Card with enhanced positioning */}
             <div className="relative z-10">
               <GameModeCard 
                 mode={survivalMode.mode}
@@ -251,6 +180,7 @@ const Index = () => {
                 previewImage={survivalMode.previewImage}
                 cardBackground={survivalMode.cardBackground}
                 customPath={survivalMode.path}
+                enabled={true}
               />
             </div>
           </div>

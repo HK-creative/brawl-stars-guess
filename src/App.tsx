@@ -64,7 +64,6 @@ const App = () => {
               <Routes>
                   <Route path="/auth" element={<AuthPage />} />
                   <Route path="/auth/callback" element={<AuthCallback />} />
-                  <Route path="/survival" element={<SurvivalModePage />} />
                   
                   {/* Daily Mode Routes - Outside Layout to remove language selection */}
                   <Route path="/daily/classic" element={<DailyClassicMode />} />
@@ -79,6 +78,8 @@ const App = () => {
                 <Route path="/gadget" element={<GadgetMode />} />
                 <Route path="/audio" element={<AudioMode />} />
                 <Route path="/endless" element={<EndlessMode />} />
+                <Route path="/survival" element={<SurvivalModePage />} />
+                <Route path="/survival/setup" element={<SurvivalSetupPage />} />
                 
                 <Route path="/score" element={<ScorePage />} />
                 <Route path="/settings" element={<SettingsPage />} />

@@ -365,7 +365,14 @@ const ClassicMode = ({
   const gridTemplateClass = "grid-cols-6"; // Use 6 columns for all attributes
   
   // Attribute labels for the header
-  const attributeLabels = ["Brawler", "Rarity", "Class", "Range", "Wallbreak", "Release Year"];
+  const attributeLabels = [
+    t('attribute.brawler'),
+    t('attribute.rarity'), 
+    t('attribute.class'),
+    t('attribute.range'),
+    t('attribute.wallbreak'),
+    t('attribute.release.year')
+  ];
   
   if (isLoading) {
     return (
@@ -415,23 +422,26 @@ const ClassicMode = ({
               disabledBrawlers={guessedBrawlerNames}
             />
             
-            <Button 
-              type="submit" 
-              disabled={!selectedBrawler || isGameOver}
-              className={cn(
-                "w-full bg-gradient-to-r from-amber-600 to-pink-600 hover:from-amber-500 hover:to-pink-500 border-none",
-                (!selectedBrawler || isGameOver) && "opacity-50 cursor-not-allowed"
-              )}
-            >
-              Guess
-            </Button>
+            {/* Guess Button - only show when not in survival mode */}
+            {!isSurvivalMode && (
+              <Button 
+                type="submit" 
+                disabled={!selectedBrawler || isGameOver}
+                className={cn(
+                  "w-full bg-gradient-to-r from-amber-600 to-pink-600 hover:from-amber-500 hover:to-pink-500 border-none",
+                  (!selectedBrawler || isGameOver) && "opacity-50 cursor-not-allowed"
+                )}
+              >
+                Guess
+              </Button>
+            )}
           </form>
           
           {/* Guess Counter - only show in survival mode */}
           {isSurvivalMode && (
             <div className="w-full flex justify-center gap-4 mt-4">
               <div className="flex items-center gap-2 bg-black/70 border-2 border-brawl-yellow px-6 py-2 rounded-full shadow-xl animate-pulse">
-                <span className="text-brawl-yellow text-lg font-bold tracking-wide">Guesses Left</span>
+                <span className="text-brawl-yellow text-lg font-bold tracking-wide">{t('guesses.left')}</span>
                 <span className={`text-2xl font-extrabold ${guessesLeft <= 2 ? 'text-brawl-red animate-bounce' : 'text-white'}`}>{guessesLeft}</span>
               </div>
             </div>

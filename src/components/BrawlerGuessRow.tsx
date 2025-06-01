@@ -10,6 +10,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { brawlers } from '@/data/brawlers';
+import { t } from '@/lib/i18n';
 
 interface BrawlerGuessRowProps {
   guess: Brawler;
@@ -19,6 +20,35 @@ interface BrawlerGuessRowProps {
   gridTemplateClass?: string;
   isNew?: boolean; // Add a new prop to identify new guesses
 }
+
+// Helper function to translate attribute values
+const translateAttributeValue = (attribute: string, value: string): string => {
+  const attributeMap: { [key: string]: { [value: string]: string } } = {
+    rarity: {
+      "Starter": "rarity.starter",
+      "Starting Brawler": "rarity.starter",
+      "Rare": "rarity.rare",
+      "Super Rare": "rarity.super.rare",
+      "Epic": "rarity.epic",
+      "Mythic": "rarity.mythic",
+      "Legendary": "rarity.legendary",
+      "Ultra Legendary": "rarity.ultra.legendary"
+    },
+    range: {
+      "Short": "range.short",
+      "Normal": "range.normal",
+      "Long": "range.long",
+      "Very Long": "range.very.long"
+    },
+    wallbreak: {
+      "No": "wallbreak.no",
+      "Yes": "wallbreak.yes"
+    }
+  };
+
+  const translationKey = attributeMap[attribute]?.[value];
+  return translationKey ? t(translationKey) : value;
+};
 
 const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({ 
   guess, 
@@ -138,23 +168,43 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({
       "Very Short": "V.Short",
       "Very Fast": "V.Fast",
       "Very Slow": "V.Slow",
+      "Ultra legendary": "Ultra",
+      "Super Rare": "S.Rare",
+      "Damage Dealer": "Damage",
+      "Heavyweight": "Heavy",
+      // Hebrew abbreviations
+      "נדיר במיוחד": "נ.במיוחד",
+      "אולטרה אגדי": "אולטרה",
+      "ממש רחוק": "מ.רחוק",
+      "טווח ירי": "טווח",
+      "שובר קירות": "שובר",
     };
     
     // Get abbreviation if it exists, otherwise use original text
     const displayText = abbrevMap[text] || text;
     
-    // Determine text size class based on length
+    // Determine text size class based on length with better mobile scaling
     let textClass = 'text-2xl';
-    if (displayText.length > 6) {
+    if (displayText.length > 8) {
+      textClass = isMobile ? 'text-xs' : 'text-lg';
+    } else if (displayText.length > 6) {
       textClass = isMobile ? 'text-sm' : 'text-xl';
     } else if (displayText.length > 4) {
       textClass = isMobile ? 'text-base' : 'text-2xl';
     } else {
-      textClass = isMobile ? 'text-xl' : 'text-3xl';
+      textClass = isMobile ? 'text-lg' : 'text-3xl';
     }
     
     return { text: displayText, className: textClass };
   };
+
+  // Get translated values for display
+  const translatedGuessRarity = translateAttributeValue('rarity', guess.rarity);
+  const translatedCorrectRarity = translateAttributeValue('rarity', correctAnswer.rarity);
+  const translatedGuessRange = translateAttributeValue('range', guess.range);
+  const translatedCorrectRange = translateAttributeValue('range', correctAnswer.range);
+  const translatedGuessWallbreak = translateAttributeValue('wallbreak', guess.wallbreak);
+  const translatedCorrectWallbreak = translateAttributeValue('wallbreak', correctAnswer.wallbreak);
 
   // Get comparison results for each attribute
   const rarityClass = compareAttribute(guess.rarity, correctAnswer.rarity);
@@ -229,7 +279,7 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({
       <div className={cn(
         "grid",
         gridTemplateClass,
-        isMobile ? "gap-1" : "gap-5", // Match exactly with the labels (gap-5 on desktop)
+        isMobile ? "gap-2" : "gap-5", // Increased mobile gap from 1 to 2 for better spacing
         "w-full" // Remove px-1 to match the label width exactly
       )}>
           {/* Brawler Portrait */}
@@ -242,6 +292,7 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({
                 "bg-gray-800/50 backdrop-blur-sm",
                 cardBorderStyle,
                 "relative",
+                isMobile ? "min-h-[60px]" : "min-h-[80px]", // Ensure minimum size on mobile
                 isNew && isRevealed && "animate-card-reveal"
               )}
             >
@@ -268,6 +319,7 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({
                 rarityClass,
                 cardBorderStyle, // Add border
                 "font-bold",
+                isMobile ? "min-h-[60px] px-1" : "min-h-[80px]", // Ensure minimum size and padding
                 isNew && isRevealed && "animate-card-reveal" // Only animate if this is a new guess and revealed
               )}
             >
@@ -277,15 +329,13 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({
               )}
               <span
                 className={cn(
-                  // Responsive text size for longer rarity names
-                  isMobile
-                    ? (guess.rarity.length > 8 ? 'text-base' : guess.rarity.length > 5 ? 'text-lg' : 'text-2xl')
-                    : (guess.rarity.length > 8 ? 'text-xl' : guess.rarity.length > 5 ? 'text-2xl' : 'text-4xl'),
-                  'font-bold',
+                  // Responsive text size for longer rarity names with better scaling
+                  getTextDisplay(translatedGuessRarity).className,
+                  'font-bold text-center leading-tight',
                 )}
                 style={{ position: 'relative', zIndex: 1 }}
               >
-                {guess.rarity}
+                {getTextDisplay(translatedGuessRarity).text}
               </span>
             </div>
           </div>
@@ -300,6 +350,7 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({
                 classClass,
                 cardBorderStyle, // Add border
                 "relative overflow-visible",
+                isMobile ? "min-h-[60px]" : "min-h-[80px]", // Ensure minimum size
                 isNew && isRevealed && "animate-card-reveal"
               )}
             >
@@ -313,7 +364,7 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({
                           src={getClassIcon(guess.class)}
                           alt={guess.class}
                           className={cn(
-                            isMobile ? 'w-[85%] h-[85%]' : 'w-[65%] h-[65%]',
+                            isMobile ? 'w-[90%] h-[90%]' : 'w-[65%] h-[65%]', // Increased mobile icon size
                             'object-contain',
                             'cursor-pointer'
                           )}
@@ -375,6 +426,7 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({
                 rangeClass,
                 cardBorderStyle, // Add border
                 "font-bold",
+                isMobile ? "min-h-[60px] px-1" : "min-h-[80px]", // Ensure minimum size and padding
                 isNew && isRevealed && "animate-card-reveal" // Only animate if this is a new guess and revealed
               )}
             >
@@ -384,12 +436,12 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({
               )}
               <span
                 className={cn(
-                  isMobile ? getTextDisplay(guess.range).className : 'text-3xl',
-                  'font-bold'
+                  getTextDisplay(translatedGuessRange).className,
+                  'font-bold text-center leading-tight'
                 )}
                 style={{ position: 'relative', zIndex: 1 }}
               >
-                {getTextDisplay(guess.range).text}
+                {getTextDisplay(translatedGuessRange).text}
               </span>
             </div>
           </div>
@@ -404,16 +456,17 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({
                 wallbreakClass,
                 cardBorderStyle, // Add border
                 "font-bold",
+                isMobile ? "min-h-[60px] px-1" : "min-h-[80px]", // Ensure minimum size and padding
                 isNew && isRevealed && "animate-card-reveal" // Only animate if this is a new guess and revealed
               )}
             >
               <span
                 className={cn(
-                  isMobile ? getTextDisplay(guess.wallbreak).className : 'text-3xl',
-                  'font-bold'
+                  getTextDisplay(translatedGuessWallbreak).className,
+                  'font-bold text-center leading-tight'
                 )}
               >
-                {getTextDisplay(guess.wallbreak).text}
+                {getTextDisplay(translatedGuessWallbreak).text}
               </span>
             </div>
           </div>
@@ -429,6 +482,7 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({
                 releaseYearClass,
                 cardBorderStyle, // Add border
                 "font-bold",
+                isMobile ? "min-h-[60px]" : "min-h-[80px]", // Ensure minimum size
                 isNew && isRevealed && "animate-card-reveal" // Only animate if this is a new guess and revealed
               )}
             >
@@ -438,8 +492,8 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({
               )}
               <span
                 className={cn(
-                  isMobile ? 'text-xl' : 'text-4xl',
-                  'font-bold'
+                  isMobile ? 'text-lg' : 'text-4xl',
+                  'font-bold text-center leading-tight'
                 )}
                 style={{ position: 'relative', zIndex: 1 }}
               >

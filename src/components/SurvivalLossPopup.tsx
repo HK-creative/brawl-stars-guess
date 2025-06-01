@@ -4,6 +4,7 @@ import Image from '@/components/ui/image';
 import { getPortrait } from '@/lib/image-helpers';
 import { Trophy, RotateCcw } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { t } from '@/lib/i18n';
 
 interface SurvivalLossPopupProps {
   correctBrawlerName: string;
@@ -25,12 +26,12 @@ const SurvivalLossPopup: React.FC<SurvivalLossPopupProps> = ({
       <div className="bg-gradient-to-b from-slate-800/90 to-slate-900/90 rounded-2xl border border-white/10 p-6 max-w-md w-full shadow-2xl flex flex-col items-center animate-slide-up">
         {/* Game Over header */}
         <h1 className="text-4xl md:text-5xl font-extrabold text-center text-red-500 drop-shadow-glow mb-4 tracking-wide">
-          GAME OVER
+          {t('game.over')}
         </h1>
         
         {/* Correct Brawler */}
         <div className="relative mb-6">
-          <p className="text-center text-white/80 mb-2">The correct brawler was:</p>
+          <p className="text-center text-white/80 mb-2">{t('game.over.correct.brawler')}</p>
           <div className="w-24 h-24 rounded-lg overflow-hidden border-2 border-red-500 mx-auto">
             <Image
               src={getPortrait(correctBrawlerName)}
@@ -48,11 +49,11 @@ const SurvivalLossPopup: React.FC<SurvivalLossPopupProps> = ({
         {/* Score information */}
         <div className="bg-black/30 rounded-lg p-4 w-full mb-6">
           <div className="flex justify-between items-center mb-2">
-            <div className="text-white/80">Final Score:</div>
+            <div className="text-white/80">{t('game.over.final.score')}</div>
             <div className="text-xl font-bold text-yellow-400">{totalScore}</div>
           </div>
           <div className="flex justify-between items-center">
-            <div className="text-white/80">Rounds Completed:</div>
+            <div className="text-white/80">{t('game.over.rounds.completed')}</div>
             <div className="text-xl font-bold text-white">{totalRounds}</div>
           </div>
         </div>
@@ -67,7 +68,7 @@ const SurvivalLossPopup: React.FC<SurvivalLossPopupProps> = ({
             )}
           >
             <RotateCcw className="mr-2 h-5 w-5" />
-            Try Again
+            {t('game.over.try.again')}
           </Button>
           <Button 
             onClick={onHome}
@@ -81,7 +82,7 @@ const SurvivalLossPopup: React.FC<SurvivalLossPopupProps> = ({
               alt="Home"
               className="mr-2 h-8 w-8"
             />
-            Home
+            {t('game.over.home')}
           </Button>
         </div>
       </div>

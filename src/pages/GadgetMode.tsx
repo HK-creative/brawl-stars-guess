@@ -452,7 +452,7 @@ const GadgetMode = ({
       <div className="flex flex-col min-h-[70vh] w-full max-w-2xl mx-auto">
         <div className="flex-1 mb-8">
           <h1 className="text-2xl md:text-3xl font-bold text-center text-white mb-3">
-            Guess the Brawler with this Gadget
+            {t('survival.guess.gadget')}
           </h1>
           
           <div className="flex flex-col items-center mb-6">
@@ -515,7 +515,7 @@ const GadgetMode = ({
           <div className="w-full flex justify-center gap-4 mt-4">
             {isSurvivalMode ? (
               <div className="flex items-center gap-2 bg-black/70 border-2 border-brawl-yellow px-6 py-2 rounded-full shadow-xl animate-pulse">
-                <span className="text-brawl-yellow text-lg font-bold tracking-wide">Guesses Left</span>
+                <span className="text-brawl-yellow text-lg font-bold tracking-wide">{t('guesses.left')}</span>
                 <span className={`text-2xl font-extrabold ${guessesLeft <= 2 ? 'text-brawl-red animate-bounce' : 'text-white'}`}>{guessesLeft}</span>
               </div>
             ) : (

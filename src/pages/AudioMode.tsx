@@ -785,7 +785,7 @@ const AudioMode = ({
         <div className="flex-1 mb-8">
           {/* Title */}
           <h1 className="text-2xl md:text-3xl font-bold text-center text-white mb-3">
-            Guess the Brawler by Sound
+            {t('survival.guess.sound')}
           </h1>
           
           {/* Audio Player */}
@@ -832,7 +832,7 @@ const AudioMode = ({
                   ? "Error playing audio. Please try again later." 
                   : isPlaying 
                     ? "Now playing..." 
-                    : "Click to play attack sound"
+                    : t('survival.click.play.sound')
                 }
               </p>
               
@@ -861,7 +861,7 @@ const AudioMode = ({
           <div className="w-full flex justify-center gap-4 mt-4">
             {isSurvivalMode ? (
               <div className="flex items-center gap-2 bg-black/70 border-2 border-brawl-yellow px-6 py-2 rounded-full shadow-xl animate-pulse">
-                <span className="text-brawl-yellow text-lg font-bold tracking-wide">Guesses Left</span>
+                <span className="text-brawl-yellow text-lg font-bold tracking-wide">{t('guesses.left')}</span>
                 <span className={`text-2xl font-extrabold ${guessesLeft <= 2 ? 'text-brawl-red animate-bounce' : 'text-white'}`}>{guessesLeft}</span>
               </div>
             ) : (

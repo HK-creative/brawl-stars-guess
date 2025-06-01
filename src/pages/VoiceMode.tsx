@@ -48,11 +48,11 @@ const VoiceMode = () => {
         if (data) {
           setDailyChallenge(data);
         } else {
-          toast.error("Couldn't load today's challenge. Please try again later.");
+          toast.error(t('error.load.challenge'));
         }
       } catch (error) {
         console.error("Error loading voice challenge:", error);
-        toast.error("Couldn't load today's challenge. Please try again later.");
+        toast.error(t('error.load.challenge'));
       } finally {
         setIsLoading(false);
       }
@@ -89,7 +89,7 @@ const VoiceMode = () => {
     if (e) e.preventDefault();
     if (!guess.trim() || !dailyChallenge) return;
     if (guesses.includes(guess.toLowerCase())) {
-      toast.error('You already guessed this brawler!');
+      toast.error(t('error.already.guessed'));
       return;
     }
     const newGuessCount = guessCount + 1;
@@ -100,7 +100,7 @@ const VoiceMode = () => {
     if (isGuessCorrect) {
       setCorrectBrawlerNameForVictory(dailyChallenge.brawler);
       setIsGameOver(true);
-      toast.success('Correct! You found the right brawler!');
+      toast.success(t('success.correct.guess'));
     } else if (newGuessCount >= maxAttempts) {
       setCorrectBrawlerNameForVictory(dailyChallenge.brawler);
       setIsGameOver(true);
@@ -119,7 +119,7 @@ const VoiceMode = () => {
     setGuessCount(0);
     setShowConfetti(false);
     setSelectedBrawler(null);
-    toast.info("Game Reset (manual reload for new daily challenge for now)");
+    toast.info(t('game.reset.manual'));
   };
 
   const handlePlayVoice = () => {
@@ -130,7 +130,7 @@ const VoiceMode = () => {
     }, 2000);
     
     toast.info(`"${dailyChallenge?.voiceLine}"`, {
-      description: "Voice playback coming soon!"
+      description: t('voice.coming.soon')
     });
   };
 
@@ -164,8 +164,8 @@ const VoiceMode = () => {
     return (
       <Card className="brawl-card p-6">
         <div className="text-center">
-          <h3 className="text-xl font-bold text-brawl-yellow mb-2">No Challenge Available</h3>
-          <p className="text-white/80">Check back later for today's challenge.</p>
+          <h3 className="text-xl font-bold text-brawl-yellow mb-2">{t('error.no.challenge')}</h3>
+          <p className="text-white/80">{t('error.check.later')}</p>
         </div>
       </Card>
     );
@@ -190,7 +190,7 @@ const VoiceMode = () => {
       </div>
       <div className="mb-4 md:mb-6">
         <h1 className="text-3xl md:text-4xl font-bold text-brawl-yellow mb-1 text-center pt-10">
-          {t('mode.voice') || 'Voice Mode'}
+          {t('mode.voice.title')}
         </h1>
       </div>
       
@@ -212,7 +212,7 @@ const VoiceMode = () => {
         
         <div className="mt-4 px-4 py-2 bg-white/10 rounded-lg">
           <p className="text-white/70 italic">
-            {isGameOver ? `"${dailyChallenge.voiceLine}"` : `"Guess the brawler by their voice!"`}
+            {isGameOver ? `"${dailyChallenge.voiceLine}"` : `"${t('voice.guess.prompt')}"`}
           </p>
         </div>
         
@@ -238,13 +238,13 @@ const VoiceMode = () => {
             </Button>
           )}
           
-          <p className="text-center text-white mt-2">Attempts: {guessCount}/{maxAttempts}</p>
+          <p className="text-center text-white mt-2">{t('game.attempts')}: {guessCount}/{maxAttempts}</p>
         </>
       )}
       
       {!isGameOver && guesses.length > 0 && (
         <div className="mt-4 w-full max-w-md mx-auto px-2">
-          <h3 className="text-white font-medium mb-2">Previous Guesses:</h3>
+          <h3 className="text-white font-medium mb-2">{t('game.previous.guesses')}</h3>
           <div className="space-y-2">
             {guesses.map((pastGuess, index) => (
               <div 
@@ -265,7 +265,7 @@ const VoiceMode = () => {
         </div>
       )}
       
-      {isGameOver && dailyChallenge && (
+      {isGameOver && (
         <div ref={victoryRef} className="mt-6 w-full max-w-xl mx-auto px-2">
           <VictorySection
             brawlerName={correctBrawlerNameForVictory}
@@ -274,25 +274,25 @@ const VoiceMode = () => {
             mode="voice"
             nextModeKey="classic"
             onNextMode={() => { navigate('/classic'); resetGame(); }}
-            nextBrawlerIn={timeUntilNext}
             onShare={handleShareResult}
           />
           <Button onClick={resetGame} className="mt-4 w-full bg-brawl-blue hover:bg-brawl-blue/90">
-            Play Again (New Daily Challenge on Reload)
+            {t('button.reset.game')}
           </Button>
         </div>
       )}
       
+      {isShareModalOpen && (
       <ShareResultModal 
         isOpen={isShareModalOpen}
         onClose={() => setIsShareModalOpen(false)}
         mode="voice"
-        success={isGameOver && correctBrawlerNameForVictory === dailyChallenge.brawler}
+          success={guesses.includes(dailyChallenge.brawler.toLowerCase())}
         attempts={guessCount}
         maxAttempts={maxAttempts}
-        guessHistory={generateGuessResults()}
-        brawlerName={dailyChallenge?.brawler || ""}
+          brawlerName={dailyChallenge.brawler}
       />
+      )}
     </div>
   );
 };

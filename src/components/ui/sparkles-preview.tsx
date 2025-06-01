@@ -1,13 +1,68 @@
 "use client";
 import React from "react";
 // SparklesCore import removed as it's no longer used
+import { t } from "@/lib/i18n";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { cn } from "@/lib/utils";
+import Image from "@/components/ui/image";
 
 export function SparklesPreview() {
+  const { language, changeLanguage } = useLanguage();
+
   return (
-    <div className="w-full flex flex-col items-center justify-center overflow-hidden pt-6 pb-6 md:pt-0 md:pb-4">
-      {/* Main title with gold gradient */}
-      <h1 className="md:text-7xl text-5xl lg:text-8xl font-bold text-center relative z-20 bg-gradient-to-b from-[#FFD700] via-[#FFA500] to-[#FF8C00] text-transparent bg-clip-text animate-fade-in">
-        Brawldle
+    <div className="w-full flex flex-col items-center justify-center overflow-hidden pt-0 pb-2 md:pt-0 md:pb-4">
+      {/* PC Layout: Language selection on left, title in center */}
+      <div className="hidden md:flex md:items-center md:justify-center md:w-full md:relative md:mb-4">
+        {/* Language selection - positioned absolutely to the left */}
+        <div className="absolute left-0 flex gap-2">
+          <button
+            onClick={() => changeLanguage('en')}
+            className={cn(
+              'rounded-full p-1 transition-all duration-200 border',
+              language === 'en' 
+                ? 'ring-2 ring-yellow-400 bg-black/60 border-yellow-400' 
+                : 'opacity-70 hover:opacity-100 border-white/30'
+            )}
+            aria-label={t('aria.switch.english')}
+          >
+            <Image
+              src="/USAIcon.png"
+              alt={t('english')}
+              width={28}
+              height={28}
+              className="w-7 h-7 object-contain"
+            />
+          </button>
+          
+          <button
+            onClick={() => changeLanguage('he')}
+            className={cn(
+              'rounded-full p-1 transition-all duration-200 border',
+              language === 'he' 
+                ? 'ring-2 ring-yellow-400 bg-black/60 border-yellow-400' 
+                : 'opacity-70 hover:opacity-100 border-white/30'
+            )}
+            aria-label={t('aria.switch.hebrew')}
+          >
+            <Image
+              src="/IsraelIcon.png"
+              alt={t('hebrew')}
+              width={28}
+              height={28}
+              className="w-7 h-7 object-contain"
+            />
+          </button>
+        </div>
+
+        {/* Main title - centered */}
+        <h1 className="md:text-7xl text-5xl lg:text-8xl font-bold text-center relative z-20 bg-gradient-to-b from-[#FFD700] via-[#FFA500] to-[#FF8C00] text-transparent bg-clip-text animate-fade-in">
+          {t('app.title')}
+        </h1>
+      </div>
+
+      {/* Mobile Layout: Title only (language selection stays in Layout.tsx) */}
+      <h1 className="md:hidden text-5xl font-bold text-center relative z-20 bg-gradient-to-b from-[#FFD700] via-[#FFA500] to-[#FF8C00] text-transparent bg-clip-text animate-fade-in">
+        {t('app.title')}
       </h1>
 
       {/* Decorative line - Responsive spacing */}
@@ -15,7 +70,7 @@ export function SparklesPreview() {
 
       {/* Subtitle - Positioned after the decorative line */}
       <h2 className="text-xl md:text-2xl lg:text-3xl text-white/90 font-medium text-center relative z-20 animate-fade-in-delay">
-        The Ultimate Daily Brawl Stars Challenge
+        {t('home.ultimate.challenge')}
       </h2>
 
       {/* Sparkles and Gradients Container - ENTIRELY REMOVED */}

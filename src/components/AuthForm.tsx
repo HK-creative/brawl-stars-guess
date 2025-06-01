@@ -141,7 +141,7 @@ export const AuthForm: React.FC<AuthFormProps> = ({ mode, onModeChange, onSucces
               placeholder="your@email.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="pl-10 pr-3 py-2.5 text-base border-gray-300 dark:border-gray-600 focus:ring-primary focus:border-primary dark:bg-gray-700 dark:text-white rounded-md transition duration-150 ease-in-out"
+              className="pl-10 pr-3 py-2.5 text-base border-gray-300 dark:border-gray-600 focus:ring-primary focus:border-primary bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white rounded-md transition duration-150 ease-in-out"
               required
             />
           </div>
@@ -159,7 +159,7 @@ export const AuthForm: React.FC<AuthFormProps> = ({ mode, onModeChange, onSucces
                 placeholder="Enter your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="pl-10 pr-3 py-2.5 text-base border-gray-300 dark:border-gray-600 focus:ring-primary focus:border-primary dark:bg-gray-700 dark:text-white rounded-md transition duration-150 ease-in-out"
+                className="pl-10 pr-3 py-2.5 text-base border-gray-300 dark:border-gray-600 focus:ring-primary focus:border-primary bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white rounded-md transition duration-150 ease-in-out"
                 required
                 minLength={6}
               />

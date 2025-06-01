@@ -6,6 +6,7 @@ import Image from '@/components/ui/image';
 import { cn } from '@/lib/utils';
 import { Search, X } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
+import { t } from '@/lib/i18n';
 
 interface BrawlerAutocompleteProps {
   brawlers: Brawler[];
@@ -228,7 +229,7 @@ const BrawlerAutocomplete: React.FC<BrawlerAutocompleteProps> = ({
           ref={inputRef}
           type="text"
           value={value}
-          placeholder="Search brawlers..."
+          placeholder={t('search.brawlers')}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
           onFocus={() => setIsOpen(true)}

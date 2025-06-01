@@ -12,6 +12,7 @@ import HomeButton from '@/components/ui/home-button';
 import DailyModeProgress from '@/components/DailyModeProgress';
 import ReactConfetti from 'react-confetti';
 import { fetchDailyChallenge } from '@/lib/daily-challenges';
+import { t } from '@/lib/i18n';
 
 // Helper to get gadget image path (same as survival mode)
 const getGadgetImage = (brawler: string, gadgetName?: string): string => {
@@ -282,7 +283,7 @@ const DailyGadgetMode: React.FC = () => {
           <div className="flex flex-row items-center gap-4 mt-2">
             <span className="flex items-center gap-2 px-3 py-1 rounded-full bg-gradient-to-r from-blue-500/60 to-purple-400/50 shadow-md border border-blue-300/30 text-lg font-bold text-white">
               <Hash className="h-6 w-6 text-white/80" />
-              {gadget.guessCount} guesses
+              {gadget.guessCount} {t('guesses.count')}
             </span>
           </div>
           
@@ -290,7 +291,7 @@ const DailyGadgetMode: React.FC = () => {
           <div className="mt-4 flex items-center gap-2 px-2 py-1 text-white/70">
             <Clock className="h-4 w-4 text-white/60" />
             <span className="text-sm font-medium">
-              Next Brawler In: {timeUntilNext.hours}h {timeUntilNext.minutes}m
+              {t('next.brawler.in')}: {timeUntilNext.hours}h {timeUntilNext.minutes}m
             </span>
           </div>
         </div>
@@ -304,10 +305,10 @@ const DailyGadgetMode: React.FC = () => {
               <div className="text-center space-y-6">
                 <div className="text-6xl mb-4">🎉</div>
                 <h2 className="text-3xl font-bold text-yellow-400 mb-4">
-                  Congratulations!
+                  {t('daily.congratulations')}
                 </h2>
                 <p className="text-xl text-white/80 mb-4">
-                  You found <span className="text-yellow-400 font-bold">{gadget.brawlerName}</span> in {gadget.guessCount} guesses!
+                  {t('daily.you.found')} <span className="text-yellow-400 font-bold">{gadget.brawlerName}</span> {t('daily.in.guesses')} {gadget.guessCount} {t('daily.guesses.count')}
                 </p>
                 <p className="text-lg text-white/60 mb-6">
                   Ready for the next challenge?
@@ -322,14 +323,14 @@ const DailyGadgetMode: React.FC = () => {
                       alt="Star Power Mode" 
                       className="h-6 w-6 mr-2"
                     />
-                    Next Mode
+                    {t('daily.next.mode')}
                   </Button>
                   <Button
                     onClick={() => navigate('/')}
                     variant="ghost"
                     className="text-white/40 hover:text-white/60 hover:bg-white/5 py-2 px-6 text-sm border border-white/10 hover:border-white/20 transition-all duration-200"
                   >
-                    Go Home
+                    {t('daily.go.home')}
                   </Button>
                 </div>
               </div>
@@ -338,7 +339,7 @@ const DailyGadgetMode: React.FC = () => {
               <div className="space-y-6">
                 <div className="text-center">
                   <h2 className="text-2xl font-bold text-white mb-2">
-                    Guess the Brawler by their Gadget!
+                    {t('daily.gadget.headline')}
                   </h2>
                   <p className="text-white/70 mb-4">
                     Use the clues from your guesses to find the correct brawler

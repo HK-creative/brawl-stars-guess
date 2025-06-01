@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import Image from '@/components/ui/image';
 import { getPortrait } from '@/lib/image-helpers';
 import { Timer, Award, TrendingUp } from 'lucide-react';
+import { t } from '@/lib/i18n';
 
 interface SurvivalVictoryPopupProps {
   brawlerName: string;
@@ -36,7 +37,7 @@ const SurvivalVictoryPopup: React.FC<SurvivalVictoryPopupProps> = ({
       <div className="bg-gradient-to-b from-slate-800/90 to-slate-900/90 rounded-2xl border border-white/10 p-6 max-w-md w-full shadow-2xl flex flex-col items-center animate-slide-up">
         {/* Victory header */}
         <h1 className="text-4xl md:text-5xl font-extrabold text-center text-brawl-yellow drop-shadow-glow mb-4 tracking-wide">
-          CORRECT!
+          {t('correct.screen.title')}
         </h1>
         
         {/* Brawler portrait */}
@@ -58,7 +59,7 @@ const SurvivalVictoryPopup: React.FC<SurvivalVictoryPopupProps> = ({
         {/* Score information */}
         <div className="w-full bg-black/30 rounded-lg p-4 mb-6">
           <div className="flex justify-between items-center mb-3">
-            <span className="text-white/80">Points earned:</span>
+            <span className="text-white/80">{t('correct.screen.points.earned')}:</span>
             <div className="flex items-center">
               <span className="text-lg font-bold text-green-400 mr-2">+{pointsEarned}</span>
               <TrendingUp className="h-4 w-4 text-green-400" />
@@ -68,18 +69,18 @@ const SurvivalVictoryPopup: React.FC<SurvivalVictoryPopupProps> = ({
           {/* Bonus breakdown */}
           <div className="text-sm text-white/70 space-y-1 mb-3">
             <div className="flex justify-between">
-              <span>Base points:</span>
+              <span>{t('correct.screen.base.points')}:</span>
               <span>100</span>
             </div>
             {actualGuessBonus > 0 && (
               <div className="flex justify-between">
-                <span>Guess bonus ({guessesUsed} guesses used):</span>
+                <span>{t('correct.screen.guess.bonus')} ({guessesUsed} {t('correct.screen.guesses.used')}):</span>
                 <span className="text-green-400">+{actualGuessBonus}</span>
               </div>
             )}
             {timeBonus > 0 && (
               <div className="flex justify-between">
-                <span>Time bonus ({elapsedTime}s elapsed):</span>
+                <span>{t('correct.screen.time.bonus')} ({elapsedTime}{t('correct.screen.seconds.elapsed')}):</span>
                 <span className="text-green-400">+{timeBonus}</span>
               </div>
             )}
@@ -89,7 +90,7 @@ const SurvivalVictoryPopup: React.FC<SurvivalVictoryPopupProps> = ({
           <div className="flex justify-between items-center bg-black/30 p-2 rounded-md mt-4">
             <div className="flex items-center">
               <Award className="h-5 w-5 text-yellow-500 mr-2" />
-              <span className="text-white font-medium">Total Score:</span>
+              <span className="text-white font-medium">{t('correct.screen.total.score')}</span>
             </div>
             <span className="text-2xl font-bold text-yellow-400">{totalScore}</span>
           </div>
@@ -100,12 +101,12 @@ const SurvivalVictoryPopup: React.FC<SurvivalVictoryPopupProps> = ({
           onClick={onNextRound}
           className="w-full py-6 text-lg bg-gradient-to-r from-amber-600 to-pink-600 hover:from-amber-500 hover:to-pink-500 text-white font-bold rounded-xl shadow-lg transition-all duration-200 transform hover:scale-105"
         >
-          Next Round
+          {t('correct.screen.next.round')}
         </Button>
         
         <div className="mt-4 flex items-center justify-center text-sm text-white/50">
           <Timer className="h-4 w-4 mr-1" />
-          <span>Get ready for the next challenge!</span>
+          <span>{t('correct.screen.get.ready')}</span>
         </div>
       </div>
     </div>

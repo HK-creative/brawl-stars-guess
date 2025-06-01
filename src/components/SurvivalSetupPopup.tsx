@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { resetModeSelectionState } from '@/lib/survival-logic';
 import { Timer } from 'lucide-react';
+import { t } from '@/lib/i18n';
 
 // Game mode images mapping
 const gameModeImages = {
@@ -13,29 +14,29 @@ const gameModeImages = {
   audio: '/AudioIcon.png'
 } as const;
 
-// Define GameMode details for UI with images
-const gameModeDetails: { id: GameMode; label: string; image: string; color: string }[] = [
+// Function to get GameMode details with translations
+const getGameModeDetails = (): { id: GameMode; label: string; image: string; color: string }[] => [
   { 
     id: 'classic', 
-    label: 'Classic',
+    label: t('survival.classic.label'),
     image: gameModeImages.classic,
     color: 'from-blue-500 to-blue-600'
   },
   { 
     id: 'gadget', 
-    label: 'Gadget',
+    label: t('survival.gadget.label'),
     image: gameModeImages.gadget,
     color: 'from-green-500 to-green-600'
   },
   { 
     id: 'starpower', 
-    label: 'Star Power',
+    label: t('survival.starpower.label'),
     image: gameModeImages.starpower,
     color: 'from-yellow-500 to-yellow-600'
   },
   { 
     id: 'audio', 
-    label: 'Audio',
+    label: t('survival.audio.label'),
     image: gameModeImages.audio,
     color: 'from-purple-500 to-purple-600'
   },
@@ -73,6 +74,9 @@ interface SurvivalSetupPopupProps {
 const SurvivalSetupPopup: React.FC<SurvivalSetupPopupProps> = ({ onStart, onCancel }) => {
   const initializeGame = useSurvivalStore((state) => state.initializeGame);
   const storeSettings = useSurvivalStore((state) => state.settings);
+  
+  // Get translated game mode details
+  const gameModeDetails = getGameModeDetails();
   
   // Initialize settings with fixed values for timer and rotation
   const [localSettings, setLocalSettings] = useState<SurvivalSettings>(() => {
@@ -137,7 +141,7 @@ const SurvivalSetupPopup: React.FC<SurvivalSetupPopupProps> = ({ onStart, onCanc
   // Handle starting the game
   const handleStartGame = () => {
     if (!isValidationPassed) {
-      toast('Please select at least one game mode');
+      toast(t('survival.select.required'));
       return;
     }
     
@@ -166,10 +170,10 @@ const SurvivalSetupPopup: React.FC<SurvivalSetupPopupProps> = ({ onStart, onCanc
           <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxkZWZzPjxwYXR0ZXJuIGlkPSJwYXR0ZXJuIiB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHBhdHRlcm5Vbml0cz0idXNlclNwYWNlT25Vc2UiIHBhdHRlcm5UcmFuc2Zvcm09InJvdGF0ZSg0NSkiPjxyZWN0IHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjAxKSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0idXJsKCNwYXR0ZXJuKSIvPjwvc3ZnPg==')]">
           </div>
           <h1 className="relative text-3xl font-black text-center bg-gradient-to-r from-amber-300 to-pink-300 text-transparent bg-clip-text font-brawl">
-            SURVIVAL MODE
+            {t('survival.mode.title')}
           </h1>
           <p className="relative text-center text-amber-100/80 text-sm mt-2 font-medium">
-            Select your challenge modes
+            {t('survival.select.challenge.modes')}
           </p>
         </div>
         
@@ -228,13 +232,13 @@ const SurvivalSetupPopup: React.FC<SurvivalSetupPopupProps> = ({ onStart, onCanc
                 <div className="absolute inset-0 bg-amber-400 rounded-full opacity-20 animate-ping"></div>
                 <Timer className="h-4 w-4 text-amber-300" />
               </div>
-              <span className="text-xs font-medium text-amber-200">150s per round</span>
+              <span className="text-xs font-medium text-amber-200">{t('time.per.round.seconds')}</span>
             </div>
             
             {/* Mode Description */}
             <div className="text-center text-amber-200/80 text-sm font-medium">
-              <p>How many brawlers can you guess?</p>
-              <p className="text-amber-300/60 text-xs mt-1">Each correct guess makes it harder!</p>
+              <p>{t('survival.how.many')}</p>
+              <p className="text-amber-300/60 text-xs mt-1">{t('survival.gets.harder')}</p>
             </div>
           </div>
         </div>
@@ -246,7 +250,7 @@ const SurvivalSetupPopup: React.FC<SurvivalSetupPopupProps> = ({ onStart, onCanc
             onClick={onCancel}
             className="text-slate-300 hover:text-white hover:bg-slate-700/50 transition-colors px-6 py-2 rounded-lg font-medium"
           >
-            Cancel
+            {t('button.cancel')}
           </Button>
           <Button 
             onClick={handleStartGame}
@@ -259,10 +263,10 @@ const SurvivalSetupPopup: React.FC<SurvivalSetupPopupProps> = ({ onStart, onCanc
           >
             {isValidationPassed ? (
               <>
-                <span className="relative z-10">Start Game</span>
+                <span className="relative z-10">{t('button.start.game')}</span>
                 <span className="absolute inset-0 bg-gradient-to-r from-amber-600/0 via-amber-400/30 to-amber-600/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
               </>
-            ) : 'Select Mode'}
+            ) : t('survival.select.required')}
           </Button>
         </div>
       </div>
