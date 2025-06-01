@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { t } from '@/lib/i18n';
+import { t, getLanguage } from '@/lib/i18n';
 import { toast } from 'sonner';
 import { fetchDailyChallenge, getTimeUntilNextChallenge } from '@/lib/daily-challenges';
 import BrawlerAutocomplete from '@/components/BrawlerAutocomplete';
-import { brawlers, Brawler } from '@/data/brawlers';
+import { brawlers, Brawler, getBrawlerDisplayName } from '@/data/brawlers';
 import { Check, X, Volume2, Share2 } from 'lucide-react';
 import ShareResultModal from '@/components/ShareResultModal';
 import { getPortrait, DEFAULT_PIN } from '@/lib/image-helpers';
@@ -39,6 +39,8 @@ const VoiceMode = () => {
   const victoryRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const [correctBrawlerNameForVictory, setCorrectBrawlerNameForVictory] = useState<string>("");
+  
+  const currentLanguage = getLanguage();
 
   useEffect(() => {
     const loadChallenge = async () => {
@@ -136,7 +138,8 @@ const VoiceMode = () => {
 
   const handleBrawlerSelect = (brawler: Brawler) => {
     setSelectedBrawler(brawler);
-    setGuess(brawler.name);
+    const displayName = getBrawlerDisplayName(brawler, currentLanguage);
+    setGuess(displayName);
   };
   
   const handleShareResult = () => {
@@ -234,7 +237,7 @@ const VoiceMode = () => {
           
           {selectedBrawler && (
             <Button onClick={() => handleSubmit()} className="mt-3 bg-brawl-green hover:bg-brawl-green/90 text-white w-full max-w-xs mx-auto">
-              Confirm Guess: {selectedBrawler.name}
+              Confirm Guess: {getBrawlerDisplayName(selectedBrawler, currentLanguage)}
             </Button>
           )}
           

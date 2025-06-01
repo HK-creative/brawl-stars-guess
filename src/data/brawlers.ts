@@ -1,4 +1,3 @@
-
 import brawlersData from './brawlers_full.json';
 
 // Define interfaces for gadgets and star powers
@@ -15,6 +14,7 @@ export interface StarPower {
 export interface Brawler {
   id?: number;   // Adding optional id field for use in Survival Mode
   name: string;
+  nameHebrew: string;  // Hebrew translation of the name
   rarity: string;
   class: string;
   movement: string;
@@ -27,6 +27,102 @@ export interface Brawler {
   gadgets?: Gadget[];
   starPowers?: StarPower[];
 }
+
+// Hebrew translations for all brawler names
+const hebrewNames: { [key: string]: string } = {
+  "Shelly": "שלי",
+  "Colt": "קולט",
+  "Bull": "בול",
+  "Brock": "ברוק",
+  "Rico": "ריקו",
+  "Spike": "ספייק",
+  "Barley": "ברלי",
+  "Jessie": "ג'סי",
+  "Nita": "ניטה",
+  "Dynamike": "דינ-מייק",
+  "El Primo": "אל פרימו",
+  "Mortis": "מורטיס",
+  "Crow": "קרואו",
+  "Poco": "פוקו",
+  "Bo": "בו",
+  "Piper": "פייפר",
+  "Pam": "פאם",
+  "Tara": "טארה",
+  "Darryl": "דאריל",
+  "Penny": "פני",
+  "Frank": "פרנק",
+  "Gene": "ג'ין",
+  "Tick": "טיק",
+  "Leon": "ליאון",
+  "Rosa": "רוזה",
+  "Carl": "קרל",
+  "Bibi": "ביבי / באבל",
+  "8-Bit": "8 ביט",
+  "Sandy": "סנדי",
+  "Bea": "בי",
+  "Emz": "אמז",
+  "Mr. P": "מר פי",
+  "Max": "מקס",
+  "Jacky": "ג'קי",
+  "Gale": "גייל",
+  "Nani": "נאני",
+  "Sprout": "ספראוט",
+  "Surge": "סרג'",
+  "Colette": "קולט",
+  "Amber": "אמבר",
+  "Lou": "לו",
+  "Byron": "ביירון",
+  "Edgar": "אדגר",
+  "Ruffs": "ראפס",
+  "Stu": "סטו",
+  "Belle": "בל",
+  "Squeak": "סקוויק",
+  "Grom": "גרום",
+  "Buzz": "באז",
+  "Griff": "גריף",
+  "Ash": "אש",
+  "Meg": "מג",
+  "Lola": "לולה",
+  "Fang": "פאנג",
+  "Eve": "איב",
+  "Janet": "ג'נט",
+  "Bonnie": "בוני",
+  "Otis": "אוטיס",
+  "Sam": "סאם",
+  "Gus": "גאס",
+  "Buster": "באסטר",
+  "Chester": "צ'סטר",
+  "Gray": "גריי",
+  "Mandy": "מנדי",
+  "R-T": "אר טי",
+  "Willow": "וילו",
+  "Maisie": "מייזי",
+  "Hank": "האנק",
+  "Cordelius": "קורדליוס",
+  "Doug": "דאג",
+  "Pearl": "פרל",
+  "Chuck": "צ'אק",
+  "Charlie": "צ'רלי",
+  "Mico": "מיקו",
+  "Kit": "קיט",
+  "Larry & Lawrie": "לארי ולורי",
+  "Melodie": "מלודי",
+  "Angelo": "אנג'לו",
+  "Draco": "דרקו",
+  "Lily": "לילי",
+  "Berry": "ברי",
+  "Clancy": "קלאנסי",
+  "Moe": "מו",
+  "Kenji": "קנג'י",
+  "Shade": "צל",
+  "Juju": "ג'וג'ו",
+  "Meeple": "מיפל",
+  "Ollie": "אולי",
+  "Finx": "פינקס",
+  "Lumi": "לומי",
+  "Jae-Yong": "ג'יי יונג",
+  "Kaze": "קייז"
+};
 
 // List of brawlers that have wallbreak ability
 const wallbreakBrawlers = [
@@ -56,6 +152,7 @@ export const brawlers: Brawler[] = brawlersData.map((brawler) => {
   
   return {
     name: brawler.name,
+    nameHebrew: hebrewNames[brawler.name] || brawler.name, // Fallback to English name if Hebrew not found
     rarity: brawler.rarity,
     class: brawler.class,
     movement: brawler.movement,
@@ -141,4 +238,33 @@ export const correctBrawler = brawlers.find(b => b.name === "Spike") || brawlers
 // Helper function to get brawler details by name
 export function getBrawlerByName(name: string): Brawler | undefined {
   return brawlers.find(brawler => brawler.name.toLowerCase() === name.toLowerCase());
+}
+
+// Helper function to get brawler by either English or Hebrew name
+export function getBrawlerByDisplayName(name: string): Brawler | undefined {
+  return brawlers.find(brawler => 
+    brawler.name.toLowerCase() === name.toLowerCase() ||
+    brawler.nameHebrew.toLowerCase() === name.toLowerCase()
+  );
+}
+
+// Helper function to get the display name based on current language
+export function getBrawlerDisplayName(brawler: Brawler, language: 'en' | 'he'): string {
+  return language === 'he' ? brawler.nameHebrew : brawler.name;
+}
+
+// Helper function to get localized brawler name by English name
+export function getBrawlerLocalizedName(englishName: string, language: 'en' | 'he'): string {
+  const brawler = getBrawlerByName(englishName);
+  if (!brawler) return englishName;
+  return getBrawlerDisplayName(brawler, language);
+}
+
+// Helper function to filter brawlers by search term in current language
+export function filterBrawlersByName(searchTerm: string, language: 'en' | 'he'): Brawler[] {
+  const lowerSearchTerm = searchTerm.toLowerCase();
+  return brawlers.filter(brawler => {
+    const displayName = getBrawlerDisplayName(brawler, language);
+    return displayName.toLowerCase().includes(lowerSearchTerm);
+  });
 }

@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { t } from '@/lib/i18n';
+import { t, getLanguage } from '@/lib/i18n';
 import { Switch } from '@/components/ui/switch';
-import { Check, X, Infinity as InfinityIcon } from 'lucide-react';
+import { Check, X, Infinity as InfinityIcon, Share2 } from 'lucide-react';
 import BrawlerAutocomplete from '@/components/BrawlerAutocomplete';
-import { brawlers, Brawler } from '@/data/brawlers';
+import { brawlers, Brawler, getBrawlerDisplayName } from '@/data/brawlers';
 import { toast } from 'sonner';
 import { fetchDailyChallenge, getTimeUntilNextChallenge, fetchYesterdayChallenge } from '@/lib/daily-challenges';
 import { getPortrait, getPin, DEFAULT_PIN, DEFAULT_PORTRAIT } from '@/lib/image-helpers';
@@ -18,6 +18,7 @@ import ReactConfetti from 'react-confetti';
 import { useIsMobile } from "@/hooks/use-mobile";
 import GameModeTracker from '@/components/GameModeTracker';
 import HomeButton from '@/components/ui/home-button';
+import ShareResultModal from '@/components/ShareResultModal';
 
 // Helper function to get the next mode key for the VictorySection
 const getNextModeKey = (currentMode: string) => {
@@ -157,6 +158,8 @@ const GadgetMode = ({
   const [gameKey, setGameKey] = useState(Date.now().toString());
   const [windowSize, setWindowSize] = useState({ width: window.innerWidth, height: window.innerHeight });
 
+  const currentLanguage = getLanguage();
+
   // Function to update countdown
   const updateCountdown = () => {
     const nextTime = getTimeUntilNextChallenge();
@@ -177,7 +180,8 @@ const GadgetMode = ({
   const handleBrawlerSelect = (brawler: Brawler | null) => {
     setSelectedBrawler(brawler);
     if (brawler) {
-      setGuess(brawler.name);
+      const displayName = getBrawlerDisplayName(brawler, currentLanguage);
+      setGuess(displayName);
     }
   };
 
@@ -187,8 +191,9 @@ const GadgetMode = ({
 
     // Find the exact brawler from our data to ensure we use the full correct name
     const exactBrawler = selectedBrawler || brawlers.find(b => 
+      getBrawlerDisplayName(b, currentLanguage).toLowerCase() === guess.toLowerCase() ||
       b.name.toLowerCase() === guess.toLowerCase() ||
-      b.name.toLowerCase().includes(guess.toLowerCase())
+      b.nameHebrew?.toLowerCase() === guess.toLowerCase()
     );
     
     // Only proceed if we have a valid brawler - this ensures we never use partial names
@@ -199,7 +204,8 @@ const GadgetMode = ({
 
     // Check if this brawler has already been guessed
     if (guesses.some(g => g.toLowerCase() === exactBrawler.name.toLowerCase())) {
-      toast.error(`You've already guessed ${exactBrawler.name}`);
+      const displayName = getBrawlerDisplayName(exactBrawler, currentLanguage);
+      toast.error(`You've already guessed ${displayName}`);
       return;
     }
 
@@ -236,7 +242,9 @@ const GadgetMode = ({
           onRoundEnd({ success: false, brawlerName: dailyChallenge.brawler });
         }
         
-        toast.error(`Game over! The correct brawler was ${dailyChallenge.brawler}.`);
+        const correctBrawlerObj = brawlers.find(b => b.name.toLowerCase() === dailyChallenge.brawler.toLowerCase());
+        const correctDisplayName = correctBrawlerObj ? getBrawlerDisplayName(correctBrawlerObj, currentLanguage) : dailyChallenge.brawler;
+        toast.error(`Game over! The correct brawler was ${correctDisplayName}.`);
       } else {
         toast.error('Incorrect! Try again.');
       }

@@ -5,14 +5,14 @@ import { Card } from '@/components/ui/card';
 import { Clock, Hash } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import { useDailyStore } from '@/stores/useDailyStore';
-import { brawlers } from '@/data/brawlers';
+import { brawlers, getBrawlerDisplayName } from '@/data/brawlers';
 import BrawlerGuessRow from '@/components/BrawlerGuessRow';
 import BrawlerAutocomplete from '@/components/BrawlerAutocomplete';
 import HomeButton from '@/components/ui/home-button';
 import DailyModeProgress from '@/components/DailyModeProgress';
 import ReactConfetti from 'react-confetti';
 import { cn } from '@/lib/utils';
-import { t } from '@/lib/i18n';
+import { t, getLanguage } from '@/lib/i18n';
 
 const DailyClassicMode: React.FC = () => {
   // Inject custom award styles into the document head
@@ -57,6 +57,8 @@ const DailyClassicMode: React.FC = () => {
     saveGuess,
     getGuesses,
   } = useDailyStore();
+
+  const currentLanguage = getLanguage();
 
   // Local game state
   const [inputValue, setInputValue] = useState('');
@@ -127,9 +129,10 @@ const DailyClassicMode: React.FC = () => {
       setShowVictoryScreen(true);
       setShowConfetti(true);
       
+      const displayName = getBrawlerDisplayName(correctBrawler, currentLanguage);
       toast({
         title: "Congratulations! 🎉",
-        description: `You found ${correctBrawler.name}!`,
+        description: `You found ${displayName}!`,
       });
     }
     
@@ -141,11 +144,12 @@ const DailyClassicMode: React.FC = () => {
   // Handle brawler selection and immediate submission
   const handleSelectBrawler = useCallback((brawler: any) => {
     setSelectedBrawler(brawler);
-    setInputValue(brawler.name);
+    const displayName = getBrawlerDisplayName(brawler, currentLanguage);
+    setInputValue(displayName);
     
     // Immediately submit the guess
     handleSubmit(brawler);
-  }, [handleSubmit]);
+  }, [handleSubmit, currentLanguage]);
 
   // Handle next mode navigation
   const handleNextMode = () => {
@@ -202,7 +206,7 @@ const DailyClassicMode: React.FC = () => {
         <div className="mb-6 flex flex-col items-center justify-center relative z-10">
           {/* Bigger Centered Headline */}
           <div className="text-center mb-4">
-            <h1 className="text-5xl md:text-6xl font-extrabold bg-gradient-to-r from-yellow-300 via-amber-400 to-pink-400 bg-clip-text text-transparent drop-shadow-[0_1px_6px_rgba(255,214,0,0.4)] animate-award-glow">
+            <h1 className="text-3xl md:text-4xl font-extrabold bg-gradient-to-r from-yellow-300 via-amber-400 to-pink-400 bg-clip-text text-transparent drop-shadow-[0_1px_6px_rgba(255,214,0,0.4)] animate-award-glow">
               {t('daily.classic.title')}
             </h1>
           </div>

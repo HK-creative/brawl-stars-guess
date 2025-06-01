@@ -1,12 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
-import { Brawler } from '@/data/brawlers';
+import { Brawler, getBrawlerDisplayName, getBrawlerByDisplayName, filterBrawlersByName } from '@/data/brawlers';
 import { getPin, DEFAULT_PIN } from '@/lib/image-helpers';
 import Image from '@/components/ui/image';
 import { cn } from '@/lib/utils';
 import { Search, X } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
-import { t } from '@/lib/i18n';
+import { t, getLanguage } from '@/lib/i18n';
 
 interface BrawlerAutocompleteProps {
   brawlers: Brawler[];
@@ -34,27 +34,29 @@ const BrawlerAutocomplete: React.FC<BrawlerAutocompleteProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
   
+  const currentLanguage = getLanguage();
+  
   useEffect(() => {
     if (value.trim() === '') {
       setFilteredBrawlers([]);
       return;
     }
     
-    const filtered = brawlers.filter(brawler => 
-      brawler.name.toLowerCase().includes(value.toLowerCase()) && 
+    // Use the new filtering function that supports both languages
+    const filtered = filterBrawlersByName(value, currentLanguage).filter(brawler => 
       !disabledBrawlers.includes(brawler.name)
     );
     setFilteredBrawlers(filtered);
     setHighlightedIndex(-1);
 
     if (onSubmit) {
-      const exactMatch = filtered.find(brawler => 
-        brawler.name.toLowerCase() === value.toLowerCase()
-      );
+      const exactMatch = filtered.find(brawler => {
+        const displayName = getBrawlerDisplayName(brawler, currentLanguage);
+        return displayName.toLowerCase() === value.toLowerCase();
+      });
       
       if (
         exactMatch &&
-        value.toLowerCase() === exactMatch.name.toLowerCase() &&
         !disabledBrawlers.includes(exactMatch.name)
       ) {
         onSelect(exactMatch);
@@ -63,7 +65,7 @@ const BrawlerAutocomplete: React.FC<BrawlerAutocompleteProps> = ({
         }, 0);
       }
     }
-  }, [value, brawlers, disabledBrawlers, onSelect, onSubmit]);
+  }, [value, brawlers, disabledBrawlers, onSelect, onSubmit, currentLanguage]);
   
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -93,7 +95,8 @@ const BrawlerAutocomplete: React.FC<BrawlerAutocompleteProps> = ({
   
   const handleSelectBrawler = (brawler: Brawler) => {
     if (disabledBrawlers.includes(brawler.name)) return;
-    onChange(brawler.name);
+    const displayName = getBrawlerDisplayName(brawler, currentLanguage);
+    onChange(displayName);
     onSelect(brawler);
     setIsOpen(false);
   };
@@ -124,10 +127,9 @@ const BrawlerAutocomplete: React.FC<BrawlerAutocompleteProps> = ({
         return;
       }
 
-      const exactMatchName = currentInputText.toLowerCase();
-      const isAlreadyGuessed = disabledBrawlers.some(name => name.toLowerCase() === exactMatchName);
-      
-      if (isAlreadyGuessed && filteredBrawlers.some(b => b.name.toLowerCase() === exactMatchName)) {
+      // Check if already guessed by looking at both English and Hebrew names
+      const matchedBrawler = getBrawlerByDisplayName(currentInputText);
+      if (matchedBrawler && disabledBrawlers.includes(matchedBrawler.name)) {
         toast({
           title: "Already Guessed",
           description: `You've already guessed this brawler!`,
@@ -149,7 +151,10 @@ const BrawlerAutocomplete: React.FC<BrawlerAutocompleteProps> = ({
 
       // If current input matches a brawler exactly, use that and submit immediately
       const exactMatchBrawler = filteredBrawlers.find(
-        b => b.name.toLowerCase() === value.toLowerCase() && !disabledBrawlers.includes(b.name)
+        b => {
+          const displayName = getBrawlerDisplayName(b, currentLanguage);
+          return displayName.toLowerCase() === value.toLowerCase() && !disabledBrawlers.includes(b.name);
+        }
       );
       if (exactMatchBrawler) {
         handleSelectBrawlerWithSubmit(exactMatchBrawler);
@@ -208,8 +213,11 @@ const BrawlerAutocomplete: React.FC<BrawlerAutocompleteProps> = ({
           className="absolute left-0 top-0 bottom-0 flex items-center justify-center w-12 bg-[#FFC107] rounded-l-2xl z-10 cursor-pointer hover:bg-[#FFD700] transition-colors duration-200"
           onClick={() => {
             if (value && onSubmit) {
-              const exactMatchBrawler = brawlers.find(
-                b => b.name.toLowerCase() === value.toLowerCase() && !disabledBrawlers?.includes(b.name)
+              const exactMatchBrawler = filteredBrawlers.find(
+                b => {
+                  const displayName = getBrawlerDisplayName(b, currentLanguage);
+                  return displayName.toLowerCase() === value.toLowerCase() && !disabledBrawlers?.includes(b.name);
+                }
               );
               if (exactMatchBrawler) {
                 handleSelectBrawlerWithSubmit(exactMatchBrawler);
@@ -277,6 +285,7 @@ const BrawlerAutocomplete: React.FC<BrawlerAutocompleteProps> = ({
             const pinPath = getPin(brawler.name);
             const isDisabled = disabledBrawlers.includes(brawler.name);
             const isHighlighted = index === highlightedIndex;
+            const displayName = getBrawlerDisplayName(brawler, currentLanguage);
             
             return (
               <div
@@ -302,13 +311,13 @@ const BrawlerAutocomplete: React.FC<BrawlerAutocompleteProps> = ({
                 <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-[#FFC107]/50 bg-black">
                   <Image 
                     src={pinPath} 
-                    alt={brawler.name}
+                    alt={displayName}
                     fallbackSrc={DEFAULT_PIN}
                     imageType="pin"
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <span className="font-medium">{brawler.name}</span>
+                <span className="font-medium">{displayName}</span>
               </div>
             );
           })}

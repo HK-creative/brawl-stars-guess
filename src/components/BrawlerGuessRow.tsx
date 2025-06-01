@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Brawler } from '@/data/brawlers';
+import { Brawler, getBrawlerDisplayName } from '@/data/brawlers';
 import { getPortrait, DEFAULT_PORTRAIT, getPin, DEFAULT_PIN } from '@/lib/image-helpers';
 import Image from '@/components/ui/image';
 import { cn } from '@/lib/utils';
@@ -10,7 +10,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { brawlers } from '@/data/brawlers';
-import { t } from '@/lib/i18n';
+import { t, getLanguage } from '@/lib/i18n';
 
 interface BrawlerGuessRowProps {
   guess: Brawler;
@@ -60,6 +60,9 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({
 }) => {
   const [imageKey, setImageKey] = useState<string>(`${guess.name}-${Date.now()}`);
   const [isRevealed, setIsRevealed] = useState(false);
+  
+  const currentLanguage = getLanguage();
+  const guessDisplayName = getBrawlerDisplayName(guess, currentLanguage);
   
   // Update the animation state when the component mounts or when isNew changes
   useEffect(() => {
@@ -299,7 +302,7 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({
               <Image
                 key={imageKey}
                 src={portraitPath}
-                alt={guess.name}
+                alt={guessDisplayName}
                 fallbackSrc={DEFAULT_PORTRAIT}
                 imageType="portrait"
                 className="w-full h-full object-cover"
@@ -394,19 +397,22 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({
                         {guess.class}
                       </div>
                       <div className="grid grid-cols-4 gap-4 justify-center items-center w-full px-2">
-                        {brawlers.filter(b => b.class === guess.class).map(b => (
-                          <div key={b.name} className="flex flex-col items-center">
-                            <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-yellow-400 bg-black">
-                              <Image
-                                src={getPin(b.name)}
-                                alt={b.name}
-                                fallbackSrc={DEFAULT_PIN}
-                                imageType="pin"
-                                className="w-full h-full object-contain"
-                              />
+                        {brawlers.filter(b => b.class === guess.class).map(b => {
+                          const brawlerDisplayName = getBrawlerDisplayName(b, currentLanguage);
+                          return (
+                            <div key={b.name} className="flex flex-col items-center">
+                              <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-yellow-400 bg-black">
+                                <Image
+                                  src={getPin(b.name)}
+                                  alt={brawlerDisplayName}
+                                  fallbackSrc={DEFAULT_PIN}
+                                  imageType="pin"
+                                  className="w-full h-full object-contain"
+                                />
+                              </div>
                             </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     </TooltipContent>
                   </Tooltip>
