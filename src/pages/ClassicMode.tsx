@@ -424,16 +424,16 @@ const ClassicMode = ({
             
             {/* Guess Button - only show when not in survival mode */}
             {!isSurvivalMode && (
-              <Button 
-                type="submit" 
-                disabled={!selectedBrawler || isGameOver}
-                className={cn(
-                  "w-full bg-gradient-to-r from-amber-600 to-pink-600 hover:from-amber-500 hover:to-pink-500 border-none",
-                  (!selectedBrawler || isGameOver) && "opacity-50 cursor-not-allowed"
-                )}
-              >
-                Guess
-              </Button>
+            <Button 
+              type="submit" 
+              disabled={!selectedBrawler || isGameOver}
+              className={cn(
+                "w-full bg-gradient-to-r from-amber-600 to-pink-600 hover:from-amber-500 hover:to-pink-500 border-none",
+                (!selectedBrawler || isGameOver) && "opacity-50 cursor-not-allowed"
+              )}
+            >
+              Guess
+            </Button>
             )}
           </form>
           
@@ -442,7 +442,7 @@ const ClassicMode = ({
             <div className="w-full flex justify-center gap-4 mt-4">
               <div className="flex items-center gap-2 bg-black/70 border-2 border-brawl-yellow px-6 py-2 rounded-full shadow-xl animate-pulse">
                 <span className="text-brawl-yellow text-lg font-bold tracking-wide">{t('guesses.left')}</span>
-                <span className={`text-2xl font-extrabold ${guessesLeft <= 2 ? 'text-brawl-red animate-bounce' : 'text-white'}`}>{guessesLeft}</span>
+                <span className={`text-2xl font-extrabold ${guessesLeft <= 3 ? 'text-brawl-red animate-bounce' : 'text-white'}`}>{guessesLeft}</span>
               </div>
             </div>
           )}

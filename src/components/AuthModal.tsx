@@ -15,7 +15,8 @@ import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2, LogIn, Mail, Lock, X } from 'lucide-react';
 import { DialogClose } from '@radix-ui/react-dialog';
-import { t } from '@/lib/i18n';
+import { t, getLanguage } from '@/lib/i18n';
+import { cn } from '@/lib/utils';
 
 const AuthModal: React.FC = () => {
   const { isAuthModalOpen, closeAuthModal, authModalMode, openAuthModal } = useAuthModal();
@@ -24,6 +25,7 @@ const AuthModal: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [resetSent, setResetSent] = useState(false);
+  const currentLanguage = getLanguage();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -126,8 +128,8 @@ const AuthModal: React.FC = () => {
   const currentTitle = authModalMode === 'signin' 
     ? t('auth.signin.email')
     : authModalMode === 'signup' 
-      ? 'Create your Brawldle account' 
-      : 'Reset your password';
+      ? t('auth.create.account')
+      : t('auth.reset.password.title');
 
   const currentDescription = authModalMode === 'signin'
     ? t('auth.access.stats')
@@ -136,7 +138,7 @@ const AuthModal: React.FC = () => {
       : t('auth.reset.instructions');
       
   const currentButtonText = authModalMode === 'reset' 
-    ? 'Send Reset Link' 
+    ? t('auth.reset.link')
     : authModalMode === 'signup' 
       ? t('auth.signup')
       : t('auth.get.started');
@@ -150,11 +152,17 @@ const AuthModal: React.FC = () => {
             <div className="p-2.5 bg-gray-100 rounded-full mb-4">
                 <LogIn className="h-6 w-6 text-gray-600" />
             </div>
-            <DialogTitle className="text-2xl font-bold text-center">
+            <DialogTitle className={cn(
+              "font-bold text-center",
+              currentLanguage === 'he' ? "text-lg" : "text-2xl"
+            )}>
                 {currentTitle}
             </DialogTitle>
             {currentDescription && (
-                <DialogDescription className="text-gray-500 pt-2 text-sm text-center max-w-xs">
+                <DialogDescription className={cn(
+                  "text-gray-500 pt-2 text-center max-w-xs",
+                  currentLanguage === 'he' ? "text-xs" : "text-sm"
+                )}>
                 {currentDescription}
                 </DialogDescription>
             )}
@@ -259,12 +267,12 @@ const AuthModal: React.FC = () => {
             )}
             {authModalMode === 'reset' && !resetSent && (
                 <p className="text-sm text-gray-500">
-                Remembered your password?{' '}
+                {t('auth.remember.password')}{' '}
                 <button 
                     onClick={() => openAuthModal('signin')} 
                     className="font-medium text-amber-600 hover:text-amber-500 hover:underline focus:outline-none"
                 >
-                    Back to Login
+                    {t('auth.back.login')}
                 </button>
                 </p>
             )}

@@ -13,8 +13,13 @@ export function SparklesPreview() {
     <div className="w-full flex flex-col items-center justify-center overflow-hidden pt-0 pb-2 md:pt-0 md:pb-4">
       {/* PC Layout: Language selection on left, title in center */}
       <div className="hidden md:flex md:items-center md:justify-center md:w-full md:relative md:mb-4">
-        {/* Language selection - positioned absolutely to the left */}
-        <div className="absolute left-0 flex gap-2">
+        {/* Main title - centered */}
+        <h1 className="md:text-7xl text-5xl lg:text-8xl font-bold text-center relative z-20 bg-gradient-to-b from-[#FFD700] via-[#FFA500] to-[#FF8C00] text-transparent bg-clip-text animate-fade-in">
+          {t('app.title')}
+        </h1>
+        
+        {/* Language selection - positioned to the left of title */}
+        <div className="absolute ml-4 flex gap-2" style={{ left: 'calc(50% - 320px)' }}>
           <button
             onClick={() => changeLanguage('en')}
             className={cn(
@@ -53,11 +58,6 @@ export function SparklesPreview() {
             />
           </button>
         </div>
-
-        {/* Main title - centered */}
-        <h1 className="md:text-7xl text-5xl lg:text-8xl font-bold text-center relative z-20 bg-gradient-to-b from-[#FFD700] via-[#FFA500] to-[#FF8C00] text-transparent bg-clip-text animate-fade-in">
-          {t('app.title')}
-        </h1>
       </div>
 
       {/* Mobile Layout: Title only (language selection stays in Layout.tsx) */}
@@ -69,7 +69,10 @@ export function SparklesPreview() {
       <div className="mt-4 mb-4 md:mt-3 md:mb-3 w-32 md:w-48 h-0.5 bg-gradient-to-r from-transparent via-[#FFA500] to-transparent animate-fade-in-delay"></div>
 
       {/* Subtitle - Positioned after the decorative line */}
-      <h2 className="text-xl md:text-2xl lg:text-3xl text-white/90 font-medium text-center relative z-20 animate-fade-in-delay">
+      <h2 className={cn(
+        "text-xl md:text-2xl lg:text-3xl text-white/90 font-medium text-center relative z-20 animate-fade-in-delay",
+        language === 'he' && "font-bold"
+      )}>
         {t('home.ultimate.challenge')}
       </h2>
 

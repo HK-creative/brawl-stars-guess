@@ -377,21 +377,19 @@ const SurvivalModePage: React.FC = () => {
           {/* Confetti Animation (award style) */}
           
 
-          {/* Glowing Trophy & Round Info */}
+          {/* Updated Round Info - Clean Design */}
           <div className="mb-6 flex flex-col items-center justify-center relative z-10">
-            <div className="relative flex items-center justify-center mb-2">
-              <span className="absolute animate-ping-slow rounded-full bg-yellow-400/40 w-24 h-24 z-0" />
-              <Trophy className="h-20 w-20 text-yellow-400 drop-shadow-[0_0_24px_gold] animate-bounce-slow z-10" />
-            </div>
-            <div className="flex flex-row items-center gap-4 mt-2">
-              <span className="text-3xl font-extrabold bg-gradient-to-r from-yellow-300 via-amber-400 to-pink-400 bg-clip-text text-transparent drop-shadow-[0_2px_12px_rgba(255,214,0,0.7)] animate-award-glow">{t('survival.round')} {currentRound}</span>
-              <span className="flex items-center gap-2 px-3 py-1 rounded-full bg-gradient-to-r from-green-500/80 to-emerald-400/70 shadow-lg border-2 border-green-300 text-lg font-bold text-white animate-award-glow">
-                <Circle className="h-6 w-6 text-white/80 fill-current" />
+            <div className="flex flex-wrap items-center justify-center gap-4 px-4 py-3 bg-slate-800/60 rounded-2xl border border-slate-700/50 backdrop-blur-sm">
+              <span className="text-2xl font-bold text-white">
+                {t('survival.round')} {currentRound}
+              </span>
+              <span className="flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-green-500/80 to-emerald-400/70 shadow-lg border border-green-300/50 text-lg font-bold text-white">
+                <Circle className="h-5 w-5 text-white/80 fill-current" />
                 {totalScore} {t('survival.pts')}
               </span>
               {settings?.timer && (
-                <span className="flex items-center gap-2 px-3 py-1 rounded-full bg-gradient-to-r from-yellow-500/80 to-pink-400/70 shadow-lg border-2 border-yellow-300 text-lg font-bold text-white animate-award-glow">
-                  <Timer className="h-6 w-6 text-white/80" />
+                <span className="flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-yellow-500/80 to-amber-400/70 shadow-lg border border-yellow-300/50 text-lg font-bold text-white">
+                  <Timer className="h-5 w-5 text-white/80" />
                   {currentTimerValue ?? activeRoundState.timerLeft}{t('survival.seconds')}
                 </span>
               )}

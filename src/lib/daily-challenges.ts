@@ -219,6 +219,35 @@ const getDailyAudioFile = (brawler: Brawler, date: string): string => {
   return audioFiles[fileIndex];
 };
 
+// Get the actual brawler that owns the audio file
+const getBrawlerFromAudioFile = (audioFile: string): string => {
+  // Extract the prefix from the audio file name
+  const prefix = audioFile.split('_')[0].toLowerCase();
+  
+  // Mapping of audio file prefixes to their actual brawler owners
+  const prefixToBrawlerMap: { [key: string]: string } = {
+    'kaze': 'Kaze',
+    'jae': 'Jae-Yong',
+    'meeple': 'Meeple',
+    'shade': 'Shade',
+    'juju': 'Juju',
+    'kenji': 'Kenji',
+    'moe': 'Moe',
+    'ddracos': 'Draco',
+    'draco': 'Draco',
+    'amber': 'Amber',
+    'lily': 'Lily',
+    'melodie': 'Melodie',
+    'angelo': 'Angelo',
+    'kit': 'Kit',
+    'lawrie': 'Larry & Lawrie',
+    'mico': 'Mico',
+    'chuck': 'Chuck'
+  };
+  
+  return prefixToBrawlerMap[prefix] || 'Kit'; // Default to Kit if prefix not found
+};
+
 // Check if Supabase connection is working
 export const checkSupabaseConnection = async (): Promise<boolean> => {
   try {
@@ -322,8 +351,10 @@ const getDeterministicDailyChallenge = (mode: string, date: string): any => {
       
     case 'audio':
       const audioFile = getDailyAudioFile(brawler, date);
+      const actualAudioOwner = getBrawlerFromAudioFile(audioFile);
+      console.log(`Audio challenge: selected brawler ${brawler.name}, audio file ${audioFile}, actual owner ${actualAudioOwner}`);
       return {
-        brawler: brawler.name,
+        brawler: actualAudioOwner, // Use the actual owner of the audio file
         audioFile: `/AttackSounds/${audioFile}`
       };
       

@@ -3,6 +3,7 @@ import { Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useDailyStore, DailyGameMode } from '@/stores/useDailyStore';
 import { useNavigate } from 'react-router-dom';
+import { t } from '@/lib/i18n';
 
 interface DailyModeProgressProps {
   currentMode?: DailyGameMode;
@@ -19,7 +20,7 @@ const DailyModeProgress: React.FC<DailyModeProgressProps> = ({
   const modes = [
     { 
       key: 'classic' as const, 
-      name: 'Classic', 
+      name: t('mode.classic'), 
       state: classic,
       iconSrc: '/ClassicIcon.png',
       path: '/daily/classic',
@@ -27,7 +28,7 @@ const DailyModeProgress: React.FC<DailyModeProgressProps> = ({
     },
     { 
       key: 'gadget' as const, 
-      name: 'Gadget', 
+      name: t('mode.gadget'), 
       state: gadget,
       iconSrc: '/GadgetIcon.png',
       path: '/daily/gadget',
@@ -35,7 +36,7 @@ const DailyModeProgress: React.FC<DailyModeProgressProps> = ({
     },
     { 
       key: 'starpower' as const, 
-      name: 'Star Power', 
+      name: t('mode.starpower'), 
       state: starpower,
       iconSrc: '/StarpowerIcon.png',
       path: '/daily/starpower',
@@ -43,7 +44,7 @@ const DailyModeProgress: React.FC<DailyModeProgressProps> = ({
     },
     { 
       key: 'audio' as const, 
-      name: 'Audio', 
+      name: t('mode.audio'), 
       state: audio,
       iconSrc: '/AudioIcon.png',
       path: '/daily/audio',

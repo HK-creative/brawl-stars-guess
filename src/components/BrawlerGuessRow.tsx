@@ -400,17 +400,17 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({
                         {brawlers.filter(b => b.class === guess.class).map(b => {
                           const brawlerDisplayName = getBrawlerDisplayName(b, currentLanguage);
                           return (
-                            <div key={b.name} className="flex flex-col items-center">
-                              <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-yellow-400 bg-black">
-                                <Image
-                                  src={getPin(b.name)}
+                          <div key={b.name} className="flex flex-col items-center">
+                            <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-yellow-400 bg-black">
+                              <Image
+                                src={getPin(b.name)}
                                   alt={brawlerDisplayName}
-                                  fallbackSrc={DEFAULT_PIN}
-                                  imageType="pin"
-                                  className="w-full h-full object-contain"
-                                />
-                              </div>
+                                fallbackSrc={DEFAULT_PIN}
+                                imageType="pin"
+                                className="w-full h-full object-contain"
+                              />
                             </div>
+                          </div>
                           );
                         })}
                       </div>

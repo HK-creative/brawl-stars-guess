@@ -290,6 +290,31 @@ body {
   .animate-shake {
     animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
   }
+
+  /* Loading spinner animation */
+  .animate-spin-slow {
+    animation: spin 2s linear infinite;
+  }
+
+  /* Loading dots animation */
+  @keyframes loading-dots {
+    0%, 80%, 100% { opacity: 0; }
+    40% { opacity: 1; }
+  }
+  .animate-loading-dots {
+    animation: loading-dots 1.4s infinite;
+  }
+  .animate-loading-dots:nth-child(1) { animation-delay: -0.32s; }
+  .animate-loading-dots:nth-child(2) { animation-delay: -0.16s; }
+
+  /* Pulse loading animation */
+  @keyframes pulse-loading {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+  .animate-pulse-loading {
+    animation: pulse-loading 1.5s infinite;
+  }
 }
 
 @keyframes fadeIn {
@@ -411,12 +436,62 @@ body {
   animation: breathe 4s ease-in-out infinite;
 }
 
-/* Hebrew attribute labels - larger and bolder */
-html[dir="rtl"] .attribute-label,
-html[dir="rtl"] [class*="attribute"] .text-xs,
-html[dir="rtl"] [class*="attribute"] .text-sm {
-  font-weight: 800 !important;
-  font-size: 1.25rem !important; /* Significantly increased from 0.875rem */
+/* IMPROVED HEBREW MOBILE ATTRIBUTE STYLING */
+@media (max-width: 768px) {
+  /* Hebrew attribute labels on mobile - better font, bolder, positioned above */
+  html[dir="rtl"] .attribute-label,
+  html[dir="rtl"] [class*="attribute"] .text-xs,
+  html[dir="rtl"] [class*="attribute"] .text-sm {
+    font-family: 'Inter', system-ui, sans-serif !important; /* Better font */
+    font-weight: 900 !important; /* Very bold */
+    font-size: 1.5rem !important; /* Significantly increased */
+    line-height: 1.1 !important;
+    transform: translateY(-2px) !important; /* Move up slightly */
+    text-shadow: 0 1px 2px rgba(0,0,0,0.8) !important; /* Better readability */
+  }
+  
+  /* Special case for wallbreak attribute to fit better on mobile */
+  html[dir="rtl"] .attribute-label:contains("שובר קירות"),
+  html[dir="rtl"] [class*="attribute"] .text-xs:contains("שובר קירות"),
+  html[dir="rtl"] [class*="attribute"] .text-sm:contains("שובר קירות") {
+    font-size: 1.1rem !important;
+    font-weight: 800 !important;
+  }
+
+  /* Hebrew attribute card text content on mobile - larger but controlled */
+  html[dir="rtl"] [class*="guess-row"] .text-xs,
+  html[dir="rtl"] [class*="brawler-card"] .text-xs,
+  html[dir="rtl"] [class*="card"] .text-xs:not(.attribute-label) {
+    font-size: 1rem !important; /* Increased from 0.8rem */
+    font-weight: 600 !important;
+    line-height: 1.1 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+  
+  /* Hebrew attribute card medium text on mobile */
+  html[dir="rtl"] [class*="guess-row"] .text-sm,
+  html[dir="rtl"] [class*="brawler-card"] .text-sm,
+  html[dir="rtl"] [class*="card"] .text-sm:not(.attribute-label) {
+    font-size: 1.125rem !important; /* Increased from 0.9rem */
+    font-weight: 600 !important;
+    line-height: 1.1 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+}
+
+/* Hebrew attribute labels - larger and bolder on desktop */
+@media (min-width: 769px) {
+  html[dir="rtl"] .attribute-label,
+  html[dir="rtl"] [class*="attribute"] .text-xs,
+  html[dir="rtl"] [class*="attribute"] .text-sm {
+    font-weight: 700 !important;
+    font-size: 1.5rem !important;
+    font-family: 'Inter', system-ui, sans-serif !important; /* Changed from Georgia to Inter like "ניסיונות" */
+  }
 }
 
 /* HEBREW HOME SCREEN HEADLINES - MASSIVE SIZE INCREASE */
@@ -482,48 +557,59 @@ html[dir="rtl"] [class*="survival"] h3 {
   }
 }
 
-/* Mobile-specific Hebrew attribute styling */
-@media (max-width: 768px) {
-  /* Hebrew attribute labels on mobile - much larger and bolder */
-  html[dir="rtl"] .attribute-label,
-  html[dir="rtl"] [class*="attribute"] .text-xs,
-  html[dir="rtl"] [class*="attribute"] .text-sm {
-    font-weight: 900 !important;
-    font-size: 1.5rem !important; /* Significantly increased from 1rem */
-    line-height: 1.2 !important;
-  }
-  
-  /* Hebrew attribute card text content on mobile - larger but controlled */
-  html[dir="rtl"] [class*="guess-row"] .text-xs,
-  html[dir="rtl"] [class*="brawler-card"] .text-xs,
-  html[dir="rtl"] [class*="card"] .text-xs:not(.attribute-label) {
-    font-size: 1rem !important; /* Increased from 0.8rem */
-    font-weight: 600 !important;
-    line-height: 1.1 !important;
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-  }
-  
-  /* Hebrew attribute card medium text on mobile */
-  html[dir="rtl"] [class*="guess-row"] .text-sm,
-  html[dir="rtl"] [class*="brawler-card"] .text-sm,
-  html[dir="rtl"] [class*="card"] .text-sm:not(.attribute-label) {
-    font-size: 1.125rem !important; /* Increased from 0.9rem */
-    font-weight: 600 !important;
-    line-height: 1.1 !important;
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-  }
+/* Reduce font sizes for specific Hebrew texts */
+html[dir="rtl"] .survival-mode-title,
+html[dir="rtl"] [class*="survival-mode"] {
+  font-size: 0.4em !important; /* Reduced by 60% from 0.8em */
 }
 
-/* Desktop-specific Hebrew attribute styling */
-@media (min-width: 769px) {
-  html[dir="rtl"] .attribute-label,
-  html[dir="rtl"] [class*="attribute"] .text-xs,
-  html[dir="rtl"] [class*="attribute"] .text-sm {
-    font-weight: 700 !important;
-    font-size: 1.125rem !important; /* Significantly increased from 0.9rem */
-  }
+html[dir="rtl"] .auth-ready-play,
+html[dir="rtl"] [class*="auth-ready"] {
+  font-size: 1em !important; /* Same size as English "Ready to Play?" */
+}
+
+html[dir="rtl"] .auth-create-account,
+html[dir="rtl"] [class*="auth-create"] {
+  font-size: 0.75em !important;
+}
+
+html[dir="rtl"] .auth-signin-email,
+html[dir="rtl"] [class*="auth-signin"] {
+  font-size: 0.75em !important;
+}
+
+/* Hebrew daily mode titles - WAAAAAY LARGER */
+html[dir="rtl"] .daily-mode-title,
+html[dir="rtl"] [class*="daily-"] h1 {
+  font-size: 2.5em !important; /* Much larger - 250% of English titles */
+}
+
+/* Hebrew daily mode headlines - LARGER */
+html[dir="rtl"] .mode-headline-starpower,
+html[dir="rtl"] .mode-headline-gadget,
+html[dir="rtl"] .mode-headline-audio {
+  font-size: 1.8em !important; /* Much larger than English versions */
+}
+
+/* Hebrew auth ready play text - same size as English */
+html[dir="rtl"] .auth-ready-play,
+html[dir="rtl"] [class*="auth-ready"] {
+  font-size: 1em !important; /* Same size as English "Ready to Play?" */
+}
+
+/* Loading states for images and audio */
+.loading-placeholder {
+  @apply animate-pulse bg-gray-300/20 rounded flex items-center justify-center;
+}
+
+.loading-spinner {
+  @apply w-8 h-8 border-4 border-gray-300/20 border-t-yellow-400 rounded-full animate-spin;
+}
+
+.loading-dots {
+  @apply flex space-x-1;
+}
+
+.loading-dot {
+  @apply w-2 h-2 bg-yellow-400 rounded-full animate-loading-dots;
 }

@@ -206,7 +206,7 @@ const DailyClassicMode: React.FC = () => {
         <div className="mb-6 flex flex-col items-center justify-center relative z-10">
           {/* Bigger Centered Headline */}
           <div className="text-center mb-4">
-            <h1 className="text-3xl md:text-4xl font-extrabold bg-gradient-to-r from-yellow-300 via-amber-400 to-pink-400 bg-clip-text text-transparent drop-shadow-[0_1px_6px_rgba(255,214,0,0.4)] animate-award-glow">
+            <h1 className="text-3xl md:text-4xl font-extrabold bg-gradient-to-r from-yellow-300 via-amber-400 to-pink-400 bg-clip-text text-transparent drop-shadow-[0_1px_6px_rgba(255,214,0,0.4)] animate-award-glow daily-mode-title">
               {t('daily.classic.title')}
             </h1>
           </div>
@@ -239,10 +239,7 @@ const DailyClassicMode: React.FC = () => {
                   {t('daily.congratulations')}
                 </h2>
                 <p className="text-xl text-white/80 mb-4">
-                  {t('daily.you.found')} <span className="text-yellow-400 font-bold">{classic.brawlerName}</span> {t('daily.in.guesses')} {classic.guessCount} {t('daily.guesses.count')}
-                </p>
-                <p className="text-lg text-white/60 mb-6">
-                  Ready for the next challenge?
+                  {t('daily.you.found')} <span className="text-yellow-400 font-bold">{getBrawlerDisplayName(getCorrectBrawler(), currentLanguage)}</span> {t('daily.in.guesses')} {classic.guessCount} {t('daily.guesses.count')}
                 </p>
                 <div className="flex flex-col gap-4 items-center justify-center">
                   <Button
@@ -252,7 +249,10 @@ const DailyClassicMode: React.FC = () => {
                     <img 
                       src="/GadgetIcon.png" 
                       alt="Gadget Mode" 
-                      className="h-6 w-6 mr-2"
+                      className={cn(
+                        "h-6 w-6",
+                        currentLanguage === 'he' ? "ml-2" : "mr-2"
+                      )}
                     />
                     {t('daily.next.mode')}
                   </Button>
@@ -299,14 +299,18 @@ const DailyClassicMode: React.FC = () => {
                       t('attribute.range'),
                       t('attribute.wallbreak'),
                       t('attribute.release.year')
-                    ].map((label) => (
+                    ].map((label, index) => (
                       <div key={label} className="w-full relative h-6 md:h-10">
                         {/* Yellow accent line */}
                         <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-brawl-yellow"></div>
                         
                         {/* Text with adaptive sizing - positioned near the bottom */}
                         <div className="w-full flex items-end justify-center pb-1">
-                          <span className="text-xs md:text-sm font-extrabold text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]">
+                          <span className={cn(
+                            "font-extrabold text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] attribute-label",
+                            currentLanguage === 'he' && index === 4 ? "text-[10px] md:text-lg" : "text-xs md:text-sm",
+                            currentLanguage === 'he' && index !== 4 ? "md:text-lg md:font-black" : ""
+                          )}>
                             {label}
                           </span>
                         </div>

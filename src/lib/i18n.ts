@@ -97,6 +97,18 @@ const translations: Translations = {
     en: "Classic Daily",
     he: "קלאסי יומי"
   },
+  "daily.audio.title": {
+    en: "Audio Daily", 
+    he: "הקול היומי"
+  },
+  "daily.gadget.title": {
+    en: "Gadget Daily",
+    he: "הגאדג'ט היומי"  
+  },
+  "daily.starpower.title": {
+    en: "Star Power Daily",
+    he: "הכוח כוכב היומי"
+  },
   "daily.classic.headline": {
     en: "Guess Today's Brawler!",
     he: "נחשו את הבראולר היומי!"
@@ -116,6 +128,10 @@ const translations: Translations = {
   "daily.audio.click.play": {
     en: "Click to play audio",
     he: "לחץ כאן כדי לשמוע"
+  },
+  "daily.audio.playing": {
+    en: "Playing audio...",
+    he: "מנגן קול..."
   },
   "daily.gadget.headline": {
     en: "Guess the Brawler by their Gadget!",
@@ -170,6 +186,10 @@ const translations: Translations = {
   "auth.ready.play": {
     en: "Ready to Play?",
     he: "מוכן לשחק?"
+  },
+  "auth.create.account": {
+    en: "Create your Brawldle account",
+    he: "צרו את החשבון שלכם"
   },
   "auth.save.progress": {
     en: "Save progress & compete!",
@@ -455,7 +475,7 @@ const translations: Translations = {
   },
   "attribute.release.year": {
     en: "Year",
-    he: "שנת לידה"
+    he: "שנה"
   },
   
   // Rarity Values
@@ -673,6 +693,10 @@ const translations: Translations = {
     en: "guesses!",
     he: "ניסיונות!"
   },
+  "daily.ready.next.challenge": {
+    en: "Ready for the next challenge?",
+    he: "מוכן לאתגר הבא?"
+  },
   "daily.all.modes.completed": {
     en: "All daily modes completed!",
     he: "האתגרים היומיים הושלמו בהצלחה!"
@@ -688,6 +712,22 @@ const translations: Translations = {
   "daily.go.home": {
     en: "Go Home",
     he: "דף הבית"
+  },
+  "auth.reset.password.title": {
+    en: "Reset your password",
+    he: "אפס סיסמא"
+  },
+  "auth.reset.link": {
+    en: "Send Reset Link",
+    he: "שלח לינק לאיפוס הסיסמא"
+  },
+  "auth.remember.password": {
+    en: "Remembered your password?",
+    he: "זוכר את הסיסמא?"
+  },
+  "auth.back.login": {
+    en: "Back to Login",
+    he: "כנס לחשבון שלך"
   }
 };
 

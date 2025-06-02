@@ -43,7 +43,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 {/* Desktop design - with text and center aligned buttons */}
                 <div className="hidden md:block">
                   <div className="text-center mb-3">
-                    <h3 className="text-lg font-bold text-amber-100 mb-1">{t('auth.ready.play')}</h3>
+                    <h3 className={cn(
+                      "font-bold text-amber-100 mb-1 auth-ready-play",
+                      language === 'he' ? "text-sm" : "text-lg"
+                    )}>{t('auth.ready.play')}</h3>
                     <p className="text-xs text-slate-300">{t('auth.save.progress')}</p>
                   </div>
                   

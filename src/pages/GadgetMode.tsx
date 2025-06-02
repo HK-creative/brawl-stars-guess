@@ -470,30 +470,50 @@ const GadgetMode = ({
                   src={dailyChallenge.image}
                   alt={`${dailyChallenge.brawler}'s Gadget`}
                   className="w-full h-full object-contain transform transition-all duration-300 hover:scale-105"
-                  onError={(e) => {
-                    console.log(`Failed to load image: ${dailyChallenge.image}, trying specific brawler gadget`);
-                    // Try a specific gadget for this brawler instead of defaulting to Shelly
-                    const brawlerSpecificFallback = getGadgetImage(dailyChallenge.brawler, dailyChallenge.gadgetName);
-                    e.currentTarget.src = brawlerSpecificFallback;
-                    
-                    // If that fails, try Colt then Shelly as backups
-                    e.currentTarget.onerror = () => {
-                      console.log(`Failed to load brawler-specific fallback, trying Colt's gadget`);
-                      e.currentTarget.src = '/GadgetImages/colt_gadget_01.png';
-                      
-                      e.currentTarget.onerror = () => {
-                        console.log(`Failed to load Colt's gadget, trying Shelly's gadget`);
-                        e.currentTarget.src = '/GadgetImages/shelly_gadget_01.png';
-                        
-                        e.currentTarget.onerror = () => {
-                          console.log('All fallback images failed, hiding image');
-                          e.currentTarget.style.display = 'none';
-                        };
-                      };
-                    };
+                  onLoad={(e) => {
+                    console.log('Gadget image loaded successfully');
+                    e.currentTarget.style.display = 'block';
+                    // Hide loading state
+                    const parent = e.currentTarget.parentElement;
+                    if (parent) {
+                      const loadingEl = parent.querySelector('.loading-placeholder') as HTMLElement;
+                      if (loadingEl) {
+                        loadingEl.style.display = 'none';
+                      }
+                    }
                   }}
+                  onError={(e) => {
+                    console.log('Gadget image load failed, showing error state');
+                    e.currentTarget.style.display = 'none';
+                    // Show error state
+                    const parent = e.currentTarget.parentElement;
+                    if (parent) {
+                      const loadingEl = parent.querySelector('.loading-placeholder') as HTMLElement;
+                      if (loadingEl) {
+                        loadingEl.innerHTML = `
+                          <div class="w-full h-full flex flex-col items-center justify-center space-y-4">
+                            <div class="text-red-400 text-sm">Failed to load gadget image</div>
+                            <button onclick="window.location.reload()" class="text-xs bg-red-600 hover:bg-red-500 px-3 py-1 rounded text-white">
+                              Refresh Page
+                            </button>
+                          </div>
+                        `;
+                      }
+                    }
+                  }}
+                  style={{ display: 'none' }}
                 />
               )}
+              {/* Loading state */}
+              <div className="w-full h-full flex flex-col items-center justify-center space-y-4 loading-placeholder">
+                <div className="loading-spinner"></div>
+                <p className="text-yellow-400 text-sm">Loading gadget...</p>
+                <div className="loading-dots">
+                  <div className="loading-dot"></div>
+                  <div className="loading-dot"></div>
+                  <div className="loading-dot"></div>
+                </div>
+              </div>
             </div>
             
             <div className="text-center">
@@ -524,7 +544,7 @@ const GadgetMode = ({
             {isSurvivalMode ? (
               <div className="flex items-center gap-2 bg-black/70 border-2 border-brawl-yellow px-6 py-2 rounded-full shadow-xl animate-pulse">
                 <span className="text-brawl-yellow text-lg font-bold tracking-wide">{t('guesses.left')}</span>
-                <span className={`text-2xl font-extrabold ${guessesLeft <= 2 ? 'text-brawl-red animate-bounce' : 'text-white'}`}>{guessesLeft}</span>
+                <span className={`text-2xl font-extrabold ${guessesLeft <= 3 ? 'text-brawl-red animate-bounce' : 'text-white'}`}>{guessesLeft}</span>
               </div>
             ) : (
               <div className="flex items-center gap-2 bg-black/50 backdrop-blur px-4 py-1 rounded-full shadow-lg">

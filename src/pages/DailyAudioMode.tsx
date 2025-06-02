@@ -6,7 +6,7 @@ import { Clock, Hash, Volume2, Play } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import { useDailyStore } from '@/stores/useDailyStore';
 import { brawlers, getBrawlerDisplayName } from '@/data/brawlers';
-import BrawlerGuessRow from '@/components/BrawlerGuessRow';
+import { getPortrait } from '@/lib/image-helpers';
 import BrawlerAutocomplete from '@/components/BrawlerAutocomplete';
 import HomeButton from '@/components/ui/home-button';
 import DailyModeProgress from '@/components/DailyModeProgress';
@@ -130,7 +130,13 @@ const DailyAudioMode: React.FC = () => {
           });
           
           audio.addEventListener('canplaythrough', () => {
-            console.log('Audio can play through');
+            console.log('Audio can play through - audio is ready');
+            setAudioReady(true);
+            setAudioError(false);
+          });
+          
+          audio.addEventListener('loadeddata', () => {
+            console.log('Audio data loaded successfully');
             setAudioReady(true);
             setAudioError(false);
           });
@@ -140,72 +146,22 @@ const DailyAudioMode: React.FC = () => {
             setAudioError(true);
             setAudioReady(false);
             
-            // Try fallback audio files
-            const fallbackAudioFiles = [
-              '/AttackSounds/draco_atk_vo_01.ogg',
-              '/AttackSounds/shade_atk_vo_01.ogg',
-              '/AttackSounds/kit_atk_vo_01.ogg',
-              '/AttackSounds/moe_atk_vo_01.ogg'
-            ];
-            
-            console.log('Trying fallback audio:', fallbackAudioFiles[0]);
-            // Try the first fallback
-            const fallbackAudio = new Audio(fallbackAudioFiles[0]);
-            fallbackAudio.addEventListener('canplaythrough', () => {
-              console.log('Fallback audio loaded successfully');
-              setAudioReady(true);
-              setAudioError(false);
-            });
-            fallbackAudio.addEventListener('error', () => {
-              console.error('Fallback audio also failed to load');
-              setAudioError(true);
-              setAudioReady(false);
-            });
-            setAudioElement(fallbackAudio);
+            console.log('Audio failed to load, showing error state');
           });
           
           // Start loading the audio
           audio.load();
           setAudioElement(audio);
         } else {
-          // No audio file provided, use a default one
-          console.warn('No audio file in challenge data, using fallback');
-          const defaultAudio = new Audio('/AttackSounds/draco_atk_vo_01.ogg');
-          
-          defaultAudio.addEventListener('ended', () => setIsPlaying(false));
-          defaultAudio.addEventListener('canplaythrough', () => {
-            console.log('Default audio loaded successfully');
-            setAudioReady(true);
-            setAudioError(false);
-          });
-          defaultAudio.addEventListener('error', (e) => {
-            console.error('Default audio failed to load:', e);
-            setAudioError(true);
-            setAudioReady(false);
-          });
-          
-          defaultAudio.load();
-          setAudioElement(defaultAudio);
+          // No audio file provided, show error instead of fallback
+          console.warn('No audio file in challenge data');
+          setAudioError(true);
+          setAudioReady(false);
         }
       } catch (error) {
         console.error('Error loading audio data:', error);
         setAudioError(true);
-        
-        // Create a fallback audio as last resort
-        console.log('Creating last resort fallback audio');
-        const emergencyAudio = new Audio('/AttackSounds/kit_atk_vo_01.ogg');
-        emergencyAudio.addEventListener('canplaythrough', () => {
-          console.log('Emergency fallback audio loaded');
-          setAudioReady(true);
-          setAudioError(false);
-        });
-        emergencyAudio.addEventListener('error', () => {
-          console.error('Even emergency fallback failed');
-          setAudioError(true);
-          setAudioReady(false);
-        });
-        emergencyAudio.load();
-        setAudioElement(emergencyAudio);
+        setAudioReady(false);
       }
     };
     
@@ -398,8 +354,8 @@ const DailyAudioMode: React.FC = () => {
         <div className="mb-6 flex flex-col items-center justify-center relative z-10">
           {/* Bigger Centered Headline */}
           <div className="text-center mb-4">
-            <h1 className="text-3xl md:text-4xl font-extrabold bg-gradient-to-r from-yellow-300 via-amber-400 to-pink-400 bg-clip-text text-transparent drop-shadow-[0_1px_6px_rgba(255,214,0,0.4)] animate-award-glow">
-              Audio Daily
+            <h1 className="text-3xl md:text-4xl font-extrabold bg-gradient-to-r from-yellow-300 via-amber-400 to-pink-400 bg-clip-text text-transparent drop-shadow-[0_1px_6px_rgba(255,214,0,0.4)] animate-award-glow daily-mode-title">
+              {t('daily.audio.title')}
             </h1>
           </div>
           
@@ -431,7 +387,7 @@ const DailyAudioMode: React.FC = () => {
                   {t('daily.congratulations')}
                 </h2>
                 <p className="text-xl text-white/80 mb-4">
-                  {t('daily.you.found')} <span className="text-yellow-400 font-bold">{audio.brawlerName}</span> {t('daily.in.guesses')} {audio.guessCount} {t('daily.guesses.count')}
+                  {t('daily.you.found')} <span className="text-yellow-400 font-bold">{getBrawlerDisplayName(getCorrectBrawler(), currentLanguage)}</span> {t('daily.in.guesses')} {audio.guessCount} {t('daily.guesses.count')}
                 </p>
                 <p className="text-xl text-green-400 font-bold mb-6">
                   {t('daily.all.modes.completed')} 🎊
@@ -444,7 +400,10 @@ const DailyAudioMode: React.FC = () => {
                     <img 
                       src="/ClassicIcon.png" 
                       alt="Classic Mode" 
-                      className="h-6 w-6 mr-2"
+                      className={cn(
+                        "h-6 w-6",
+                        currentLanguage === 'he' ? "ml-2" : "mr-2"
+                      )}
                     />
                     {t('daily.back.to')} Classic
                   </Button>
@@ -461,7 +420,7 @@ const DailyAudioMode: React.FC = () => {
               // Game Content
               <div className="space-y-6">
                 <div className="text-center">
-                  <h2 className="text-2xl font-bold text-white mb-2">
+                  <h2 className="text-2xl font-bold text-white mb-2 mode-headline-audio">
                     {t('daily.audio.headline')}
                   </h2>
                   <p className="text-white/70 mb-4">
@@ -485,10 +444,13 @@ const DailyAudioMode: React.FC = () => {
                             "w-20 h-20 md:w-24 md:h-24 flex items-center justify-center rounded-full shadow-lg transition-all",
                             isPlaying ? "bg-blue-500 scale-95" : "bg-blue-600 hover:bg-blue-500",
                             "border-4 border-white",
-                            audioError && "bg-red-500 cursor-not-allowed"
+                            audioError && "bg-red-500 cursor-not-allowed",
+                            !audioReady && !audioError && "bg-gray-500 cursor-wait"
                           )}
                         >
-                          {isPlaying ? (
+                          {!audioReady && !audioError ? (
+                            <div className="loading-spinner" />
+                          ) : isPlaying ? (
                             <Volume2 size={40} className="text-white animate-pulse" />
                           ) : (
                             <Play size={40} className="text-white ml-2" />
@@ -510,32 +472,24 @@ const DailyAudioMode: React.FC = () => {
                       {audioError ? (
                         <div className="space-y-2">
                           <p className="text-red-400 text-sm">Audio failed to load</p>
-                          {process.env.NODE_ENV === 'development' && (
-                            <button
-                              onClick={() => {
-                                console.log('Testing direct audio load...');
-                                const testAudio = new Audio('/AttackSounds/kit_atk_vo_01.ogg');
-                                testAudio.addEventListener('canplaythrough', () => {
-                                  console.log('Direct audio test successful');
-                                  testAudio.play().then(() => {
-                                    console.log('Direct audio play successful');
-                                  }).catch(console.error);
-                                });
-                                testAudio.addEventListener('error', (e) => {
-                                  console.error('Direct audio test failed:', e);
-                                });
-                                testAudio.load();
-                              }}
-                              className="text-xs bg-yellow-600 hover:bg-yellow-500 px-2 py-1 rounded"
-                            >
-                              Test Audio
-                            </button>
-                          )}
+                          <button
+                            onClick={() => window.location.reload()}
+                            className="text-xs bg-red-600 hover:bg-red-500 px-3 py-1 rounded text-white"
+                          >
+                            Refresh Page
+                          </button>
                         </div>
                       ) : !audioReady ? (
-                        <p className="text-yellow-400 text-sm">Loading audio...</p>
+                        <div className="flex flex-col items-center space-y-2">
+                          <p className="text-yellow-400 text-sm">Loading audio...</p>
+                          <div className="loading-dots">
+                            <div className="loading-dot"></div>
+                            <div className="loading-dot"></div>
+                            <div className="loading-dot"></div>
+                          </div>
+                        </div>
                       ) : isPlaying ? (
-                        <p className="text-blue-400 text-sm animate-pulse">Playing audio...</p>
+                        <p className="text-blue-400 text-sm animate-pulse">{t('daily.audio.playing')}</p>
                       ) : (
                         <p className="text-white/70 text-sm">{t('daily.audio.click.play')}</p>
                       )}
@@ -557,14 +511,37 @@ const DailyAudioMode: React.FC = () => {
 
                 {/* Guesses */}
                 <div className="space-y-2">
-                  {guesses.map((guess, index) => (
-                    <BrawlerGuessRow
-                      key={index}
-                      guess={guess}
-                      correctAnswer={getCorrectBrawler()}
-                      isNew={index === guesses.length - 1}
-                    />
-                  ))}
+                  <div className="w-full max-w-md mx-auto">
+                    <ul className="grid grid-cols-1 md:grid-cols-2 gap-y-3 md:gap-x-4 md:gap-y-3">
+                      {guesses.map((guess, idx) => {
+                        const isCorrect = guess.name.toLowerCase() === getCorrectBrawler().name.toLowerCase();
+                        const isLastGuess = idx === guesses.length - 1;
+                        return (
+                          <li
+                            key={idx}
+                            className={cn(
+                              "flex flex-col items-center justify-center py-2 md:py-4 rounded-2xl border-2 transition-all duration-300 animate-fade-in w-36 md:w-40 mx-auto md:min-h-[120px]",
+                              isCorrect ? "bg-brawl-green border-yellow-400" : "bg-brawl-red border-yellow-400",
+                              !isCorrect && isLastGuess ? "animate-shake" : ""
+                            )}
+                            style={{ minHeight: '81px' }}
+                          >
+                            <img
+                              src={getPortrait(guess.name.toLowerCase())}
+                              alt={getBrawlerDisplayName(guess, currentLanguage)}
+                              className="w-14 h-14 md:w-20 md:h-20 rounded-xl object-cover border border-yellow-400 shadow-lg mx-auto"
+                              onError={(e) => {
+                                e.currentTarget.src = '/portraits/shelly.png';
+                              }}
+                            />
+                            <span className="text-base md:text-2xl font-extrabold text-white text-center mt-2 truncate w-full" style={{lineHeight: 1.1}}>
+                              {getBrawlerDisplayName(guess, currentLanguage)}
+                            </span>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </div>
                 </div>
               </div>
             )}

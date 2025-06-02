@@ -6,13 +6,14 @@ import { Clock, Hash } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import { useDailyStore } from '@/stores/useDailyStore';
 import { brawlers, getBrawlerDisplayName } from '@/data/brawlers';
-import BrawlerGuessRow from '@/components/BrawlerGuessRow';
+import { getPortrait } from '@/lib/image-helpers';
 import BrawlerAutocomplete from '@/components/BrawlerAutocomplete';
 import HomeButton from '@/components/ui/home-button';
 import DailyModeProgress from '@/components/DailyModeProgress';
 import ReactConfetti from 'react-confetti';
 import { fetchDailyChallenge } from '@/lib/daily-challenges';
 import { t, getLanguage } from '@/lib/i18n';
+import { cn } from '@/lib/utils';
 
 // Helper to get gadget image path (same as survival mode)
 const getGadgetImage = (brawler: string, gadgetName?: string): string => {
@@ -278,8 +279,8 @@ const DailyGadgetMode: React.FC = () => {
         <div className="mb-6 flex flex-col items-center justify-center relative z-10">
           {/* Bigger Centered Headline */}
           <div className="text-center mb-4">
-            <h1 className="text-3xl md:text-4xl font-extrabold bg-gradient-to-r from-yellow-300 via-amber-400 to-pink-400 bg-clip-text text-transparent drop-shadow-[0_1px_6px_rgba(255,214,0,0.4)] animate-award-glow">
-              Gadget Daily
+            <h1 className="text-3xl md:text-4xl font-extrabold bg-gradient-to-r from-yellow-300 via-amber-400 to-pink-400 bg-clip-text text-transparent drop-shadow-[0_1px_6px_rgba(255,214,0,0.4)] animate-award-glow daily-mode-title">
+              {t('daily.gadget.title')}
             </h1>
           </div>
           
@@ -311,10 +312,7 @@ const DailyGadgetMode: React.FC = () => {
                   {t('daily.congratulations')}
                 </h2>
                 <p className="text-xl text-white/80 mb-4">
-                  {t('daily.you.found')} <span className="text-yellow-400 font-bold">{gadget.brawlerName}</span> {t('daily.in.guesses')} {gadget.guessCount} {t('daily.guesses.count')}
-                </p>
-                <p className="text-lg text-white/60 mb-6">
-                  Ready for the next challenge?
+                  {t('daily.you.found')} <span className="text-yellow-400 font-bold">{getBrawlerDisplayName(getCorrectBrawler(), currentLanguage)}</span> {t('daily.in.guesses')} {gadget.guessCount} {t('daily.guesses.count')}
                 </p>
                 <div className="flex flex-col gap-4 items-center justify-center">
                   <Button
@@ -324,7 +322,10 @@ const DailyGadgetMode: React.FC = () => {
                     <img 
                       src="/StarpowerIcon.png" 
                       alt="Star Power Mode" 
-                      className="h-6 w-6 mr-2"
+                      className={cn(
+                        "h-6 w-6",
+                        currentLanguage === 'he' ? "ml-2" : "mr-2"
+                      )}
                     />
                     {t('daily.next.mode')}
                   </Button>
@@ -341,12 +342,9 @@ const DailyGadgetMode: React.FC = () => {
               // Game Content
               <div className="space-y-6">
                 <div className="text-center">
-                  <h2 className="text-2xl font-bold text-white mb-2">
+                  <h2 className="text-2xl font-bold text-white mb-2 mode-headline-gadget">
                     {t('daily.gadget.headline')}
                   </h2>
-                  <p className="text-white/70 mb-4">
-                    Use the clues from your guesses to find the correct brawler
-                  </p>
                   
                   {/* Gadget Image Only - No Name or Description */}
                   {gadgetImage && (
@@ -356,21 +354,49 @@ const DailyGadgetMode: React.FC = () => {
                           src={gadgetImage}
                           alt="Brawler Gadget"
                           className="w-full h-full object-contain transform transition-all duration-300 hover:scale-105"
-                          onError={(e) => {
-                            console.log('Image load failed. Using fallback gadget image.');
-                            e.currentTarget.src = '/GadgetImages/shelly_gadget_01.png';
-                            
-                            e.currentTarget.onerror = () => {
-                              console.log('First fallback failed, trying another brawler gadget');
-                              e.currentTarget.src = '/GadgetImages/colt_gadget_01.png';
-                              
-                              e.currentTarget.onerror = () => {
-                                console.log('All fallback images failed, hiding image');
-                                e.currentTarget.style.display = 'none';
-                              };
-                            };
+                          onLoad={(e) => {
+                            console.log('Gadget image loaded successfully');
+                            e.currentTarget.style.display = 'block';
+                            // Hide loading state
+                            const parent = e.currentTarget.parentElement;
+                            if (parent) {
+                              const loadingEl = parent.querySelector('.loading-placeholder') as HTMLElement;
+                              if (loadingEl) {
+                                loadingEl.style.display = 'none';
+                              }
+                            }
                           }}
+                          onError={(e) => {
+                            console.log('Gadget image load failed, showing loading state');
+                            e.currentTarget.style.display = 'none';
+                            // Show error state instead of loading
+                            const parent = e.currentTarget.parentElement;
+                            if (parent) {
+                              const loadingEl = parent.querySelector('.loading-placeholder') as HTMLElement;
+                              if (loadingEl) {
+                                loadingEl.innerHTML = `
+                                  <div class="w-full h-full flex flex-col items-center justify-center space-y-4">
+                                    <div class="text-red-400 text-sm">Failed to load gadget image</div>
+                                    <button onclick="window.location.reload()" class="text-xs bg-red-600 hover:bg-red-500 px-3 py-1 rounded text-white">
+                                      Refresh Page
+                                    </button>
+                                  </div>
+                                `;
+                              }
+                            }
+                          }}
+                          style={{ display: 'none' }}
                         />
+                        {/* Loading state */}
+                        <div className="w-full h-full flex flex-col items-center justify-center space-y-4 loading-placeholder">
+                          <div className="loading-spinner"></div>
+                          <p className="text-yellow-400 text-sm">Loading gadget...</p>
+                          <div className="loading-dots">
+                            <div className="loading-dot"></div>
+                            <div className="loading-dot"></div>
+                            <div className="loading-dot"></div>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   )}
@@ -390,14 +416,37 @@ const DailyGadgetMode: React.FC = () => {
 
                 {/* Guesses */}
                 <div className="space-y-2">
-                  {guesses.map((guess, index) => (
-                    <BrawlerGuessRow
-                      key={index}
-                      guess={guess}
-                      correctAnswer={getCorrectBrawler()}
-                      isNew={index === guesses.length - 1}
-                    />
-                  ))}
+                  <div className="w-full max-w-md mx-auto">
+                    <ul className="grid grid-cols-1 md:grid-cols-2 gap-y-3 md:gap-x-4 md:gap-y-3">
+                      {guesses.map((guess, idx) => {
+                        const isCorrect = guess.name.toLowerCase() === getCorrectBrawler().name.toLowerCase();
+                        const isLastGuess = idx === guesses.length - 1;
+                        return (
+                          <li
+                            key={idx}
+                            className={cn(
+                              "flex flex-col items-center justify-center py-2 md:py-4 rounded-2xl border-2 transition-all duration-300 animate-fade-in w-36 md:w-40 mx-auto md:min-h-[120px]",
+                              isCorrect ? "bg-brawl-green border-yellow-400" : "bg-brawl-red border-yellow-400",
+                              !isCorrect && isLastGuess ? "animate-shake" : ""
+                            )}
+                            style={{ minHeight: '81px' }}
+                          >
+                            <img
+                              src={getPortrait(guess.name)}
+                              alt={getBrawlerDisplayName(guess, currentLanguage)}
+                              className="w-14 h-14 md:w-20 md:h-20 rounded-xl object-cover border border-yellow-400 shadow-lg mx-auto"
+                              onError={(e) => {
+                                e.currentTarget.src = '/portraits/shelly.png';
+                              }}
+                            />
+                            <span className="text-base md:text-2xl font-extrabold text-white text-center mt-2 truncate w-full" style={{lineHeight: 1.1}}>
+                              {getBrawlerDisplayName(guess, currentLanguage)}
+                            </span>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </div>
                 </div>
               </div>
             )}

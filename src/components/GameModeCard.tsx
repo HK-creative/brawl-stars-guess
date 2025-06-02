@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { t } from '@/lib/i18n';
 import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
+import { getLanguage } from '@/lib/i18n';
 
 interface GameModeCardProps {
   mode?: string;
@@ -618,6 +619,8 @@ export const GameModeCardButton: React.FC<{
   className?: string;
 }> = ({ title, icon, onClick, bgColor, cardBackground, previewImage, className }) => {
   const gradientColor = bgColor || "from-blue-500 to-blue-600";
+  const currentLanguage = getLanguage();
+  
   return (
     <button
       type="button"
@@ -642,7 +645,10 @@ export const GameModeCardButton: React.FC<{
           "bg-black/70 group-hover:bg-black/50"
         )} />
       </div>
-      <div className="relative flex items-center gap-4 z-10 w-full justify-center">
+      <div className={cn(
+        "relative flex items-center gap-4 z-10 w-full justify-center",
+        currentLanguage === 'he' ? "flex-row-reverse" : "flex-row"
+      )}>
         <span className="flex items-center justify-center w-12 h-12 md:w-16 md:h-16 rounded-2xl bg-black/60 border-2 border-white/30 shadow-lg">
           {typeof icon === 'string' && icon.startsWith('/') ? (
             <img src={icon} alt={`${title} icon`} className="w-8 h-8 md:w-12 md:h-12 object-contain" />
