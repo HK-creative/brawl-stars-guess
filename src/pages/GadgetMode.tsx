@@ -484,7 +484,7 @@ const GadgetMode = ({
                   }}
                   onError={(e) => {
                     console.log('Gadget image load failed, showing error state');
-                    e.currentTarget.style.display = 'none';
+                          e.currentTarget.style.display = 'none';
                     // Show error state
                     const parent = e.currentTarget.parentElement;
                     if (parent) {

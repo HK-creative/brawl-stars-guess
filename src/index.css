@@ -613,3 +613,281 @@ html[dir="rtl"] [class*="auth-ready"] {
 .loading-dot {
   @apply w-2 h-2 bg-yellow-400 rounded-full animate-loading-dots;
 }
+
+/* SPECIFIC HEBREW HEADLINES FONT SIZE REDUCTIONS */
+
+/* Remove the non-working :contains() selectors and replace with proper targeting */
+
+/* Hebrew headlines that should be H3 size instead of H1 size (reduces from 8rem to 4rem = ~50% reduction) */
+/* These target the specific Hebrew game mode headlines */
+
+/* מצב הישרדות (Survival Mode) */
+html[dir="rtl"] h1[class*="survival"],
+html[dir="rtl"] .survival-title h1,
+html[dir="rtl"] h1.survival-mode-title {
+  font-size: 4rem !important; /* H3 size instead of H1 */
+  line-height: 1 !important;
+  font-weight: 900 !important;
+}
+
+/* Daily challenge mode headlines - reduce to H3 size */
+html[dir="rtl"] h1[class*="starpower"],
+html[dir="rtl"] h1[class*="gadget"], 
+html[dir="rtl"] h1[class*="audio"],
+html[dir="rtl"] .starpower-title h1,
+html[dir="rtl"] .gadget-title h1,
+html[dir="rtl"] .audio-title h1 {
+  font-size: 4rem !important; /* H3 size instead of H1 */
+  line-height: 1 !important;
+  font-weight: 900 !important;
+}
+
+/* Auth page headlines - reduce by 40% (from 8rem to ~4.8rem) */
+html[dir="rtl"] h1[class*="auth"],
+html[dir="rtl"] .auth-title h1,
+html[dir="rtl"] h1[class*="signin"],
+html[dir="rtl"] h1[class*="signup"],
+html[dir="rtl"] h1[class*="reset"] {
+  font-size: 4.8rem !important; /* 40% reduction from H1 */
+  line-height: 1 !important;
+  font-weight: 900 !important;
+}
+
+/* Mobile versions */
+@media (max-width: 768px) {
+  /* Survival and game modes - H3 mobile size */
+  html[dir="rtl"] h1[class*="survival"],
+  html[dir="rtl"] .survival-title h1,
+  html[dir="rtl"] h1.survival-mode-title,
+  html[dir="rtl"] h1[class*="starpower"],
+  html[dir="rtl"] h1[class*="gadget"], 
+  html[dir="rtl"] h1[class*="audio"],
+  html[dir="rtl"] .starpower-title h1,
+  html[dir="rtl"] .gadget-title h1,
+  html[dir="rtl"] .audio-title h1 {
+    font-size: 2.5rem !important; /* H3 mobile size */
+    line-height: 1.1 !important;
+  }
+  
+  /* Auth headlines mobile - 40% reduction */
+  html[dir="rtl"] h1[class*="auth"],
+  html[dir="rtl"] .auth-title h1,
+  html[dir="rtl"] h1[class*="signin"],
+  html[dir="rtl"] h1[class*="signup"],
+  html[dir="rtl"] h1[class*="reset"] {
+    font-size: 2.7rem !important; /* 40% reduction from H1 mobile size */
+    line-height: 1.1 !important;
+  }
+}
+
+/* SPECIAL FONT FOR ULTIMATE CHALLENGE TITLE */
+/* אתגר בראול סטארס האגדי - change font to Abraham */
+html[dir="rtl"] .ultimate-challenge-title,
+html[dir="rtl"] h2[class*="ultimate"],
+html[dir="rtl"] .subtitle-main {
+  font-family: 'Abraham', 'Inter', system-ui, sans-serif !important;
+  font-weight: 800 !important;
+}
+
+/* OVERRIDE SPECIFIC HEBREW HEADLINES TO H3 SIZE */
+/* These headlines should be H3 size (4rem) instead of H1 size (8rem) */
+
+/* Target survival mode headlines - force to H3 size */
+html[dir="rtl"] h1[data-mode="survival"],
+html[dir="rtl"] h1.survival-title,
+html[dir="rtl"] .survival-mode h1,
+html[dir="rtl"] [data-testid*="survival"] h1,
+html[dir="rtl"] h1:has-text("מצב הישרדות") {
+  font-size: 4rem !important; /* H3 size */
+  line-height: 1 !important;
+  font-weight: 900 !important;
+}
+
+/* Target daily mode headlines - force to H3 size */
+html[dir="rtl"] h1[data-mode="starpower"],
+html[dir="rtl"] h1[data-mode="gadget"],
+html[dir="rtl"] h1[data-mode="audio"],
+html[dir="rtl"] .starpower-mode h1,
+html[dir="rtl"] .gadget-mode h1,
+html[dir="rtl"] .audio-mode h1,
+html[dir="rtl"] [data-testid*="starpower"] h1,
+html[dir="rtl"] [data-testid*="gadget"] h1,
+html[dir="rtl"] [data-testid*="audio"] h1 {
+  font-size: 4rem !important; /* H3 size */
+  line-height: 1 !important;
+  font-weight: 900 !important;
+}
+
+/* Target auth page headlines - 40% reduction */
+html[dir="rtl"] h1[data-auth],
+html[dir="rtl"] .auth-page h1,
+html[dir="rtl"] .signin-page h1,
+html[dir="rtl"] .signup-page h1,
+html[dir="rtl"] .reset-page h1,
+html[dir="rtl"] [data-testid*="auth"] h1 {
+  font-size: 4.8rem !important; /* 40% reduction */
+  line-height: 1 !important;
+  font-weight: 900 !important;
+}
+
+/* MORE SPECIFIC TARGETING - Use Abraham font as indicator */
+/* Since user mentioned they all use Abraham font, target those specifically */
+html[dir="rtl"] h1[style*="Abraham"],
+html[dir="rtl"] h1.font-brawl:not(.main-title):not(.brawldle-title),
+html[dir="rtl"] .page-title h1,
+html[dir="rtl"] .mode-title h1,
+html[dir="rtl"] .game-mode-title h1 {
+  font-size: 4rem !important; /* Force H3 size */
+  line-height: 1 !important;
+  font-weight: 900 !important;
+}
+
+/* Auth specific targeting */
+html[dir="rtl"] .auth-title h1,
+html[dir="rtl"] .login-title h1,
+html[dir="rtl"] .signup-title h1 {
+  font-size: 4.8rem !important; /* 40% reduction */
+  line-height: 1 !important;
+  font-weight: 900 !important;
+}
+
+/* NUCLEAR OPTION - Target all H1s that aren't the main Brawldle title */
+html[dir="rtl"] h1:not(.main-title):not(.brawldle-title):not(.site-title):not(.hero-title) {
+  font-size: 4rem !important; /* Force all other H1s to H3 size */
+  line-height: 1 !important;
+  font-weight: 900 !important;
+}
+
+/* Exception for the main Brawldle title - keep it large */
+html[dir="rtl"] h1.main-title,
+html[dir="rtl"] h1.brawldle-title,
+html[dir="rtl"] h1.site-title,
+html[dir="rtl"] h1.hero-title,
+html[dir="rtl"] .hero h1:first-child {
+  font-size: 8rem !important; /* Keep main title large */
+  line-height: 0.9 !important;
+  font-weight: 900 !important;
+}
+
+/* Mobile overrides for reduced headlines */
+@media (max-width: 768px) {
+  /* All reduced H1s become H3 mobile size */
+  html[dir="rtl"] h1:not(.main-title):not(.brawldle-title):not(.site-title):not(.hero-title) {
+    font-size: 2.5rem !important; /* H3 mobile size */
+    line-height: 1.1 !important;
+  }
+  
+  /* Keep main title large on mobile */
+  html[dir="rtl"] h1.main-title,
+  html[dir="rtl"] h1.brawldle-title,
+  html[dir="rtl"] h1.site-title,
+  html[dir="rtl"] h1.hero-title,
+  html[dir="rtl"] .hero h1:first-child {
+    font-size: 4.5rem !important; /* Keep main title large on mobile */
+    line-height: 0.95 !important;
+  }
+}
+
+/* SPECIFIC HEBREW HEADLINES TO H4 SIZE */
+/* Target the 3 specific Hebrew game mode headlines and make them H4 size */
+
+/* Star Power Mode - נחש את הבראולר לפי הכוח כוכב */
+html[dir="rtl"] h1[data-mode="starpower"],
+html[dir="rtl"] .starpower-mode h1,
+html[dir="rtl"] [data-testid*="starpower"] h1,
+html[dir="rtl"] .page-title:contains("כוכב") h1,
+html[dir="rtl"] h1.starpower-title {
+  font-size: 3rem !important; /* H4 size */
+  line-height: 1.1 !important;
+  font-weight: 900 !important;
+}
+
+/* Gadget Mode - נחש את הבראולר לפי הגאדג'ט */
+html[dir="rtl"] h1[data-mode="gadget"],
+html[dir="rtl"] .gadget-mode h1,
+html[dir="rtl"] [data-testid*="gadget"] h1,
+html[dir="rtl"] .page-title:contains("גאדג'ט") h1,
+html[dir="rtl"] h1.gadget-title {
+  font-size: 3rem !important; /* H4 size */
+  line-height: 1.1 !important;
+  font-weight: 900 !important;
+}
+
+/* Audio/Voice Mode - נחש את הבראולר לפי הקול */
+html[dir="rtl"] h1[data-mode="audio"],
+html[dir="rtl"] h1[data-mode="voice"],
+html[dir="rtl"] .audio-mode h1,
+html[dir="rtl"] .voice-mode h1,
+html[dir="rtl"] [data-testid*="audio"] h1,
+html[dir="rtl"] [data-testid*="voice"] h1,
+html[dir="rtl"] .page-title:contains("קול") h1,
+html[dir="rtl"] h1.audio-title,
+html[dir="rtl"] h1.voice-title {
+  font-size: 3rem !important; /* H4 size */
+  line-height: 1.1 !important;
+  font-weight: 900 !important;
+}
+
+/* SPECIAL STYLING FOR ULTIMATE CHALLENGE SUBTITLE */
+/* אתגר בראול סטארס האגדי - different font and smaller size */
+html[dir="rtl"] .ultimate-challenge-title,
+html[dir="rtl"] h2[class*="ultimate"],
+html[dir="rtl"] .subtitle-main,
+html[dir="rtl"] .hero-subtitle,
+html[dir="rtl"] .main-subtitle {
+  font-family: 'Inter', system-ui, sans-serif !important; /* Different font - not Abraham */
+  font-weight: 600 !important; /* Lighter weight */
+  font-size: 2.2rem !important; /* Smaller than default H2 */
+  line-height: 1.2 !important;
+  letter-spacing: 0.02em !important;
+}
+
+/* Mobile overrides for reduced headlines */
+@media (max-width: 768px) {
+  /* All reduced H1s become H3 mobile size */
+  html[dir="rtl"] h1:not(.main-title):not(.brawldle-title):not(.site-title):not(.hero-title) {
+    font-size: 2.5rem !important; /* H3 mobile size */
+    line-height: 1.1 !important;
+  }
+  
+  /* OVERRIDE: Specific headlines that should be H4 size on mobile */
+  html[dir="rtl"] h1[data-mode="starpower"],
+  html[dir="rtl"] .starpower-mode h1,
+  html[dir="rtl"] [data-testid*="starpower"] h1,
+  html[dir="rtl"] h1.starpower-title,
+  html[dir="rtl"] h1[data-mode="gadget"],
+  html[dir="rtl"] .gadget-mode h1,
+  html[dir="rtl"] [data-testid*="gadget"] h1,
+  html[dir="rtl"] h1.gadget-title,
+  html[dir="rtl"] h1[data-mode="audio"],
+  html[dir="rtl"] h1[data-mode="voice"],
+  html[dir="rtl"] .audio-mode h1,
+  html[dir="rtl"] .voice-mode h1,
+  html[dir="rtl"] [data-testid*="audio"] h1,
+  html[dir="rtl"] [data-testid*="voice"] h1,
+  html[dir="rtl"] h1.audio-title,
+  html[dir="rtl"] h1.voice-title {
+    font-size: 2rem !important; /* H4 mobile size */
+    line-height: 1.2 !important;
+  }
+  
+  /* Ultimate challenge subtitle mobile */
+  html[dir="rtl"] .ultimate-challenge-title,
+  html[dir="rtl"] h2[class*="ultimate"],
+  html[dir="rtl"] .subtitle-main,
+  html[dir="rtl"] .hero-subtitle,
+  html[dir="rtl"] .main-subtitle {
+    font-size: 1.5rem !important; /* Smaller on mobile */
+    line-height: 1.3 !important;
+  }
+  
+  /* Keep main title large on mobile */
+  html[dir="rtl"] h1.main-title,
+  html[dir="rtl"] h1.brawldle-title,
+  html[dir="rtl"] h1.site-title,
+  html[dir="rtl"] h1.hero-title,
+  html[dir="rtl"] .hero h1:first-child {
+    font-size: 4.5rem !important; /* Keep main title large on mobile */
+    line-height: 0.95 !important;
+  }
+}

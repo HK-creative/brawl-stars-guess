@@ -14,7 +14,7 @@ export function SparklesPreview() {
       {/* PC Layout: Language selection on left, title in center */}
       <div className="hidden md:flex md:items-center md:justify-center md:w-full md:relative md:mb-4">
         {/* Main title - centered */}
-        <h1 className="md:text-7xl text-5xl lg:text-8xl font-bold text-center relative z-20 bg-gradient-to-b from-[#FFD700] via-[#FFA500] to-[#FF8C00] text-transparent bg-clip-text animate-fade-in">
+      <h1 className="md:text-7xl text-5xl lg:text-8xl font-bold text-center relative z-20 bg-gradient-to-b from-[#FFD700] via-[#FFA500] to-[#FF8C00] text-transparent bg-clip-text animate-fade-in">
           {t('app.title')}
         </h1>
         

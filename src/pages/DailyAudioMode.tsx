@@ -155,13 +155,13 @@ const DailyAudioMode: React.FC = () => {
         } else {
           // No audio file provided, show error instead of fallback
           console.warn('No audio file in challenge data');
-          setAudioError(true);
-          setAudioReady(false);
+            setAudioError(true);
+            setAudioReady(false);
         }
       } catch (error) {
         console.error('Error loading audio data:', error);
-        setAudioError(true);
-        setAudioReady(false);
+          setAudioError(true);
+          setAudioReady(false);
       }
     };
     
@@ -472,16 +472,16 @@ const DailyAudioMode: React.FC = () => {
                       {audioError ? (
                         <div className="space-y-2">
                           <p className="text-red-400 text-sm">Audio failed to load</p>
-                          <button
+                            <button
                             onClick={() => window.location.reload()}
                             className="text-xs bg-red-600 hover:bg-red-500 px-3 py-1 rounded text-white"
-                          >
+                            >
                             Refresh Page
-                          </button>
+                            </button>
                         </div>
                       ) : !audioReady ? (
                         <div className="flex flex-col items-center space-y-2">
-                          <p className="text-yellow-400 text-sm">Loading audio...</p>
+                        <p className="text-yellow-400 text-sm">Loading audio...</p>
                           <div className="loading-dots">
                             <div className="loading-dot"></div>
                             <div className="loading-dot"></div>

@@ -344,7 +344,7 @@ const DailyStarPowerMode: React.FC = () => {
                           }}
                           onError={(e) => {
                             console.log('Star power image load failed, showing loading state');
-                            e.currentTarget.style.display = 'none';
+                                e.currentTarget.style.display = 'none';
                             // Show error state instead of loading
                             const parent = e.currentTarget.parentElement;
                             if (parent) {
