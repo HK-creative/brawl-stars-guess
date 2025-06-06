@@ -689,6 +689,139 @@ html[dir="rtl"] .subtitle-main {
   font-weight: 800 !important;
 }
 
+/* Home screen subtitle - Abraham font + smaller size */
+html[dir="rtl"] h2:has-text("אתגר בראול סטארס האגדי"),
+html[dir="rtl"] h2:contains("אתגר בראול סטארס האגדי") {
+  font-family: 'David Libre', 'Times New Roman', serif !important;
+  font-size: 1.4rem !important; /* Smaller than the default text-xl md:text-2xl lg:text-3xl */
+  font-weight: 600 !important;
+}
+
+/* Target the specific sparkles-preview component subtitle */
+html[dir="rtl"] .sparkles-preview h2,
+html[dir="rtl"] [class*="sparkles"] h2 {
+  font-family: 'David Libre', 'Times New Roman', serif !important;
+  font-size: 1.4rem !important; /* Smaller than default */
+  font-weight: 600 !important;
+}
+
+/* More specific targeting using the home-subtitle class */
+html[dir="rtl"] .home-subtitle {
+  font-family: 'David Libre', 'Times New Roman', serif !important;
+  font-size: 1.7rem !important; /* Slightly larger than before */
+  font-weight: 700 !important; /* Bold */
+}
+
+/* Mobile version */
+@media (max-width: 768px) {
+  html[dir="rtl"] h2:has-text("אתגר בראול סטארס האגדי"),
+  html[dir="rtl"] h2:contains("אתגר בראול סטארס האגדי"),
+  html[dir="rtl"] .sparkles-preview h2,
+  html[dir="rtl"] [class*="sparkles"] h2,
+  html[dir="rtl"] .home-subtitle {
+    font-size: 1.4rem !important; /* Slightly larger on mobile too */
+    font-weight: 700 !important; /* Bold on mobile */
+  }
+}
+
+/* SPECIFIC HEBREW SURVIVAL MODE TEXTS - REDUCED FONT SIZE */
+/* Target the three specific Hebrew survival mode headlines */
+
+/* נחש את הבראולר לפי הכוח כוכב - Star Power Mode */
+html[dir="rtl"] h1:has-text("נחש את הבראולר לפי הכוח כוכב"),
+html[dir="rtl"] h1:contains("נחש את הבראולר לפי הכוח כוכב") {
+  font-size: 1.6rem !important; /* Reduced from text-2xl md:text-3xl */
+  line-height: 1.2 !important;
+}
+
+/* נחש את הבראולר לפי הגאדג'ט - Gadget Mode */
+html[dir="rtl"] h1:has-text("נחש את הבראולר לפי הגאדג'ט"),
+html[dir="rtl"] h1:contains("נחש את הבראולר לפי הגאדג'ט") {
+  font-size: 1.6rem !important; /* Reduced from text-2xl md:text-3xl */
+  line-height: 1.2 !important;
+}
+
+/* נחש את הבראולר לפי הקול - Audio/Voice Mode */
+html[dir="rtl"] h1:has-text("נחש את הבראולר לפי הקול"),
+html[dir="rtl"] h1:contains("נחש את הבראולר לפי הקול") {
+  font-size: 1.6rem !important; /* Reduced from text-2xl md:text-3xl */
+  line-height: 1.2 !important;
+}
+
+/* Mobile versions for the survival mode texts */
+@media (max-width: 768px) {
+  html[dir="rtl"] h1:has-text("נחש את הבראולר לפי הכוח כוכב"),
+  html[dir="rtl"] h1:contains("נחש את הבראולר לפי הכוח כוכב"),
+  html[dir="rtl"] h1:has-text("נחש את הבראולר לפי הגאדג'ט"),
+  html[dir="rtl"] h1:contains("נחש את הבראולר לפי הגאדג'ט"),
+  html[dir="rtl"] h1:has-text("נחש את הבראולר לפי הקול"),
+  html[dir="rtl"] h1:contains("נחש את הבראולר לפי הקול") {
+    font-size: 1.4rem !important; /* Even smaller on mobile */
+    line-height: 1.2 !important;
+  }
+}
+
+/* ALTERNATIVE TARGETING - Use page-specific targeting since :has-text and :contains may not work */
+/* Target survival mode headers by page location */
+
+/* Star Power Mode page */
+body:has([data-page="starpower"]) html[dir="rtl"] h1.text-2xl,
+body:has([data-testid*="starpower"]) html[dir="rtl"] h1.text-2xl,
+[data-page="starpower"] html[dir="rtl"] h1.text-2xl,
+.starpower-mode html[dir="rtl"] h1.text-2xl {
+  font-size: 1.6rem !important;
+  line-height: 1.2 !important;
+}
+
+/* Gadget Mode page */
+body:has([data-page="gadget"]) html[dir="rtl"] h1.text-2xl,
+body:has([data-testid*="gadget"]) html[dir="rtl"] h1.text-2xl,
+[data-page="gadget"] html[dir="rtl"] h1.text-2xl,
+.gadget-mode html[dir="rtl"] h1.text-2xl {
+  font-size: 1.6rem !important;
+  line-height: 1.2 !important;
+}
+
+/* Audio Mode page */
+body:has([data-page="audio"]) html[dir="rtl"] h1.text-2xl,
+body:has([data-testid*="audio"]) html[dir="rtl"] h1.text-2xl,
+[data-page="audio"] html[dir="rtl"] h1.text-2xl,
+.audio-mode html[dir="rtl"] h1.text-2xl {
+  font-size: 1.6rem !important;
+  line-height: 1.2 !important;
+}
+
+/* More specific targeting using URL-based approach */
+/* When the URL contains starpower, gadget, or audio, target the survival mode h1 titles */
+html[dir="rtl"][data-route*="starpower"] h1:not(.main-title):not(.brawldle-title),
+html[dir="rtl"][data-route*="gadget"] h1:not(.main-title):not(.brawldle-title),
+html[dir="rtl"][data-route*="audio"] h1:not(.main-title):not(.brawldle-title) {
+  font-size: 1.6rem !important;
+  line-height: 1.2 !important;
+}
+
+/* Mobile versions for page-specific targeting */
+@media (max-width: 768px) {
+  body:has([data-page="starpower"]) html[dir="rtl"] h1.text-2xl,
+  body:has([data-testid*="starpower"]) html[dir="rtl"] h1.text-2xl,
+  [data-page="starpower"] html[dir="rtl"] h1.text-2xl,
+  .starpower-mode html[dir="rtl"] h1.text-2xl,
+  body:has([data-page="gadget"]) html[dir="rtl"] h1.text-2xl,
+  body:has([data-testid*="gadget"]) html[dir="rtl"] h1.text-2xl,
+  [data-page="gadget"] html[dir="rtl"] h1.text-2xl,
+  .gadget-mode html[dir="rtl"] h1.text-2xl,
+  body:has([data-page="audio"]) html[dir="rtl"] h1.text-2xl,
+  body:has([data-testid*="audio"]) html[dir="rtl"] h1.text-2xl,
+  [data-page="audio"] html[dir="rtl"] h1.text-2xl,
+  .audio-mode html[dir="rtl"] h1.text-2xl,
+  html[dir="rtl"][data-route*="starpower"] h1:not(.main-title):not(.brawldle-title),
+  html[dir="rtl"][data-route*="gadget"] h1:not(.main-title):not(.brawldle-title),
+  html[dir="rtl"][data-route*="audio"] h1:not(.main-title):not(.brawldle-title) {
+    font-size: 1.4rem !important;
+    line-height: 1.2 !important;
+  }
+}
+
 /* OVERRIDE SPECIFIC HEBREW HEADLINES TO H3 SIZE */
 /* These headlines should be H3 size (4rem) instead of H1 size (8rem) */
 
@@ -788,106 +921,42 @@ html[dir="rtl"] .hero h1:first-child {
   }
 }
 
-/* SPECIFIC HEBREW HEADLINES TO H4 SIZE */
-/* Target the 3 specific Hebrew game mode headlines and make them H4 size */
-
-/* Star Power Mode - נחש את הבראולר לפי הכוח כוכב */
-html[dir="rtl"] h1[data-mode="starpower"],
-html[dir="rtl"] .starpower-mode h1,
-html[dir="rtl"] [data-testid*="starpower"] h1,
-html[dir="rtl"] .page-title:contains("כוכב") h1,
-html[dir="rtl"] h1.starpower-title {
-  font-size: 3rem !important; /* H4 size */
+/* MOST RELIABLE TARGETING - Using specific CSS classes */
+/* Target survival mode headers using the new survival-mode-header class */
+html[dir="rtl"] .survival-mode-header {
+  font-size: 1.2rem !important; /* Reduced even more from original text-2xl md:text-3xl */
   line-height: 1.1 !important;
-  font-weight: 900 !important;
 }
 
-/* Gadget Mode - נחש את הבראולר לפי הגאדג'ט */
-html[dir="rtl"] h1[data-mode="gadget"],
-html[dir="rtl"] .gadget-mode h1,
-html[dir="rtl"] [data-testid*="gadget"] h1,
-html[dir="rtl"] .page-title:contains("גאדג'ט") h1,
-html[dir="rtl"] h1.gadget-title {
-  font-size: 3rem !important; /* H4 size */
-  line-height: 1.1 !important;
-  font-weight: 900 !important;
-}
-
-/* Audio/Voice Mode - נחש את הבראולר לפי הקול */
-html[dir="rtl"] h1[data-mode="audio"],
-html[dir="rtl"] h1[data-mode="voice"],
-html[dir="rtl"] .audio-mode h1,
-html[dir="rtl"] .voice-mode h1,
-html[dir="rtl"] [data-testid*="audio"] h1,
-html[dir="rtl"] [data-testid*="voice"] h1,
-html[dir="rtl"] .page-title:contains("קול") h1,
-html[dir="rtl"] h1.audio-title,
-html[dir="rtl"] h1.voice-title {
-  font-size: 3rem !important; /* H4 size */
-  line-height: 1.1 !important;
-  font-weight: 900 !important;
-}
-
-/* SPECIAL STYLING FOR ULTIMATE CHALLENGE SUBTITLE */
-/* אתגר בראול סטארס האגדי - different font and smaller size */
-html[dir="rtl"] .ultimate-challenge-title,
-html[dir="rtl"] h2[class*="ultimate"],
-html[dir="rtl"] .subtitle-main,
-html[dir="rtl"] .hero-subtitle,
-html[dir="rtl"] .main-subtitle {
-  font-family: 'Inter', system-ui, sans-serif !important; /* Different font - not Abraham */
-  font-weight: 600 !important; /* Lighter weight */
-  font-size: 2.2rem !important; /* Smaller than default H2 */
-  line-height: 1.2 !important;
-  letter-spacing: 0.02em !important;
-}
-
-/* Mobile overrides for reduced headlines */
+/* Mobile version for survival mode headers */
 @media (max-width: 768px) {
-  /* All reduced H1s become H3 mobile size */
-  html[dir="rtl"] h1:not(.main-title):not(.brawldle-title):not(.site-title):not(.hero-title) {
-    font-size: 2.5rem !important; /* H3 mobile size */
+  html[dir="rtl"] .survival-mode-header {
+    font-size: 1rem !important; /* Very small on mobile */
     line-height: 1.1 !important;
   }
-  
-  /* OVERRIDE: Specific headlines that should be H4 size on mobile */
-  html[dir="rtl"] h1[data-mode="starpower"],
-  html[dir="rtl"] .starpower-mode h1,
-  html[dir="rtl"] [data-testid*="starpower"] h1,
-  html[dir="rtl"] h1.starpower-title,
-  html[dir="rtl"] h1[data-mode="gadget"],
-  html[dir="rtl"] .gadget-mode h1,
-  html[dir="rtl"] [data-testid*="gadget"] h1,
-  html[dir="rtl"] h1.gadget-title,
-  html[dir="rtl"] h1[data-mode="audio"],
-  html[dir="rtl"] h1[data-mode="voice"],
-  html[dir="rtl"] .audio-mode h1,
-  html[dir="rtl"] .voice-mode h1,
-  html[dir="rtl"] [data-testid*="audio"] h1,
-  html[dir="rtl"] [data-testid*="voice"] h1,
-  html[dir="rtl"] h1.audio-title,
-  html[dir="rtl"] h1.voice-title {
-    font-size: 2rem !important; /* H4 mobile size */
-    line-height: 1.2 !important;
-  }
-  
-  /* Ultimate challenge subtitle mobile */
-  html[dir="rtl"] .ultimate-challenge-title,
-  html[dir="rtl"] h2[class*="ultimate"],
-  html[dir="rtl"] .subtitle-main,
-  html[dir="rtl"] .hero-subtitle,
-  html[dir="rtl"] .main-subtitle {
-    font-size: 1.5rem !important; /* Smaller on mobile */
-    line-height: 1.3 !important;
-  }
-  
-  /* Keep main title large on mobile */
-  html[dir="rtl"] h1.main-title,
-  html[dir="rtl"] h1.brawldle-title,
-  html[dir="rtl"] h1.site-title,
-  html[dir="rtl"] h1.hero-title,
-  html[dir="rtl"] .hero h1:first-child {
-    font-size: 4.5rem !important; /* Keep main title large on mobile */
-    line-height: 0.95 !important;
+}
+
+/* HEBREW APP TITLE - MASSIVE SIZE INCREASE */
+/* Make "בראולדל" WAAAAAY larger when in Hebrew - 2-3x bigger */
+html[dir="rtl"] .app-title-main {
+  font-size: 20rem !important; /* MASSIVE size for desktop - 2.5x bigger */
+  line-height: 0.7 !important;
+}
+
+/* Mobile version for Hebrew app title */
+@media (max-width: 768px) {
+  html[dir="rtl"] .app-title-main {
+    font-size: 12rem !important; /* MASSIVE mobile size - over 2x bigger */
+    line-height: 0.75 !important;
   }
 }
+
+/* Medium screens adjustment */
+@media (max-width: 1024px) and (min-width: 769px) {
+  html[dir="rtl"] .app-title-main {
+    font-size: 16rem !important; /* Scaled for tablets */
+    line-height: 0.72 !important;
+  }
+}
+
+

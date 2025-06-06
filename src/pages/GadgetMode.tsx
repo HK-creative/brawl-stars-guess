@@ -459,7 +459,7 @@ const GadgetMode = ({
 
       <div className="flex flex-col min-h-[70vh] w-full max-w-2xl mx-auto">
         <div className="flex-1 mb-8">
-          <h1 className="text-2xl md:text-3xl font-bold text-center text-white mb-3">
+          <h1 className="text-2xl md:text-3xl font-bold text-center text-white mb-3 survival-mode-header">
             {t('survival.guess.gadget')}
           </h1>
           

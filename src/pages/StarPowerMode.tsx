@@ -586,7 +586,7 @@ const StarPowerMode = ({
         {/* Main Challenge Content */}
         <div className="flex-1 mb-8">
           {/* Title */}
-          <h1 className="text-2xl md:text-3xl font-bold text-center text-white mb-3">
+          <h1 className="text-2xl md:text-3xl font-bold text-center text-white mb-3 survival-mode-header">
             {t('survival.guess.starpower')}
           </h1>
           

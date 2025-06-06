@@ -14,7 +14,7 @@ export function SparklesPreview() {
       {/* PC Layout: Language selection on left, title in center */}
       <div className="hidden md:flex md:items-center md:justify-center md:w-full md:relative md:mb-4">
         {/* Main title - centered */}
-      <h1 className="md:text-7xl text-5xl lg:text-8xl font-bold text-center relative z-20 bg-gradient-to-b from-[#FFD700] via-[#FFA500] to-[#FF8C00] text-transparent bg-clip-text animate-fade-in">
+      <h1 className="md:text-7xl text-5xl lg:text-8xl font-bold text-center relative z-20 bg-gradient-to-b from-[#FFD700] via-[#FFA500] to-[#FF8C00] text-transparent bg-clip-text animate-fade-in app-title-main">
           {t('app.title')}
         </h1>
         
@@ -61,7 +61,7 @@ export function SparklesPreview() {
       </div>
 
       {/* Mobile Layout: Title only (language selection stays in Layout.tsx) */}
-      <h1 className="md:hidden text-5xl font-bold text-center relative z-20 bg-gradient-to-b from-[#FFD700] via-[#FFA500] to-[#FF8C00] text-transparent bg-clip-text animate-fade-in">
+      <h1 className="md:hidden text-5xl font-bold text-center relative z-20 bg-gradient-to-b from-[#FFD700] via-[#FFA500] to-[#FF8C00] text-transparent bg-clip-text animate-fade-in app-title-main">
         {t('app.title')}
       </h1>
 
@@ -70,7 +70,7 @@ export function SparklesPreview() {
 
       {/* Subtitle - Positioned after the decorative line */}
       <h2 className={cn(
-        "text-xl md:text-2xl lg:text-3xl text-white/90 font-medium text-center relative z-20 animate-fade-in-delay",
+        "text-xl md:text-2xl lg:text-3xl text-white/90 font-medium text-center relative z-20 animate-fade-in-delay home-subtitle",
         language === 'he' && "font-bold"
       )}>
         {t('home.ultimate.challenge')}
