@@ -1,13 +1,7 @@
 import React from 'react';
 import GameModeCard from '@/components/GameModeCard';
-import { t } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
-import { SparklesPreview } from '@/components/ui/sparkles-preview';
-import { useStreak } from '@/contexts/StreakContext';
-import AuthButton from '@/components/ui/auth-button';
-import { Button } from '@/components/ui/button';
-import { User, LogOut, Heart } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import Hero from '@/components/Hero';
 
 const gameModes = [
   {
@@ -58,16 +52,6 @@ const gameModes = [
 ];
 
 const Index = () => {
-  const { isLoggedIn, user, logout } = useStreak();
-  const navigate = useNavigate();
-
-  const handleProfileClick = () => {
-    navigate('/settings');
-  };
-
-  const handleLogout = async () => {
-    await logout();
-  };
 
   // Separate regular modes from survival
   const regularModes = gameModes.slice(0, 4);
@@ -82,13 +66,8 @@ const Index = () => {
         "pt-0",
         "pb-8 md:pb-12"
       )}>
-        {/* Header Section with drastically reduced mobile spacing */}
-        <div className={cn(
-          "text-center",
-          "-mt-12 md:-mt-16" // Drastically reduced mobile spacing - negative margin to pull it up
-        )}>
-          <SparklesPreview />
-        </div>
+        {/* Hero Section */}
+        <Hero />
 
         {/* Game Modes Section */}
         <div className={cn(
