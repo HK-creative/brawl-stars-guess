@@ -67,6 +67,13 @@ const SurvivalSetupPage: React.FC = () => {
       icon: <Volume2 className="h-6 w-6" />,
       color: 'from-purple-500 to-purple-600'
     },
+    { 
+      id: 'pixels' as GameMode, 
+      label: t('survival.pixels.label'), 
+      description: t('survival.pixels.description'), 
+      icon: <div className="h-5 w-5 bg-indigo-400 rounded-sm flex items-center justify-center"><div className="h-2 w-2 bg-indigo-600 rounded-sm"></div></div>,
+      color: 'from-indigo-500 to-indigo-600'
+    },
   ], [language]); // Re-create when language changes
   
   // Initialize settings with fixed values for timer and rotation

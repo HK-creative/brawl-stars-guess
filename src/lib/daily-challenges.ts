@@ -76,7 +76,7 @@ class SeededRandom {
 // Get deterministic daily brawler for a specific mode and date
 const getDailyBrawler = (mode: string, date: string): Brawler => {
   // Get all modes for cross-mode checking
-  const allModes = ['classic', 'gadget', 'starpower', 'audio'];
+  const allModes = ['classic', 'gadget', 'starpower', 'audio', 'pixels'];
   const selectedBrawlers: string[] = [];
   
   // Check what brawlers have already been selected for other modes today
@@ -493,6 +493,12 @@ const getDeterministicDailyChallenge = (mode: string, date: string): any => {
         hintAudioFile: hintAudioFile ? `/AttackSounds/${hintAudioFile}` : null,
         hasHint: hasHint
       };
+
+    case 'pixels':
+      return {
+        brawler: brawler.name,
+        tip: "Identify the brawler from this pixelated portrait!"
+      };
       
     default:
       return null;
@@ -565,6 +571,7 @@ export const getTodaysBrawlers = (): { [mode: string]: string } => {
     gadget: getDailyBrawler('gadget', currentDate).name,
     starpower: getDailyBrawler('starpower', currentDate).name,
     audio: getDailyBrawler('audio', currentDate).name,
+    pixels: getDailyBrawler('pixels', currentDate).name,
   };
 };
 
@@ -579,5 +586,6 @@ export const getTomorrowsBrawlers = (): { [mode: string]: string } => {
     gadget: getDailyBrawler('gadget', tomorrowDate).name,
     starpower: getDailyBrawler('starpower', tomorrowDate).name,
     audio: getDailyBrawler('audio', tomorrowDate).name,
+    pixels: getDailyBrawler('pixels', tomorrowDate).name,
   };
 };

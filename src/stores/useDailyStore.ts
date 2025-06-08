@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { fetchDailyChallenge, getCurrentDateUTC2, getTimeUntilNextChallenge } from '@/lib/daily-challenges';
 
-export type DailyGameMode = 'classic' | 'gadget' | 'starpower' | 'audio';
+export type DailyGameMode = 'classic' | 'gadget' | 'starpower' | 'audio' | 'pixels';
 
 export interface DailyModeState {
   brawlerName: string;
@@ -21,6 +21,7 @@ export interface DailyGameState {
   gadget: DailyModeState;
   starpower: DailyModeState;
   audio: DailyModeState;
+  pixels: DailyModeState;
   
   // Time until next brawler reset
   timeUntilNext: { hours: number; minutes: number };
@@ -76,6 +77,7 @@ const initialState: DailyGameState = {
   gadget: { ...initialModeState },
   starpower: { ...initialModeState },
   audio: { ...initialModeState },
+  pixels: { ...initialModeState },
   timeUntilNext: { hours: 0, minutes: 0 },
   isLoading: false,
   lastFetchDate: null,
@@ -99,6 +101,7 @@ export const useDailyStore = create<DailyGameState & DailyActions>()(
             gadget: { ...initialModeState },
             starpower: { ...initialModeState },
             audio: { ...initialModeState },
+            pixels: { ...initialModeState },
             lastFetchDate: null,
           });
         }
@@ -109,11 +112,12 @@ export const useDailyStore = create<DailyGameState & DailyActions>()(
           
           try {
             // Fetch daily challenges for all modes
-            const [classicData, gadgetData, starpowerData, audioData] = await Promise.all([
+            const [classicData, gadgetData, starpowerData, audioData, pixelsData] = await Promise.all([
               fetchDailyChallenge('classic'),
               fetchDailyChallenge('gadget'),
               fetchDailyChallenge('starpower'),
               fetchDailyChallenge('audio'),
+              fetchDailyChallenge('pixels'),
             ]);
             
             set((state) => ({
@@ -132,6 +136,10 @@ export const useDailyStore = create<DailyGameState & DailyActions>()(
               audio: {
                 ...state.audio,
                 brawlerName: audioData?.brawler || 'Spike',
+              },
+              pixels: {
+                ...state.pixels,
+                brawlerName: pixelsData?.brawler || 'Spike',
               },
               lastFetchDate: currentDate,
               isLoading: false,

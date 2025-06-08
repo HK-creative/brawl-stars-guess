@@ -15,7 +15,7 @@ const DailyModeProgress: React.FC<DailyModeProgressProps> = ({
   className 
 }) => {
   const navigate = useNavigate();
-  const { classic, gadget, starpower, audio } = useDailyStore();
+  const { classic, gadget, starpower, audio, pixels } = useDailyStore();
   
   const modes = [
     { 
@@ -49,6 +49,14 @@ const DailyModeProgress: React.FC<DailyModeProgressProps> = ({
       iconSrc: '/AudioIcon.png',
       path: '/daily/audio',
       color: 'from-orange-500 to-orange-600'
+    },
+    { 
+      key: 'pixels' as const, 
+      name: t('mode.pixels'), 
+      state: pixels,
+      iconSrc: '/PixelsIcon.png',
+      path: '/daily/pixels',
+      color: 'from-indigo-500 to-indigo-600'
     },
   ];
 

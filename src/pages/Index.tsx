@@ -47,6 +47,15 @@ const gameModes = [
     path: "/daily/starpower"
   },
   {
+    mode: "pixels",
+    descriptionKey: "mode.pixels.description",
+    icon: "/PixelsIcon.png",
+    bgColor: "from-indigo-500 to-indigo-600",
+    previewImage: "/images/modes/pixels-preview.jpg",
+    cardBackground: "/PixelsMode_Background.png",
+    path: "/daily/pixels"
+  },
+  {
     mode: "survival",
     descriptionKey: "mode.survival.description",
     icon: "/images/icons/heart-icon.png",
@@ -70,8 +79,8 @@ const Index = () => {
   };
 
   // Separate regular modes from survival
-  const regularModes = gameModes.slice(0, 4);
-  const survivalMode = gameModes[4];
+  const regularModes = gameModes.slice(0, 5);
+  const survivalMode = gameModes[5];
 
   return (
     <div className="min-h-screen flex flex-col relative">

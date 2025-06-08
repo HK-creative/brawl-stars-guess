@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Clock, Hash, Volume2, Play } from 'lucide-react';
+import { Clock, Hash, Volume2, Play, Pause } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { useDailyStore } from '@/stores/useDailyStore';
 import { brawlers, getBrawlerDisplayName } from '@/data/brawlers';
@@ -114,7 +114,7 @@ const DailyAudioMode: React.FC = () => {
     }, 60000);
     
     return () => clearInterval(interval);
-  }, [initializeDailyModes]);
+  }, [initializeDailyModes, updateTimeUntilNext]);
 
   // Load audio data
   useEffect(() => {
@@ -400,7 +400,7 @@ const DailyAudioMode: React.FC = () => {
     // Reset input
     setInputValue('');
     setSelectedBrawler(null);
-  }, [selectedBrawler, audio.isCompleted, incrementGuessCount, saveGuess, getCorrectBrawler, completeMode, audioElement, currentLanguage]);
+  }, [selectedBrawler, audio.isCompleted, incrementGuessCount, saveGuess, getCorrectBrawler, completeMode, audioElement, hintAudioElement, currentLanguage, toast, audio.guessCount, audioData?.hasHint, showHint]);
 
   // Handle brawler selection and immediate submission
   const handleSelectBrawler = useCallback((brawler: any) => {
@@ -412,9 +412,9 @@ const DailyAudioMode: React.FC = () => {
     handleSubmit(brawler);
   }, [handleSubmit, currentLanguage]);
 
-  // Handle next mode navigation (back to classic since audio is last)
+  // Handle next mode navigation
   const handleNextMode = () => {
-    navigate('/daily/classic');
+    navigate('/daily/pixels');
   };
 
   // Handle play again
@@ -462,251 +462,270 @@ const DailyAudioMode: React.FC = () => {
           className="fixed top-0 left-0 w-full h-full z-50 pointer-events-none"
         />
       )}
-
-      {/* Top Bar */}
-      <div className="bg-slate-800/50 border-b border-white/5 py-4 px-4 flex items-center justify-between sticky top-0 z-10">
-        <HomeButton />
-        <div className="flex-1 flex justify-center">
-          <DailyModeProgress currentMode="audio" />
-        </div>
-        <div className="w-[40px]"></div> {/* Spacer to balance the layout */}
-      </div>
       
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col p-4 items-center justify-center relative">
-        {/* Header Info */}
-        <div className="mb-6 flex flex-col items-center justify-center relative z-10">
-          {/* Bigger Centered Headline */}
-          <div className="text-center mb-4">
-            <h1 className="text-3xl md:text-4xl font-extrabold bg-gradient-to-r from-yellow-300 via-amber-400 to-pink-400 bg-clip-text text-transparent drop-shadow-[0_1px_6px_rgba(255,214,0,0.4)] animate-award-glow daily-mode-title">
-              {t('daily.audio.title')}
-            </h1>
+      {/* Top Navigation Bar */}
+      <div className="w-full px-4 py-6">
+        <div className="max-w-4xl mx-auto flex items-center justify-between">
+          {/* Home Button */}
+          <HomeButton />
+          
+          {/* Mode Navigation - Center */}
+          <div className="flex-1 flex justify-center">
+            <DailyModeProgress currentMode="audio" />
           </div>
           
-          <div className="flex flex-row items-center gap-4 mt-2">
-            <span className="flex items-center gap-2 px-3 py-1 rounded-full bg-gradient-to-r from-blue-500/60 to-purple-400/50 shadow-md border border-blue-300/30 text-lg font-bold text-white">
-              <Hash className="h-6 w-6 text-white/80" />
-              {audio.guessCount} {t('guesses.count')}
-            </span>
-          </div>
-          
-          {/* Redesigned Timer - More Minimal */}
-          <div className="mt-4 flex items-center gap-2 px-2 py-1 text-white/70">
-            <Clock className="h-4 w-4 text-white/60" />
-            <span className="text-sm font-medium">
-              {t('next.brawler.in')}: {timeUntilNext.hours}h {timeUntilNext.minutes}m
+          {/* Timer - Right */}
+          <div className="flex items-center gap-2 px-3 py-2 bg-slate-800/60 rounded-full border border-slate-700/50 backdrop-blur-sm">
+            <Clock className="h-4 w-4 text-slate-400" />
+            <span className="text-sm font-medium text-slate-300">
+              {timeUntilNext.hours}h {timeUntilNext.minutes}m
             </span>
           </div>
         </div>
+      </div>
 
-        {/* Game Card */}
-        <Card className="flex-1 w-full max-w-2xl mx-auto bg-gradient-to-br from-yellow-200/20 via-pink-100/10 to-slate-900/60 border-4 border-yellow-400 shadow-[0_8px_40px_0_rgba(255,214,0,0.10)] rounded-3xl overflow-hidden relative z-10 animate-award-card">
-          <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-yellow-400 via-pink-400 to-yellow-300 opacity-80 blur-sm animate-award-bar" />
-          <div className="p-4 md:p-8">
-            {showVictoryScreen ? (
-              // Victory Screen
-              <div className="text-center space-y-6">
-                <h2 className="text-3xl font-bold text-yellow-400 mb-4">
-                  {t('daily.congratulations')}
-                </h2>
-                <p className="text-xl text-white/80 mb-4">
-                  {t('daily.you.found')} <span className="text-yellow-400 font-bold">{getBrawlerDisplayName(getCorrectBrawler(), currentLanguage)}</span> {t('daily.in.guesses')} {audio.guessCount} {t('daily.guesses.count')}
-                </p>
-                <p className="text-xl text-green-400 font-bold mb-6">
-                  {t('daily.all.modes.completed')} 🎊
-                </p>
-                <div className="flex flex-col gap-4 items-center justify-center">
-                  <Button
-                    onClick={handleNextMode}
-                    className="bg-gradient-to-r from-emerald-500 to-blue-600 hover:from-emerald-400 hover:to-blue-500 text-white py-4 px-12 text-xl font-bold shadow-xl hover:shadow-emerald-500/50 transform hover:scale-105 transition-all duration-300 border-2 border-emerald-300/50 w-full max-w-sm"
-                  >
-                    <img 
-                      src="/ClassicIcon.png" 
-                      alt="Classic Mode" 
-                      className={cn(
-                        "h-6 w-6",
-                        currentLanguage === 'he' ? "ml-2" : "mr-2"
-                      )}
-                    />
-                    {t('daily.back.to')} Classic
-                  </Button>
-                  <Button
-                    onClick={() => navigate('/')}
-                    variant="ghost"
-                    className="text-white/40 hover:text-white/60 hover:bg-white/5 py-2 px-6 text-sm border border-white/10 hover:border-white/20 transition-all duration-200"
-                  >
-                    {t('daily.go.home')}
-                  </Button>
-                  <div className="flex justify-center mt-6">
-                    <img 
-                      src="/Brawler_GIFs/mico_win.gif" 
-                      alt="Mico Victory" 
-                      className="w-64 h-64 md:w-80 md:h-80 object-contain"
-                    />
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col items-center justify-center px-4 pb-8">
+        {/* Page Title */}
+        <div className="text-center mb-8">
+          <h1 className="text-4xl md:text-5xl font-black bg-gradient-to-r from-blue-400 via-cyan-400 to-teal-400 bg-clip-text text-transparent mb-2">
+            Audio Daily
+          </h1>
+          <p className="text-slate-400 text-lg">
+            Guess the brawler by their audio
+          </p>
+        </div>
+
+        {/* Game Container */}
+        <div className="w-full max-w-2xl">
+          <Card className="bg-gradient-to-br from-slate-800/90 to-slate-900/90 border-2 border-blue-500/30 shadow-2xl backdrop-blur-sm">
+            <div className="p-6 md:p-8">
+              {showVictoryScreen ? (
+                // Victory Screen
+                <div className="text-center space-y-6">
+                  <div className="space-y-2">
+                    <h2 className="text-3xl font-bold text-blue-400">
+                      🎉 Congratulations! 🎉
+                    </h2>
+                    <p className="text-xl text-slate-300">
+                      You found <span className="text-blue-400 font-bold">{audioData?.brawler}</span> in {guesses.length} {guesses.length === 1 ? 'guess' : 'guesses'}!
+                    </p>
+                  </div>
+
+                  {/* Audio Player */}
+                  <div className="flex justify-center">
+                    <div className="w-48 h-48 rounded-2xl overflow-hidden border-4 border-blue-400 shadow-xl bg-slate-800/50 flex items-center justify-center">
+                      <div className="text-slate-300 text-center">
+                        <div className="text-4xl mb-2">🎵</div>
+                        <div className="text-sm">Audio Challenge</div>
+                        <Button
+                          onClick={playAudio}
+                          className="mt-3 bg-blue-500 hover:bg-blue-400 text-white px-4 py-2 rounded-lg"
+                        >
+                          {isPlaying ? 'Playing...' : 'Play Audio'}
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-3 items-center">
+                    <Button
+                      onClick={handleNextMode}
+                      className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 text-white py-3 px-8 text-lg font-semibold shadow-lg hover:shadow-indigo-500/25 transform hover:scale-105 transition-all duration-200"
+                    >
+                      <img 
+                        src="/PixelsIcon.png" 
+                        alt="Next Mode" 
+                        className="h-5 w-5 mr-2"
+                      />
+                      Next Mode
+                    </Button>
+                    <Button
+                      onClick={() => navigate('/')}
+                      variant="ghost"
+                      className="text-slate-400 hover:text-slate-300 hover:bg-slate-800/50"
+                    >
+                      Back to Home
+                    </Button>
                   </div>
                 </div>
-              </div>
-            ) : (
-              // Game Content
-              <div className="space-y-6">
-                <div className="text-center">
-                  <h2 className="text-2xl font-bold text-white mb-2 mode-headline-audio">
-                    {t('daily.audio.headline')}
-                  </h2>
-                  <p className="text-white/70 mb-4">
-                    {t('daily.audio.description')}
-                  </p>
-                  
-                  {/* Audio Player - Survival Mode Style */}
-                  <div className="flex flex-col items-center mb-6">
-                    <div className="relative w-32 h-32 md:w-40 md:h-40 mx-auto mb-4 flex items-center justify-center">
-                      {/* Sound Icon Background */}
-                      <div className={cn(
-                        "w-full h-full rounded-full flex items-center justify-center transition-all duration-300",
-                        isPlaying ? "bg-blue-500/20 animate-pulse" : "bg-white/10",
-                        audioError && "bg-red-500/20"
-                      )}>
-                        {/* Play Button */}
-                        <button
-                          onClick={playAudio}
-                          disabled={isPlaying || !audioReady || audioError}
-                          className={cn(
-                            "w-20 h-20 md:w-24 md:h-24 flex items-center justify-center rounded-full shadow-lg transition-all",
-                            isPlaying ? "bg-blue-500 scale-95" : "bg-blue-600 hover:bg-blue-500",
-                            "border-4 border-white",
-                            audioError && "bg-red-500 cursor-not-allowed",
-                            !audioReady && !audioError && "bg-gray-500 cursor-wait"
+              ) : (
+                // Game Content
+                <div className="space-y-6">
+                  {/* Audio Player Section */}
+                  <div className="flex justify-center mb-8">
+                    <div className="w-96 h-96 rounded-3xl overflow-hidden border-4 border-blue-500/40 bg-gradient-to-br from-slate-800/80 to-slate-900/80 shadow-2xl backdrop-blur-sm flex items-center justify-center">
+                      <div className="text-center space-y-6">
+                        <div className="text-8xl text-blue-400">🎵</div>
+                        <div className="space-y-4">
+                          <Button
+                            onClick={playAudio}
+                            disabled={!audioReady || audioError}
+                            className={cn(
+                              "px-8 py-4 rounded-xl font-semibold transition-all duration-200 text-lg",
+                              audioReady && !audioError
+                                ? "bg-blue-500 hover:bg-blue-400 text-white shadow-lg hover:shadow-blue-500/25"
+                                : "bg-slate-600 text-slate-400 cursor-not-allowed"
+                            )}
+                          >
+                            {isPlaying ? (
+                              <>
+                                <Pause className="h-5 w-5 mr-2" />
+                                Playing...
+                              </>
+                            ) : (
+                              <>
+                                <Play className="h-5 w-5 mr-2" />
+                                {audioReady ? 'Play Audio' : 'Loading...'}
+                              </>
+                            )}
+                          </Button>
+                          
+                          {/* Hint Audio Button */}
+                          {showHint && audioData?.hasHint && (
+                            <Button
+                              onClick={playHintAudio}
+                              disabled={!hintAudioReady || hintAudioError}
+                              className={cn(
+                                "px-8 py-4 rounded-xl font-semibold transition-all duration-200 text-lg",
+                                hintAudioReady && !hintAudioError
+                                  ? "bg-amber-500 hover:bg-amber-400 text-white shadow-lg hover:shadow-amber-500/25"
+                                  : "bg-slate-600 text-slate-400 cursor-not-allowed"
+                              )}
+                            >
+                              {isHintPlaying ? (
+                                <>
+                                  <Pause className="h-5 w-5 mr-2" />
+                                  Playing Hint...
+                                </>
+                              ) : (
+                                <>
+                                  <Play className="h-5 w-5 mr-2" />
+                                  💡 Play Hint
+                                </>
+                              )}
+                            </Button>
                           )}
-                        >
-                          {!audioReady && !audioError ? (
-                            <div className="loading-spinner" />
-                          ) : isPlaying ? (
-                            <Volume2 size={40} className="text-white animate-pulse" />
-                          ) : (
-                            <Play size={40} className="text-white ml-2" />
-                          )}
-                        </button>
+                        </div>
                         
-                        {/* Audio visualization rings (show during playback) */}
-                        {isPlaying && (
-                          <>
-                            <div className="absolute inset-0 rounded-full border-4 border-blue-400/40 animate-ping-slow"></div>
-                            <div className="absolute inset-[-15px] rounded-full border-2 border-blue-300/30 animate-ping-slow-2"></div>
-                          </>
+                        {audioError && (
+                          <div className="text-red-400 text-sm">
+                            Audio failed to load
+                          </div>
                         )}
                       </div>
                     </div>
+                  </div>
+
+                  {/* Search Section */}
+                  <div className="space-y-6">
+                    <BrawlerAutocomplete
+                      brawlers={brawlers}
+                      value={inputValue}
+                      onChange={setInputValue}
+                      onSelect={handleSelectBrawler}
+                      onSubmit={handleSubmit}
+                      disabledBrawlers={guessedBrawlerNames}
+                    />
                     
-                    {/* Status Text */}
-                    <div className="text-center">
-                      {audioError ? (
-                        <div className="space-y-2">
-                          <p className="text-red-400 text-sm">Audio failed to load</p>
-                            <button
-                            onClick={() => window.location.reload()}
-                            className="text-xs bg-red-600 hover:bg-red-500 px-3 py-1 rounded text-white"
-                            >
-                            Refresh Page
-                            </button>
-                        </div>
-                      ) : !audioReady ? (
-                        <div className="flex flex-col items-center space-y-2">
-                        <p className="text-yellow-400 text-sm">Loading audio...</p>
-                          <div className="loading-dots">
-                            <div className="loading-dot"></div>
-                            <div className="loading-dot"></div>
-                            <div className="loading-dot"></div>
-                          </div>
-                        </div>
-                      ) : isPlaying ? (
-                        <p className="text-blue-400 text-sm animate-pulse">{t('daily.audio.playing')}</p>
-                      ) : (
-                        <p className="text-white/70 text-sm">{t('daily.audio.click.play')}</p>
-                      )}
-                    </div>
-                    
-                    {/* Hint Audio Player - Minimal Design */}
-                    {showHint && audioData?.hasHint && (
-                      <div className="mt-4 flex items-center justify-center gap-3">
-                        <span className="text-yellow-400 text-sm font-medium">💡 Hint:</span>
-                        <button
-                          onClick={playHintAudio}
-                          disabled={isHintPlaying || !hintAudioReady || hintAudioError}
-                          className={cn(
-                            "w-8 h-8 flex items-center justify-center rounded-full transition-all",
-                            isHintPlaying ? "bg-yellow-500" : "bg-yellow-600 hover:bg-yellow-500",
-                            "border-2 border-yellow-300",
-                            hintAudioError && "bg-red-500 cursor-not-allowed",
-                            !hintAudioReady && !hintAudioError && "bg-gray-500 cursor-wait"
-                          )}
-                        >
-                          {!hintAudioReady && !hintAudioError ? (
-                            <div className="w-3 h-3 border border-white border-t-transparent rounded-full animate-spin" />
-                          ) : isHintPlaying ? (
-                            <Volume2 size={16} className="text-white" />
-                          ) : (
-                            <Play size={14} className="text-white ml-0.5" />
-                          )}
-                        </button>
-                        <span className="text-white/60 text-xs">
-                          {hintAudioError ? "Error" : !hintAudioReady ? "Loading..." : isHintPlaying ? "Playing..." : "Different sound"}
+                    {/* Stats Row */}
+                    <div className="flex items-center justify-center gap-6">
+                      <div className="flex items-center gap-2 px-4 py-2 bg-slate-800/60 rounded-full border border-slate-700/50">
+                        <Hash className="h-4 w-4 text-blue-400" />
+                        <span className="text-sm font-medium text-slate-300">
+                          {guesses.length} {guesses.length === 1 ? 'guess' : 'guesses'}
                         </span>
                       </div>
-                    )}
+                      
+                      {guesses.length >= 4 && audioData?.hasHint && (
+                        <div className="flex items-center gap-2 px-4 py-2 bg-amber-500/20 rounded-full border border-amber-500/50">
+                          <span className="text-sm font-medium text-amber-300">
+                            💡 Hint available!
+                          </span>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
 
-                {/* Input Form - No Submit Button */}
-                <div className="space-y-4">
-                  <BrawlerAutocomplete
-                    brawlers={brawlers}
-                    value={inputValue}
-                    onChange={setInputValue}
-                    onSelect={handleSelectBrawler}
-                    disabled={audio.isCompleted}
-                    disabledBrawlers={guessedBrawlerNames}
-                  />
-                </div>
+                  {/* Game Over Message */}
+                  {isGameOver && !showVictoryScreen && (
+                    <div className="text-center space-y-4 py-6 bg-red-500/10 border border-red-500/20 rounded-xl">
+                      <h2 className="text-2xl font-bold text-red-400">Game Over!</h2>
+                      <p className="text-slate-300">
+                        The correct brawler was <span className="text-blue-400 font-bold">{audioData?.brawler}</span>
+                      </p>
+                      <div className="flex flex-col gap-3 items-center">
+                        <Button
+                          onClick={handleNextMode}
+                          className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 text-white py-3 px-8 text-lg font-semibold"
+                        >
+                          Next Mode
+                        </Button>
+                        <Button
+                          onClick={() => navigate('/')}
+                          variant="ghost"
+                          className="text-slate-400 hover:text-slate-300"
+                        >
+                          Back to Home
+                        </Button>
+                      </div>
+                    </div>
+                  )}
 
-                {/* Guesses */}
-                <div className="space-y-2">
-                  <div className="w-full max-w-md mx-auto">
-                    <ul className="grid grid-cols-1 md:grid-cols-2 gap-y-3 md:gap-x-4 md:gap-y-3">
-                      {guesses.map((guess, idx) => {
-                        const isCorrect = guess.name.toLowerCase() === getCorrectBrawler().name.toLowerCase();
-                        const isLastGuess = idx === guesses.length - 1;
-                        return (
-                          <li
-                            key={idx}
-                            className={cn(
-                              "flex flex-col items-center justify-center py-2 md:py-4 rounded-2xl border-2 transition-all duration-300 animate-fade-in w-36 md:w-40 mx-auto md:min-h-[120px]",
-                              isCorrect ? "bg-brawl-green border-yellow-400" : "bg-brawl-red border-yellow-400",
-                              !isCorrect && isLastGuess ? "animate-shake" : ""
-                            )}
-                            style={{ minHeight: '81px' }}
-                          >
-                            <img
-                              src={getPortrait(guess.name.toLowerCase())}
-                              alt={getBrawlerDisplayName(guess, currentLanguage)}
-                              className="w-14 h-14 md:w-20 md:h-20 rounded-xl object-cover border border-yellow-400 shadow-lg mx-auto"
-                              onError={(e) => {
-                                e.currentTarget.src = '/portraits/shelly.png';
-                              }}
-                            />
-                            <span className="text-base md:text-2xl font-extrabold text-white text-center mt-2 truncate w-full" style={{lineHeight: 1.1}}>
-                              {getBrawlerDisplayName(guess, currentLanguage)}
-                            </span>
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  </div>
+                  {/* Previous Guesses */}
+                  {guesses.length > 0 && (
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-semibold text-slate-300 text-center">
+                        Previous Guesses
+                      </h3>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                        {guesses.map((guess, idx) => {
+                          const isCorrect = audioData && guess.name.toLowerCase() === audioData.brawler.toLowerCase();
+                          const isLastGuess = idx === guesses.length - 1;
+                          return (
+                            <div
+                              key={idx}
+                              className={cn(
+                                "flex flex-col items-center p-3 rounded-xl border-2 transition-all duration-300",
+                                isCorrect 
+                                  ? "bg-green-500/20 border-green-400/50" 
+                                  : "bg-red-500/20 border-red-400/50",
+                                !isCorrect && isLastGuess ? "animate-pulse" : ""
+                              )}
+                            >
+                              <img
+                                src={getPortrait(guess.name)}
+                                alt={getBrawlerDisplayName(guess, currentLanguage)}
+                                className="w-12 h-12 rounded-lg object-cover border-2 border-slate-600/50"
+                                onError={(e) => {
+                                  e.currentTarget.src = '/portraits/shelly.png';
+                                }}
+                              />
+                              <span className="text-sm font-medium text-slate-300 text-center mt-2 truncate w-full">
+                                {getBrawlerDisplayName(guess, currentLanguage)}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
                 </div>
-              </div>
-            )}
-          </div>
-        </Card>
+              )}
+            </div>
+          </Card>
+        </div>
       </div>
+
+      {/* Loading State */}
+      {!audioData && !isLoading && (
+        <div className="fixed inset-0 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm">
+          <div className="text-center space-y-4 p-8 bg-slate-800/90 rounded-2xl border border-slate-700/50">
+            <div className="animate-spin h-8 w-8 border-4 border-blue-400 border-t-transparent rounded-full mx-auto"></div>
+            <p className="text-slate-300">Loading today's challenge...</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

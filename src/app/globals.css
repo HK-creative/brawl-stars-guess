@@ -14,4 +14,15 @@
   backface-visibility: hidden;
   transform-style: preserve-3d;
   will-change: transform, opacity;
+}
+
+/* Pixelated image rendering for cross-browser compatibility */
+.pixelated-rendering {
+  image-rendering: optimizeSpeed;             /* Legacy */
+  image-rendering: -moz-crisp-edges;          /* Firefox */
+  image-rendering: -o-crisp-edges;            /* Opera */
+  image-rendering: -webkit-crisp-edges;       /* Webkit (Safari) */
+  image-rendering: crisp-edges;               /* Standard */
+  image-rendering: pixelated;                 /* Chrome */
+  -ms-interpolation-mode: nearest-neighbor;   /* IE */
 } 

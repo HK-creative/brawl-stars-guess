@@ -53,6 +53,10 @@ const translations: Translations = {
     en: "Star Power",
     he: "כוח כוכב"
   },
+  "mode.pixels": {
+    en: "Pixels",
+    he: "פיקסלים"
+  },
   "mode.survival": {
     en: "Survival Mode",
     he: "מצב הישרדות"
@@ -78,6 +82,10 @@ const translations: Translations = {
   "mode.starpower.title": {
     en: "Star Power Mode",
     he: "מצב כוח כוכב"
+  },
+  "mode.pixels.title": {
+    en: "Pixels Mode",
+    he: "מצב פיקסלים"
   },
   "survival.setup.title": {
     en: "Survival Mode Setup",
@@ -109,6 +117,10 @@ const translations: Translations = {
     en: "Star Power Daily",
     he: "הכוח כוכב היומי"
   },
+  "daily.pixels.title": {
+    en: "Pixels Daily",
+    he: "הפיקסלים היומי"
+  },
   "daily.classic.headline": {
     en: "Guess Today's Brawler!",
     he: "נחשו את הבראולר היומי!"
@@ -122,8 +134,8 @@ const translations: Translations = {
     he: "נחשו את הבראולר על פי הקול!"
   },
   "daily.audio.description": {
-    en: "Listen to the audio clip and use the clues from your guesses to find the correct brawler",
-    he: "האזינו ונחשו של מי הקול הזה"
+    en: "",
+    he: ""
   },
   "daily.audio.click.play": {
     en: "Click to play audio",
@@ -140,6 +152,10 @@ const translations: Translations = {
   "daily.starpower.headline": {
     en: "Guess the Brawler by their Star Power!",
     he: "נחשו את הבראולר לפי הכוח כוכב!"
+  },
+  "daily.pixels.headline": {
+    en: "Guess the Pixelated Brawler!",
+    he: "נחשו את הבראולר המפוקסל!"
   },
   
   // Search and Input
@@ -176,6 +192,10 @@ const translations: Translations = {
   "mode.starpower.description": {
     en: "Guess by star power icon",
     he: "נחשו לפי הכוח כוכב"
+  },
+  "mode.pixels.description": {
+    en: "Guess from pixelated portraits",
+    he: "נחשו מתמונות מפוקסלות"
   },
   "mode.survival.description": {
     en: "Ultimate challenge mode",
@@ -314,6 +334,14 @@ const translations: Translations = {
   "survival.audio.description": {
     en: "Guess the Brawler from their voice line or attack sound.",
     he: "נחשו את הבראולר לפי הקול שלו"
+  },
+  "survival.pixels.label": {
+    en: "Pixels",
+    he: "פיקסלים"
+  },
+  "survival.pixels.description": {
+    en: "Guess the Brawler from their pixelated portrait.",
+    he: "נחשו את הבראולר מהתמונה המפוקסלת"
   },
   
   // Buttons & Actions

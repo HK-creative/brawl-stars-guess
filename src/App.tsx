@@ -22,6 +22,7 @@ import NotFound from "./pages/NotFound";
 import StarPowerMode from "./pages/StarPowerMode";
 import GadgetMode from "./pages/GadgetMode";
 import AudioMode from "./pages/AudioMode";
+import PixelsMode from "./pages/PixelsMode";
 import AuthPage from "./pages/AuthPage";
 import AuthCallback from "./pages/AuthCallback";
 import SurvivalSetupPage from './pages/SurvivalSetup';
@@ -32,6 +33,7 @@ import DailyClassicMode from "./pages/DailyClassicMode";
 import DailyGadgetMode from "./pages/DailyGadgetMode";
 import DailyStarPowerMode from "./pages/DailyStarPowerMode";
 import DailyAudioMode from "./pages/DailyAudioMode";
+import DailyPixelsMode from "./pages/DailyPixelsMode";
 
 // Layout
 import Layout from "./components/layout/Layout";
@@ -72,6 +74,7 @@ const App = () => {
                   <Route path="/daily/gadget" element={<DailyGadgetMode />} />
                   <Route path="/daily/starpower" element={<DailyStarPowerMode />} />
                   <Route path="/daily/audio" element={<DailyAudioMode />} />
+                  <Route path="/daily/pixels" element={<DailyPixelsMode />} />
                   
                   <Route element={<Layout />}>
                     <Route index element={<Index />} />
@@ -79,6 +82,7 @@ const App = () => {
                 <Route path="/starpower" element={<StarPowerMode />} />
                 <Route path="/gadget" element={<GadgetMode />} />
                 <Route path="/audio" element={<AudioMode />} />
+                <Route path="/pixels" element={<PixelsMode />} />
                 <Route path="/endless" element={<EndlessMode />} />
                 <Route path="/survival" element={<SurvivalModePage />} />
                 <Route path="/survival/setup" element={<SurvivalSetupPage />} />

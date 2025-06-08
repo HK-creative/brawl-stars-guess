@@ -11,7 +11,8 @@ const gameModeImages = {
   classic: '/ClassicIcon.png',
   gadget: '/GadgetIcon.png',
   starpower: '/StarpowerIcon.png',
-  audio: '/AudioIcon.png'
+  audio: '/AudioIcon.png',
+  pixels: '/PixelsIcon.png'
 } as const;
 
 // Function to get GameMode details with translations
@@ -39,6 +40,12 @@ const getGameModeDetails = (): { id: GameMode; label: string; image: string; col
     label: t('survival.audio.label'),
     image: gameModeImages.audio,
     color: 'from-purple-500 to-purple-600'
+  },
+  { 
+    id: 'pixels', 
+    label: t('survival.pixels.label'),
+    image: gameModeImages.pixels,
+    color: 'from-indigo-500 to-indigo-600'
   },
 ];
 

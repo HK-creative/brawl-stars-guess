@@ -4,7 +4,7 @@ import { calculateNextGuessesQuota, selectNextBrawlerAndMode, resetModeSelection
 import { brawlers } from '@/data/brawlers';
 
 // Define the available game modes explicitly based on existing pages
-export type GameMode = 'classic' | 'starpower' | 'gadget' | 'audio';
+export type GameMode = 'classic' | 'starpower' | 'gadget' | 'audio' | 'pixels';
 
 export interface SurvivalSettings {
   // Only modes are configurable now
@@ -54,7 +54,7 @@ interface SurvivalActions {
 }
 
 const initialSettings: SurvivalSettings = {
-  modes: ['classic', 'gadget', 'starpower', 'audio'], // Default to all modes
+  modes: ['classic', 'gadget', 'starpower', 'audio', 'pixels'], // Default to all modes
   rotation: 'repeat', // Fixed setting - always random
   timer: 150, // Fixed setting - always 150 seconds
 };

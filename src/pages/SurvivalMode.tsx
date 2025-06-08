@@ -10,6 +10,7 @@ import ClassicMode from './ClassicMode';
 import GadgetMode from './GadgetMode';
 import StarPowerMode from './StarPowerMode';
 import AudioMode from './AudioMode';
+import PixelsMode from './PixelsMode';
 import HomeButton from '@/components/ui/home-button';
 import { cn } from '@/lib/utils';
 import SurvivalVictoryPopup from '@/components/SurvivalVictoryPopup';
@@ -446,6 +447,16 @@ const SurvivalModePage: React.FC = () => {
               {currentModeName === 'audio' && (
                 <AudioMode 
                   key={`${modeKey}-audio`}
+                  brawlerId={activeRoundState.currentBrawlerId || 1}
+                  onRoundEnd={handleRoundEnd}
+                  maxGuesses={activeRoundState.guessesQuota}
+                  isSurvivalMode={true}
+                  skipVictoryScreen={true}
+                />
+              )}
+              {currentModeName === 'pixels' && (
+                <PixelsMode 
+                  key={`${modeKey}-pixels`}
                   brawlerId={activeRoundState.currentBrawlerId || 1}
                   onRoundEnd={handleRoundEnd}
                   maxGuesses={activeRoundState.guessesQuota}

@@ -3,10 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Clock, Hash } from 'lucide-react';
-import { useToast } from '@/components/ui/use-toast';
+import { toast } from '@/components/ui/use-toast';
 import { useDailyStore } from '@/stores/useDailyStore';
 import { brawlers, getBrawlerDisplayName } from '@/data/brawlers';
-import { getPortrait } from '@/lib/image-helpers';
+import { getPortrait, DEFAULT_PORTRAIT } from '@/lib/image-helpers';
 import BrawlerAutocomplete from '@/components/BrawlerAutocomplete';
 import HomeButton from '@/components/ui/home-button';
 import DailyModeProgress from '@/components/DailyModeProgress';
@@ -14,32 +14,11 @@ import ReactConfetti from 'react-confetti';
 import { fetchDailyChallenge } from '@/lib/daily-challenges';
 import { t, getLanguage } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
+import PixelatedImage from '@/components/PixelatedImage';
 
-// Helper function to generate star power image path (same as survival mode)
-function getStarPowerImagePath(brawlerName: string, starPowerIndex: number): string {
-  // Convert brawler name to lowercase and replace spaces with underscores
-  let brawlerFileName = brawlerName.toLowerCase().replace(/ /g, '_');
-  
-  // Handle special cases for brawler names
-  if (brawlerName === "8-Bit") {
-    brawlerFileName = "8bit";
-  } else if (brawlerName === "Mr. P") {
-    brawlerFileName = "mrp";
-  } else if (brawlerName === "R-T") {
-    brawlerFileName = "rt";
-  } else if (brawlerName === "Larry & Lawrie") {
-    brawlerFileName = "larry_lawrie";
-  }
-  
-  // Try zero-padded format first (_01, _02)
-  const paddedNum = starPowerIndex.toString().padStart(2, '0');
-  return `/${brawlerFileName}_starpower_${paddedNum}.png`;
-}
-
-const DailyStarPowerMode: React.FC = () => {
+const DailyPixelsMode: React.FC = () => {
   const navigate = useNavigate();
   const currentLanguage = getLanguage();
-  const { toast } = useToast();
 
   // Inject custom award styles into the document head
   useEffect(() => {
@@ -71,7 +50,7 @@ const DailyStarPowerMode: React.FC = () => {
   }, []);
 
   const {
-    starpower,
+    pixels,
     timeUntilNext,
     isLoading,
     initializeDailyModes,
@@ -91,8 +70,9 @@ const DailyStarPowerMode: React.FC = () => {
   const [isGameOver, setIsGameOver] = useState(false);
   const [showVictoryScreen, setShowVictoryScreen] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
-  const [starPowerData, setStarPowerData] = useState<any>(null);
-  const [starPowerImage, setStarPowerImage] = useState<string>('');
+  const [pixelsData, setPixelsData] = useState<any>(null);
+  const [portraitImage, setPortraitImage] = useState<string>('');
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   // Initialize daily modes on component mount
   useEffect(() => {
@@ -107,119 +87,130 @@ const DailyStarPowerMode: React.FC = () => {
     return () => clearInterval(interval);
   }, [initializeDailyModes, updateTimeUntilNext]);
 
-  // Load star power data and generate image
+  // Load pixels data and generate image
   useEffect(() => {
-    const loadStarPowerData = async () => {
+    const loadPixelsData = async () => {
       try {
-        const data = await fetchDailyChallenge('starpower');
-        setStarPowerData(data);
+        const data = await fetchDailyChallenge('pixels');
+        console.log('Loaded pixels data:', data);
+        setPixelsData(data);
         
-        // Generate star power image path
+        // Generate portrait image path
         if (data?.brawler) {
-          // Find the brawler and get a random star power index
-          const brawler = brawlers.find(b => b.name.toLowerCase() === data.brawler.toLowerCase());
-          if (brawler && brawler.starPowers && brawler.starPowers.length > 0) {
-            // Use the first star power or find the matching one
-            const starPowerIndex = 1; // Default to first star power
-            const imagePath = getStarPowerImagePath(data.brawler, starPowerIndex);
-            setStarPowerImage(imagePath);
-          }
+          const imagePath = getPortrait(data.brawler.toLowerCase());
+          console.log('Generated portrait image path:', imagePath);
+          setPortraitImage(imagePath);
+          setImageLoaded(false); // Reset image loaded state
+        } else {
+          console.warn('No brawler data found in pixels challenge');
+          setPortraitImage('');
         }
       } catch (error) {
-        console.error('Error loading star power data:', error);
+        console.error('Error loading pixels data:', error);
+        setPortraitImage('');
+        setImageLoaded(false);
+        setPixelsData(null);
       }
     };
     
-    loadStarPowerData();
+    loadPixelsData();
   }, []);
 
-  // Load saved guesses when component mounts or starpower data changes
+  // Load saved guesses when component mounts or pixels data changes
   useEffect(() => {
-    const savedGuesses = getGuesses('starpower');
+    const savedGuesses = getGuesses('pixels');
     setGuesses(savedGuesses);
     // Extract brawler names from saved guesses to prevent duplicates
     const brawlerNames = savedGuesses.map(guess => guess.name);
     setGuessedBrawlerNames(brawlerNames);
-  }, [starpower.brawlerName, getGuesses]);
+  }, [pixels.brawlerName, getGuesses]);
 
   // Reset game when already completed
   useEffect(() => {
-    if (starpower.isCompleted) {
+    if (pixels.isCompleted) {
       setShowVictoryScreen(true);
     }
-  }, [starpower.isCompleted]);
+  }, [pixels.isCompleted]);
 
-  // Find the correct brawler object
+  // Calculate pixelation level based on guess count
+  const getPixelationLevel = useCallback(() => {
+    if (pixels.isCompleted) return 6; // Show clearest image when completed
+    // Start with maximum pixelation (0) and increase level with each guess to make it clearer
+    // Level 0 = most pixelated, Level 6 = least pixelated
+    return Math.min(6, guesses.length); // 0, 1, 2, 3, 4, 5, 6 (gets clearer each guess)
+  }, [pixels.isCompleted, guesses.length]);
+
   const getCorrectBrawler = useCallback(() => {
-    return brawlers.find(b => b.name.toLowerCase() === starpower.brawlerName.toLowerCase()) || brawlers[0];
-  }, [starpower.brawlerName]);
+    return brawlers.find(b => b.name.toLowerCase() === pixels.brawlerName.toLowerCase()) || brawlers[0];
+  }, [pixels.brawlerName]);
 
-  // Handle guess submission
   const handleSubmit = useCallback((brawler?: any) => {
     const brawlerToSubmit = brawler || selectedBrawler;
     
-    if (!brawlerToSubmit || starpower.isCompleted) return;
+    if (!brawlerToSubmit || !pixelsData || guessedBrawlerNames.includes(brawlerToSubmit.name)) {
+      return;
+    }
 
-    // Increment guess count in store
-    incrementGuessCount('starpower');
-    
-    // Add guess to store and local state
     const newGuess = brawlerToSubmit;
-    saveGuess('starpower', newGuess);
-    setGuesses(prev => [...prev, newGuess]);
-    setGuessedBrawlerNames(prev => [...prev, brawlerToSubmit.name]);
+    const updatedGuesses = [...guesses, newGuess];
+    setGuesses(updatedGuesses);
+    setGuessedBrawlerNames([...guessedBrawlerNames, newGuess.name]);
     
-    // Check if correct
-    const correctBrawler = getCorrectBrawler();
-    const isCorrect = brawlerToSubmit.name.toLowerCase() === correctBrawler.name.toLowerCase();
+    // Save guess to store
+    saveGuess('pixels', newGuess);
+    incrementGuessCount('pixels');
+
+    const isCorrect = newGuess.name.toLowerCase() === pixelsData.brawler.toLowerCase();
     
     if (isCorrect) {
-      // Mark mode as completed
-      completeMode('starpower');
+      // Correct guess
       setIsGameOver(true);
       setShowVictoryScreen(true);
       setShowConfetti(true);
+      completeMode('pixels');
       
-      toast({
-        id: String(Date.now()),
-        title: "Congratulations! 🎉",
-        description: `You found ${getBrawlerDisplayName(correctBrawler, currentLanguage)}!`,
-      });
+      setTimeout(() => setShowConfetti(false), 3000);
+    } else if (updatedGuesses.length >= 6) {
+      // Game over - max guesses reached
+      setIsGameOver(true);
     }
-    
-    // Reset input
+
+    // Reset form
     setInputValue('');
     setSelectedBrawler(null);
-  }, [selectedBrawler, starpower.isCompleted, incrementGuessCount, saveGuess, getCorrectBrawler, completeMode, currentLanguage, toast]);
+  }, [selectedBrawler, pixelsData, guessedBrawlerNames, guesses, saveGuess, incrementGuessCount, completeMode]);
 
-  // Handle brawler selection and immediate submission
-  const handleSelectBrawler = useCallback((brawler: any) => {
+  const handleBrawlerSelect = useCallback((brawler: any) => {
     setSelectedBrawler(brawler);
-    const displayName = getBrawlerDisplayName(brawler, currentLanguage);
-    setInputValue(displayName);
+    if (brawler) {
+      const displayName = getBrawlerDisplayName(brawler, currentLanguage);
+      setInputValue(displayName);
+    }
     
     // Immediately submit the guess
     handleSubmit(brawler);
   }, [handleSubmit, currentLanguage]);
 
-  // Handle next mode navigation
   const handleNextMode = () => {
-    navigate('/daily/audio');
+    navigate('/');
   };
 
-  // Handle play again
   const handlePlayAgain = () => {
-    setGuesses([]);
-    setGuessedBrawlerNames([]);
-    setIsGameOver(false);
-    setShowVictoryScreen(false);
-    setShowConfetti(false);
-    setInputValue('');
-    setSelectedBrawler(null);
-    resetGuessCount('starpower');
+    navigate('/');
   };
 
-  // Loading state
+  const handleImageLoad = () => {
+    setImageLoaded(true);
+  };
+
+  const handleImageError = () => {
+    console.error('Failed to load portrait image:', portraitImage);
+  };
+
+  const formatTime = (time: { hours: number; minutes: number }) => {
+    return `${time.hours.toString().padStart(2, '0')}:${time.minutes.toString().padStart(2, '0')}`;
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-950 flex items-center justify-center">
@@ -250,14 +241,14 @@ const DailyStarPowerMode: React.FC = () => {
           
           {/* Mode Navigation - Center */}
           <div className="flex-1 flex justify-center">
-            <DailyModeProgress currentMode="starpower" />
+            <DailyModeProgress currentMode="pixels" />
           </div>
           
           {/* Timer - Right */}
           <div className="flex items-center gap-2 px-3 py-2 bg-slate-800/60 rounded-full border border-slate-700/50 backdrop-blur-sm">
             <Clock className="h-4 w-4 text-slate-400" />
             <span className="text-sm font-medium text-slate-300">
-              {timeUntilNext.hours}h {timeUntilNext.minutes}m
+              {formatTime(timeUntilNext)}
             </span>
           </div>
         </div>
@@ -267,92 +258,75 @@ const DailyStarPowerMode: React.FC = () => {
       <div className="flex-1 flex flex-col items-center justify-center px-4 pb-8">
         {/* Page Title */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl md:text-5xl font-black bg-gradient-to-r from-purple-400 via-pink-400 to-red-400 bg-clip-text text-transparent mb-2">
-            Star Power Daily
+          <h1 className="text-4xl md:text-5xl font-black bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent mb-2">
+            Guess the Pixelated Brawler!
           </h1>
           <p className="text-slate-400 text-lg">
-            Guess the brawler by their star power
+            The image becomes clearer with each guess
           </p>
         </div>
 
         {/* Game Container */}
         <div className="w-full max-w-2xl">
-          <Card className="bg-gradient-to-br from-slate-800/90 to-slate-900/90 border-2 border-purple-500/30 shadow-2xl backdrop-blur-sm">
+          <Card className="bg-gradient-to-br from-slate-800/90 to-slate-900/90 border-2 border-indigo-500/30 shadow-2xl backdrop-blur-sm">
             <div className="p-6 md:p-8">
               {showVictoryScreen ? (
                 // Victory Screen
                 <div className="text-center space-y-6">
                   <div className="space-y-2">
-                    <h2 className="text-3xl font-bold text-purple-400">
+                    <h2 className="text-3xl font-bold text-indigo-400">
                       🎉 Congratulations! 🎉
                     </h2>
                     <p className="text-xl text-slate-300">
-                      You found <span className="text-purple-400 font-bold">{starPowerData?.brawler}</span> in {guesses.length} {guesses.length === 1 ? 'guess' : 'guesses'}!
+                      You found <span className="text-indigo-400 font-bold">{pixelsData?.brawler}</span> in {guesses.length} {guesses.length === 1 ? 'guess' : 'guesses'}!
                     </p>
                   </div>
 
-                  {/* Star Power Image */}
-                  <div className="flex justify-center">
-                    <div className="w-48 h-48 rounded-2xl overflow-hidden border-4 border-purple-400 shadow-xl bg-slate-800/50 flex items-center justify-center">
-                      {starPowerImage ? (
-                        <img
-                          src={starPowerImage}
-                          alt={`${starPowerData?.brawler} Star Power`}
-                          className="w-full h-full object-contain"
-                          onError={(e) => {
-                            e.currentTarget.src = '/StarPowerImages/shelly_starpower_01.png';
-                          }}
+                  {/* Clear Portrait Image */}
+                  {portraitImage && (
+                    <div className="flex justify-center">
+                      <div className="w-48 h-48 rounded-2xl overflow-hidden border-4 border-indigo-400 shadow-xl">
+                        <PixelatedImage
+                          src={portraitImage}
+                          alt={pixelsData?.brawler || 'Brawler'}
+                          pixelationLevel={6}
+                          fallbackSrc={DEFAULT_PORTRAIT}
+                          className="w-full h-full"
+                          onLoad={handleImageLoad}
+                          onError={handleImageError}
                         />
-                      ) : (
-                        <div className="text-slate-400 text-center">
-                          <div className="text-4xl mb-2">⭐</div>
-                          <div className="text-sm">Star Power Image</div>
-                        </div>
-                      )}
+                      </div>
                     </div>
-                  </div>
+                  )}
 
                   <div className="flex flex-col gap-3 items-center">
                     <Button
                       onClick={handleNextMode}
-                      className="bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-400 hover:to-red-500 text-white py-3 px-8 text-lg font-semibold shadow-lg hover:shadow-orange-500/25 transform hover:scale-105 transition-all duration-200"
+                      className="bg-gradient-to-r from-emerald-500 to-blue-600 hover:from-emerald-400 hover:to-blue-500 text-white py-3 px-8 text-lg font-semibold shadow-lg hover:shadow-emerald-500/25 transform hover:scale-105 transition-all duration-200"
                     >
-                      <img 
-                        src="/AudioIcon.png" 
-                        alt="Next Mode" 
-                        className="h-5 w-5 mr-2"
-                      />
-                      Next Mode
-                    </Button>
-                    <Button
-                      onClick={() => navigate('/')}
-                      variant="ghost"
-                      className="text-slate-400 hover:text-slate-300 hover:bg-slate-800/50"
-                    >
-                      Back to Home
+                      🏠 Back to Home
                     </Button>
                   </div>
                 </div>
               ) : (
                 // Game Content
                 <div className="space-y-6">
-                  {/* Star Power Display */}
+                  {/* Pixelated Portrait Display */}
                   <div className="flex justify-center mb-8">
-                    <div className="w-96 h-96 rounded-3xl overflow-hidden border-4 border-purple-500/40 bg-gradient-to-br from-slate-800/80 to-slate-900/80 shadow-2xl backdrop-blur-sm flex items-center justify-center">
-                      {starPowerImage ? (
-                        <img
-                          src={starPowerImage}
-                          alt="Brawler Star Power"
-                          className="w-full h-full object-contain p-8"
-                          onLoad={() => console.log('Star power image loaded')}
-                          onError={(e) => {
-                            e.currentTarget.src = '/StarPowerImages/shelly_starpower_01.png';
-                          }}
+                    <div className="w-96 h-96 rounded-3xl overflow-hidden border-4 border-indigo-500/40 bg-gradient-to-br from-slate-800/80 to-slate-900/80 shadow-2xl backdrop-blur-sm">
+                      {portraitImage ? (
+                        <PixelatedImage
+                          src={portraitImage}
+                          alt="Pixelated Brawler Portrait"
+                          pixelationLevel={getPixelationLevel()}
+                          fallbackSrc={DEFAULT_PORTRAIT}
+                          className="w-full h-full"
+                          onLoad={handleImageLoad}
+                          onError={handleImageError}
                         />
                       ) : (
-                        <div className="text-slate-400 text-center">
-                          <div className="text-6xl mb-4">⭐</div>
-                          <div className="text-lg">Loading star power...</div>
+                        <div className="w-full h-full flex items-center justify-center">
+                          <div className="animate-spin h-8 w-8 border-4 border-indigo-400 border-t-transparent rounded-full"></div>
                         </div>
                       )}
                     </div>
@@ -364,7 +338,7 @@ const DailyStarPowerMode: React.FC = () => {
                       brawlers={brawlers}
                       value={inputValue}
                       onChange={setInputValue}
-                      onSelect={handleSelectBrawler}
+                      onSelect={handleBrawlerSelect}
                       onSubmit={handleSubmit}
                       disabledBrawlers={guessedBrawlerNames}
                     />
@@ -372,16 +346,16 @@ const DailyStarPowerMode: React.FC = () => {
                     {/* Stats Row */}
                     <div className="flex items-center justify-center gap-6">
                       <div className="flex items-center gap-2 px-4 py-2 bg-slate-800/60 rounded-full border border-slate-700/50">
-                        <Hash className="h-4 w-4 text-purple-400" />
+                        <Hash className="h-4 w-4 text-indigo-400" />
                         <span className="text-sm font-medium text-slate-300">
                           {guesses.length} {guesses.length === 1 ? 'guess' : 'guesses'}
                         </span>
                       </div>
                       
                       {guesses.length > 0 && (
-                        <div className="flex items-center gap-2 px-4 py-2 bg-purple-500/20 rounded-full border border-purple-500/50">
-                          <span className="text-sm font-medium text-purple-300">
-                            Keep guessing!
+                        <div className="flex items-center gap-2 px-4 py-2 bg-indigo-500/20 rounded-full border border-indigo-500/50">
+                          <span className="text-sm font-medium text-indigo-300">
+                            Getting clearer...
                           </span>
                         </div>
                       )}
@@ -393,21 +367,14 @@ const DailyStarPowerMode: React.FC = () => {
                     <div className="text-center space-y-4 py-6 bg-red-500/10 border border-red-500/20 rounded-xl">
                       <h2 className="text-2xl font-bold text-red-400">Game Over!</h2>
                       <p className="text-slate-300">
-                        The correct brawler was <span className="text-purple-400 font-bold">{starPowerData?.brawler}</span>
+                        The correct brawler was <span className="text-indigo-400 font-bold">{pixelsData?.brawler}</span>
                       </p>
                       <div className="flex flex-col gap-3 items-center">
                         <Button
                           onClick={handleNextMode}
-                          className="bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-400 hover:to-red-500 text-white py-3 px-8 text-lg font-semibold"
+                          className="bg-gradient-to-r from-emerald-500 to-blue-600 hover:from-emerald-400 hover:to-blue-500 text-white py-3 px-8 text-lg font-semibold"
                         >
-                          Next Mode
-                        </Button>
-                        <Button
-                          onClick={() => navigate('/')}
-                          variant="ghost"
-                          className="text-slate-400 hover:text-slate-300"
-                        >
-                          Back to Home
+                          🏠 Back to Home
                         </Button>
                       </div>
                     </div>
@@ -421,7 +388,7 @@ const DailyStarPowerMode: React.FC = () => {
                       </h3>
                       <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                         {guesses.map((guess, idx) => {
-                          const isCorrect = starPowerData && guess.name.toLowerCase() === starPowerData.brawler.toLowerCase();
+                          const isCorrect = pixelsData && guess.name.toLowerCase() === pixelsData.brawler.toLowerCase();
                           const isLastGuess = idx === guesses.length - 1;
                           return (
                             <div
@@ -439,7 +406,7 @@ const DailyStarPowerMode: React.FC = () => {
                                 alt={getBrawlerDisplayName(guess, currentLanguage)}
                                 className="w-12 h-12 rounded-lg object-cover border-2 border-slate-600/50"
                                 onError={(e) => {
-                                  e.currentTarget.src = '/portraits/shelly.png';
+                                  e.currentTarget.src = DEFAULT_PORTRAIT;
                                 }}
                               />
                               <span className="text-sm font-medium text-slate-300 text-center mt-2 truncate w-full">
@@ -459,10 +426,10 @@ const DailyStarPowerMode: React.FC = () => {
       </div>
 
       {/* Loading State */}
-      {!starPowerData && !isLoading && (
+      {!pixelsData && !isLoading && (
         <div className="fixed inset-0 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm">
           <div className="text-center space-y-4 p-8 bg-slate-800/90 rounded-2xl border border-slate-700/50">
-            <div className="animate-spin h-8 w-8 border-4 border-purple-400 border-t-transparent rounded-full mx-auto"></div>
+            <div className="animate-spin h-8 w-8 border-4 border-indigo-400 border-t-transparent rounded-full mx-auto"></div>
             <p className="text-slate-300">Loading today's challenge...</p>
           </div>
         </div>
@@ -471,4 +438,4 @@ const DailyStarPowerMode: React.FC = () => {
   );
 };
 
-export default DailyStarPowerMode; 
+export default DailyPixelsMode; 
