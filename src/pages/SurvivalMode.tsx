@@ -388,9 +388,22 @@ const SurvivalModePage: React.FC = () => {
                 {totalScore} {t('survival.pts')}
               </span>
               {settings?.timer && (
-                <span className="flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-yellow-500/80 to-amber-400/70 shadow-lg border border-yellow-300/50 text-lg font-bold text-white">
-                  <Timer className="h-5 w-5 text-white/80" />
-                  {currentTimerValue ?? activeRoundState.timerLeft}{t('survival.seconds')}
+                <span className={cn(
+                  "flex items-center gap-2 px-4 py-2 rounded-full shadow-lg border text-lg font-bold text-white transition-all duration-300",
+                  (currentTimerValue ?? activeRoundState.timerLeft) <= 30 
+                    ? "bg-gradient-to-r from-red-500/80 to-red-600/70 border-red-300/50 animate-pulse" 
+                    : (currentTimerValue ?? activeRoundState.timerLeft) <= 60
+                    ? "bg-gradient-to-r from-orange-500/80 to-yellow-500/70 border-orange-300/50"
+                    : "bg-gradient-to-r from-blue-500/80 to-cyan-400/70 border-blue-300/50"
+                )}>
+                  <Timer className={cn(
+                    "h-5 w-5 text-white/80",
+                    (currentTimerValue ?? activeRoundState.timerLeft) <= 30 && "animate-bounce"
+                  )} />
+                  <span className="font-mono text-xl">
+                    {Math.floor((currentTimerValue ?? activeRoundState.timerLeft) / 60)}:
+                    {String((currentTimerValue ?? activeRoundState.timerLeft) % 60).padStart(2, '0')}
+                  </span>
                 </span>
               )}
             </div>

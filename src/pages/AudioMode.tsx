@@ -142,40 +142,90 @@ const extractBrawlerNameFromFilename = (filename: string): string | null => {
   
   // Map of filename prefixes to actual brawler names
   const nameMapping: { [key: string]: string } = {
-    'elprimo': 'El Primo',
-    '8bit': '8-Bit',
-    'mrp': 'Mr. P',
-    'rt': 'R-T',
-    'larry': 'Larry & Lawrie',
-    'lawrie': 'Larry & Lawrie',
-    'ddracos': 'Draco', // Assuming ddracos is a variant of draco
-    'evil_mortis': 'Mortis',
-    'mecha_mortis': 'Mortis', 
-    'mech_crow': 'Crow',
-    'mech_spike': 'Spike',
-    'amber_ice': 'Amber',
-    'bea_mon': 'Bea',
-    'buzz_ulti': 'Buzz',
-    'buzz_ulti_dog': 'Buzz',
-    'buzzilla': 'Buzz', // Buzzilla skin for Buzz
-    'barley_fire': 'Barley',
-    'jacky_summer': 'Jacky',
+    'kaze': 'Kaze',
+    'jae': 'Jae-Yong',
+    'meeple': 'Meeple',
+    'shade': 'Shade',
+    'juju': 'Juju',
     'juju_water': 'Juju',
     'juju_forest': 'Juju', 
     'juju_earth': 'Juju',
-    'lawrie_win': 'Larry & Lawrie',
-    'kit_ulti': 'Kit',
-    'lily_ulti': 'Lily',
-    'mico_ulti': 'Mico',
-    'fang_ulti': 'Fang',
-    'grom_ulti': 'Grom',
-    'draco_ulti': 'Draco',
+    'kenji': 'Kenji',
+    'moe': 'Moe',
     'moe_drill': 'Moe',
     'moe_rockthrow': 'Moe',
-    'jae': 'Jae-Yong',
-    'kaze': 'Kaze',
-    'meeple': 'Meeple',
-    'shade': 'Shade'
+    'ddracos': 'Draco',
+    'draco': 'Draco',
+    'draco_ulti': 'Draco',
+    'amber': 'Amber',
+    'amber_ice': 'Amber',
+    'lily': 'Lily',
+    'lily_ulti': 'Lily',
+    'melodie': 'Melodie',
+    'angelo': 'Angelo',
+    'kit': 'Kit',
+    'kit_ulti': 'Kit',
+    'lawrie': 'Larry & Lawrie',
+    'lawrie_win': 'Larry & Lawrie',
+    'larry': 'Larry & Lawrie',
+    'mico': 'Mico',
+    'mico_ulti': 'Mico',
+    'chuck': 'Chuck',
+    'elprimo': 'El Primo',
+    'pearl': 'Pearl',
+    'berry': 'Berry',
+    'clancy': 'Clancy',
+    'hank': 'Hank',
+    'mandy': 'Mandy',
+    'chester': 'Chester',
+    'chester2': 'Chester',
+    'gray': 'Gray',
+    'willow': 'Willow',
+    'doug': 'Doug',
+    'bonnie': 'Bonnie',
+    'grom': 'Grom',
+    'grom_ulti': 'Grom',
+    'fang': 'Fang',
+    'fang_ulti': 'Fang',
+    'eve': 'Eve',
+    'janet': 'Janet',
+    'otis': 'Otis',
+    'sam': 'Sam',
+    'buster': 'Buster',
+    'gus': 'Gus',
+    '8bit': '8-Bit',
+    'bea': 'Bea',
+    'bea_mon': 'Bea',
+    'buzz': 'Buzz',
+    'buzz_ulti': 'Buzz',
+    'buzz_ulti_dog': 'Buzz',
+    'buzzilla': 'Buzz',
+    'carl': 'Carl',
+    'emz': 'Emz',
+    'gene': 'Gene',
+    'jacky': 'Jacky',
+    'jacky_summer': 'Jacky',
+    'lou': 'Lou',
+    'max': 'Max',
+    'mortis': 'Mortis',
+    'evil_mortis': 'Mortis',
+    'mecha_mortis': 'Mortis',
+    'mrp': 'Mr. P',
+    'nita': 'Nita',
+    'surge': 'Surge',
+    'crow': 'Crow',
+    'mech_crow': 'Crow',
+    'spike': 'Spike',
+    'mech_spike': 'Spike',
+    'barley': 'Barley',
+    'barley_fire': 'Barley',
+    'jessie': 'Jessie',
+    'water_jessie': 'Jessie',
+    'brock': 'Brock',
+    'water_brock': 'Brock',
+    'rosa': 'Rosa',
+    'rocket_rose': 'Rosa',
+    'rt': 'R-T'
   };
   
   // Check if there's a mapping for this name
@@ -241,6 +291,14 @@ const AudioMode = ({
   const [gameKey, setGameKey] = useState(Date.now().toString()); // Key to force re-render
   const victoryRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+
+  // Hint system state
+  const [showHint, setShowHint] = useState(false);
+  const [hintAudioFile, setHintAudioFile] = useState<string>('');
+  const [isHintPlaying, setIsHintPlaying] = useState(false);
+  const [hintAudioReady, setHintAudioReady] = useState(false);
+  const [hintAudioError, setHintAudioError] = useState(false);
+  const hintAudioRef = useRef<HTMLAudioElement | null>(null);
 
   // Confetti window size
   const [windowSize, setWindowSize] = useState({ width: window.innerWidth, height: window.innerHeight });
@@ -404,6 +462,23 @@ const AudioMode = ({
       setDailyChallenge(challenge);
       setAudioFile(audio ? `/AttackSounds/${audio}` : '');
       setCorrectBrawlerName(brawler.name);
+      
+      // Load hint audio (different audio file for the same brawler)
+      const availableAudios = audioFiles.filter(f => {
+        const normalized = brawler.name.toLowerCase().replace(/ /g, '');
+        return f.toLowerCase().startsWith(normalized) && f !== audio;
+      });
+      
+      if (availableAudios.length > 0) {
+        const hintAudio = availableAudios[Math.floor(Math.random() * availableAudios.length)];
+        setHintAudioFile(`/AttackSounds/${hintAudio}`);
+        setHintAudioReady(true);
+        setHintAudioError(false);
+      } else {
+        setHintAudioFile('');
+        setHintAudioReady(false);
+      }
+      
       setIsLoading(false);
       setAudioError(false);
       setAudioReady(true);
@@ -494,6 +569,23 @@ const AudioMode = ({
         setDailyChallenge(challenge);
         setAudioFile(`/AttackSounds/${selectedAudioFile}`);
         setCorrectBrawlerName(matchingBrawler.name);
+        
+        // Load hint audio (different audio file for the same brawler)
+        const availableAudios = audioFiles.filter(f => {
+          const normalized = matchingBrawler.name.toLowerCase().replace(/ /g, '');
+          return f.toLowerCase().startsWith(normalized) && f !== selectedAudioFile;
+        });
+        
+        if (availableAudios.length > 0) {
+          const hintAudio = availableAudios[Math.floor(Math.random() * availableAudios.length)];
+          setHintAudioFile(`/AttackSounds/${hintAudio}`);
+          setHintAudioReady(true);
+          setHintAudioError(false);
+        } else {
+          setHintAudioFile('');
+          setHintAudioReady(false);
+        }
+        
         setIsLoading(false);
         setAudioReady(true);
         setAudioError(false);
@@ -650,6 +742,45 @@ const AudioMode = ({
     });
   };
 
+  const playHintAudio = () => {
+    if (!hintAudioFile || isHintPlaying || hintAudioError) return;
+
+    console.log(`Attempting to play hint audio: ${hintAudioFile}`);
+    setIsHintPlaying(true);
+    
+    // Clean up any existing hint audio element
+    if (hintAudioRef.current) {
+      hintAudioRef.current.pause();
+      hintAudioRef.current.removeEventListener('ended', () => {});
+      hintAudioRef.current.removeEventListener('error', () => {});
+      hintAudioRef.current = null;
+    }
+    
+    // Create and configure a new audio element
+    hintAudioRef.current = new Audio(hintAudioFile);
+    
+    // Set up event listeners
+    hintAudioRef.current.addEventListener('ended', () => {
+      setIsHintPlaying(false);
+      console.log('Hint audio playback ended');
+    });
+    
+    hintAudioRef.current.addEventListener('error', (error) => {
+      console.error('Hint audio playback error:', error);
+      setIsHintPlaying(false);
+      setHintAudioError(true);
+      toast.error(`Error playing hint audio: ${hintAudioFile}`);
+    });
+    
+    // Play the hint audio
+    hintAudioRef.current.play().catch(error => {
+      console.error('Error playing hint audio:', error);
+      setIsHintPlaying(false);
+      setHintAudioError(true);
+      toast.error(`Error playing hint audio: ${error.message}`);
+    });
+  };
+
   const handleGuess = () => {
     if (!dailyChallenge || showResult || !selectedBrawler) return;
 
@@ -671,6 +802,10 @@ const AudioMode = ({
     setGuessCount(guessCount + 1);
     
     if (isSurvivalMode) {
+      // In survival mode, don't manage local guesses - let the parent handle it
+      // The parent (SurvivalMode) will track guesses through its own state
+    } else {
+      // Only manage local guesses in non-survival modes
       setGuessesLeft(prev => prev - 1);
     }
     
@@ -704,7 +839,12 @@ const AudioMode = ({
     }
     // Check if out of guesses
     else {
-      const outOfGuesses = isSurvivalMode ? guessesLeft <= 1 : attempts + 1 >= maxGuesses;
+      // Show hint after 4 wrong guesses if hint audio is available
+      if (attempts + 1 >= 4 && hintAudioFile && !showHint) {
+        setShowHint(true);
+      }
+      
+      const outOfGuesses = isSurvivalMode ? attempts + 1 >= maxGuesses : attempts + 1 >= maxGuesses;
       
       if (outOfGuesses) {
         // Out of guesses
@@ -844,6 +984,24 @@ const AudioMode = ({
               )}
             </div>
           </div>
+
+          {/* Hint System */}
+          {showHint && hintAudioFile && !showResult && (
+            <div className="flex items-center justify-center gap-3 px-4 py-2 bg-yellow-500/20 rounded-full border border-yellow-400/50 mb-4 max-w-md mx-auto">
+              <span className="text-yellow-300 text-sm font-medium">Need a hint?</span>
+              <button
+                onClick={playHintAudio}
+                disabled={isHintPlaying || hintAudioError}
+                className={cn(
+                  "flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium transition-all",
+                  isHintPlaying ? "bg-yellow-500/30 text-yellow-200" : "bg-yellow-500/50 hover:bg-yellow-500/70 text-yellow-100"
+                )}
+              >
+                <Play size={14} className={isHintPlaying ? "animate-pulse" : ""} />
+                {isHintPlaying ? "Playing..." : "Play Hint"}
+              </button>
+            </div>
+          )}
           
           {/* Input Form */}
           <form onSubmit={handleSubmit} className="mb-4 max-w-md mx-auto px-2">
@@ -862,7 +1020,7 @@ const AudioMode = ({
             {isSurvivalMode ? (
               <div className="flex items-center gap-2 bg-black/70 border-2 border-brawl-yellow px-6 py-2 rounded-full shadow-xl animate-pulse">
                 <span className="text-brawl-yellow text-lg font-bold tracking-wide">{t('guesses.left')}</span>
-                <span className={`text-2xl font-extrabold ${guessesLeft <= 3 ? 'text-brawl-red animate-bounce' : 'text-white'}`}>{guessesLeft}</span>
+                <span className={`text-2xl font-extrabold ${(maxGuesses - attempts) <= 3 ? 'text-brawl-red animate-bounce' : 'text-white'}`}>{maxGuesses - attempts}</span>
               </div>
             ) : (
               <div className="flex items-center gap-2 bg-black/50 backdrop-blur px-4 py-1 rounded-full shadow-lg">

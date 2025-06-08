@@ -7,14 +7,15 @@ import {
   updateRecentlyUsedBrawlers
 } from './survival-logic';
 import type { SurvivalSettings } from '@/stores/useSurvivalStore';
+import type { Brawler } from '@/data/brawlers';
 
 // Mock brawlers for testing
-const mockBrawlers = [
-  { id: 1, name: 'Shelly' },
-  { id: 2, name: 'Nita' },
-  { id: 3, name: 'Colt' },
-  { id: 4, name: 'Bull' },
-  { id: 5, name: 'Jessie' },
+const mockBrawlers: Brawler[] = [
+  { id: 1, name: 'Shelly', nameHebrew: 'שלי', rarity: 'Starter', class: 'Damage Dealer', movement: 'Normal', range: 'Normal', reload: 'Normal', wallbreak: 'Yes', releaseYear: 2017 },
+  { id: 2, name: 'Nita', nameHebrew: 'ניטה', rarity: 'Rare', class: 'Damage Dealer', movement: 'Normal', range: 'Normal', reload: 'Normal', wallbreak: 'No', releaseYear: 2017 },
+  { id: 3, name: 'Colt', nameHebrew: 'קולט', rarity: 'Rare', class: 'Damage Dealer', movement: 'Fast', range: 'Long', reload: 'Normal', wallbreak: 'Yes', releaseYear: 2017 },
+  { id: 4, name: 'Bull', nameHebrew: 'בול', rarity: 'Rare', class: 'Heavyweight', movement: 'Normal', range: 'Short', reload: 'Slow', wallbreak: 'Yes', releaseYear: 2017 },
+  { id: 5, name: 'Jessie', nameHebrew: 'ג\'סי', rarity: 'Super Rare', class: 'Damage Dealer', movement: 'Normal', range: 'Long', reload: 'Normal', wallbreak: 'No', releaseYear: 2017 },
 ];
 
 describe('survival-logic', () => {
@@ -29,22 +30,32 @@ describe('survival-logic', () => {
   });
 
   describe('calculateNextGuessesQuota', () => {
-    it('should return 10 for round 1', () => {
-      expect(calculateNextGuessesQuota(1)).toBe(10);
+    it('should return 6 for rounds 1-3', () => {
+      expect(calculateNextGuessesQuota(1)).toBe(6);
+      expect(calculateNextGuessesQuota(2)).toBe(6);
+      expect(calculateNextGuessesQuota(3)).toBe(6);
     });
 
-    it('should return 9 for round 2', () => {
-      expect(calculateNextGuessesQuota(2)).toBe(9);
+    it('should return 5 for rounds 4-6', () => {
+      expect(calculateNextGuessesQuota(4)).toBe(5);
+      expect(calculateNextGuessesQuota(5)).toBe(5);
+      expect(calculateNextGuessesQuota(6)).toBe(5);
     });
 
-    it('should return 1 for round 10 and beyond', () => {
-      expect(calculateNextGuessesQuota(10)).toBe(1);
-      expect(calculateNextGuessesQuota(15)).toBe(1);
+    it('should return 4 for rounds 7-9', () => {
+      expect(calculateNextGuessesQuota(7)).toBe(4);
+      expect(calculateNextGuessesQuota(8)).toBe(4);
+      expect(calculateNextGuessesQuota(9)).toBe(4);
+    });
+
+    it('should return 3 for round 10 and beyond', () => {
+      expect(calculateNextGuessesQuota(10)).toBe(3);
+      expect(calculateNextGuessesQuota(15)).toBe(3);
+      expect(calculateNextGuessesQuota(100)).toBe(3);
     });
 
     it('should handle edge cases', () => {
-      expect(calculateNextGuessesQuota(0)).toBe(10); // Edge case: round 0
-      expect(calculateNextGuessesQuota(-5)).toBe(10); // Edge case: negative round
+      expect(calculateNextGuessesQuota(0)).toBe(6); // Edge case: round 0 (should be treated like round 1-3)
     });
   });
 

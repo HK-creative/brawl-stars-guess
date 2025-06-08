@@ -234,7 +234,6 @@ const DailyClassicMode: React.FC = () => {
             {showVictoryScreen ? (
               // Victory Screen
               <div className="text-center space-y-6">
-                <div className="text-6xl mb-4">🎉</div>
                 <h2 className="text-3xl font-bold text-yellow-400 mb-4">
                   {t('daily.congratulations')}
                 </h2>
@@ -263,6 +262,13 @@ const DailyClassicMode: React.FC = () => {
                   >
                     {t('daily.go.home')}
                   </Button>
+                  <div className="flex justify-center mt-6">
+                    <img 
+                      src="/Brawler_GIFs/elprimo_win.gif" 
+                      alt="El Primo Victory" 
+                      className="w-64 h-64 md:w-80 md:h-80 object-contain"
+                    />
+                  </div>
                 </div>
               </div>
             ) : (
@@ -300,16 +306,18 @@ const DailyClassicMode: React.FC = () => {
                       t('attribute.wallbreak'),
                       t('attribute.release.year')
                     ].map((label, index) => (
-                      <div key={label} className="w-full relative h-6 md:h-10">
+                      <div key={label} className="w-full relative h-6 md:h-12">
                         {/* Yellow accent line */}
                         <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-brawl-yellow"></div>
                         
                         {/* Text with adaptive sizing - positioned near the bottom */}
-                        <div className="w-full flex items-end justify-center pb-1">
+                        <div className="w-full h-full flex items-center justify-center px-1">
                           <span className={cn(
-                            "font-extrabold text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] attribute-label",
-                            currentLanguage === 'he' && index === 4 ? "text-[10px] md:text-lg" : "text-xs md:text-sm",
-                            currentLanguage === 'he' && index !== 4 ? "md:text-lg md:font-black" : ""
+                            "font-extrabold text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] attribute-label text-center",
+                            currentLanguage === 'he' && index === 4 ? "text-[10px] md:text-sm" : "text-xs md:text-base",
+                            currentLanguage === 'he' && index !== 4 ? "md:text-base md:font-black" : "",
+                            // Special handling for wallbreak in Hebrew
+                            currentLanguage === 'he' && label === "שובר קירות" ? "md:text-xs" : ""
                           )}>
                             {label}
                           </span>

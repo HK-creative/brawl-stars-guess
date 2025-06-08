@@ -13,13 +13,13 @@ export function SparklesPreview() {
     <div className="w-full flex flex-col items-center justify-center overflow-hidden pt-0 pb-2 md:pt-0 md:pb-4">
       {/* PC Layout: Language selection on left, title in center */}
       <div className="hidden md:flex md:items-center md:justify-center md:w-full md:relative md:mb-4">
-        {/* Main title - centered */}
-      <h1 className="md:text-7xl text-5xl lg:text-8xl font-bold text-center relative z-20 bg-gradient-to-b from-[#FFD700] via-[#FFA500] to-[#FF8C00] text-transparent bg-clip-text animate-fade-in app-title-main">
+        {/* Main title - centered and smaller */}
+        <h1 className="md:text-5xl text-4xl lg:text-6xl font-bold text-center relative z-20 bg-gradient-to-b from-[#FFD700] via-[#FFA500] to-[#FF8C00] text-transparent bg-clip-text animate-fade-in app-title-main">
           {t('app.title')}
         </h1>
         
         {/* Language selection - positioned to the left of title */}
-        <div className="absolute ml-4 flex gap-2" style={{ left: 'calc(50% - 320px)' }}>
+        <div className="absolute ml-4 flex gap-2" style={{ left: 'calc(50% - 280px)' }}>
           <button
             onClick={() => changeLanguage('en')}
             className={cn(
@@ -33,9 +33,9 @@ export function SparklesPreview() {
             <Image
               src="/USAIcon.png"
               alt={t('english')}
-              width={28}
-              height={28}
-              className="w-7 h-7 object-contain"
+              width={24}
+              height={24}
+              className="w-6 h-6 object-contain"
             />
           </button>
           
@@ -52,16 +52,16 @@ export function SparklesPreview() {
             <Image
               src="/IsraelIcon.png"
               alt={t('hebrew')}
-              width={28}
-              height={28}
-              className="w-7 h-7 object-contain"
+              width={24}
+              height={24}
+              className="w-6 h-6 object-contain"
             />
           </button>
         </div>
       </div>
 
       {/* Mobile Layout: Title only (language selection stays in Layout.tsx) */}
-      <h1 className="md:hidden text-5xl font-bold text-center relative z-20 bg-gradient-to-b from-[#FFD700] via-[#FFA500] to-[#FF8C00] text-transparent bg-clip-text animate-fade-in app-title-main">
+      <h1 className="md:hidden text-4xl font-bold text-center relative z-20 bg-gradient-to-b from-[#FFD700] via-[#FFA500] to-[#FF8C00] text-transparent bg-clip-text animate-fade-in app-title-main">
         {t('app.title')}
       </h1>
 
@@ -70,7 +70,7 @@ export function SparklesPreview() {
 
       {/* Subtitle - Positioned after the decorative line */}
       <h2 className={cn(
-        "text-xl md:text-2xl lg:text-3xl text-white/90 font-medium text-center relative z-20 animate-fade-in-delay home-subtitle",
+        "text-lg md:text-xl lg:text-2xl text-white/90 font-medium text-center relative z-20 animate-fade-in-delay home-subtitle",
         language === 'he' && "font-bold"
       )}>
         {t('home.ultimate.challenge')}

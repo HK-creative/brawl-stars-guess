@@ -39,7 +39,7 @@ const translations: Translations = {
   },
   "mode.audio": {
     en: "Audio",
-    he: "אודיו"
+    he: "קול"
   },
   "mode.voice": {
     en: "Voice",
@@ -47,7 +47,7 @@ const translations: Translations = {
   },
   "mode.gadget": {
     en: "Gadget",
-    he: "אביזר"
+    he: "גאדג'ט"
   },
   "mode.starpower": {
     en: "Star Power",

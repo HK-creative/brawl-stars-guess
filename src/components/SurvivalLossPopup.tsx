@@ -46,6 +46,15 @@ const SurvivalLossPopup: React.FC<SurvivalLossPopupProps> = ({
           </div>
         </div>
         
+        {/* 8-bit Game Over GIF above score section */}
+        <div className="flex justify-center mb-4">
+          <img 
+            src="/Brawler_GIFs/8bit_lose.gif" 
+            alt="8-Bit Game Over" 
+            className="w-48 h-48 md:w-64 md:h-64 object-contain"
+          />
+        </div>
+        
         {/* Score information */}
         <div className="bg-black/30 rounded-lg p-4 w-full mb-6">
           <div className="flex justify-between items-center mb-2">

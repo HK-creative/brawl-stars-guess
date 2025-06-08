@@ -395,6 +395,84 @@ body {
   }
 }
 
+@keyframes moveHexagonOutline {
+  0% {
+    left: 12px;
+    top: -1px;
+  }
+  10% {
+    left: 50%;
+    top: -1px;
+  }
+  20% {
+    left: calc(100% - 12px);
+    top: -1px;
+  }
+  35% {
+    left: calc(100% + 1px);
+    top: 50%;
+  }
+  50% {
+    left: calc(100% - 12px);
+    top: calc(100% + 1px);
+  }
+  60% {
+    left: 50%;
+    top: calc(100% + 1px);
+  }
+  70% {
+    left: 12px;
+    top: calc(100% + 1px);
+  }
+  85% {
+    left: -1px;
+    top: 50%;
+  }
+  100% {
+    left: 12px;
+    top: -1px;
+  }
+}
+
+@keyframes moveHexagonOutlineDesktop {
+  0% {
+    left: 24px;
+    top: -1.5px;
+  }
+  10% {
+    left: 50%;
+    top: -1.5px;
+  }
+  20% {
+    left: calc(100% - 24px);
+    top: -1.5px;
+  }
+  35% {
+    left: calc(100% + 1.5px);
+    top: 50%;
+  }
+  50% {
+    left: calc(100% - 24px);
+    top: calc(100% + 1.5px);
+  }
+  60% {
+    left: 50%;
+    top: calc(100% + 1.5px);
+  }
+  70% {
+    left: 24px;
+    top: calc(100% + 1.5px);
+  }
+  85% {
+    left: -1.5px;
+    top: 50%;
+  }
+  100% {
+    left: 24px;
+    top: -1.5px;
+  }
+}
+
 @keyframes borderShift {
   0%, 100% {
     border-image: linear-gradient(45deg, #f59e0b, #ea580c, #dc2626, #f59e0b) 1;
@@ -444,17 +522,22 @@ body {
   html[dir="rtl"] [class*="attribute"] .text-sm {
     font-family: 'Inter', system-ui, sans-serif !important; /* Better font */
     font-weight: 900 !important; /* Very bold */
-    font-size: 1.5rem !important; /* Significantly increased */
+    font-size: clamp(0.75rem, 2.5vw, 1.25rem) !important; /* Responsive sizing with limits */
     line-height: 1.1 !important;
     transform: translateY(-2px) !important; /* Move up slightly */
     text-shadow: 0 1px 2px rgba(0,0,0,0.8) !important; /* Better readability */
+    white-space: nowrap !important; /* Prevent wrapping */
+    overflow: hidden !important; /* Hide overflow */
+    text-overflow: ellipsis !important; /* Show ellipsis for overflow */
+    max-width: 100% !important; /* Ensure it doesn't exceed container */
+    display: block !important; /* Ensure proper box model */
   }
   
   /* Special case for wallbreak attribute to fit better on mobile */
   html[dir="rtl"] .attribute-label:contains("שובר קירות"),
   html[dir="rtl"] [class*="attribute"] .text-xs:contains("שובר קירות"),
   html[dir="rtl"] [class*="attribute"] .text-sm:contains("שובר קירות") {
-    font-size: 1.1rem !important;
+    font-size: clamp(0.6rem, 2vw, 1rem) !important;
     font-weight: 800 !important;
   }
 
@@ -462,24 +545,33 @@ body {
   html[dir="rtl"] [class*="guess-row"] .text-xs,
   html[dir="rtl"] [class*="brawler-card"] .text-xs,
   html[dir="rtl"] [class*="card"] .text-xs:not(.attribute-label) {
-    font-size: 1rem !important; /* Increased from 0.8rem */
+    font-size: clamp(0.75rem, 2.5vw, 1rem) !important; /* Responsive sizing */
     font-weight: 600 !important;
     line-height: 1.1 !important;
     white-space: nowrap !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
+    max-width: 100% !important;
   }
   
   /* Hebrew attribute card medium text on mobile */
   html[dir="rtl"] [class*="guess-row"] .text-sm,
   html[dir="rtl"] [class*="brawler-card"] .text-sm,
   html[dir="rtl"] [class*="card"] .text-sm:not(.attribute-label) {
-    font-size: 1.125rem !important; /* Increased from 0.9rem */
+    font-size: clamp(0.875rem, 3vw, 1.125rem) !important; /* Responsive sizing */
     font-weight: 600 !important;
     line-height: 1.1 !important;
     white-space: nowrap !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
+    max-width: 100% !important;
+  }
+  
+  /* Ensure attribute containers have proper bounds on mobile */
+  html[dir="rtl"] [class*="attribute"],
+  html[dir="rtl"] .attribute-label {
+    box-sizing: border-box !important;
+    padding: 0 2px !important; /* Small padding to prevent edge overflow */
   }
 }
 
@@ -489,8 +581,59 @@ body {
   html[dir="rtl"] [class*="attribute"] .text-xs,
   html[dir="rtl"] [class*="attribute"] .text-sm {
     font-weight: 700 !important;
-    font-size: 1.5rem !important;
-    font-family: 'Inter', system-ui, sans-serif !important; /* Changed from Georgia to Inter like "ניסיונות" */
+    /* Better adaptive sizing that prioritizes fitting the text */
+    font-size: clamp(0.6rem, 1.5vw, 1rem) !important;
+    font-family: 'Inter', system-ui, sans-serif !important;
+    line-height: 1.05 !important;
+    /* Allow wrapping for better text display */
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    max-width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    word-wrap: break-word !important;
+    hyphens: auto !important;
+    /* Better spacing */
+    padding: 1px 2px !important;
+  }
+  
+  /* Larger fonts for shorter Hebrew labels that have more space */
+  html[dir="rtl"] .attribute-label:not([class*="text-xs"]) {
+    font-size: clamp(0.75rem, 1.8vw, 1.1rem) !important;
+  }
+  
+  /* Auto-fit text class for perfect sizing */
+  html[dir="rtl"] .auto-fit-text {
+    font-size: 1rem !important; /* Starting font size, will be adjusted by JS */
+    white-space: nowrap !important; /* Prefer single line first */
+    overflow: hidden !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: font-size 0.1s ease !important; /* Smooth transitions */
+  }
+  
+  /* Ensure attribute containers have proper bounds on desktop with better spacing */
+  html[dir="rtl"] [class*="attribute"],
+  html[dir="rtl"] .attribute-label {
+    box-sizing: border-box !important;
+    min-height: 2.5rem !important; /* Ensure adequate height for wrapped text */
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  
+  /* Alternative approach: Use CSS container queries for even more precise control */
+  @supports (container-type: inline-size) {
+    html[dir="rtl"] .attribute-label,
+    html[dir="rtl"] [class*="attribute"] .text-xs,
+    html[dir="rtl"] [class*="attribute"] .text-sm {
+      container-type: inline-size;
+      font-size: clamp(0.6rem, 6cqw, 1rem) !important; /* Container-based sizing */
+    }
   }
 }
 

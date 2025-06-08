@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
-import { DEFAULT_PORTRAIT } from '@/lib/image-helpers';
+import { DEFAULT_PORTRAIT, DEFAULT_PIN } from '@/lib/image-helpers';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 
 interface ImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
@@ -13,23 +12,27 @@ interface ImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
 const Image: React.FC<ImageProps> = ({ 
   src, 
   alt = "Image", 
-  fallbackSrc = DEFAULT_PORTRAIT,
+  fallbackSrc,
   className = "",
   objectFit = "cover",
   imageType = "default",
   aspectRatio,
   ...props 
 }) => {
-  const [imgSrc, setImgSrc] = useState<string>(src || fallbackSrc);
+  const [imgSrc, setImgSrc] = useState<string>(src || fallbackSrc || DEFAULT_PORTRAIT);
   
-  // Reset the image source whenever the src prop changes
+  // Reset when src prop changes
   useEffect(() => {
-    setImgSrc(src || fallbackSrc);
+    setImgSrc(src || fallbackSrc || DEFAULT_PORTRAIT);
   }, [src, fallbackSrc]);
   
   const handleError = (e: React.SyntheticEvent<HTMLImageElement>) => {
-    console.error("Missing image:", src);
-    setImgSrc(fallbackSrc);
+    console.log("Image failed to load:", imgSrc);
+    
+    // Fallback to the appropriate default
+    const defaultSrc = fallbackSrc || (imageType === 'pin' ? DEFAULT_PIN : DEFAULT_PORTRAIT);
+    console.log("Using default:", defaultSrc);
+    setImgSrc(defaultSrc);
   };
 
   // Apply specific styling based on image type

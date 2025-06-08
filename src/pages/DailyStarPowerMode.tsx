@@ -283,7 +283,6 @@ const DailyStarPowerMode: React.FC = () => {
             {showVictoryScreen ? (
               // Victory Screen
               <div className="text-center space-y-6">
-                <div className="text-6xl mb-4">🎉</div>
                 <h2 className="text-3xl font-bold text-yellow-400 mb-4">
                   {t('daily.congratulations')}
                 </h2>
@@ -312,6 +311,13 @@ const DailyStarPowerMode: React.FC = () => {
                   >
                     {t('daily.go.home')}
                   </Button>
+                  <div className="flex justify-center mt-6">
+                    <img 
+                      src="/Brawler_GIFs/chuck_win.gif" 
+                      alt="Chuck Victory" 
+                      className="w-64 h-64 md:w-80 md:h-80 object-contain"
+                    />
+                  </div>
                 </div>
               </div>
             ) : (

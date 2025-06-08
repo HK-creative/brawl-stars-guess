@@ -15,34 +15,34 @@ import { fetchDailyChallenge } from '@/lib/daily-challenges';
 import { t, getLanguage } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
-// Helper to get gadget image path (same as survival mode)
-const getGadgetImage = (brawler: string, gadgetName?: string): string => {
+// Helper to get gadget image path with fallback variants
+const getGadgetImageVariants = (brawler: string, gadgetName?: string): string[] => {
   if (!brawler) {
-    return `/GadgetImages/shelly_gadget_01.png`;
+    return [];
   }
   
   // Clean up brawler name for file path
   const normalizedBrawler = brawler.toLowerCase().replace(/ /g, '_');
   
   // Handle special cases
-  if (normalizedBrawler === 'mr.p') return `/GadgetImages/mrp_gadget_01.png`;
-  if (normalizedBrawler === 'el primo') return `/GadgetImages/elprimo_gadget_01.png`;
-  if (normalizedBrawler === 'colonel ruffs') return `/GadgetImages/colonel_ruffs_gadget_01.png`;
+  if (normalizedBrawler === 'mr.p') return [`/GadgetImages/mrp_gadget_01.png`];
+  if (normalizedBrawler === 'el primo') return [`/GadgetImages/elprimo_gadget_01.png`];
+  if (normalizedBrawler === 'colonel ruffs') return [`/GadgetImages/colonel_ruffs_gadget_01.png`];
   
   // Special case for R-T
   if (brawler.toLowerCase().replace(/[-_ ]/g, '') === 'rt') {
     if (gadgetName && gadgetName.match(/2|second/i)) {
-      return '/GadgetImages/rt_gadget_02.png';
+      return ['/GadgetImages/rt_gadget_02.png'];
     }
-    return '/GadgetImages/rt_gadget_01.png';
+    return ['/GadgetImages/rt_gadget_01.png'];
   }
   
   // Special case for Jae-Yong
   if (brawler.toLowerCase().replace(/[-_ ]/g, '') === 'jaeyong') {
     if (gadgetName && gadgetName.match(/2|second/i)) {
-      return '/GadgetImages/Jae-Yong_gadget_2.png';
+      return ['/GadgetImages/Jae-Yong_gadget_2.png'];
     }
-    return '/GadgetImages/Jae-Yong_gadget_1.png';
+    return ['/GadgetImages/Jae-Yong_gadget_1.png'];
   }
   
   // First, try to determine the base gadget number from the name
@@ -62,8 +62,8 @@ const getGadgetImage = (brawler: string, gadgetName?: string): string => {
   const variant1 = `/GadgetImages/${normalizedBrawler}_gadget_${baseNum}.png`;
   const variant2 = `/GadgetImages/${normalizedBrawler}_gadget_${baseNum.replace(/^0+/, '')}.png`;
   
-  // Randomly choose between the two variants
-  return Math.random() < 0.5 ? variant1 : variant2;
+  // Return both variants to try
+  return [variant1, variant2];
 };
 
 const DailyGadgetMode: React.FC = () => {
@@ -122,6 +122,9 @@ const DailyGadgetMode: React.FC = () => {
   const [showConfetti, setShowConfetti] = useState(false);
   const [gadgetData, setGadgetData] = useState<any>(null);
   const [gadgetImage, setGadgetImage] = useState<string>('');
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageVariants, setImageVariants] = useState<string[]>([]);
+  const [currentVariantIndex, setCurrentVariantIndex] = useState(0);
 
   // Initialize daily modes on component mount
   useEffect(() => {
@@ -141,16 +144,39 @@ const DailyGadgetMode: React.FC = () => {
     const loadGadgetData = async () => {
       try {
         const data = await fetchDailyChallenge('gadget');
+        console.log('Loaded gadget data:', data);
         setGadgetData(data);
         
-        // Generate gadget image path
+        // Generate gadget image variants
         if (data?.brawler) {
-          const imagePath = getGadgetImage(data.brawler, data.gadgetName);
-          setGadgetImage(imagePath);
+          const variants = getGadgetImageVariants(data.brawler, data.gadgetName);
+          console.log('Generated gadget image variants:', variants);
+          setImageVariants(variants);
+          setCurrentVariantIndex(0);
+          if (variants.length > 0) {
+            setGadgetImage(variants[0]);
+            console.log('Trying first variant:', variants[0]);
+          } else {
+            setGadgetImage('');
+          }
+          setImageLoaded(false); // Reset image loaded state
+        } else {
+          console.warn('No brawler data found in gadget challenge');
+          // Don't set any fallback image - just leave it empty
+          setGadgetImage('');
+          setImageVariants([]);
+          setCurrentVariantIndex(0);
+          setImageLoaded(false);
         }
-      } catch (error) {
-        console.error('Error loading gadget data:', error);
-      }
+              } catch (error) {
+          console.error('Error loading gadget data:', error);
+          // Don't set any fallback image on error - just leave it empty
+          setGadgetImage('');
+          setImageVariants([]);
+          setCurrentVariantIndex(0);
+          setImageLoaded(false);
+          setGadgetData(null);
+        }
     };
     
     loadGadgetData();
@@ -307,7 +333,6 @@ const DailyGadgetMode: React.FC = () => {
             {showVictoryScreen ? (
               // Victory Screen
               <div className="text-center space-y-6">
-                <div className="text-6xl mb-4">🎉</div>
                 <h2 className="text-3xl font-bold text-yellow-400 mb-4">
                   {t('daily.congratulations')}
                 </h2>
@@ -336,6 +361,13 @@ const DailyGadgetMode: React.FC = () => {
                   >
                     {t('daily.go.home')}
                   </Button>
+                  <div className="flex justify-center mt-6">
+                    <img 
+                      src="/Brawler_GIFs/surge_win.gif" 
+                      alt="Surge Victory" 
+                      className="w-64 h-64 md:w-80 md:h-80 object-contain"
+                    />
+                  </div>
                 </div>
               </div>
             ) : (
@@ -351,11 +383,13 @@ const DailyGadgetMode: React.FC = () => {
                     <div className="flex flex-col items-center mb-6">
                       <div className="relative w-32 h-32 md:w-40 md:h-40 mx-auto mb-4">
                         <img
+                          key={gadgetImage}
                           src={gadgetImage}
                           alt="Brawler Gadget"
                           className="w-full h-full object-contain transform transition-all duration-300 hover:scale-105"
                           onLoad={(e) => {
-                            console.log('Gadget image loaded successfully');
+                            console.log('Gadget image loaded successfully:', gadgetImage);
+                            setImageLoaded(true);
                             e.currentTarget.style.display = 'block';
                             // Hide loading state
                             const parent = e.currentTarget.parentElement;
@@ -367,35 +401,46 @@ const DailyGadgetMode: React.FC = () => {
                             }
                           }}
                           onError={(e) => {
-                            console.log('Gadget image load failed, showing loading state');
-                                e.currentTarget.style.display = 'none';
-                            // Show error state instead of loading
-                            const parent = e.currentTarget.parentElement;
-                            if (parent) {
-                              const loadingEl = parent.querySelector('.loading-placeholder') as HTMLElement;
-                              if (loadingEl) {
-                                loadingEl.innerHTML = `
-                                  <div class="w-full h-full flex flex-col items-center justify-center space-y-4">
-                                    <div class="text-red-400 text-sm">Failed to load gadget image</div>
-                                    <button onclick="window.location.reload()" class="text-xs bg-red-600 hover:bg-red-500 px-3 py-1 rounded text-white">
-                                      Refresh Page
-                                    </button>
-                                  </div>
-                                `;
+                            // Only handle error if image hasn't already loaded successfully
+                            if (!imageLoaded) {
+                              console.log('Gadget image load failed:', gadgetImage);
+                              
+                              // Try next variant if available
+                              const nextIndex = currentVariantIndex + 1;
+                              if (nextIndex < imageVariants.length) {
+                                console.log(`Trying next variant (${nextIndex + 1}/${imageVariants.length}):`, imageVariants[nextIndex]);
+                                setCurrentVariantIndex(nextIndex);
+                                setGadgetImage(imageVariants[nextIndex]);
+                                return; // Don't show error state yet, try next variant
                               }
+                              
+                              // All variants failed, show error state
+                              console.log('All gadget image variants failed');
+                              e.currentTarget.style.display = 'none';
+                              const parent = e.currentTarget.parentElement;
+                              if (parent) {
+                                const loadingEl = parent.querySelector('.loading-placeholder') as HTMLElement;
+                                if (loadingEl) {
+                                  loadingEl.innerHTML = `
+                                    <div class="w-full h-full flex flex-col items-center justify-center space-y-4 bg-slate-800/50 rounded-xl border-2 border-dashed border-slate-600">
+                                      <div class="text-slate-400 text-6xl">🔧</div>
+                                      <div class="text-slate-400 text-sm text-center">Challenge Ready!</div>
+                                      <div class="text-xs text-slate-500 text-center px-4">Guess which brawler this gadget belongs to</div>
+                                    </div>
+                                  `;
+                                  loadingEl.style.display = 'block';
+                                }
+                              }
+                            } else {
+                              console.log('Image error ignored - image already loaded successfully');
                             }
                           }}
                           style={{ display: 'none' }}
                         />
                         {/* Loading state */}
                         <div className="w-full h-full flex flex-col items-center justify-center space-y-4 loading-placeholder">
-                          <div className="loading-spinner"></div>
+                          <div className="animate-spin h-8 w-8 border-4 border-yellow-400 border-t-transparent rounded-full"></div>
                           <p className="text-yellow-400 text-sm">Loading gadget...</p>
-                          <div className="loading-dots">
-                            <div className="loading-dot"></div>
-                            <div className="loading-dot"></div>
-                            <div className="loading-dot"></div>
-                          </div>
                         </div>
                       </div>
                     </div>

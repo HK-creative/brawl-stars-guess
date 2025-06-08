@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { toast } from '@/components/ui/use-toast';
+import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { t } from '@/lib/i18n';
@@ -45,6 +45,7 @@ const ClassicMode = ({
   const [showShareModal, setShowShareModal] = useState(false);
   const [isEndlessMode, setIsEndlessMode] = useState(propIsEndlessMode);
   const isMobile = useIsMobile();
+  const { toast } = useToast();
   const [guessedBrawlerNames, setGuessedBrawlerNames] = useState<string[]>([]);
   const [availableBrawlers, setAvailableBrawlers] = useState<Brawler[]>([]);
   const [lastGuessIndex, setLastGuessIndex] = useState<number | null>(null); // Track the most recent guess
@@ -202,6 +203,7 @@ const ClassicMode = ({
         setCorrectBrawlerName(fallbackBrawlerName);
         setIsBackendConnected(false);
         toast({
+          id: String(Date.now()),
           title: 'Offline Mode',
           description: 'Could not connect to server. Using offline mode.',
         });
@@ -213,6 +215,7 @@ const ClassicMode = ({
     } catch (error) {
       console.error('Error in loadChallenge:', error);
       toast({
+        id: String(Date.now()),
         title: 'Error',
         description: 'An error occurred while loading the challenge.',
         variant: 'destructive',
@@ -275,6 +278,7 @@ const ClassicMode = ({
     
     if (!selectedBrawler) {
       toast({
+        id: String(Date.now()),
         title: 'No brawler selected',
         description: 'Please select a brawler to make a guess.',
         variant: 'destructive',
@@ -285,6 +289,7 @@ const ClassicMode = ({
     // Check if this brawler has already been guessed
     if (guessedBrawlerNames.includes(selectedBrawler.name)) {
       toast({
+        id: String(Date.now()),
         title: 'Already guessed',
         description: `You've already guessed ${selectedBrawler.name}.`,
         variant: 'destructive',
@@ -300,6 +305,10 @@ const ClassicMode = ({
     setGuessCount(prevCount => prevCount + 1);
     
     if (isSurvivalMode) {
+      // In survival mode, don't manage local guesses - let the parent handle it
+      // The parent (SurvivalMode) will track guesses through its own state
+    } else {
+      // Only manage local guesses in non-survival modes
       setGuessesLeft(prevLeft => prevLeft - 1);
     }
     
@@ -320,6 +329,7 @@ const ClassicMode = ({
       
       // Standard victory handling
       toast({
+        id: String(Date.now()),
         title: 'Correct!',
         description: `You guessed ${correctBrawlerName} in ${guessCount + 1} tries.`,
         variant: 'default',
@@ -336,7 +346,7 @@ const ClassicMode = ({
     }
     // Check if out of guesses
     else {
-      const outOfGuesses = isSurvivalMode ? guessesLeft <= 1 : guessCount + 1 >= maxGuesses;
+      const outOfGuesses = isSurvivalMode ? guessCount + 1 >= maxGuesses : guessCount + 1 >= maxGuesses;
       
       if (outOfGuesses) {
         // For survival mode, defer to the parent component to handle loss
@@ -347,6 +357,7 @@ const ClassicMode = ({
         
         // Standard game over handling
         toast({
+          id: String(Date.now()),
           title: 'Game Over',
           description: `The correct answer was ${correctBrawlerName}.`,
           variant: 'destructive',
@@ -442,7 +453,7 @@ const ClassicMode = ({
             <div className="w-full flex justify-center gap-4 mt-4">
               <div className="flex items-center gap-2 bg-black/70 border-2 border-brawl-yellow px-6 py-2 rounded-full shadow-xl animate-pulse">
                 <span className="text-brawl-yellow text-lg font-bold tracking-wide">{t('guesses.left')}</span>
-                <span className={`text-2xl font-extrabold ${guessesLeft <= 3 ? 'text-brawl-red animate-bounce' : 'text-white'}`}>{guessesLeft}</span>
+                <span className={`text-2xl font-extrabold ${(maxGuesses - guessCount) <= 3 ? 'text-brawl-red animate-bounce' : 'text-white'}`}>{maxGuesses - guessCount}</span>
               </div>
             </div>
           )}

@@ -5,7 +5,7 @@ import { getPin, DEFAULT_PIN } from '@/lib/image-helpers';
 import Image from '@/components/ui/image';
 import { cn } from '@/lib/utils';
 import { Search, X } from 'lucide-react';
-import { toast } from '@/components/ui/use-toast';
+import { useToast } from '@/components/ui/use-toast';
 import { t, getLanguage } from '@/lib/i18n';
 
 interface BrawlerAutocompleteProps {
@@ -35,6 +35,7 @@ const BrawlerAutocomplete: React.FC<BrawlerAutocompleteProps> = ({
   const listRef = useRef<HTMLDivElement>(null);
   
   const currentLanguage = getLanguage();
+  const { toast } = useToast();
   
   useEffect(() => {
     if (value.trim() === '') {
@@ -131,6 +132,7 @@ const BrawlerAutocomplete: React.FC<BrawlerAutocompleteProps> = ({
       const matchedBrawler = getBrawlerByDisplayName(currentInputText);
       if (matchedBrawler && disabledBrawlers.includes(matchedBrawler.name)) {
         toast({
+          id: String(Date.now()),
           title: "Already Guessed",
           description: `You've already guessed this brawler!`,
           variant: "destructive"

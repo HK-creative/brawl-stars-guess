@@ -215,6 +215,10 @@ const GadgetMode = ({
     setAttempts(attempts + 1);
     
     if (isSurvivalMode) {
+      // In survival mode, don't manage local guesses - let the parent handle it
+      // The parent (SurvivalMode) will track guesses through its own state
+    } else {
+      // Only manage local guesses in non-survival modes
       setGuessesLeft(prev => prev - 1);
     }
 
@@ -232,7 +236,7 @@ const GadgetMode = ({
       
       toast.success('Correct! You guessed the brawler!');
     } else {
-      const outOfGuesses = isSurvivalMode ? guessesLeft <= 1 : attempts + 1 >= maxGuesses;
+      const outOfGuesses = isSurvivalMode ? attempts + 1 >= maxGuesses : attempts + 1 >= maxGuesses;
       
       if (outOfGuesses) {
         setShowResult(true);
@@ -544,7 +548,7 @@ const GadgetMode = ({
             {isSurvivalMode ? (
               <div className="flex items-center gap-2 bg-black/70 border-2 border-brawl-yellow px-6 py-2 rounded-full shadow-xl animate-pulse">
                 <span className="text-brawl-yellow text-lg font-bold tracking-wide">{t('guesses.left')}</span>
-                <span className={`text-2xl font-extrabold ${guessesLeft <= 3 ? 'text-brawl-red animate-bounce' : 'text-white'}`}>{guessesLeft}</span>
+                <span className={`text-2xl font-extrabold ${(maxGuesses - attempts) <= 3 ? 'text-brawl-red animate-bounce' : 'text-white'}`}>{maxGuesses - attempts}</span>
               </div>
             ) : (
               <div className="flex items-center gap-2 bg-black/50 backdrop-blur px-4 py-1 rounded-full shadow-lg">

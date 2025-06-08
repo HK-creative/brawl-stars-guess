@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Clock, Hash, Volume2, Play } from 'lucide-react';
-import { toast } from '@/components/ui/use-toast';
+import { useToast } from '@/components/ui/use-toast';
 import { useDailyStore } from '@/stores/useDailyStore';
 import { brawlers, getBrawlerDisplayName } from '@/data/brawlers';
 import { getPortrait } from '@/lib/image-helpers';
@@ -80,6 +80,7 @@ const DailyAudioMode: React.FC = () => {
   } = useDailyStore();
 
   const currentLanguage = getLanguage();
+  const { toast } = useToast();
 
   // Local game state
   const [inputValue, setInputValue] = useState('');
@@ -94,6 +95,13 @@ const DailyAudioMode: React.FC = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [audioReady, setAudioReady] = useState(false);
   const [audioError, setAudioError] = useState(false);
+  
+  // Hint system state
+  const [hintAudioElement, setHintAudioElement] = useState<HTMLAudioElement | null>(null);
+  const [isHintPlaying, setIsHintPlaying] = useState(false);
+  const [hintAudioReady, setHintAudioReady] = useState(false);
+  const [hintAudioError, setHintAudioError] = useState(false);
+  const [showHint, setShowHint] = useState(false);
 
   // Initialize daily modes on component mount
   useEffect(() => {
@@ -117,6 +125,8 @@ const DailyAudioMode: React.FC = () => {
         console.log('Received audio challenge data:', data);
         console.log('Today\'s audio brawler:', data?.brawler);
         console.log('Audio file path:', data?.audioFile);
+        console.log('Has hint:', data?.hasHint);
+        console.log('Hint audio file:', data?.hintAudioFile);
         setAudioData(data);
         
         // Create audio element
@@ -152,6 +162,39 @@ const DailyAudioMode: React.FC = () => {
           // Start loading the audio
           audio.load();
           setAudioElement(audio);
+          
+          // Create hint audio element if available
+          if (data?.hintAudioFile && data?.hasHint) {
+            console.log('Creating hint audio element with file:', data.hintAudioFile);
+            const hintAudio = new Audio(data.hintAudioFile);
+            
+            hintAudio.addEventListener('ended', () => {
+              console.log('Hint audio playback ended');
+              setIsHintPlaying(false);
+            });
+            
+            hintAudio.addEventListener('canplaythrough', () => {
+              console.log('Hint audio can play through - hint audio is ready');
+              setHintAudioReady(true);
+              setHintAudioError(false);
+            });
+            
+            hintAudio.addEventListener('loadeddata', () => {
+              console.log('Hint audio data loaded successfully');
+              setHintAudioReady(true);
+              setHintAudioError(false);
+            });
+            
+            hintAudio.addEventListener('error', (e) => {
+              console.error('Hint audio loading error:', e, 'src:', hintAudio.src);
+              setHintAudioError(true);
+              setHintAudioReady(false);
+            });
+            
+            // Start loading the hint audio
+            hintAudio.load();
+            setHintAudioElement(hintAudio);
+          }
         } else {
           // No audio file provided, show error instead of fallback
           console.warn('No audio file in challenge data');
@@ -174,6 +217,11 @@ const DailyAudioMode: React.FC = () => {
         audioElement.pause();
         audioElement.src = '';
       }
+      if (hintAudioElement) {
+        console.log('Cleaning up hint audio element');
+        hintAudioElement.pause();
+        hintAudioElement.src = '';
+      }
     };
   }, []);
 
@@ -184,7 +232,12 @@ const DailyAudioMode: React.FC = () => {
     // Extract brawler names from saved guesses to prevent duplicates
     const brawlerNames = savedGuesses.map(guess => guess.name);
     setGuessedBrawlerNames(brawlerNames);
-  }, [audio.brawlerName, getGuesses]);
+    
+    // Check if hint should be shown based on saved guesses
+    if (savedGuesses.length >= 4 && audioData?.hasHint && !audio.isCompleted) {
+      setShowHint(true);
+    }
+  }, [audio.brawlerName, getGuesses, audioData?.hasHint, audio.isCompleted]);
 
   // Reset game when already completed
   useEffect(() => {
@@ -215,6 +268,7 @@ const DailyAudioMode: React.FC = () => {
           console.error('Failed to play audio:', error);
           setAudioError(true);
           toast({
+            id: String(Date.now()),
             title: "Audio Error",
             description: "Failed to play audio. Please try refreshing the page.",
           });
@@ -222,20 +276,69 @@ const DailyAudioMode: React.FC = () => {
     } else if (!audioReady) {
       console.log('Audio not ready yet');
       toast({
+        id: String(Date.now()),
         title: "Audio Loading",
         description: "Audio file is still loading. Please wait a moment.",
       });
     } else if (audioError) {
       console.log('Audio has error, attempting to reload');
       toast({
+        id: String(Date.now()),
         title: "Audio Error",
         description: "There was an issue with the audio. Please refresh the page.",
       });
     } else {
       console.log('No audio element available');
       toast({
+        id: String(Date.now()),
         title: "Audio Error",
         description: "Audio is not available. Please refresh the page.",
+      });
+    }
+  };
+
+  // Handle hint audio play/pause
+  const playHintAudio = () => {
+    console.log('playHintAudio called', { hintAudioElement: !!hintAudioElement, hintAudioReady, hintAudioError });
+    
+    if (hintAudioElement && hintAudioReady && !hintAudioError) {
+      hintAudioElement.currentTime = 0; // Reset to beginning
+      console.log('Attempting to play hint audio:', hintAudioElement.src);
+      
+      hintAudioElement.play()
+        .then(() => {
+          console.log('Hint audio play started successfully');
+          setIsHintPlaying(true);
+        })
+        .catch((error) => {
+          console.error('Failed to play hint audio:', error);
+          setHintAudioError(true);
+          toast({
+            id: String(Date.now()),
+            title: "Hint Audio Error",
+            description: "Failed to play hint audio. Please try refreshing the page.",
+          });
+        });
+    } else if (!hintAudioReady) {
+      console.log('Hint audio not ready yet');
+      toast({
+        id: String(Date.now()),
+        title: "Hint Audio Loading",
+        description: "Hint audio file is still loading. Please wait a moment.",
+      });
+    } else if (hintAudioError) {
+      console.log('Hint audio has error');
+      toast({
+        id: String(Date.now()),
+        title: "Hint Audio Error",
+        description: "There was an issue with the hint audio. Please refresh the page.",
+      });
+    } else {
+      console.log('No hint audio element available');
+      toast({
+        id: String(Date.now()),
+        title: "Hint Audio Error",
+        description: "Hint audio is not available.",
       });
     }
   };
@@ -271,11 +374,27 @@ const DailyAudioMode: React.FC = () => {
         audioElement.pause();
         setIsPlaying(false);
       }
+      if (hintAudioElement) {
+        hintAudioElement.pause();
+        setIsHintPlaying(false);
+      }
       
       toast({
+        id: String(Date.now()),
         title: "Congratulations! 🎉",
         description: `You found ${getBrawlerDisplayName(correctBrawler, currentLanguage)}!`,
       });
+    } else {
+      // Check if we should show hint after 4 wrong guesses
+      const newGuessCount = audio.guessCount + 1;
+      if (newGuessCount >= 4 && audioData?.hasHint && !showHint) {
+        setShowHint(true);
+        toast({
+          id: String(Date.now()),
+          title: "Hint Available! 💡",
+          description: "A second audio clip is now available to help you!",
+        });
+      }
     }
     
     // Reset input
@@ -307,12 +426,17 @@ const DailyAudioMode: React.FC = () => {
     setShowConfetti(false);
     setInputValue('');
     setSelectedBrawler(null);
+    setShowHint(false);
     resetGuessCount('audio');
     
     // Stop audio
     if (audioElement) {
       audioElement.pause();
       setIsPlaying(false);
+    }
+    if (hintAudioElement) {
+      hintAudioElement.pause();
+      setIsHintPlaying(false);
     }
   };
 
@@ -382,7 +506,6 @@ const DailyAudioMode: React.FC = () => {
             {showVictoryScreen ? (
               // Victory Screen
               <div className="text-center space-y-6">
-                <div className="text-6xl mb-4">🎉</div>
                 <h2 className="text-3xl font-bold text-yellow-400 mb-4">
                   {t('daily.congratulations')}
                 </h2>
@@ -414,6 +537,13 @@ const DailyAudioMode: React.FC = () => {
                   >
                     {t('daily.go.home')}
                   </Button>
+                  <div className="flex justify-center mt-6">
+                    <img 
+                      src="/Brawler_GIFs/mico_win.gif" 
+                      alt="Mico Victory" 
+                      className="w-64 h-64 md:w-80 md:h-80 object-contain"
+                    />
+                  </div>
                 </div>
               </div>
             ) : (
@@ -494,6 +624,35 @@ const DailyAudioMode: React.FC = () => {
                         <p className="text-white/70 text-sm">{t('daily.audio.click.play')}</p>
                       )}
                     </div>
+                    
+                    {/* Hint Audio Player - Minimal Design */}
+                    {showHint && audioData?.hasHint && (
+                      <div className="mt-4 flex items-center justify-center gap-3">
+                        <span className="text-yellow-400 text-sm font-medium">💡 Hint:</span>
+                        <button
+                          onClick={playHintAudio}
+                          disabled={isHintPlaying || !hintAudioReady || hintAudioError}
+                          className={cn(
+                            "w-8 h-8 flex items-center justify-center rounded-full transition-all",
+                            isHintPlaying ? "bg-yellow-500" : "bg-yellow-600 hover:bg-yellow-500",
+                            "border-2 border-yellow-300",
+                            hintAudioError && "bg-red-500 cursor-not-allowed",
+                            !hintAudioReady && !hintAudioError && "bg-gray-500 cursor-wait"
+                          )}
+                        >
+                          {!hintAudioReady && !hintAudioError ? (
+                            <div className="w-3 h-3 border border-white border-t-transparent rounded-full animate-spin" />
+                          ) : isHintPlaying ? (
+                            <Volume2 size={16} className="text-white" />
+                          ) : (
+                            <Play size={14} className="text-white ml-0.5" />
+                          )}
+                        </button>
+                        <span className="text-white/60 text-xs">
+                          {hintAudioError ? "Error" : !hintAudioReady ? "Loading..." : isHintPlaying ? "Playing..." : "Different sound"}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
 

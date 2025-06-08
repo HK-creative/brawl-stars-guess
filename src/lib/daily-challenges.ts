@@ -75,48 +75,119 @@ class SeededRandom {
 
 // Get deterministic daily brawler for a specific mode and date
 const getDailyBrawler = (mode: string, date: string): Brawler => {
+  // Get all modes for cross-mode checking
+  const allModes = ['classic', 'gadget', 'starpower', 'audio'];
+  const selectedBrawlers: string[] = [];
+  
+  // Check what brawlers have already been selected for other modes today
+  for (const otherMode of allModes) {
+    if (otherMode !== mode) {
+      const otherSeed = `${otherMode}-${date}`;
+      const otherRandom = new SeededRandom(otherSeed);
+      const otherBrawlerIndex = otherRandom.nextInt(brawlers.length);
+      selectedBrawlers.push(brawlers[otherBrawlerIndex].name);
+    }
+  }
+  
   // Create a unique seed for this mode and date
   const seed = `${mode}-${date}`;
   const random = new SeededRandom(seed);
   
-  // Select a random brawler using the seeded random
-  const brawlerIndex = random.nextInt(brawlers.length);
-  return brawlers[brawlerIndex];
+  // Try to find a brawler that hasn't been used in other modes
+  let attempts = 0;
+  let selectedBrawler: Brawler;
+  
+  do {
+    const brawlerIndex = random.nextInt(brawlers.length);
+    selectedBrawler = brawlers[brawlerIndex];
+    attempts++;
+    
+    // If we've tried too many times or no conflicts, accept this brawler
+    if (attempts > 10 || !selectedBrawlers.includes(selectedBrawler.name)) {
+      break;
+    }
+    
+    // Create a new seed with attempt number to get different result
+    const newSeed = `${mode}-${date}-attempt-${attempts}`;
+    const newRandom = new SeededRandom(newSeed);
+    const newBrawlerIndex = newRandom.nextInt(brawlers.length);
+    selectedBrawler = brawlers[newBrawlerIndex];
+  } while (selectedBrawlers.includes(selectedBrawler.name) && attempts < 10);
+  
+  return selectedBrawler;
 };
 
 // Get available audio files for a specific brawler
 const getAudioFilesForBrawler = (brawlerName: string): string[] => {
   const availableAudioFiles = [
-    'kaze_atk_sfx_01.ogg', 'kaze_atk_sfx_02.ogg',
-    'jae_atk_2_01.ogg', 'jae_atk_1_01.ogg',
-    'meeple_atk_01.ogg',
-    'shade_atk_vo_03.ogg', 'shade_atk_vo_01.ogg', 'shade_atk_vo_02.ogg', 'shade_atk_02.ogg',
-    'juju_water_atk_01.ogg', 'juju_forest_atk_01.ogg', 'juju_earth_atk_01.ogg',
-    'kenji_atk_vo_09.ogg', 'kenji_atk_vo_07.ogg', 'kenji_atk_vo_08.ogg', 'kenji_atk_vo_06.ogg',
-    'kenji_atk_vo_04.ogg', 'kenji_atk_vo_05.ogg', 'kenji_atk_vo_02.ogg', 'kenji_atk_vo_03.ogg',
-    'kenji_atk_vo_01.ogg', 'kenji_atk_sfx_01.ogg', 'kenji_atk_sfx_02.ogg',
-    'moe_drill_atk_vo_06.ogg', 'moe_rockthrow_atk_01.ogg', 'moe_drill_atk_vo_05.ogg',
-    'moe_drill_atk_vo_03.ogg', 'moe_drill_atk_vo_04.ogg', 'moe_drill_atk_vo_01.ogg',
-    'moe_drill_atk_vo_02.ogg', 'moe_drill_atk_sfx_01.ogg', 'moe_atk_vo_05.ogg',
-    'moe_atk_vo_06.ogg', 'moe_atk_vo_03.ogg', 'moe_atk_vo_04.ogg', 'moe_atk_vo_02.ogg', 'moe_atk_vo_01.ogg',
-    'ddracos_atk_vo_07.ogg', 'ddracos_atk_vo_08.ogg', 'ddracos_atk_vo_06.ogg', 'ddracos_atk_vo_04.ogg',
-    'ddracos_atk_vo_05.ogg', 'ddracos_atk_vo_03.ogg', 'ddracos_atk_vo_01.ogg', 'ddracos_atk_vo_02.ogg',
-    'amber_ice_atk_vo_02.ogg', 'amber_ice_atk_vo_03.ogg', 'amber_ice_atk_vo_01.ogg',
-    'amber_ice_atk_vo_06.ogg', 'amber_ice_atk_vo_05.ogg', 'amber_ice_atk_vo_04.ogg', 'amber_ice_atk_vo_07.ogg',
-    'lily_atk_01.ogg', 'lily_ulti_atk_01.ogg',
-    'draco_atk_vo_08.ogg', 'draco_atk_gui_08.ogg', 'draco_atk_gui_09.ogg', 'draco_atk_gui_14.ogg',
-    'draco_atk_gui_15.ogg', 'draco_atk_gui_02.ogg', 'draco_atk_gui_03.ogg', 'draco_atk_gui_01.ogg',
-    'draco_atk_gui_12.ogg', 'draco_atk_gui_13.ogg', 'draco_atk_gui_11.ogg', 'draco_atk_gui_06.ogg',
-    'draco_atk_gui_07.ogg', 'draco_atk_gui_05.ogg', 'draco_atk_vo_03.ogg', 'draco_atk_gui_10.ogg',
-    'draco_atk_gui_04.ogg', 'draco_ulti_atk_sfx_01.ogg', 'draco_atk_vo_06.ogg', 'draco_atk_vo_07.ogg',
-    'draco_atk_vo_05.ogg', 'draco_atk_vo_02.ogg', 'draco_atk_vo_04.ogg', 'draco_atk_vo_01.ogg', 'draco_atk_sfx_01.ogg',
-    'melodie_atk_sfx_01.ogg', 'angelo_atk_01.ogg',
-    'kit_ulti_atk_01.ogg', 'kit_atk_vo_03.ogg', 'kit_atk_vo_04.ogg', 'kit_atk_vo_02.ogg', 'kit_atk_vo_01.ogg', 'kit_atk_01.ogg',
-    'lawrie_win_atk_01.ogg', 'mico_ulti_atk_01.ogg', 'chuck_atk_01.ogg', 'mico_atk_01.ogg'
+    "8bit_atk_02.ogg",
+    "amber_atk_01.ogg", "amber_atk_02.ogg", "amber_atk_vo_01.ogg", "amber_atk_vo_02.ogg", "amber_atk_vo_03.ogg", "amber_atk_vo_04.ogg", "amber_atk_vo_05.ogg", "amber_atk_vo_06.ogg",
+    "amber_ice_atk_vo_01.ogg", "amber_ice_atk_vo_02.ogg", "amber_ice_atk_vo_03.ogg", "amber_ice_atk_vo_04.ogg", "amber_ice_atk_vo_05.ogg", "amber_ice_atk_vo_06.ogg", "amber_ice_atk_vo_07.ogg",
+    "angelo_atk_01.ogg",
+    "barley_fire_atk_01.ogg",
+    "bea_atk_01.ogg", "bea_atk_hit_01.ogg", "bea_atk_vo_01.ogg", "bea_atk_vo_02.ogg", "bea_atk_vo_03.ogg",
+    "bea_mon_atk_vo_01.ogg", "bea_mon_atk_vo_02.ogg", "bea_mon_atk_vo_03.ogg",
+    "belle_atk_01.ogg", "buster_atk_01.ogg",
+    "buzzilla_atk_vo_01.ogg", "buzzilla_atk_vo_02.ogg", "buzzilla_atk_vo_03.ogg",
+    "buzz_atk_01.ogg", "buzz_ulti_atk_01.ogg", "buzz_ulti_dog_atk_01.ogg",
+    "carl_atk_01v2.ogg", "carl_atk_hit_return_01.ogg", "carl_atk_return_03.ogg", "carl_atk_vo_01.ogg", "carl_atk_vo_02.ogg", "carl_atk_vo_03.ogg",
+    "chester_atk_01.ogg", "chester_atk_hit_01.ogg",
+    "chuck_atk_01.ogg", "cordelius_atk_01.ogg",
+    "ddracos_atk_vo_01.ogg", "ddracos_atk_vo_02.ogg", "ddracos_atk_vo_03.ogg", "ddracos_atk_vo_04.ogg", "ddracos_atk_vo_05.ogg", "ddracos_atk_vo_06.ogg", "ddracos_atk_vo_07.ogg", "ddracos_atk_vo_08.ogg",
+    "doug_atk_sfx_01.ogg",
+    "draco_atk_gui_01.ogg", "draco_atk_gui_02.ogg", "draco_atk_gui_03.ogg", "draco_atk_gui_04.ogg", "draco_atk_gui_05.ogg", "draco_atk_gui_06.ogg", "draco_atk_gui_07.ogg", "draco_atk_gui_08.ogg", "draco_atk_gui_09.ogg", "draco_atk_gui_10.ogg", "draco_atk_gui_11.ogg", "draco_atk_gui_12.ogg", "draco_atk_gui_13.ogg", "draco_atk_gui_14.ogg", "draco_atk_gui_15.ogg",
+    "draco_atk_sfx_01.ogg", "draco_atk_vo_01.ogg", "draco_atk_vo_02.ogg", "draco_atk_vo_03.ogg", "draco_atk_vo_04.ogg", "draco_atk_vo_05.ogg", "draco_atk_vo_06.ogg", "draco_atk_vo_07.ogg", "draco_atk_vo_08.ogg", "draco_ulti_atk_sfx_01.ogg",
+    "elprimo_atk_01.ogg", "elprimo_atk_02.ogg", "elprimo_atk_03.ogg", "elprimo_atk_04.ogg", "elprimo_atk_05.ogg",
+    "emz_atk_01.ogg", "emz_atk_vo_01.ogg", "emz_atk_vo_02.ogg", "emz_atk_vo_03.ogg", "emz_atk_vo_04.ogg", "emz_atk_vo_05.ogg",
+    "eve_atk_01.ogg",
+    "evil_mortis_atk_vo_01.ogg", "evil_mortis_atk_vo_02.ogg", "evil_mortis_atk_vo_03.ogg", "evil_mortis_atk_vo_04.ogg",
+    "fang_atk_01.ogg", "fang_atk_hit_01.ogg", "fang_atk_vo_01.ogg", "fang_atk_vo_02.ogg", "fang_atk_vo_03.ogg", "fang_atk_vo_04.ogg", "fang_ulti_atk_01.ogg",
+    "gale_atk_01.ogg",
+    "gene_atk_02.ogg", "gene_atk_dry_01.ogg", "gene_atk_hit_01.ogg", "gene_atk_hit_02.ogg", "gene_atk_reload_01.ogg", "gene_atk_split_01.ogg", "gene_atk_ulti_01.ogg",
+    "gray_atk_01.ogg", "gray_atk_02.ogg", "gray_atk_03.ogg", "gray_atk_04.ogg", "gray_atk_05.ogg", "gray_atk_06.ogg",
+    "griff_atk_01.ogg",
+    "grom_atk_sfx_01.ogg", "grom_atk_sfx_02.ogg", "grom_atk_sfx_03.ogg", "grom_atk_sfx_04.ogg", "grom_ulti_atk_01.ogg",
+    "gus_atk_01.ogg", "gus_atk_02.ogg", "gus_atk_hit_01.ogg", "gus_atk_reachend_01.ogg", "gus_atk_vo_01.ogg", "gus_atk_vo_02.ogg", "gus_atk_vo_03.ogg", "gus_atk_vo_04.ogg",
+    "jacky_atk_01.ogg", "jacky_atk_02.ogg", "jacky_atk_ulti_01.ogg", "jacky_atk_ulti_02.ogg", "jacky_atk_ulti_03.ogg", "jacky_summer_atk_01.ogg",
+    "jae_atk_1_01.ogg", "jae_atk_2_01.ogg",
+    "janet_atk_sfx_01.ogg",
+    "juju_earth_atk_01.ogg", "juju_earth_atk_hit_01.ogg", "juju_forest_atk_01.ogg", "juju_forest_atk_hit_01.ogg", "juju_water_atk_01.ogg", "juju_water_atk_hit_01.ogg",
+    "kaze_atk_sfx_01.ogg", "kaze_atk_sfx_02.ogg",
+    "kenji_atk_sfx_01.ogg", "kenji_atk_sfx_02.ogg", "kenji_atk_vo_01.ogg", "kenji_atk_vo_02.ogg", "kenji_atk_vo_03.ogg", "kenji_atk_vo_04.ogg", "kenji_atk_vo_05.ogg", "kenji_atk_vo_06.ogg", "kenji_atk_vo_07.ogg", "kenji_atk_vo_08.ogg", "kenji_atk_vo_09.ogg",
+    "kit_atk_01.ogg", "kit_atk_vo_01.ogg", "kit_atk_vo_02.ogg", "kit_atk_vo_03.ogg", "kit_atk_vo_04.ogg", "kit_ulti_atk_01.ogg",
+    "lawrie_win_atk_01.ogg",
+    "lily_atk_01.ogg", "lily_ulti_atk_01.ogg",
+    "lola_atk_01.ogg",
+    "lou_atk_01.ogg", "lou_atk_vo_01.ogg", "lou_atk_vo_02.ogg", "lou_atk_vo_03.ogg", "lou_atk_vo_04.ogg", "lou_atk_vo_05.ogg", "lou_atk_vo_06.ogg", "lou_atk_vo_07.ogg", "lou_atk_vo_08.ogg",
+    "maisie_atk_01.ogg", "mandy_atk_01.ogg",
+    "max_atk_01.ogg", "max_atk_impact_01.ogg",
+    "mecha_mortis_atk_vo_01.ogg", "mecha_mortis_atk_vo_02.ogg", "mecha_mortis_atk_vo_03.ogg", "mecha_mortis_atk_vo_04.ogg",
+    "mech_crow_atk_01.ogg", "mech_spike_atk_01.ogg",
+    "meeple_atk_01.ogg", "melodie_atk_sfx_01.ogg",
+    "mico_atk_01.ogg", "mico_ulti_atk_01.ogg",
+    "moe_atk_vo_01.ogg", "moe_atk_vo_02.ogg", "moe_atk_vo_03.ogg", "moe_atk_vo_04.ogg", "moe_atk_vo_05.ogg", "moe_atk_vo_06.ogg",
+    "moe_drill_atk_sfx_01.ogg", "moe_drill_atk_vo_01.ogg", "moe_drill_atk_vo_02.ogg", "moe_drill_atk_vo_03.ogg", "moe_drill_atk_vo_04.ogg", "moe_drill_atk_vo_05.ogg", "moe_drill_atk_vo_06.ogg", "moe_rockthrow_atk_01.ogg",
+    "mortis_atk_01.ogg", "mortis_atk_vo_01.ogg", "mortis_atk_vo_02.ogg", "mortis_atk_vo_03.ogg", "mortis_atk_vo_04.ogg",
+    "mrp_atk_01.ogg", "mrp_atk_vo_01.ogg", "mrp_atk_vo_02.ogg", "mrp_atk_vo_03.ogg", "mrp_atk_vo_04.ogg", "mrp_minip_atk_01.ogg", "mrp_minip_atk_02.ogg",
+    "nani_atk_01.ogg",
+    "nita_atk_01.ogg", "nita_atk_02.ogg", "nita_atk_03.ogg", "nita_atk_04.ogg", "nita_atk_05.ogg", "nita_earth_atk_01.ogg",
+    "otis_atk_01.ogg", "otis_atk_hit_01.ogg",
+    "pearl_atk_01.ogg", "pearl_atk_vo_01.ogg", "pearl_atk_vo_02.ogg", "pearl_atk_vo_03.ogg", "pearl_atk_vo_04.ogg", "pearl_atk_vo_05.ogg", "pearl_atk_vo_06.ogg", "pearl_atk_vo_07.ogg", "pearl_atk_vo_08.ogg", "pearl_atk_vo_09.ogg", "pearl_atk_vo_10.ogg",
+    "poco_new_atk_01.ogg", "rocket_rose_atk_02.ogg",
+    "rt_atk_01.ogg", "ruffs_atk_01.ogg", "ruffs_atk_dryfire_01.ogg", "ruff_atk_01.ogg",
+    "sam_atk_vo_01.ogg", "sam_atk_vo_02.ogg", "sam_atk_vo_03.ogg", "sam_atk_vo_04.ogg", "sam_atk_vo_05.ogg", "sam_atk_vo_06.ogg", "sam_atk_vo_07.ogg",
+    "sandy_atk_01.ogg",
+    "shade_atk_02.ogg", "shade_atk_hit_01.ogg", "shade_atk_vo_01.ogg", "shade_atk_vo_02.ogg", "shade_atk_vo_03.ogg",
+    "spike_atk_01.ogg", "sprout_atk_01.ogg", "sprout_atk_explo_01.ogg", "sprout_atk_ulti_01.ogg", "squeak_atk_01.ogg", "stu_atk_01.ogg",
+    "surge_atk_01.ogg", "surge_atk_vo_01.ogg", "surge_atk_vo_02.ogg", "surge_atk_vo_03.ogg", "surge_atk_vo_04.ogg", "surge_atk_vo_05.ogg",
+    "tara_atk_01.ogg", "tick_atk_01.ogg", "tick_atk_split_02.ogg",
+    "water_brock_atk_01.ogg", "water_jessie_atk_01.ogg", "water_nita_atk_01.ogg",
+    "willow_atk_01.ogg", "willow_atk_hit_01.ogg"
   ];
 
   // Create mapping of brawler names to their possible prefixes in audio files
   const brawlerAudioMapping: { [key: string]: string[] } = {
+    // New brawlers with multiple sounds
     'Kaze': ['kaze_'],
     'Jae': ['jae_'], 
     'Jae-Yong': ['jae_'],
@@ -126,7 +197,7 @@ const getAudioFilesForBrawler = (brawlerName: string): string[] => {
     'Kenji': ['kenji_'],
     'Moe': ['moe_drill_', 'moe_rockthrow_', 'moe_atk_'],
     'Draco': ['ddracos_', 'draco_'],
-    'Amber': ['amber_ice_'],
+    'Amber': ['amber_ice_', 'amber_'],
     'Lily': ['lily_'],
     'Melodie': ['melodie_'],
     'Angelo': ['angelo_'],
@@ -134,61 +205,72 @@ const getAudioFilesForBrawler = (brawlerName: string): string[] => {
     'Larry & Lawrie': ['lawrie_'],
     'Mico': ['mico_'],
     'Chuck': ['chuck_'],
-    // Add some fallback mappings for popular brawlers
+    
+    // Classic brawlers with multiple sounds
+    '8-Bit': ['8bit_'],
+    'Bea': ['bea_atk_', 'bea_mon_'],
+    'Buzz': ['buzz_atk_', 'buzz_ulti_', 'buzzilla_'],
+    'Carl': ['carl_'],
+    'Chester': ['chester_'],
+    'El Primo': ['elprimo_'],
+    'Emz': ['emz_'],
+    'Fang': ['fang_'],
+    'Gene': ['gene_'],
+    'Gray': ['gray_'],
+    'Grom': ['grom_'],
+    'Gus': ['gus_'],
+    'Jacky': ['jacky_'],
+    'Lou': ['lou_'],
+    'Max': ['max_'],
+    'Mortis': ['mortis_', 'evil_mortis_', 'mecha_mortis_'],
+    'Mr. P': ['mrp_'],
+    'Nita': ['nita_'],
+    'Otis': ['otis_'],
+    'Pearl': ['pearl_'],
+    'Sam': ['sam_'],
+    'Surge': ['surge_'],
+    'Willow': ['willow_'],
+    
+    // Skin variants
+    'Crow': ['mech_crow_'],
+    'Spike': ['spike_', 'mech_spike_'],
+    'Barley': ['barley_fire_'],
+    'Jessie': ['water_jessie_'],
+    'Brock': ['water_brock_'],
+    'Rosa': ['rocket_rose_'],
+    // Add some fallback mappings for brawlers without their own audio files
     'Shelly': ['kit_'], // Use Kit's audio as fallback
     'Colt': ['draco_atk_vo_'],
     'Bull': ['moe_atk_'],
-    'Jessie': ['melodie_'],
-    'Brock': ['angelo_'],
     'Dynamike': ['kenji_'],
     'Bo': ['shade_'],
     'Tick': ['meeple_'],
     'Primo': ['moe_drill_'],
-    'El Primo': ['moe_drill_'],
     'Poco': ['lily_'],
-    'Rosa': ['juju_'],
     'Rico': ['chuck_'],
     'Darryl': ['draco_'],
     'Penny': ['kit_'],
-    'Carl': ['moe_'],
-    'Jacky': ['shade_'],
-    'Gus': ['angelo_'],
     'Edgar': ['kenji_'],
     'Colette': ['melodie_'],
     'Leon': ['shade_'],
-    'Crow': ['kaze_'],
-    'Spike': ['meeple_'],
-    'Mortis': ['draco_'],
     'Tara': ['lily_'],
-    'Gene': ['jae_'],
-    'Max': ['kit_'],
-    'Mr. P': ['angelo_'],
     'Sprout': ['juju_'],
     'Byron': ['kenji_'],
     'Squeak': ['melodie_'],
-    'Lou': ['amber_ice_'],
     'Ruffs': ['moe_'],
     'Belle': ['shade_'],
-    'Buzz': ['chuck_'],
     'Griff': ['draco_'],
     'Ash': ['moe_drill_'],
     'Lola': ['lily_'],
     'Meg': ['melodie_'],
-    'Grom': ['angelo_'],
-    'Fang': ['kenji_'],
     'Eve': ['juju_'],
     'Janet': ['kit_'],
     'Bonnie': ['shade_'],
-    'Otis': ['meeple_'],
-    'Sam': ['moe_'],
     'Buster': ['draco_'],
-    'Chester': ['chuck_'],
     'Mandy': ['amber_ice_'],
     'R-T': ['melodie_'],
-    'Willow': ['lily_'],
     'Maisie': ['kit_'],
     'Hank': ['moe_'],
-    'Pearl': ['juju_'],
     'Larry': ['lawrie_'],
     'Lawrie': ['lawrie_']
   };
@@ -219,6 +301,36 @@ const getDailyAudioFile = (brawler: Brawler, date: string): string => {
   return audioFiles[fileIndex];
 };
 
+// Get a hint audio file for a brawler (different from the main audio file)
+const getDailyHintAudioFile = (brawler: Brawler, date: string, mainAudioFile: string): string | null => {
+  const audioFiles = getAudioFilesForBrawler(brawler.name);
+  
+  // If there's only one audio file or no files, no hint available
+  if (audioFiles.length <= 1) {
+    return null;
+  }
+
+  // Filter out the main audio file to get different options for hint
+  const hintOptions = audioFiles.filter(file => file !== mainAudioFile);
+  
+  if (hintOptions.length === 0) {
+    return null;
+  }
+
+  // Use seeded random to pick the same hint audio file each day for this brawler
+  const seed = `hint-audio-${brawler.name}-${date}`;
+  const random = new SeededRandom(seed);
+  const fileIndex = random.nextInt(hintOptions.length);
+  
+  return hintOptions[fileIndex];
+};
+
+// Check if a brawler has multiple audio files (can provide hints)
+const canProvideHint = (brawlerName: string): boolean => {
+  const audioFiles = getAudioFilesForBrawler(brawlerName);
+  return audioFiles.length > 1;
+};
+
 // Get the actual brawler that owns the audio file
 const getBrawlerFromAudioFile = (audioFile: string): string => {
   // Extract the prefix from the audio file name
@@ -242,7 +354,27 @@ const getBrawlerFromAudioFile = (audioFile: string): string => {
     'kit': 'Kit',
     'lawrie': 'Larry & Lawrie',
     'mico': 'Mico',
-    'chuck': 'Chuck'
+    'chuck': 'Chuck',
+    'elprimo': 'El Primo',
+    'pearl': 'Pearl',
+    'berry': 'Berry',
+    'clancy': 'Clancy',
+    'hank': 'Hank',
+    'mandy': 'Mandy',
+    'chester': 'Chester',
+    'gray': 'Gray',
+    'willow': 'Willow',
+    'doug': 'Doug',
+    'bonnie': 'Bonnie',
+    'grom': 'Grom',
+    'fang': 'Fang',
+    'eve': 'Eve',
+    'janet': 'Janet',
+    'otis': 'Otis',
+    'sam': 'Sam',
+    'buster': 'Buster',
+    'chester2': 'Chester',
+    'gus': 'Gus'
   };
   
   return prefixToBrawlerMap[prefix] || 'Kit'; // Default to Kit if prefix not found
@@ -352,10 +484,14 @@ const getDeterministicDailyChallenge = (mode: string, date: string): any => {
     case 'audio':
       const audioFile = getDailyAudioFile(brawler, date);
       const actualAudioOwner = getBrawlerFromAudioFile(audioFile);
-      console.log(`Audio challenge: selected brawler ${brawler.name}, audio file ${audioFile}, actual owner ${actualAudioOwner}`);
+      const hintAudioFile = getDailyHintAudioFile(brawler, date, audioFile);
+      const hasHint = canProvideHint(actualAudioOwner);
+      console.log(`Audio challenge: selected brawler ${brawler.name}, audio file ${audioFile}, actual owner ${actualAudioOwner}, hint available: ${hasHint}`);
       return {
         brawler: actualAudioOwner, // Use the actual owner of the audio file
-        audioFile: `/AttackSounds/${audioFile}`
+        audioFile: `/AttackSounds/${audioFile}`,
+        hintAudioFile: hintAudioFile ? `/AttackSounds/${hintAudioFile}` : null,
+        hasHint: hasHint
       };
       
     default:
@@ -417,6 +553,9 @@ export const getRandomBrawler = (): Brawler => {
   const randomIndex = Math.floor(Math.random() * brawlers.length);
   return brawlers[randomIndex];
 };
+
+// Export hint-related functions for use in components
+export { getDailyHintAudioFile, canProvideHint, getAudioFilesForBrawler };
 
 // Test function to see today's brawlers for all modes (for debugging)
 export const getTodaysBrawlers = (): { [mode: string]: string } => {

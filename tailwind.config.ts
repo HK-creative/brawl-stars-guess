@@ -106,6 +106,14 @@ export default {
           "70%": { boxShadow: "0 0 0 15px rgba(239, 68, 68, 0)" },
           "100%": { boxShadow: "0 0 0 0 rgba(239, 68, 68, 0)" }
         },
+        'star-movement-bottom': {
+          '0%': { transform: 'translate(0%, 0%)', opacity: '1' },
+          '100%': { transform: 'translate(-100%, 0%)', opacity: '0' },
+        },
+        'star-movement-top': {
+          '0%': { transform: 'translate(0%, 0%)', opacity: '1' },
+          '100%': { transform: 'translate(100%, 0%)', opacity: '0' },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -114,6 +122,8 @@ export default {
         "heartbeat": "heartbeat 1.5s ease-in-out infinite",
         "heartbreak": "heartbreak 2s ease-in-out forwards",
         "gameoverPulse": "gameoverPulse 2s infinite",
+        'star-movement-bottom': 'star-movement-bottom linear infinite alternate',
+        'star-movement-top': 'star-movement-top linear infinite alternate',
       },
     },
   },

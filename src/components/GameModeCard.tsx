@@ -4,6 +4,7 @@ import { t } from '@/lib/i18n';
 import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { getLanguage } from '@/lib/i18n';
+import { StarBorder } from '@/components/ui/star-border';
 
 interface GameModeCardProps {
   mode?: string;
@@ -99,233 +100,517 @@ const GameModeCard: React.FC<GameModeCardProps> = ({
     }
   };
 
-  // Survival Mode - CLEAN MOBILE & REVOLUTIONARY PC DESIGN
+  // Survival Mode - ENHANCED COOL DESIGN WITH CUSTOM STAR BORDER
   if (mode === 'survival') {
     return (
       <>
-        {/* Mobile layout for Survival Mode - Enhanced with animations */}
+        {/* Mobile layout for Survival Mode - Enhanced with custom star border */}
         <div className="w-full md:hidden">
           <Link 
             to={finalPath} 
             className={cn(
-              "block transition-all duration-500 transform",
+              "block transition-all duration-300 transform",
               !isClickable && "opacity-70 cursor-not-allowed",
               "group"
             )}
           >
-            {/* Enhanced Mobile Card with breathing and particle effects */}
+            {/* Enhanced Mobile Card with custom star border animation */}
             <div className="relative">
-              {/* Floating particles background */}
+              {/* Subtle glowing floating effect behind card */}
+              <div className="absolute inset-0 -z-10">
+                {/* Main floating glow */}
+                <div 
+                  className="absolute inset-0 bg-gradient-to-r from-amber-500/20 via-orange-500/30 to-red-500/20 rounded-xl blur-xl animate-pulse"
+                  style={{ 
+                    animationDuration: '4s',
+                    clipPath: 'polygon(8px 0%, calc(100% - 8px) 0%, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 0% calc(100% - 8px), 0% 8px)'
+                  }}
+                />
+                {/* Secondary floating glow */}
+                <div 
+                  className="absolute inset-2 bg-gradient-to-br from-amber-400/15 via-orange-400/25 to-red-400/15 rounded-lg blur-lg animate-pulse"
+                  style={{ 
+                    animationDuration: '3s',
+                    animationDelay: '1s'
+                  }}
+                />
+                {/* Tertiary subtle glow */}
+                <div 
+                  className="absolute inset-1 bg-gradient-to-tr from-amber-300/10 via-orange-300/20 to-red-300/10 rounded-lg blur-md animate-pulse"
+                  style={{ 
+                    animationDuration: '5s',
+                    animationDelay: '2s'
+                  }}
+                />
+              </div>
+
+              {/* Floating sparkles animation */}
               <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute top-2 left-4 w-1 h-1 bg-amber-400 rounded-full animate-pulse opacity-70"></div>
-                <div className="absolute top-8 right-6 w-0.5 h-0.5 bg-orange-400 rounded-full opacity-60"></div>
-                <div className="absolute bottom-6 left-8 w-1.5 h-1.5 bg-red-400 rounded-full opacity-50"></div>
-                <div className="absolute bottom-4 right-4 w-0.5 h-0.5 bg-amber-300 rounded-full animate-pulse opacity-80"></div>
-                <div className="absolute top-12 left-12 w-1 h-1 bg-orange-300 rounded-full opacity-60"></div>
-                <div className="absolute top-4 right-12 w-0.5 h-0.5 bg-red-300 rounded-full opacity-70"></div>
+                <div className="absolute top-3 left-6 w-1 h-1 bg-amber-400 rounded-full animate-ping opacity-60" style={{ animationDelay: '0s' }}></div>
+                <div className="absolute top-8 right-8 w-0.5 h-0.5 bg-orange-400 rounded-full animate-ping opacity-50" style={{ animationDelay: '1s' }}></div>
+                <div className="absolute bottom-6 left-10 w-1.5 h-1.5 bg-red-400 rounded-full animate-ping opacity-40" style={{ animationDelay: '2s' }}></div>
+                <div className="absolute bottom-4 right-6 w-0.5 h-0.5 bg-amber-300 rounded-full animate-ping opacity-70" style={{ animationDelay: '0.5s' }}></div>
               </div>
 
-              {/* Breathing glow effect */}
-              <div className="absolute inset-0 rounded-xl opacity-60">
-                <div className="w-full h-32 bg-gradient-to-r from-amber-500/20 via-orange-500/30 to-red-500/20 rounded-xl blur-sm"></div>
+              {/* Hexagonal moving lines outline effect with trail - Mobile */}
+              <div className="absolute inset-0 pointer-events-none z-20 overflow-visible">
+                {/* First comet - Main moving line */}
+                <div 
+                  className="absolute w-4 h-0.5 bg-amber-400 rounded-full"
+                  style={{
+                    animation: 'moveHexagonOutline 6s ease-in-out infinite',
+                    filter: 'blur(0.5px)',
+                    boxShadow: '0 0 12px rgba(245, 158, 11, 1)',
+                    transform: 'translate(-50%, -50%)'
+                  }}
+                />
+                {/* First comet trail lines */}
+                <div 
+                  className="absolute w-3 h-0.5 bg-amber-400 rounded-full opacity-70"
+                  style={{
+                    animation: 'moveHexagonOutline 6s ease-in-out infinite',
+                    animationDelay: '-0.15s',
+                    filter: 'blur(0.5px)',
+                    boxShadow: '0 0 8px rgba(245, 158, 11, 0.7)',
+                    transform: 'translate(-50%, -50%)'
+                  }}
+                />
+                <div 
+                  className="absolute w-2 h-0.5 bg-amber-400 rounded-full opacity-50"
+                  style={{
+                    animation: 'moveHexagonOutline 6s ease-in-out infinite',
+                    animationDelay: '-0.3s',
+                    filter: 'blur(0.5px)',
+                    boxShadow: '0 0 6px rgba(245, 158, 11, 0.5)',
+                    transform: 'translate(-50%, -50%)'
+                  }}
+                />
+                <div 
+                  className="absolute w-1.5 h-0.5 bg-amber-400 rounded-full opacity-30"
+                  style={{
+                    animation: 'moveHexagonOutline 6s ease-in-out infinite',
+                    animationDelay: '-0.45s',
+                    filter: 'blur(0.5px)',
+                    boxShadow: '0 0 4px rgba(245, 158, 11, 0.3)',
+                    transform: 'translate(-50%, -50%)'
+                  }}
+                />
+                <div 
+                  className="absolute w-1 h-0.5 bg-amber-400 rounded-full opacity-15"
+                  style={{
+                    animation: 'moveHexagonOutline 6s ease-in-out infinite',
+                    animationDelay: '-0.6s',
+                    filter: 'blur(0.5px)',
+                    boxShadow: '0 0 2px rgba(245, 158, 11, 0.15)',
+                    transform: 'translate(-50%, -50%)'
+                  }}
+                />
+
+                {/* Second comet - 50% offset (opposite side) */}
+                <div 
+                  className="absolute w-4 h-0.5 bg-orange-400 rounded-full"
+                  style={{
+                    animation: 'moveHexagonOutline 6s ease-in-out infinite',
+                    animationDelay: '-3s',
+                    filter: 'blur(0.5px)',
+                    boxShadow: '0 0 12px rgba(251, 146, 60, 1)',
+                    transform: 'translate(-50%, -50%)'
+                  }}
+                />
+                {/* Second comet trail lines */}
+                <div 
+                  className="absolute w-3 h-0.5 bg-orange-400 rounded-full opacity-70"
+                  style={{
+                    animation: 'moveHexagonOutline 6s ease-in-out infinite',
+                    animationDelay: '-3.15s',
+                    filter: 'blur(0.5px)',
+                    boxShadow: '0 0 8px rgba(251, 146, 60, 0.7)',
+                    transform: 'translate(-50%, -50%)'
+                  }}
+                />
+                <div 
+                  className="absolute w-2 h-0.5 bg-orange-400 rounded-full opacity-50"
+                  style={{
+                    animation: 'moveHexagonOutline 6s ease-in-out infinite',
+                    animationDelay: '-3.3s',
+                    filter: 'blur(0.5px)',
+                    boxShadow: '0 0 6px rgba(251, 146, 60, 0.5)',
+                    transform: 'translate(-50%, -50%)'
+                  }}
+                />
+                <div 
+                  className="absolute w-1.5 h-0.5 bg-orange-400 rounded-full opacity-30"
+                  style={{
+                    animation: 'moveHexagonOutline 6s ease-in-out infinite',
+                    animationDelay: '-3.45s',
+                    filter: 'blur(0.5px)',
+                    boxShadow: '0 0 4px rgba(251, 146, 60, 0.3)',
+                    transform: 'translate(-50%, -50%)'
+                  }}
+                />
+                <div 
+                  className="absolute w-1 h-0.5 bg-orange-400 rounded-full opacity-15"
+                  style={{
+                    animation: 'moveHexagonOutline 6s ease-in-out infinite',
+                    animationDelay: '-3.6s',
+                    filter: 'blur(0.5px)',
+                    boxShadow: '0 0 2px rgba(251, 146, 60, 0.15)',
+                    transform: 'translate(-50%, -50%)'
+                  }}
+                />
               </div>
 
-              {/* Main card with animated border */}
+              {/* Subtle edge glow effect - Mobile */}
               <div 
-                className="relative w-full h-32 mx-auto max-w-md bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 border-2 shadow-[0_8px_32px_rgba(245,158,11,0.25)] transition-all duration-500 group-hover:shadow-[0_12px_48px_rgba(245,158,11,0.6)] group-hover:scale-[1.02] overflow-hidden"
+                className="absolute animate-pulse z-0"
                 style={{
-                  clipPath: 'polygon(16px 0%, calc(100% - 16px) 0%, 100% 16px, 100% calc(100% - 16px), calc(100% - 16px) 100%, 16px 100%, 0% calc(100% - 16px), 0% 16px)',
-                  borderImage: 'linear-gradient(45deg, #f59e0b, #ea580c, #dc2626, #f59e0b) 1'
+                  left: '-4px',
+                  right: '-4px',
+                  top: '-4px',
+                  bottom: '-4px',
+                  background: 'linear-gradient(45deg, rgba(245, 158, 11, 0.6), rgba(251, 146, 60, 0.4), rgba(239, 68, 68, 0.6))',
+                  clipPath: 'polygon(12px 0%, calc(100% - 12px) 0%, 100% 12px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 12px 100%, 0% calc(100% - 12px), 0% 12px)',
+                  filter: 'blur(4px)',
+                  animationDuration: '3s'
+                }}
+              />
+              
+              {/* Additional outer glow - Mobile */}
+              <div 
+                className="absolute animate-pulse z-0"
+                style={{
+                  left: '-8px',
+                  right: '-8px',
+                  top: '-8px',
+                  bottom: '-8px',
+                  background: 'radial-gradient(ellipse, rgba(245, 158, 11, 0.3) 0%, rgba(251, 146, 60, 0.2) 50%, transparent 70%)',
+                  clipPath: 'polygon(12px 0%, calc(100% - 12px) 0%, 100% 12px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 12px 100%, 0% calc(100% - 12px), 0% 12px)',
+                  filter: 'blur(8px)',
+                  animationDuration: '4s',
+                  animationDelay: '1s'
+                }}
+              />
+
+              {/* Main card content */}
+              <div 
+                className="relative w-full h-28 mx-auto max-w-md bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 border-2 border-amber-500/70 shadow-lg shadow-amber-500/30 transition-all duration-500 group-hover:scale-[1.03] overflow-hidden"
+                style={{
+                  clipPath: 'polygon(12px 0%, calc(100% - 12px) 0%, 100% 12px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 12px 100%, 0% calc(100% - 12px), 0% 12px)'
                 }}
               >
-                {/* Animated gradient border overlay */}
-                <div className="absolute inset-0 p-0.5 rounded-xl overflow-hidden">
-                  <div 
-                    className="absolute inset-0"
+                {/* Background Image */}
+                <div className="absolute inset-0 overflow-hidden"
                     style={{
-                      background: 'conic-gradient(from 0deg, #f59e0b, #ea580c, #dc2626, #f97316, #f59e0b)',
-                      clipPath: 'polygon(16px 0%, calc(100% - 16px) 0%, 100% 16px, 100% calc(100% - 16px), calc(100% - 16px) 100%, 16px 100%, 0% calc(100% - 16px), 0% 16px)'
-                    }}
-                  ></div>
-                  <div 
-                    className="absolute inset-0.5 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900"
-                    style={{
-                      clipPath: 'polygon(15px 0%, calc(100% - 15px) 0%, 100% 15px, 100% calc(100% - 15px), calc(100% - 15px) 100%, 15px 100%, 0% calc(100% - 15px), 0% 15px)'
-                    }}
-                  ></div>
-                </div>
-
-                {/* Background Image with enhanced effects */}
-                <div className="absolute inset-1 overflow-hidden">
+                       clipPath: 'polygon(10px 0%, calc(100% - 10px) 0%, 100% 10px, 100% calc(100% - 10px), calc(100% - 10px) 100%, 10px 100%, 0% calc(100% - 10px), 0% 10px)'
+                     }}>
                   <img 
                     src="/Survival_card_background.png" 
                     alt="Survival Background" 
-                    className="w-full h-full object-cover opacity-50 transition-all duration-700 group-hover:scale-110 group-hover:opacity-70" 
+                    className="w-full h-full object-cover opacity-70" 
                   />
-                  <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-black/70" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/20 to-black/50" />
                   
-                  {/* Dynamic light rays */}
+                  {/* Subtle moving light effect */}
                   <div className="absolute inset-0 opacity-30">
-                    <div className="absolute top-1/2 left-1/2 w-32 h-0.5 bg-gradient-to-r from-transparent via-amber-400 to-transparent transform -translate-x-1/2 -translate-y-1/2 rotate-45 animate-pulse"></div>
-                    <div className="absolute top-1/2 left-1/2 w-24 h-0.5 bg-gradient-to-r from-transparent via-orange-400 to-transparent transform -translate-x-1/2 -translate-y-1/2 -rotate-45 animate-pulse delay-150"></div>
-                    <div className="absolute top-1/2 left-1/2 w-20 h-0.5 bg-gradient-to-r from-transparent via-red-400 to-transparent transform -translate-x-1/2 -translate-y-1/2 rotate-90 animate-pulse delay-300"></div>
+                    <div className="absolute top-1/2 left-1/2 w-20 h-0.5 bg-gradient-to-r from-transparent via-amber-400 to-transparent transform -translate-x-1/2 -translate-y-1/2 rotate-45 animate-pulse"></div>
+                    <div className="absolute top-1/2 left-1/2 w-16 h-0.5 bg-gradient-to-r from-transparent via-orange-400 to-transparent transform -translate-x-1/2 -translate-y-1/2 -rotate-45 animate-pulse" style={{ animationDelay: '1s' }}></div>
                   </div>
                 </div>
 
-                {/* Enhanced content with glow */}
+                {/* Enhanced content with larger text */}
                 <div className="relative z-10 h-full flex flex-col items-center justify-center text-center px-6">
-                  <h3 className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-100 to-orange-200 uppercase tracking-wider mb-2 drop-shadow-[0_0_20px_rgba(245,158,11,0.8)] animate-pulse">
+                  <h3 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-100 to-orange-200 uppercase tracking-wide mb-1 drop-shadow-lg animate-pulse" style={{ animationDuration: '2.5s' }}>
                     {t('home.survival.title')}
                   </h3>
-                  
-                  {/* Enhanced decorative line with animation */}
-                  <div className="w-20 h-0.5 bg-gradient-to-r from-transparent via-amber-400 to-transparent mb-3 opacity-80 animate-pulse relative">
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent animate-ping"></div>
-                  </div>
-                  
-                  <p className="text-slate-300 text-xs font-medium leading-relaxed opacity-90">
+                  <p className="text-slate-300 text-xs font-medium opacity-90">
                     {t('home.ultimate.challenge.mode')}
                   </p>
                 </div>
 
-                {/* Enhanced shine effect with multiple layers */}
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-amber-200/20 to-transparent transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[300%] transition-transform duration-1000 ease-out" />
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform skew-x-12 translate-x-[-120%] group-hover:translate-x-[320%] transition-transform duration-1200 ease-out delay-100" />
+                {/* Enhanced shine effect */}
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-amber-200/20 to-transparent transform -skew-x-12 translate-x-[-100%]" />
               </div>
             </div>
           </Link>
         </div>
 
-        {/* Desktop layout for Survival Mode - ENHANCED HEXAGONAL DESIGN */}
+        {/* Desktop layout for Survival Mode - DRAMATICALLY IMPROVED WITH CUSTOM STAR BORDER */}
         <div className="hidden md:block relative w-full">
-          {/* Floating particles for desktop */}
-          <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            <div className="absolute top-4 left-8 w-2 h-2 bg-amber-400 rounded-full opacity-70"></div>
-            <div className="absolute top-12 right-12 w-1 h-1 bg-orange-400 rounded-full opacity-60"></div>
-            <div className="absolute bottom-8 left-16 w-3 h-3 bg-red-400 rounded-full opacity-50"></div>
-            <div className="absolute bottom-4 right-8 w-1 h-1 bg-amber-300 rounded-full animate-pulse opacity-80"></div>
-            <div className="absolute top-20 left-32 w-2 h-2 bg-orange-300 rounded-full opacity-60"></div>
-            <div className="absolute top-8 right-24 w-1 h-1 bg-red-300 rounded-full opacity-70"></div>
-            <div className="absolute bottom-12 left-24 w-1.5 h-1.5 bg-amber-400 rounded-full opacity-65"></div>
-            <div className="absolute top-16 left-48 w-1 h-1 bg-orange-500 rounded-full animate-pulse opacity-75"></div>
+          {/* Subtle glowing floating effect behind desktop card */}
+          <div className="absolute inset-0 -z-10">
+            {/* Main floating glow */}
+            <div 
+              className="absolute inset-0 bg-gradient-to-r from-amber-500/15 via-orange-500/25 to-red-500/15 rounded-2xl blur-2xl animate-pulse"
+              style={{ 
+                animationDuration: '5s',
+                clipPath: 'polygon(20px 0%, calc(100% - 20px) 0%, 100% 20px, 100% calc(100% - 20px), calc(100% - 20px) 100%, 20px 100%, 0% calc(100% - 20px), 0% 20px)'
+              }}
+            />
+            {/* Secondary floating glow */}
+            <div 
+              className="absolute inset-4 bg-gradient-to-br from-amber-400/12 via-orange-400/20 to-red-400/12 rounded-xl blur-xl animate-pulse"
+              style={{ 
+                animationDuration: '4s',
+                animationDelay: '1.5s'
+              }}
+            />
+            {/* Tertiary subtle glow */}
+            <div 
+              className="absolute inset-2 bg-gradient-to-tr from-amber-300/8 via-orange-300/15 to-red-300/8 rounded-xl blur-lg animate-pulse"
+              style={{ 
+                animationDuration: '6s',
+                animationDelay: '3s'
+              }}
+            />
+            {/* Quaternary ultra-subtle glow */}
+            <div 
+              className="absolute inset-6 bg-gradient-to-r from-amber-200/5 via-orange-200/10 to-red-200/5 rounded-lg blur-md animate-pulse"
+              style={{ 
+                animationDuration: '7s',
+                animationDelay: '0.5s'
+              }}
+            />
           </div>
 
-          {/* Breathing glow effect for desktop */}
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-full h-48 bg-gradient-to-r from-amber-500/15 via-orange-500/25 to-red-500/15 rounded-3xl blur-xl opacity-80"></div>
+          {/* Enhanced floating sparkles for desktop */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            <div className="absolute top-6 left-16 w-2 h-2 bg-amber-400 rounded-full animate-ping opacity-70" style={{ animationDelay: '0s' }}></div>
+            <div className="absolute top-4 right-20 w-1.5 h-1.5 bg-orange-400 rounded-full animate-ping opacity-60" style={{ animationDelay: '1.5s' }}></div>
+            <div className="absolute bottom-8 left-24 w-3 h-3 bg-red-400 rounded-full animate-ping opacity-50" style={{ animationDelay: '3s' }}></div>
+            <div className="absolute bottom-6 right-16 w-1 h-1 bg-amber-300 rounded-full animate-ping opacity-80" style={{ animationDelay: '0.8s' }}></div>
+            <div className="absolute top-16 left-40 w-2 h-2 bg-orange-300 rounded-full animate-ping opacity-65" style={{ animationDelay: '2.2s' }}></div>
+            <div className="absolute top-8 right-32 w-1.5 h-1.5 bg-red-300 rounded-full animate-ping opacity-55" style={{ animationDelay: '4s' }}></div>
           </div>
 
           <Link 
             to={finalPath} 
             className={cn(
-              "block w-full transition-all duration-300",
+              "block w-full transition-all duration-300 relative",
               !isClickable && "opacity-70 cursor-not-allowed",
               "group"
             )}
             style={{ minWidth: 0 }}
           >
-            {/* Enhanced Large Hexagonal Gaming Card */}
-            <div className="relative w-full h-48 transition-all duration-500 group-hover:scale-[1.02] mx-auto max-w-5xl">
-              
-              {/* Animated outer glow */}
-              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+            {/* DRAMATICALLY IMPROVED Desktop Card */}
+            <div className="relative w-full h-full transition-all duration-500 group-hover:scale-[1.03]">
+              {/* Hexagonal moving lines outline effect with trail - Desktop */}
+              <div className="absolute inset-0 pointer-events-none z-20 overflow-visible">
+                {/* First comet - Main moving line */}
                 <div 
-                  className="w-full h-full animate-pulse"
+                  className="absolute w-6 h-1 bg-amber-400 rounded-full"
                   style={{
-                    background: 'radial-gradient(ellipse at center, rgba(245,158,11,0.3) 0%, rgba(249,115,22,0.2) 40%, transparent 70%)',
-                    clipPath: 'polygon(42px 0%, calc(100% - 42px) 0%, 100% 42px, 100% calc(100% - 42px), calc(100% - 42px) 100%, 42px 100%, 0% calc(100% - 42px), 0% 42px)'
+                    animation: 'moveHexagonOutlineDesktop 8s ease-in-out infinite',
+                    filter: 'blur(0.5px)',
+                    boxShadow: '0 0 16px rgba(245, 158, 11, 1)',
+                    transform: 'translate(-50%, -50%)'
                   }}
-                ></div>
+                />
+                {/* First comet trail lines */}
+                <div 
+                  className="absolute w-5 h-1 bg-amber-400 rounded-full opacity-70"
+                  style={{
+                    animation: 'moveHexagonOutlineDesktop 8s ease-in-out infinite',
+                    animationDelay: '-0.2s',
+                    filter: 'blur(0.5px)',
+                    boxShadow: '0 0 12px rgba(245, 158, 11, 0.7)',
+                    transform: 'translate(-50%, -50%)'
+                  }}
+                />
+                <div 
+                  className="absolute w-4 h-1 bg-amber-400 rounded-full opacity-50"
+                  style={{
+                    animation: 'moveHexagonOutlineDesktop 8s ease-in-out infinite',
+                    animationDelay: '-0.4s',
+                    filter: 'blur(0.5px)',
+                    boxShadow: '0 0 10px rgba(245, 158, 11, 0.5)',
+                    transform: 'translate(-50%, -50%)'
+                  }}
+                />
+                <div 
+                  className="absolute w-3 h-1 bg-amber-400 rounded-full opacity-30"
+                  style={{
+                    animation: 'moveHexagonOutlineDesktop 8s ease-in-out infinite',
+                    animationDelay: '-0.6s',
+                    filter: 'blur(0.5px)',
+                    boxShadow: '0 0 8px rgba(245, 158, 11, 0.3)',
+                    transform: 'translate(-50%, -50%)'
+                  }}
+                />
+                <div 
+                  className="absolute w-2 h-1 bg-amber-400 rounded-full opacity-15"
+                  style={{
+                    animation: 'moveHexagonOutlineDesktop 8s ease-in-out infinite',
+                    animationDelay: '-0.8s',
+                    filter: 'blur(0.5px)',
+                    boxShadow: '0 0 6px rgba(245, 158, 11, 0.15)',
+                    transform: 'translate(-50%, -50%)'
+                  }}
+                />
+                <div 
+                  className="absolute w-1 h-1 bg-amber-400 rounded-full opacity-10"
+                  style={{
+                    animation: 'moveHexagonOutlineDesktop 8s ease-in-out infinite',
+                    animationDelay: '-1s',
+                    filter: 'blur(0.5px)',
+                    boxShadow: '0 0 4px rgba(245, 158, 11, 0.1)',
+                    transform: 'translate(-50%, -50%)'
+                  }}
+                />
+
+                {/* Second comet - 50% offset (opposite side) */}
+                <div 
+                  className="absolute w-6 h-1 bg-orange-400 rounded-full"
+                  style={{
+                    animation: 'moveHexagonOutlineDesktop 8s ease-in-out infinite',
+                    animationDelay: '-4s',
+                    filter: 'blur(0.5px)',
+                    boxShadow: '0 0 16px rgba(251, 146, 60, 1)',
+                    transform: 'translate(-50%, -50%)'
+                  }}
+                />
+                {/* Second comet trail lines */}
+                <div 
+                  className="absolute w-5 h-1 bg-orange-400 rounded-full opacity-70"
+                  style={{
+                    animation: 'moveHexagonOutlineDesktop 8s ease-in-out infinite',
+                    animationDelay: '-4.2s',
+                    filter: 'blur(0.5px)',
+                    boxShadow: '0 0 12px rgba(251, 146, 60, 0.7)',
+                    transform: 'translate(-50%, -50%)'
+                  }}
+                />
+                <div 
+                  className="absolute w-4 h-1 bg-orange-400 rounded-full opacity-50"
+                  style={{
+                    animation: 'moveHexagonOutlineDesktop 8s ease-in-out infinite',
+                    animationDelay: '-4.4s',
+                    filter: 'blur(0.5px)',
+                    boxShadow: '0 0 10px rgba(251, 146, 60, 0.5)',
+                    transform: 'translate(-50%, -50%)'
+                  }}
+                />
+                <div 
+                  className="absolute w-3 h-1 bg-orange-400 rounded-full opacity-30"
+                  style={{
+                    animation: 'moveHexagonOutlineDesktop 8s ease-in-out infinite',
+                    animationDelay: '-4.6s',
+                    filter: 'blur(0.5px)',
+                    boxShadow: '0 0 8px rgba(251, 146, 60, 0.3)',
+                    transform: 'translate(-50%, -50%)'
+                  }}
+                />
+                <div 
+                  className="absolute w-2 h-1 bg-orange-400 rounded-full opacity-15"
+                  style={{
+                    animation: 'moveHexagonOutlineDesktop 8s ease-in-out infinite',
+                    animationDelay: '-4.8s',
+                    filter: 'blur(0.5px)',
+                    boxShadow: '0 0 6px rgba(251, 146, 60, 0.15)',
+                    transform: 'translate(-50%, -50%)'
+                  }}
+                />
+                <div 
+                  className="absolute w-1 h-1 bg-orange-400 rounded-full opacity-10"
+                  style={{
+                    animation: 'moveHexagonOutlineDesktop 8s ease-in-out infinite',
+                    animationDelay: '-5s',
+                    filter: 'blur(0.5px)',
+                    boxShadow: '0 0 4px rgba(251, 146, 60, 0.1)',
+                    transform: 'translate(-50%, -50%)'
+                  }}
+                />
               </div>
 
-              {/* Main container with animated border */}
-              <div className="relative w-full h-full overflow-hidden">
-                {/* Rotating gradient border */}
-                <div 
-                  className="absolute inset-0 p-1 opacity-80"
-                  style={{
-                    background: 'conic-gradient(from 0deg, #f59e0b, #ea580c, #dc2626, #f97316, #f59e0b, #ea580c)',
-                    clipPath: 'polygon(40px 0%, calc(100% - 40px) 0%, 100% 40px, 100% calc(100% - 40px), calc(100% - 40px) 100%, 40px 100%, 0% calc(100% - 40px), 0% 40px)'
-                  }}
-                ></div>
+              {/* Subtle edge glow effect - Desktop */}
+              <div 
+                className="absolute animate-pulse z-0"
+                style={{
+                  left: '-8px',
+                  right: '-8px',
+                  top: '-8px',
+                  bottom: '-8px',
+                  background: 'linear-gradient(45deg, rgba(245, 158, 11, 0.5), rgba(251, 146, 60, 0.3), rgba(239, 68, 68, 0.5))',
+                  clipPath: 'polygon(24px 0%, calc(100% - 24px) 0%, 100% 24px, 100% calc(100% - 24px), calc(100% - 24px) 100%, 24px 100%, 0% calc(100% - 24px), 0% 24px)',
+                  filter: 'blur(6px)',
+                  animationDuration: '4s'
+                }}
+              />
+              
+              {/* Additional outer glow - Desktop */}
+              <div 
+                className="absolute animate-pulse z-0"
+                style={{
+                  left: '-16px',
+                  right: '-16px',
+                  top: '-16px',
+                  bottom: '-16px',
+                  background: 'radial-gradient(ellipse, rgba(245, 158, 11, 0.25) 0%, rgba(251, 146, 60, 0.15) 50%, transparent 70%)',
+                  clipPath: 'polygon(24px 0%, calc(100% - 24px) 0%, 100% 24px, 100% calc(100% - 24px), calc(100% - 24px) 100%, 24px 100%, 0% calc(100% - 24px), 0% 24px)',
+                  filter: 'blur(12px)',
+                  animationDuration: '5s',
+                  animationDelay: '1.5s'
+                }}
+              />
 
-                {/* Inner card */}
-                <div 
-                  className="absolute inset-1 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 shadow-[0_16px_64px_rgba(245,158,11,0.5)] transition-all duration-500 group-hover:shadow-[0_24px_80px_rgba(245,158,11,0.8)] overflow-hidden"
-                  style={{
-                    clipPath: 'polygon(39px 0%, calc(100% - 39px) 0%, 100% 39px, 100% calc(100% - 39px), calc(100% - 39px) 100%, 39px 100%, 0% calc(100% - 39px), 0% 39px)'
-                  }}
-                >
-                  
-                  {/* Enhanced Background with multiple layers */}
+              {/* Enhanced inner card with better hexagonal shape */}
+              <div 
+                className="relative w-full h-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border-2 border-amber-500/70 shadow-2xl shadow-amber-500/50 overflow-hidden"
+                style={{
+                  clipPath: 'polygon(24px 0%, calc(100% - 24px) 0%, 100% 24px, 100% calc(100% - 24px), calc(100% - 24px) 100%, 24px 100%, 0% calc(100% - 24px), 0% 24px)'
+                }}
+              >
+                {/* Enhanced background with multiple layers */}
                   <div className="absolute inset-0 overflow-hidden">
                     <img 
                       src="/Survival_card_background.png" 
                       alt="Survival Background" 
-                      className="w-full h-full object-cover opacity-60 transition-all duration-700 group-hover:scale-105 group-hover:opacity-80" 
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-black/70" />
-                    
-                    {/* Animated background pattern */}
-                    <div className="absolute inset-0 opacity-20">
-                      <div className="absolute inset-0 bg-gradient-to-r from-amber-500/10 via-orange-500/20 to-red-500/10 animate-pulse"></div>
-                      <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-transparent via-amber-400/5 to-transparent animate-pulse delay-300"></div>
-                    </div>
-
-                    {/* Dynamic light rays for desktop */}
-                    <div className="absolute inset-0 opacity-40">
-                      <div className="absolute top-1/2 left-1/2 w-64 h-1 bg-gradient-to-r from-transparent via-amber-400 to-transparent transform -translate-x-1/2 -translate-y-1/2 rotate-45 animate-pulse"></div>
-                      <div className="absolute top-1/2 left-1/2 w-48 h-1 bg-gradient-to-r from-transparent via-orange-400 to-transparent transform -translate-x-1/2 -translate-y-1/2 -rotate-45 animate-pulse delay-150"></div>
-                      <div className="absolute top-1/2 left-1/2 w-32 h-1 bg-gradient-to-r from-transparent via-red-400 to-transparent transform -translate-x-1/2 -translate-y-1/2 rotate-90 animate-pulse delay-300"></div>
-                      <div className="absolute top-1/2 left-1/2 w-40 h-1 bg-gradient-to-r from-transparent via-amber-300 to-transparent transform -translate-x-1/2 -translate-y-1/2 animate-pulse delay-450"></div>
-                    </div>
+                    className="w-full h-full object-cover opacity-80" 
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-br from-black/50 via-transparent to-black/60" />
+                  <div className="absolute inset-0 bg-gradient-to-tr from-amber-900/20 via-transparent to-red-900/20" />
+                  
+                  {/* Enhanced animated light rays */}
+                  <div className="absolute inset-0 opacity-50">
+                    <div className="absolute top-1/2 left-1/2 w-40 h-0.5 bg-gradient-to-r from-transparent via-amber-400 to-transparent transform -translate-x-1/2 -translate-y-1/2 rotate-45 animate-pulse"></div>
+                    <div className="absolute top-1/2 left-1/2 w-36 h-0.5 bg-gradient-to-r from-transparent via-orange-400 to-transparent transform -translate-x-1/2 -translate-y-1/2 -rotate-45 animate-pulse" style={{ animationDelay: '1s' }}></div>
+                    <div className="absolute top-1/2 left-1/2 w-32 h-0.5 bg-gradient-to-r from-transparent via-red-400 to-transparent transform -translate-x-1/2 -translate-y-1/2 rotate-90 animate-pulse" style={{ animationDelay: '2s' }}></div>
+                    <div className="absolute top-1/2 left-1/2 w-28 h-0.5 bg-gradient-to-r from-transparent via-amber-300 to-transparent transform -translate-x-1/2 -translate-y-1/2 animate-pulse" style={{ animationDelay: '0.5s' }}></div>
                   </div>
 
-                  {/* Enhanced centered content */}
-                  <div className="relative z-10 h-full flex items-center justify-center px-16">
+                  {/* Corner accent lights */}
+                  <div className="absolute top-4 left-4 w-3 h-3 bg-amber-400 rounded-full opacity-60 animate-pulse" style={{ animationDelay: '0s' }}></div>
+                  <div className="absolute top-4 right-4 w-2 h-2 bg-orange-400 rounded-full opacity-50 animate-pulse" style={{ animationDelay: '1.5s' }}></div>
+                  <div className="absolute bottom-4 left-4 w-2.5 h-2.5 bg-red-400 rounded-full opacity-40 animate-pulse" style={{ animationDelay: '3s' }}></div>
+                  <div className="absolute bottom-4 right-4 w-2 h-2 bg-amber-300 rounded-full opacity-70 animate-pulse" style={{ animationDelay: '2s' }}></div>
+                </div>
+
+                {/* DRAMATICALLY enhanced content with much larger text */}
+                <div className="relative z-10 h-full flex items-center justify-center">
                     <div className="text-center">
-                      <h3 className="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-100 to-orange-200 uppercase tracking-wider mb-6 drop-shadow-[0_0_40px_rgba(245,158,11,1)] animate-pulse">
+                    <h3 className="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-100 to-orange-200 uppercase tracking-wider mb-3 drop-shadow-2xl animate-pulse" 
+                        style={{ 
+                          animationDuration: '3s',
+                          textShadow: '0 0 30px rgba(245, 158, 11, 0.8), 0 0 60px rgba(245, 158, 11, 0.4)'
+                        }}>
                         {t('home.survival.title')}
                       </h3>
-                      
-                      {/* Enhanced angular decorative elements */}
-                      <div className="flex items-center justify-center space-x-4 mb-6">
-                        <div className="w-8 h-0.5 bg-amber-400 transform -skew-x-12 animate-pulse shadow-[0_0_10px_rgba(245,158,11,0.8)]" />
-                        <div className="w-4 h-4 bg-amber-400 transform rotate-45 animate-spin-slow shadow-[0_0_15px_rgba(245,158,11,1)]" />
-                        <div className="w-8 h-0.5 bg-amber-400 transform skew-x-12 animate-pulse shadow-[0_0_10px_rgba(245,158,11,0.8)]" />
+                    <div className="flex items-center justify-center mb-2">
+                      <div className="w-8 h-0.5 bg-amber-400 animate-pulse"></div>
+                      <div className="w-3 h-3 bg-amber-400 mx-3 rotate-45 animate-pulse" style={{ animationDelay: '0.5s' }}></div>
+                      <div className="w-8 h-0.5 bg-amber-400 animate-pulse"></div>
                       </div>
-                      
-                      <p className="text-slate-300 text-lg font-medium opacity-90 max-w-2xl drop-shadow-lg">
+                    <p className="text-slate-200 text-base font-semibold opacity-95 animate-pulse tracking-wide" 
+                       style={{ animationDelay: '1s', animationDuration: '4s' }}>
                         {t('home.ultimate.challenge.mode')}
                       </p>
                     </div>
                   </div>
 
                   {/* Enhanced multi-layer shine effects */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-amber-200/30 to-transparent transform -skew-x-45 translate-x-[-100%] group-hover:translate-x-[300%] transition-transform duration-1000 ease-out" />
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform skew-x-45 translate-x-[-120%] group-hover:translate-x-[320%] transition-transform duration-1200 ease-out delay-100" />
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-orange-200/25 to-transparent transform -skew-x-30 translate-x-[-140%] group-hover:translate-x-[340%] transition-transform duration-1400 ease-out delay-200" />
-                </div>
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-amber-200/30 to-transparent transform -skew-x-12 translate-x-[-100%]" />
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/15 to-transparent transform skew-x-12 translate-x-[-120%]" />
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-orange-200/20 to-transparent transform -skew-x-6 translate-x-[-140%]" />
               </div>
-
-              {/* Enhanced Coming Soon Overlay */}
-              {comingSoon && (
-                <div 
-                  className="absolute inset-0 z-30 flex items-center justify-center bg-black/90 backdrop-blur-md"
-                  style={{
-                    clipPath: 'polygon(40px 0%, calc(100% - 40px) 0%, 100% 40px, 100% calc(100% - 40px), calc(100% - 40px) 100%, 40px 100%, 0% calc(100% - 40px), 0% 40px)'
-                  }}
-                >
-                  <div className="text-center">
-                    <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-amber-500 to-red-600 border-2 border-amber-300/50 shadow-[0_0_40px_rgba(245,158,11,1.0)] mb-6 transform rotate-45 animate-pulse">
-                      <span className="text-3xl transform -rotate-45">🔒</span>
-                    </div>
-                    <span className="text-xl font-bold text-amber-100 uppercase tracking-wider animate-pulse">
-                      {t('coming.soon')}
-                    </span>
-                  </div>
-                </div>
-              )}
             </div>
           </Link>
         </div>
@@ -333,20 +618,24 @@ const GameModeCard: React.FC<GameModeCardProps> = ({
     );
   }
 
-  // Default design for all other modes (unchanged)
+  // Regular Game Mode Layout
   return (
-    <>
-      {/* Mobile layout: flex row, icon 20%, card 70% (increased from 60%), spacing 10% */}
-      <div className="w-full flex flex-row items-center md:hidden">
-        <div className="flex items-center justify-center w-[20%] h-16" style={{ minWidth: '56px', maxWidth: '80px' }}>
+    <div className="w-full">
+      {/* Mobile layout: Icon on left, card on right */}
+      <div className="flex items-center md:hidden">
+        <div className={cn(
+          "flex-shrink-0 flex items-center justify-center w-16 h-16 rounded-2xl mr-4",
+          "backdrop-blur-md border-2 shadow-lg transition-all duration-300",
+          'bg-black/40 border-white/20 shadow-black/40'
+        )}>
           {typeof icon === 'string' && icon.startsWith('/') ? (
-            <img src={icon} alt={`${displayTitle} icon`} className="w-14 h-14 object-contain" />
+            <img src={icon} alt={`${displayTitle} icon`} className="w-12 h-12 object-contain" />
           ) : (
-            <span className="text-4xl">{icon}</span>
+            <span className="text-3xl">{icon}</span>
           )}
         </div>
         
-        {/* Add backup click handler for starpower mode */}
+        {/* Use div instead of Link for starpower mode to prevent navigation issues */}
         {mode === 'starpower' ? (
           <div 
             className={cn(
@@ -357,7 +646,7 @@ const GameModeCard: React.FC<GameModeCardProps> = ({
             onClick={handleCardClick}
           >
             <Card className={cn(
-              "relative h-24 flex items-center justify-center overflow-hidden rounded-3xl transition-all duration-300",
+              "relative h-20 flex items-center justify-center overflow-hidden rounded-2xl transition-all duration-300",
               'border border-white/30 bg-black/20 backdrop-blur-lg shadow-xl shadow-black/40',
               isClickable && [
                 "hover:scale-[1.02]",
@@ -382,7 +671,7 @@ const GameModeCard: React.FC<GameModeCardProps> = ({
               </div>
               <div className="relative w-full flex items-center justify-center z-10">
                 <h3 className={cn(
-                  "text-3xl font-extrabold text-white text-center uppercase tracking-wide drop-shadow-[0_4px_12px_rgba(0,0,0,0.9)]",
+                  "text-2xl font-extrabold text-white text-center uppercase tracking-wide drop-shadow-[0_4px_12px_rgba(0,0,0,0.9)]",
                   "[text-shadow:_0_2px_8px_rgba(0,0,0,0.8),_0_0_2px_#000,0_0_8px_#000]"
                 )}>
                   {displayTitle}
@@ -414,7 +703,7 @@ const GameModeCard: React.FC<GameModeCardProps> = ({
             style={{ minWidth: 0 }}
           >
             <Card className={cn(
-              "relative h-24 flex items-center justify-center overflow-hidden rounded-3xl transition-all duration-300",
+              "relative h-20 flex items-center justify-center overflow-hidden rounded-2xl transition-all duration-300",
               'border border-white/30 bg-black/20 backdrop-blur-lg shadow-xl shadow-black/40',
               isClickable && [
                 "hover:scale-[1.02]",
@@ -439,7 +728,7 @@ const GameModeCard: React.FC<GameModeCardProps> = ({
               </div>
               <div className="relative w-full flex items-center justify-center z-10">
                 <h3 className={cn(
-                  "text-3xl font-extrabold text-white text-center uppercase tracking-wide drop-shadow-[0_4px_12px_rgba(0,0,0,0.9)]",
+                  "text-2xl font-extrabold text-white text-center uppercase tracking-wide drop-shadow-[0_4px_12px_rgba(0,0,0,0.9)]",
                   "[text-shadow:_0_2px_8px_rgba(0,0,0,0.8),_0_0_2px_#000,0_0_8px_#000]"
                 )}>
                   {displayTitle}
@@ -466,14 +755,14 @@ const GameModeCard: React.FC<GameModeCardProps> = ({
       {/* Desktop layout: icon absolutely positioned, card full width with left padding */}
       <div className="hidden md:block relative w-full">
         <div className={cn(
-          "absolute -left-16 z-20 flex items-center justify-center w-20 h-20 rounded-3xl",
-          "backdrop-blur-md border-2 shadow-xl transition-all duration-300",
+          "absolute -left-16 z-20 flex items-center justify-center w-18 h-18 rounded-2xl",
+          "backdrop-blur-md border-2 shadow-lg transition-all duration-300",
           'bg-black/40 border-white/20 shadow-black/40'
         )}>
           {typeof icon === 'string' && icon.startsWith('/') ? (
-            <img src={icon} alt={`${displayTitle} icon`} className="w-16 h-16 object-contain" />
+            <img src={icon} alt={`${displayTitle} icon`} className="w-14 h-14 object-contain" />
           ) : (
-            <span className="text-5xl">{icon}</span>
+            <span className="text-4xl">{icon}</span>
           )}
         </div>
         
@@ -488,7 +777,7 @@ const GameModeCard: React.FC<GameModeCardProps> = ({
             onClick={handleCardClick}
           >
             <Card className={cn(
-              "relative h-28 flex items-center justify-center overflow-hidden rounded-3xl transition-all duration-300 pl-24",
+              "relative h-24 flex items-center justify-center overflow-hidden rounded-2xl transition-all duration-300 pl-20",
               'border border-white/30 bg-black/20 backdrop-blur-lg shadow-xl shadow-black/40',
               isClickable && [
                 "hover:scale-[1.02]",
@@ -515,7 +804,7 @@ const GameModeCard: React.FC<GameModeCardProps> = ({
                 <div className="flex flex-col items-center">
                   <div className="relative">
                     <h3 className={cn(
-                      "text-5xl font-extrabold text-center uppercase tracking-wide",
+                      "text-4xl font-extrabold text-center uppercase tracking-wide",
                       "drop-shadow-[0_4px_12px_rgba(0,0,0,0.9)]",
                       "[text-shadow:_0_2px_8px_rgba(0,0,0,0.8),_0_0_2px_#000,0_0_8px_#000]",
                       'text-white'
@@ -551,7 +840,7 @@ const GameModeCard: React.FC<GameModeCardProps> = ({
             style={{ minWidth: 0 }}
           >
             <Card className={cn(
-              "relative h-28 flex items-center justify-center overflow-hidden rounded-3xl transition-all duration-300 pl-24",
+              "relative h-24 flex items-center justify-center overflow-hidden rounded-2xl transition-all duration-300 pl-20",
               'border border-white/30 bg-black/20 backdrop-blur-lg shadow-xl shadow-black/40',
               isClickable && [
                 "hover:scale-[1.02]",
@@ -578,7 +867,7 @@ const GameModeCard: React.FC<GameModeCardProps> = ({
                 <div className="flex flex-col items-center">
                   <div className="relative">
                     <h3 className={cn(
-                      "text-5xl font-extrabold text-center uppercase tracking-wide",
+                      "text-4xl font-extrabold text-center uppercase tracking-wide",
                       "drop-shadow-[0_4px_12px_rgba(0,0,0,0.9)]",
                       "[text-shadow:_0_2px_8px_rgba(0,0,0,0.8),_0_0_2px_#000,0_0_8px_#000]",
                       'text-white'
@@ -605,7 +894,7 @@ const GameModeCard: React.FC<GameModeCardProps> = ({
           </Link>
         )}
       </div>
-    </>
+    </div>
   );
 };
 

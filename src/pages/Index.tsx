@@ -85,21 +85,21 @@ const Index = () => {
         {/* Header Section with drastically reduced mobile spacing */}
         <div className={cn(
           "text-center",
-          "-mt-12 md:-mt-16" // Drastically reduced mobile spacing - negative margin to pull it up
+          "-mt-12 md:-mt-16"
         )}>
           <SparklesPreview />
         </div>
 
         {/* Game Modes Section */}
         <div className={cn(
-          "w-full max-w-lg mx-auto",
+          "w-full max-w-lg md:max-w-md mx-auto",
           "flex flex-col",
-          "gap-4 md:gap-6" // Reduced mobile gap from 8 to 4
+          "gap-4 md:gap-6"
         )}>
           {/* Regular 4 game modes */}
           {regularModes.map((mode, index) => (
             <div key={mode.mode} className={cn(
-              index === 0 ? "mt-0 md:mt-4" : "" // A bit more spacing above first (classic) card on PC only
+              index === 0 ? "mt-0 md:mt-4" : ""
             )}>
               <GameModeCard 
                 mode={mode.mode}
@@ -123,55 +123,27 @@ const Index = () => {
             
             {/* Unified separator line design */}
             <div className="relative flex items-center justify-center">
-              {/* Mobile: simplified design without circle, reduced opacity */}
-              <div className="md:hidden w-full h-px bg-gradient-to-r from-transparent via-slate-400/30 to-transparent" />
+              {/* Mobile: simplified design */}
+              <div className="md:hidden w-full h-px bg-gradient-to-r from-transparent via-slate-400/40 to-transparent" />
               
-              {/* PC: reduced opacity line without circle */}
-              <div className="hidden md:block w-full h-1 bg-gradient-to-r from-transparent via-slate-400/30 to-transparent shadow-sm" />
+              {/* PC: slightly more prominent */}
+              <div className="hidden md:block w-full h-0.5 bg-gradient-to-r from-transparent via-slate-400/50 to-transparent" />
             </div>
           </div>
 
-          {/* Survival Mode with enhanced animated effects and reduced bottom spacing */}
+          {/* Survival Mode with reduced effects and spacing */}
           <div className="relative mb-2 md:mb-0">
-            {/* Enhanced floating particles background */}
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-              <div className="absolute top-4 left-8 w-1 h-1 bg-amber-400 rounded-full animate-pulse opacity-60"></div>
-              <div className="absolute top-16 right-12 w-0.5 h-0.5 bg-orange-400 rounded-full opacity-50"></div>
-              <div className="absolute bottom-8 left-16 w-1.5 h-1.5 bg-red-400 rounded-full opacity-40"></div>
-              <div className="absolute bottom-12 right-8 w-0.5 h-0.5 bg-amber-300 rounded-full animate-pulse opacity-70"></div>
-              <div className="absolute top-24 left-24 w-1 h-1 bg-orange-300 rounded-full opacity-55"></div>
-              <div className="absolute top-8 right-20 w-0.5 h-0.5 bg-red-300 rounded-full opacity-65"></div>
-              <div className="absolute bottom-4 left-12 w-1 h-1 bg-amber-500 rounded-full opacity-45"></div>
-              <div className="absolute top-20 right-16 w-0.5 h-0.5 bg-orange-500 rounded-full animate-pulse opacity-60"></div>
-            </div>
-
-            {/* Enhanced multi-layer radial glows with breathing effect */}
+            {/* Simplified background glow */}
             <div className="absolute inset-0 flex items-center justify-center">
               <div 
-                className="w-96 h-96 rounded-full blur-3xl opacity-70"
+                className="w-64 h-64 md:w-80 md:h-80 rounded-full blur-2xl opacity-40"
                 style={{
-                  background: 'radial-gradient(circle, rgba(239,68,68,0.15) 0%, rgba(245,158,11,0.10) 40%, rgba(249,115,22,0.08) 60%, transparent 100%)'
-                }}
-              />
-            </div>
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div 
-                className="w-64 h-64 rounded-full blur-2xl opacity-60"
-                style={{
-                  background: 'radial-gradient(circle, rgba(245,158,11,0.20) 0%, rgba(249,115,22,0.12) 50%, transparent 100%)'
-                }}
-              />
-            </div>
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div 
-                className="w-48 h-48 rounded-full blur-xl opacity-50"
-                style={{
-                  background: 'radial-gradient(circle, rgba(249,115,22,0.25) 0%, rgba(234,88,12,0.15) 40%, transparent 70%)'
+                  background: 'radial-gradient(circle, rgba(239,68,68,0.12) 0%, rgba(245,158,11,0.08) 40%, transparent 70%)'
                 }}
               />
             </div>
             
-            {/* Survival Mode Card with enhanced positioning */}
+            {/* Survival Mode Card */}
             <div className="relative z-10">
               <GameModeCard 
                 mode={survivalMode.mode}

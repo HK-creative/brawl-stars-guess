@@ -56,6 +56,15 @@ const SurvivalVictoryPopup: React.FC<SurvivalVictoryPopupProps> = ({
           </div>
         </div>
         
+        {/* 8-bit Victory GIF above score section */}
+        <div className="flex justify-center mb-4">
+          <img 
+            src="/Brawler_GIFs/8bit_win.gif" 
+            alt="8-Bit Victory" 
+            className="w-48 h-48 md:w-64 md:h-64 object-contain"
+          />
+        </div>
+        
         {/* Score information */}
         <div className="w-full bg-black/30 rounded-lg p-4 mb-6">
           <div className="flex justify-between items-center mb-3">

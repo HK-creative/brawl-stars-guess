@@ -94,6 +94,18 @@ const ToastProvider = ({ children }: { children: React.ReactNode }) => {
     };
   }, [state.toasts]);
 
+  // Listen for standalone toast events
+  useEffect(() => {
+    const handleToastEvent = (event: CustomEvent) => {
+      toast(event.detail);
+    };
+
+    window.addEventListener('show-toast', handleToastEvent as EventListener);
+    return () => {
+      window.removeEventListener('show-toast', handleToastEvent as EventListener);
+    };
+  }, [toast]);
+
   return (
     <ToastContext.Provider value={{ ...state, toast, dismiss }}>
       {children}
@@ -103,14 +115,22 @@ const ToastProvider = ({ children }: { children: React.ReactNode }) => {
 
 export { useToast, ToastProvider };
 
-export const toast = ({ title, description, variant = "default", duration = 3000 }: Omit<ToastType, "id">) => {
-  const { toast } = useToast();
-  
-  return toast({
-    id: String(Date.now()),
-    title,
-    description,
-    variant,
-    duration,
+// Standalone toast function that doesn't use hooks
+export const toast = ({ title, description, variant = "default", duration = 3000 }: {
+  title?: string;
+  description?: string;
+  variant?: "default" | "destructive";
+  duration?: number;
+}) => {
+  // Create a temporary toast element and dispatch a custom event
+  const event = new CustomEvent('show-toast', {
+    detail: {
+      id: String(Date.now()),
+      title,
+      description,
+      variant,
+      duration,
+    }
   });
+  window.dispatchEvent(event);
 };

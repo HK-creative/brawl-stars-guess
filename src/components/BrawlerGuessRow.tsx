@@ -404,7 +404,7 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({
                             <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-yellow-400 bg-black">
                               <Image
                                 src={getPin(b.name)}
-                                  alt={brawlerDisplayName}
+                                alt={brawlerDisplayName}
                                 fallbackSrc={DEFAULT_PIN}
                                 imageType="pin"
                                 className="w-full h-full object-contain"
