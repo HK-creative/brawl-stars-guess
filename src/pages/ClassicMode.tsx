@@ -396,9 +396,9 @@ const ClassicMode = ({
   }
 
   return (
-    <div key={gameKey} className="flex flex-col min-h-[80vh] py-2">
+    <div key={gameKey} className="flex flex-col min-h-[70vh] py-1">
       {!isSurvivalMode && (
-        <div className="flex justify-between items-center mb-4">
+        <div className="flex justify-between items-center mb-2">
           <div className="flex items-center gap-2">
             {!isEndlessMode ? (
               <span className="text-sm text-white/60">Daily Challenge</span>
@@ -420,8 +420,8 @@ const ClassicMode = ({
         </div>
       )}
       
-      <div className="mb-4 flex flex-col">
-        <div className="mb-4">
+      <div className="mb-2 flex flex-col">
+        <div className="mb-2">
           <form onSubmit={handleSubmit} className="space-y-2">
             <BrawlerAutocomplete
               brawlers={availableBrawlers}
@@ -450,7 +450,7 @@ const ClassicMode = ({
           
           {/* Guess Counter - only show in survival mode */}
           {isSurvivalMode && (
-            <div className="w-full flex justify-center gap-4 mt-4">
+            <div className="w-full flex justify-center gap-4 mt-2">
               <div className="flex items-center gap-2 bg-black/70 border-2 border-brawl-yellow px-6 py-2 rounded-full shadow-xl animate-pulse">
                 <span className="text-brawl-yellow text-lg font-bold tracking-wide">{t('guesses.left')}</span>
                 <span className={`text-2xl font-extrabold ${(maxGuesses - guessCount) <= 3 ? 'text-brawl-red animate-bounce' : 'text-white'}`}>{maxGuesses - guessCount}</span>

@@ -156,7 +156,7 @@ const SurvivalSetupPage: React.FC = () => {
         {/* Additional descriptions */}
         <div className="px-4 pb-2 text-center space-y-1">
           <p className="text-white/80 text-xs">{t('survival.how.many')}</p>
-          <p className="text-white/60 text-xs">{t('survival.gets.harder')}</p>
+          
         </div>
         
         {/* Mode Selection */}

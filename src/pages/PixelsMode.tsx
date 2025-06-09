@@ -109,6 +109,8 @@ const PixelsMode = ({
     if (brawler) {
       const displayName = getBrawlerDisplayName(brawler, currentLanguage);
       setGuess(displayName);
+      // Immediately submit the guess
+      setTimeout(() => handleGuess(), 0);
     }
   };
 
@@ -344,7 +346,8 @@ const PixelsMode = ({
   const portraitPath = getPortrait(correctBrawlerName);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-950 flex flex-col">
+    <div className="survival-mode-container survival-pixels-theme">
+      {/* Confetti effect for correct guesses */}
       {showConfetti && (
         <ReactConfetti
           width={windowSize.width}
@@ -356,11 +359,11 @@ const PixelsMode = ({
         />
       )}
 
-      {/* Top Bar */}
-      {!isSurvivalMode && (
-        <div className="bg-slate-800/50 border-b border-white/5 py-4 px-4 flex items-center justify-between sticky top-0 z-10">
-          <HomeButton />
-          <div className="flex items-center gap-4">
+      {/* Header Section */}
+      <div className="survival-mode-header">
+        {/* Top Bar - only show if not in survival mode */}
+        {!isSurvivalMode && (
+          <div className="absolute top-4 right-4 flex items-center gap-4">
             {!isEndlessMode && (
               <div className="flex items-center gap-2 px-2 py-1 text-white/70">
                 <Clock className="h-4 w-4 text-white/60" />
@@ -378,34 +381,26 @@ const PixelsMode = ({
               />
             </div>
           </div>
+        )}
+
+        {/* Title Section */}
+        <div className="survival-mode-title-section">
+          <h1 className="survival-mode-title">
+            {isSurvivalMode ? 'Survival Pixels' : isEndlessMode ? 'Endless Pixels' : 'Daily Pixels Challenge'}
+          </h1>
+          
+
         </div>
-      )}
+      </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col p-4 items-center justify-center relative">
-        {/* Header Info */}
-        <div className="mb-6 flex flex-col items-center justify-center relative z-10">
-          <div className="text-center mb-4">
-            <h1 className="text-3xl md:text-4xl font-extrabold bg-gradient-to-r from-indigo-300 via-purple-400 to-pink-400 bg-clip-text text-transparent drop-shadow-[0_1px_6px_rgba(147,51,234,0.4)] animate-award-glow">
-              {isSurvivalMode ? 'Survival Pixels' : isEndlessMode ? 'Endless Pixels' : 'Daily Pixels Challenge'}
-            </h1>
-          </div>
-          
-          <div className="flex flex-row items-center gap-4 mt-2">
-            <span className="flex items-center gap-2 px-3 py-1 rounded-full bg-gradient-to-r from-indigo-500/60 to-purple-400/50 shadow-md border border-indigo-300/30 text-lg font-bold text-white">
-              <Hash className="h-6 w-6 text-white/80" />
-              {guessCount}/{maxGuesses} {t('guesses.count')}
-            </span>
-          </div>
-        </div>
-
+      <div className="survival-mode-content">
         {/* Game Card */}
-        <Card className="flex-1 w-full max-w-2xl mx-auto bg-gradient-to-br from-indigo-200/20 via-purple-100/10 to-slate-900/60 border-4 border-indigo-400 shadow-[0_8px_40px_0_rgba(147,51,234,0.10)] rounded-3xl overflow-hidden relative z-10 animate-award-card">
-          <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-indigo-400 via-purple-400 to-indigo-300 opacity-80 blur-sm animate-award-bar" />
-          <div className="p-4 md:p-8">
+        <div className="survival-mode-game-card survival-mode-animate-pulse">
+          <div className="survival-mode-card-content">
             {/* Victory/Game Over Screen */}
             {showResult && !skipVictoryScreen && (
-              <div className="text-center space-y-6">
+              <div className="text-center space-y-4">
                 <h2 className={cn(
                   "text-3xl font-bold mb-4",
                   isCorrect ? "text-indigo-400" : "text-red-400"
@@ -469,16 +464,16 @@ const PixelsMode = ({
 
             {/* Game Screen */}
             {!showResult && dailyChallenge && (
-              <div className="space-y-6">
-                <div className="text-center">
+              <div className="survival-mode-input-section">
+                <div className="text-center mb-6">
                   <h2 className="text-2xl font-bold text-white mb-2">
                     Identify the brawler from this pixelated portrait!
                   </h2>
                 </div>
 
                 {/* Pixelated Portrait Display */}
-                <div className="flex justify-center">
-                  <div className="w-64 h-64 md:w-80 md:h-80 rounded-xl overflow-hidden border-4 border-white/20 bg-slate-800/50">
+                <div className="flex justify-center mb-2">
+                  <div className="w-40 h-40 md:w-48 md:h-48 rounded-xl overflow-hidden border-4 border-white/20 bg-slate-800/50">
                     {portraitImage ? (
                       <PixelatedImage
                         src={portraitImage}
@@ -509,45 +504,59 @@ const PixelsMode = ({
                   </div>
                 )}
 
-                {/* Previous Guesses */}
-                {guesses.length > 0 && (
-                  <div className="space-y-3">
-                    <h3 className="text-lg font-semibold text-white text-center">Previous Guesses</h3>
-                    <ul className="grid grid-cols-1 md:grid-cols-2 gap-y-3 md:gap-x-4 md:gap-y-3">
-                      {guesses.map((pastGuess, idx) => {
-                        const isCorrectGuess = dailyChallenge && pastGuess.toLowerCase() === dailyChallenge.brawler.toLowerCase();
-                        const isLastGuess = idx === guesses.length - 1;
-                        return (
-                          <li
-                            key={idx}
-                            className={cn(
-                              "flex flex-col items-center justify-center py-2 md:py-4 rounded-2xl border-2 transition-all duration-300 animate-fade-in w-36 md:w-40 mx-auto md:min-h-[120px]",
-                              isCorrectGuess ? "bg-green-600/20 border-green-400" : "bg-red-600/20 border-red-400",
-                              !isCorrectGuess && isLastGuess ? "animate-shake" : ""
-                            )}
-                            style={{ minHeight: '81px' }}
-                          >
-                            <img
-                              src={getPortrait(pastGuess)}
-                              alt={pastGuess}
-                              className="w-14 h-14 md:w-20 md:h-20 rounded-xl object-cover border border-yellow-400 shadow-lg mx-auto"
-                              onError={(e) => {
-                                e.currentTarget.src = DEFAULT_PORTRAIT;
-                              }}
-                            />
-                            <span className="text-base md:text-2xl font-extrabold text-white text-center mt-2 truncate w-full" style={{lineHeight: 1.1}}>
-                              {pastGuess}
-                            </span>
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  </div>
-                )}
+                {/* Guess Counter */}
+                <div className="w-full flex justify-center gap-4 mt-2">
+                  {isSurvivalMode ? (
+                    <div className="survival-mode-guess-counter">
+                      <span className="text-lg font-bold tracking-wide">{t('guesses.left')}</span>
+                      <span className={`text-2xl font-extrabold ${(maxGuesses - guessCount) <= 3 ? 'text-red-400 animate-bounce' : 'text-white'}`}>{maxGuesses - guessCount}</span>
+                    </div>
+                  ) : (
+                    <div className="survival-mode-guess-counter">
+                      <Hash className="h-5 w-5" />
+                      <span>{guessCount}/{maxGuesses} {t('guesses.count')}</span>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
           </div>
-        </Card>
+        </div>
+
+        {/* Previous Guesses */}
+        {guesses.length > 0 && (
+          <div className="survival-mode-guesses-section">
+            <h3 className="text-lg font-semibold text-white text-center mb-4">Previous Guesses</h3>
+            <div className="survival-mode-guesses-grid">
+              {guesses.map((pastGuess, idx) => {
+                const isCorrectGuess = dailyChallenge && pastGuess.toLowerCase() === dailyChallenge.brawler.toLowerCase();
+                const isLastGuess = idx === guesses.length - 1;
+                return (
+                  <div
+                    key={idx}
+                    className={cn(
+                      "survival-mode-guess-item",
+                      isCorrectGuess ? "survival-mode-guess-correct" : "survival-mode-guess-incorrect",
+                      !isCorrectGuess && isLastGuess ? "animate-shake" : ""
+                    )}
+                  >
+                    <img
+                      src={getPortrait(pastGuess)}
+                      alt={pastGuess}
+                      className="survival-mode-guess-portrait"
+                      onError={(e) => {
+                        e.currentTarget.src = DEFAULT_PORTRAIT;
+                      }}
+                    />
+                    <span className="survival-mode-guess-name">
+                      {pastGuess}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

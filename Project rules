@@ -5,11 +5,6 @@
 This project uses **Bun** exclusively.  
 Absolutely **do not use `npm`, `pnpm`, or `yarn`** in any instructions, commands, prompts, or automation.  
 
-### ✅ Always use:
-- `bun install` (instead of `npm install`)
-- `bun run <script>` (instead of `npm run`)
-- `bunx <tool>` (instead of `npx`)
-- `bun test`, `bun run dev`, `bun run build`, etc.
 
 If you need to add packages or scripts, **assume Bun is the only available tool**.
 
@@ -22,24 +17,18 @@ You are assisting a non-coder. Every answer must:
 2. Assume the user has **Bun already installed** and wants **no exposure to npm/yarn**.
 3. Show only Bun-compatible commands.
 
-If you suggest anything related to packages, scripts, dev tools, tests, or config:
-→ **Always default to Bun** syntax and Bun-compatible solutions.
 
 ---
 
 ## ✅ Example Command Translations
 
-| 🟥 Wrong (npm/yarn)             | ✅ Right (Bun)                      |
+|   ✅ Right (Bun)                      |
 |--------------------------------|------------------------------------|
-| `npm install vitest`           | `bun add -d vitest`                |
-| `npx shadcn-ui@latest init`    | `bunx shadcn-ui@latest init`       |
-| `npm run dev`                  | `bun run dev`                      |
-| `yarn add react-hook-form`     | `bun add react-hook-form`          |
-| `npx tailwindcss init`         | `bunx tailwindcss init`            |
-| `npm install` (no arguments)   | `bun install`                      |
+|    | `bun add -d vitest`                |
+|    | `bunx shadcn-ui@latest init`  
+     | `bun run dev`                      |
+|    | `bun add react-hook-form`          |
+|    | `bunx tailwindcss init`            |
+|    | `bun install`                      |
 
 ---
-
-## ✋ Final Rule
-
-⚠️ If you ever mention a command that starts with `npm`, `npx`, or `yarn`, treat it as a **mistake** and immediately correct it with the Bun version.

@@ -2,73 +2,65 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Clock, Hash } from 'lucide-react';
-import { useToast } from '@/components/ui/use-toast';
+import { Clock, Hash, Flame, Home } from 'lucide-react';
+import { toast } from '@/components/ui/use-toast';
 import { useDailyStore } from '@/stores/useDailyStore';
 import { brawlers, getBrawlerDisplayName } from '@/data/brawlers';
-import { getPortrait } from '@/lib/image-helpers';
+import { getPortrait, DEFAULT_PORTRAIT } from '@/lib/image-helpers';
 import BrawlerAutocomplete from '@/components/BrawlerAutocomplete';
-import HomeButton from '@/components/ui/home-button';
-import DailyModeProgress from '@/components/DailyModeProgress';
 import ReactConfetti from 'react-confetti';
-import { fetchDailyChallenge } from '@/lib/daily-challenges';
+import { fetchDailyChallenge, fetchYesterdayChallenge } from '@/lib/daily-challenges';
 import { t, getLanguage } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
+import { useStreak } from '@/contexts/StreakContext';
 
-// Helper function to generate star power image path (same as survival mode)
-function getStarPowerImagePath(brawlerName: string, starPowerIndex: number): string {
-  // Convert brawler name to lowercase and replace spaces with underscores
-  let brawlerFileName = brawlerName.toLowerCase().replace(/ /g, '_');
-  
-  // Handle special cases for brawler names
-  if (brawlerName === "8-Bit") {
-    brawlerFileName = "8bit";
-  } else if (brawlerName === "Mr. P") {
-    brawlerFileName = "mrp";
-  } else if (brawlerName === "R-T") {
-    brawlerFileName = "rt";
-  } else if (brawlerName === "Larry & Lawrie") {
-    brawlerFileName = "larry_lawrie";
+// Helper to get star power image path with fallback variants
+const getStarPowerImageVariants = (brawler: string, starPowerName?: string): string[] => {
+  if (!brawler) {
+    return [];
   }
   
-  // Try zero-padded format first (_01, _02)
-  const paddedNum = starPowerIndex.toString().padStart(2, '0');
-  return `/${brawlerFileName}_starpower_${paddedNum}.png`;
-}
+  // Clean up brawler name for file path
+  const normalizedBrawler = brawler.toLowerCase().replace(/ /g, '_');
+  
+  // Handle special cases
+  if (normalizedBrawler === 'mr.p') return [`/StarPowerImages/mrp_starpower_01.png`];
+  if (normalizedBrawler === 'el primo') return [`/StarPowerImages/elprimo_starpower_01.png`];
+  if (normalizedBrawler === 'colonel ruffs') return [`/StarPowerImages/colonel_ruffs_starpower_01.png`];
+  
+  // Special case for R-T
+  if (brawler.toLowerCase().replace(/[-_ ]/g, '') === 'rt') {
+    if (starPowerName && starPowerName.match(/2|second/i)) {
+      return ['/StarPowerImages/rt_starpower_02.png'];
+    }
+    return ['/StarPowerImages/rt_starpower_01.png'];
+  }
+  
+  // First, try to determine the base star power number from the name
+  let baseNum = '01';
+  if (starPowerName) {
+    const match = starPowerName.match(/(\d+)/);
+    if (match) {
+      baseNum = match[1].padStart(2, '0');
+    } else if (starPowerName.includes('First')) {
+      baseNum = '01';
+    } else if (starPowerName.includes('Second')) {
+      baseNum = '02';
+    }
+  }
+  
+  // Generate both possible variants
+  const variant1 = `/StarPowerImages/${normalizedBrawler}_starpower_${baseNum}.png`;
+  const variant2 = `/StarPowerImages/${normalizedBrawler}_starpower_${baseNum.replace(/^0+/, '')}.png`;
+  
+  // Return both variants to try
+  return [variant1, variant2];
+};
 
 const DailyStarPowerMode: React.FC = () => {
   const navigate = useNavigate();
   const currentLanguage = getLanguage();
-  const { toast } = useToast();
-
-  // Inject custom award styles into the document head
-  useEffect(() => {
-    const style = document.createElement('style');
-    style.innerHTML = `
-      @keyframes award-glow {
-        0% { text-shadow: 0 0 1.5px rgba(255,214,0,0.09), 0 0 3px rgba(255,214,0,0.09), 0 0 4.5px rgba(255,214,0,0.06); }
-        100% { text-shadow: 0 0 2.4px rgba(255,214,0,0.12), 0 0 4.8px rgba(255,214,0,0.09), 0 0 7.2px rgba(255,214,0,0.075); }
-      }
-      .animate-award-glow { 
-        animation: award-glow 3s infinite alternate; 
-        will-change: transform, text-shadow;
-      }
-      @keyframes award-bar {
-        0% { opacity: 0.5; }
-        50% { opacity: 1; }
-        100% { opacity: 0.5; }
-      }
-      .animate-award-bar { animation: award-bar 3s infinite; }
-      @keyframes award-card {
-        0% { box-shadow: 0 8px 40px 0 rgba(255,214,0,0.10); }
-        50% { box-shadow: 0 16px 64px 0 rgba(255,214,0,0.18); }
-        100% { box-shadow: 0 8px 40px 0 rgba(255,214,0,0.10); }
-      }
-      .animate-award-card { animation: award-card 2.5s infinite alternate; }
-    `;
-    document.head.appendChild(style);
-    return () => { document.head.removeChild(style); };
-  }, []);
+  const { streak } = useStreak();
 
   const {
     starpower,
@@ -93,6 +85,10 @@ const DailyStarPowerMode: React.FC = () => {
   const [showConfetti, setShowConfetti] = useState(false);
   const [starPowerData, setStarPowerData] = useState<any>(null);
   const [starPowerImage, setStarPowerImage] = useState<string>('');
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageVariants, setImageVariants] = useState<string[]>([]);
+  const [currentVariantIndex, setCurrentVariantIndex] = useState(0);
+  const [yesterdayData, setYesterdayData] = useState<any>(null);
 
   // Initialize daily modes on component mount
   useEffect(() => {
@@ -105,35 +101,56 @@ const DailyStarPowerMode: React.FC = () => {
     }, 60000);
     
     return () => clearInterval(interval);
-  }, [initializeDailyModes, updateTimeUntilNext]);
+  }, [initializeDailyModes]);
 
   // Load star power data and generate image
   useEffect(() => {
     const loadStarPowerData = async () => {
       try {
-        const data = await fetchDailyChallenge('starpower');
-        setStarPowerData(data);
+        const [data, yesterdayChallenge] = await Promise.all([
+          fetchDailyChallenge('starpower'),
+          fetchYesterdayChallenge('starpower')
+        ]);
         
-        // Generate star power image path
+        console.log('Loaded star power data:', data);
+        setStarPowerData(data);
+        setYesterdayData(yesterdayChallenge);
+        
+        // Generate star power image variants
         if (data?.brawler) {
-          // Find the brawler and get a random star power index
-          const brawler = brawlers.find(b => b.name.toLowerCase() === data.brawler.toLowerCase());
-          if (brawler && brawler.starPowers && brawler.starPowers.length > 0) {
-            // Use the first star power or find the matching one
-            const starPowerIndex = 1; // Default to first star power
-            const imagePath = getStarPowerImagePath(data.brawler, starPowerIndex);
-            setStarPowerImage(imagePath);
+          const variants = getStarPowerImageVariants(data.brawler, data.starPowerName);
+          console.log('Generated star power image variants:', variants);
+          setImageVariants(variants);
+          setCurrentVariantIndex(0);
+          if (variants.length > 0) {
+            setStarPowerImage(variants[0]);
+            console.log('Trying first variant:', variants[0]);
+          } else {
+            setStarPowerImage('');
           }
+          setImageLoaded(false);
+        } else {
+          console.warn('No brawler data found in star power challenge');
+          setStarPowerImage('');
+          setImageVariants([]);
+          setCurrentVariantIndex(0);
+          setImageLoaded(false);
+          setStarPowerData(null);
         }
       } catch (error) {
         console.error('Error loading star power data:', error);
+        setStarPowerImage('');
+        setImageVariants([]);
+        setCurrentVariantIndex(0);
+        setImageLoaded(false);
+        setStarPowerData(null);
       }
     };
     
     loadStarPowerData();
   }, []);
 
-  // Load saved guesses when component mounts or starpower data changes
+  // Load saved guesses when component mounts or star power data changes
   useEffect(() => {
     const savedGuesses = getGuesses('starpower');
     setGuesses(savedGuesses);
@@ -146,13 +163,16 @@ const DailyStarPowerMode: React.FC = () => {
   useEffect(() => {
     if (starpower.isCompleted) {
       setShowVictoryScreen(true);
+      setIsGameOver(true);
     }
   }, [starpower.isCompleted]);
 
-  // Find the correct brawler object
-  const getCorrectBrawler = useCallback(() => {
+  const getCorrectBrawler = () => {
+    if (starPowerData?.brawler) {
+      return brawlers.find(b => b.name.toLowerCase() === starPowerData.brawler.toLowerCase()) || brawlers[0];
+    }
     return brawlers.find(b => b.name.toLowerCase() === starpower.brawlerName.toLowerCase()) || brawlers[0];
-  }, [starpower.brawlerName]);
+  };
 
   // Handle guess submission
   const handleSubmit = useCallback((brawler?: any) => {
@@ -180,17 +200,17 @@ const DailyStarPowerMode: React.FC = () => {
       setShowVictoryScreen(true);
       setShowConfetti(true);
       
+      const displayName = getBrawlerDisplayName(correctBrawler, currentLanguage);
       toast({
-        id: String(Date.now()),
         title: "Congratulations! 🎉",
-        description: `You found ${getBrawlerDisplayName(correctBrawler, currentLanguage)}!`,
+        description: `You found ${displayName}!`,
       });
     }
     
     // Reset input
     setInputValue('');
     setSelectedBrawler(null);
-  }, [selectedBrawler, starpower.isCompleted, incrementGuessCount, saveGuess, getCorrectBrawler, completeMode, currentLanguage, toast]);
+  }, [selectedBrawler, starpower.isCompleted, incrementGuessCount, saveGuess, getCorrectBrawler, completeMode]);
 
   // Handle brawler selection and immediate submission
   const handleSelectBrawler = useCallback((brawler: any) => {
@@ -219,17 +239,88 @@ const DailyStarPowerMode: React.FC = () => {
     resetGuessCount('starpower');
   };
 
+  const handleImageError = () => {
+    console.error('Image failed to load:', starPowerImage);
+    // Try next variant if available
+    if (currentVariantIndex < imageVariants.length - 1) {
+      const nextIndex = currentVariantIndex + 1;
+      setCurrentVariantIndex(nextIndex);
+      setStarPowerImage(imageVariants[nextIndex]);
+      console.log('Trying next variant:', imageVariants[nextIndex]);
+    } else {
+      console.warn('All star power image variants failed to load');
+      setStarPowerImage('');
+      setImageLoaded(false);
+    }
+  };
+
+  const handleImageLoad = () => {
+    console.log('Star power image loaded successfully:', starPowerImage);
+    setImageLoaded(true);
+  };
+
+  const formatTime = (time: { hours: number; minutes: number }) => {
+    return `${time.hours.toString().padStart(2, '0')}:${time.minutes.toString().padStart(2, '0')}:00`;
+  };
+
+  // Mode navigation data
+  const modes = [
+    { 
+      key: 'classic', 
+      name: 'Classic', 
+      path: '/daily/classic',
+      color: 'from-yellow-500 to-amber-600',
+      bgColor: 'bg-yellow-500/20'
+    },
+    { 
+      key: 'gadget', 
+      name: 'Gadget', 
+      path: '/daily/gadget',
+      color: 'from-purple-500 to-violet-600',
+      bgColor: 'bg-purple-500/20'
+    },
+    { 
+      key: 'starpower', 
+      name: 'Star Power', 
+      path: '/daily/starpower',
+      color: 'from-orange-500 to-yellow-600',
+      bgColor: 'bg-orange-500/20'
+    },
+    { 
+      key: 'audio', 
+      name: 'Audio', 
+      path: '/daily/audio',
+      color: 'from-emerald-500 to-teal-600',
+      bgColor: 'bg-emerald-500/20'
+    },
+    { 
+      key: 'pixels', 
+      name: 'Pixels', 
+      path: '/daily/pixels',
+      color: 'from-indigo-500 to-blue-600',
+      bgColor: 'bg-indigo-500/20'
+    },
+  ];
+
+  const handleModeClick = (mode: typeof modes[0]) => {
+    if (mode.key !== 'starpower') {
+      navigate(mode.path);
+    }
+  };
+
   // Loading state
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-950 flex items-center justify-center">
-        <div className="animate-spin h-8 w-8 border-4 border-brawl-yellow border-t-transparent rounded-full"></div>
+      <div className="daily-mode-container daily-starpower-theme">
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="animate-spin h-12 w-12 border-4 border-white/20 border-t-white rounded-full"></div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-950 flex flex-col">
+    <div className="daily-mode-container daily-starpower-theme">
       {/* Confetti Animation */}
       {showConfetti && (
         <ReactConfetti
@@ -242,231 +333,216 @@ const DailyStarPowerMode: React.FC = () => {
         />
       )}
       
-      {/* Top Navigation Bar */}
-      <div className="w-full px-4 py-6">
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
-          {/* Home Button */}
-          <HomeButton />
-          
-          {/* Mode Navigation - Center */}
-          <div className="flex-1 flex justify-center">
-            <DailyModeProgress currentMode="starpower" />
+      {/* Header Section */}
+      <div className="w-full max-w-4xl mx-auto px-4 py-4 relative">
+        {/* Top Row: Home Icon, Streak, Timer */}
+        <div className="flex items-center justify-between mb-6">
+          {/* Home Icon */}
+          <button
+            onClick={() => navigate('/')}
+            className="flex items-center justify-center w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20 text-white hover:bg-white/20 transition-all duration-200"
+            aria-label="Go to Home"
+          >
+            <Home className="w-6 h-6" />
+          </button>
+
+          {/* Center: Streak */}
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 px-4 py-2 rounded-full bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg">
+              <span className="text-xl font-bold">{streak}</span>
+              <Flame className="h-4 w-4 text-yellow-300" />
+            </div>
+            <span className="text-sm text-white/70 font-medium">daily streak</span>
           </div>
-          
-          {/* Timer - Right */}
-          <div className="flex items-center gap-2 px-3 py-2 bg-slate-800/60 rounded-full border border-slate-700/50 backdrop-blur-sm">
-            <Clock className="h-4 w-4 text-slate-400" />
-            <span className="text-sm font-medium text-slate-300">
-              {timeUntilNext.hours}h {timeUntilNext.minutes}m
+
+          {/* Timer */}
+          <div className="flex flex-col items-center px-4 py-3 rounded-full bg-black/30 backdrop-blur-sm border border-white/20 text-white/90">
+            <span className="text-xs text-white/60 font-medium uppercase tracking-wide">Next Brawler In</span>
+            <span className="font-mono text-white font-bold text-lg">
+              {formatTime(timeUntilNext)}
             </span>
           </div>
+        </div>
+
+        {/* Mode Navigation Pills */}
+        <div className="flex items-center justify-center gap-3 mb-6">
+          {modes.map((mode) => {
+            const isCurrent = mode.key === 'starpower';
+            
+            return (
+              <button
+                key={mode.key}
+                onClick={() => handleModeClick(mode)}
+                className={cn(
+                  "relative px-6 py-3 rounded-full text-sm font-semibold transition-all duration-300",
+                  isCurrent
+                    ? "bg-gradient-to-r from-orange-500 to-yellow-600 text-white shadow-lg"
+                    : "bg-white/10 text-white/60 hover:text-white/80 hover:bg-white/20",
+                  !isCurrent && "cursor-pointer"
+                )}
+                disabled={isCurrent}
+              >
+                {mode.name}
+                
+                {/* Current mode indicator dot */}
+                {isCurrent && (
+                  <div className="absolute -bottom-3 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-white rounded-full"></div>
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Title */}
+        <div className="text-center mb-8">
+          <h1 className="text-4xl md:text-5xl font-black text-white mb-2 tracking-tight">
+            Today's Star Power
+          </h1>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col items-center justify-center px-4 pb-8">
-        {/* Page Title */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl md:text-5xl font-black bg-gradient-to-r from-purple-400 via-pink-400 to-red-400 bg-clip-text text-transparent mb-2">
-            Star Power Daily
-          </h1>
-          <p className="text-slate-400 text-lg">
-            Guess the brawler by their star power
-          </p>
-        </div>
-
-        {/* Game Container */}
-        <div className="w-full max-w-2xl">
-          <Card className="bg-gradient-to-br from-slate-800/90 to-slate-900/90 border-2 border-purple-500/30 shadow-2xl backdrop-blur-sm">
-            <div className="p-6 md:p-8">
-              {showVictoryScreen ? (
-                // Victory Screen
-                <div className="text-center space-y-6">
-                  <div className="space-y-2">
-                    <h2 className="text-3xl font-bold text-purple-400">
-                      🎉 Congratulations! 🎉
-                    </h2>
-                    <p className="text-xl text-slate-300">
-                      You found <span className="text-purple-400 font-bold">{starPowerData?.brawler}</span> in {guesses.length} {guesses.length === 1 ? 'guess' : 'guesses'}!
-                    </p>
-                  </div>
-
-                  {/* Star Power Image */}
-                  <div className="flex justify-center">
-                    <div className="w-48 h-48 rounded-2xl overflow-hidden border-4 border-purple-400 shadow-xl bg-slate-800/50 flex items-center justify-center">
-                      {starPowerImage ? (
-                        <img
-                          src={starPowerImage}
-                          alt={`${starPowerData?.brawler} Star Power`}
-                          className="w-full h-full object-contain"
-                          onError={(e) => {
-                            e.currentTarget.src = '/StarPowerImages/shelly_starpower_01.png';
-                          }}
-                        />
-                      ) : (
-                        <div className="text-slate-400 text-center">
-                          <div className="text-4xl mb-2">⭐</div>
-                          <div className="text-sm">Star Power Image</div>
-                        </div>
+      <div className="flex-1 flex flex-col px-4 pb-4">
+        <div className="daily-mode-game-card daily-mode-animate-pulse">
+          <div className="daily-mode-card-content">
+            {showVictoryScreen ? (
+              // Victory Screen
+              <div className="daily-mode-victory-section">
+                <h2 className="daily-mode-victory-title">
+                  GG EZ
+                </h2>
+                <p className="daily-mode-victory-text">
+                  {t('daily.you.found')} <span className="font-bold" style={{ color: 'hsla(var(--daily-mode-primary), 1)' }}>{getBrawlerDisplayName(getCorrectBrawler(), currentLanguage)}</span> {t('daily.in.guesses')} {starpower.guessCount} {t('daily.guesses.count')}
+                </p>
+                
+                <div className="flex flex-col gap-6 items-center">
+                  <Button
+                    onClick={handleNextMode}
+                    className="daily-mode-next-button"
+                  >
+                    <img 
+                      src="/AudioIcon.png" 
+                      alt="Audio Mode" 
+                      className={cn(
+                        "h-6 w-6",
+                        currentLanguage === 'he' ? "ml-2" : "mr-2"
                       )}
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col gap-3 items-center">
-                    <Button
-                      onClick={handleNextMode}
-                      className="bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-400 hover:to-red-500 text-white py-3 px-8 text-lg font-semibold shadow-lg hover:shadow-orange-500/25 transform hover:scale-105 transition-all duration-200"
-                    >
-                      <img 
-                        src="/AudioIcon.png" 
-                        alt="Next Mode" 
-                        className="h-5 w-5 mr-2"
-                      />
-                      Next Mode
-                    </Button>
-                    <Button
-                      onClick={() => navigate('/')}
-                      variant="ghost"
-                      className="text-slate-400 hover:text-slate-300 hover:bg-slate-800/50"
-                    >
-                      Back to Home
-                    </Button>
-                  </div>
-                </div>
-              ) : (
-                // Game Content
-                <div className="space-y-6">
-                  {/* Star Power Display */}
-                  <div className="flex justify-center mb-8">
-                    <div className="w-96 h-96 rounded-3xl overflow-hidden border-4 border-purple-500/40 bg-gradient-to-br from-slate-800/80 to-slate-900/80 shadow-2xl backdrop-blur-sm flex items-center justify-center">
-                      {starPowerImage ? (
-                        <img
-                          src={starPowerImage}
-                          alt="Brawler Star Power"
-                          className="w-full h-full object-contain p-8"
-                          onLoad={() => console.log('Star power image loaded')}
-                          onError={(e) => {
-                            e.currentTarget.src = '/StarPowerImages/shelly_starpower_01.png';
-                          }}
-                        />
-                      ) : (
-                        <div className="text-slate-400 text-center">
-                          <div className="text-6xl mb-4">⭐</div>
-                          <div className="text-lg">Loading star power...</div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Search Section */}
-                  <div className="space-y-6">
-                    <BrawlerAutocomplete
-                      brawlers={brawlers}
-                      value={inputValue}
-                      onChange={setInputValue}
-                      onSelect={handleSelectBrawler}
-                      onSubmit={handleSubmit}
-                      disabledBrawlers={guessedBrawlerNames}
                     />
-                    
-                    {/* Stats Row */}
-                    <div className="flex items-center justify-center gap-6">
-                      <div className="flex items-center gap-2 px-4 py-2 bg-slate-800/60 rounded-full border border-slate-700/50">
-                        <Hash className="h-4 w-4 text-purple-400" />
-                        <span className="text-sm font-medium text-slate-300">
-                          {guesses.length} {guesses.length === 1 ? 'guess' : 'guesses'}
-                        </span>
+                    {t('daily.next.mode')}
+                  </Button>
+                  
+                  <Button
+                    onClick={() => navigate('/')}
+                    variant="ghost"
+                    className="text-white/60 hover:text-white/80 hover:bg-white/5 py-3 px-8 text-base border border-white/20 hover:border-white/30 transition-all duration-200 rounded-xl"
+                  >
+                    {t('daily.go.home')}
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              // Game Content
+              <div className="daily-mode-game-area">
+                {/* Star Power Image */}
+                <div className="flex justify-center mb-8">
+                  <div className="w-80 h-80 md:w-96 md:h-96 rounded-3xl border-4 border-white/20 bg-black/20 backdrop-blur-sm flex items-center justify-center overflow-hidden shadow-2xl">
+                    {starPowerImage && imageLoaded ? (
+                      <img
+                        src={starPowerImage}
+                        alt="Mystery Star Power"
+                        className="w-full h-full object-contain"
+                        onLoad={handleImageLoad}
+                        onError={handleImageError}
+                      />
+                    ) : starPowerImage ? (
+                      <img
+                        src={starPowerImage}
+                        alt="Mystery Star Power"
+                        className="w-full h-full object-contain opacity-0"
+                        onLoad={handleImageLoad}
+                        onError={handleImageError}
+                      />
+                    ) : (
+                      <div className="text-white/40 text-center">
+                        <div className="text-6xl mb-4">⭐</div>
+                        <div>Mystery Star Power</div>
                       </div>
-                      
-                      {guesses.length > 0 && (
-                        <div className="flex items-center gap-2 px-4 py-2 bg-purple-500/20 rounded-full border border-purple-500/50">
-                          <span className="text-sm font-medium text-purple-300">
-                            Keep guessing!
-                          </span>
-                        </div>
-                      )}
+                    )}
+                    
+                    {/* Loading overlay */}
+                    {starPowerImage && !imageLoaded && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                        <div className="animate-spin h-8 w-8 border-4 border-white/20 border-t-white rounded-full"></div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Search Bar */}
+                <div className="daily-mode-input-section mb-6">
+                  <BrawlerAutocomplete
+                    brawlers={brawlers}
+                    value={inputValue}
+                    onChange={setInputValue}
+                    onSelect={handleSelectBrawler}
+                    onSubmit={() => handleSubmit()}
+                    disabled={starpower.isCompleted}
+                    disabledBrawlers={guessedBrawlerNames}
+                  />
+                </div>
+
+                {/* Guesses Counter */}
+                <div className="flex justify-center mb-6">
+                  <div className="daily-mode-guess-counter">
+                    <Hash className="h-5 w-5" />
+                    <span>{starpower.guessCount} {t('guesses.count')}</span>
+                  </div>
+                </div>
+
+                {/* Guesses Grid */}
+                {guesses.length > 0 && (
+                  <div className="daily-mode-guesses-section">
+                    <div className="daily-mode-guesses-grid">
+                      {guesses.map((guess, index) => {
+                        const isCorrect = guess.name.toLowerCase() === getCorrectBrawler().name.toLowerCase();
+                        const portraitSrc = getPortrait(guess.name) || DEFAULT_PORTRAIT;
+                        
+                        return (
+                          <div
+                            key={index}
+                            className={cn(
+                              "daily-mode-guess-item",
+                              isCorrect ? "daily-mode-guess-correct" : "daily-mode-guess-incorrect"
+                            )}
+                          >
+                            <img
+                              src={portraitSrc}
+                              alt={guess.name}
+                              className="daily-mode-guess-portrait"
+                            />
+                            <span className="daily-mode-guess-name">
+                              {getBrawlerDisplayName(guess, currentLanguage)}
+                            </span>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
+                )}
 
-                  {/* Game Over Message */}
-                  {isGameOver && !showVictoryScreen && (
-                    <div className="text-center space-y-4 py-6 bg-red-500/10 border border-red-500/20 rounded-xl">
-                      <h2 className="text-2xl font-bold text-red-400">Game Over!</h2>
-                      <p className="text-slate-300">
-                        The correct brawler was <span className="text-purple-400 font-bold">{starPowerData?.brawler}</span>
-                      </p>
-                      <div className="flex flex-col gap-3 items-center">
-                        <Button
-                          onClick={handleNextMode}
-                          className="bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-400 hover:to-red-500 text-white py-3 px-8 text-lg font-semibold"
-                        >
-                          Next Mode
-                        </Button>
-                        <Button
-                          onClick={() => navigate('/')}
-                          variant="ghost"
-                          className="text-slate-400 hover:text-slate-300"
-                        >
-                          Back to Home
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Previous Guesses */}
-                  {guesses.length > 0 && (
-                    <div className="space-y-4">
-                      <h3 className="text-lg font-semibold text-slate-300 text-center">
-                        Previous Guesses
-                      </h3>
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                        {guesses.map((guess, idx) => {
-                          const isCorrect = starPowerData && guess.name.toLowerCase() === starPowerData.brawler.toLowerCase();
-                          const isLastGuess = idx === guesses.length - 1;
-                          return (
-                            <div
-                              key={idx}
-                              className={cn(
-                                "flex flex-col items-center p-3 rounded-xl border-2 transition-all duration-300",
-                                isCorrect 
-                                  ? "bg-green-500/20 border-green-400/50" 
-                                  : "bg-red-500/20 border-red-400/50",
-                                !isCorrect && isLastGuess ? "animate-pulse" : ""
-                              )}
-                            >
-                              <img
-                                src={getPortrait(guess.name)}
-                                alt={getBrawlerDisplayName(guess, currentLanguage)}
-                                className="w-12 h-12 rounded-lg object-cover border-2 border-slate-600/50"
-                                onError={(e) => {
-                                  e.currentTarget.src = '/portraits/shelly.png';
-                                }}
-                              />
-                              <span className="text-sm font-medium text-slate-300 text-center mt-2 truncate w-full">
-                                {getBrawlerDisplayName(guess, currentLanguage)}
-                              </span>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          </Card>
-        </div>
-      </div>
-
-      {/* Loading State */}
-      {!starPowerData && !isLoading && (
-        <div className="fixed inset-0 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm">
-          <div className="text-center space-y-4 p-8 bg-slate-800/90 rounded-2xl border border-slate-700/50">
-            <div className="animate-spin h-8 w-8 border-4 border-purple-400 border-t-transparent rounded-full mx-auto"></div>
-            <p className="text-slate-300">Loading today's challenge...</p>
+                {/* Yesterday's Star Power */}
+                {yesterdayData && (
+                  <div className="flex justify-center mt-6">
+                    <span className="text-sm text-white/50">
+                      yesterday's star power was <span className="text-white/70 font-medium">{yesterdayData.brawler || 'Mico'}</span>
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 };

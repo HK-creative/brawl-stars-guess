@@ -2,48 +2,25 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Clock, Hash } from 'lucide-react';
-import { useToast } from '@/components/ui/use-toast';
+import { Clock, Hash, Flame, Home } from 'lucide-react';
+import { toast } from '@/components/ui/use-toast';
 import { useDailyStore } from '@/stores/useDailyStore';
 import { brawlers, getBrawlerDisplayName } from '@/data/brawlers';
+import { getPortrait } from '@/lib/image-helpers';
 import BrawlerAutocomplete from '@/components/BrawlerAutocomplete';
-import HomeButton from '@/components/ui/home-button';
-import DailyModeProgress from '@/components/DailyModeProgress';
 import ReactConfetti from 'react-confetti';
-import { cn } from '@/lib/utils';
+import { fetchDailyChallenge, fetchYesterdayChallenge } from '@/lib/daily-challenges';
 import { t, getLanguage } from '@/lib/i18n';
+import { cn } from '@/lib/utils';
+import { useStreak } from '@/contexts/StreakContext';
+
+const DEFAULT_PORTRAIT = '/portraits/shelly.png';
 
 const DailyClassicMode: React.FC = () => {
-  // Inject custom award styles into the document head
-  useEffect(() => {
-    const style = document.createElement('style');
-    style.innerHTML = `
-      @keyframes award-glow {
-        0% { text-shadow: 0 0 1.5px rgba(255,214,0,0.09), 0 0 3px rgba(255,214,0,0.09), 0 0 4.5px rgba(255,214,0,0.06); }
-        100% { text-shadow: 0 0 2.4px rgba(255,214,0,0.12), 0 0 4.8px rgba(255,214,0,0.09), 0 0 7.2px rgba(255,214,0,0.075); }
-      }
-      .animate-award-glow { 
-        animation: award-glow 3s infinite alternate; 
-        will-change: transform, text-shadow;
-      }
-      @keyframes award-bar {
-        0% { opacity: 0.5; }
-        50% { opacity: 1; }
-        100% { opacity: 0.5; }
-      }
-      .animate-award-bar { animation: award-bar 3s infinite; }
-      @keyframes award-card {
-        0% { box-shadow: 0 8px 40px 0 rgba(255,214,0,0.10); }
-        50% { box-shadow: 0 16px 64px 0 rgba(255,214,0,0.18); }
-        100% { box-shadow: 0 8px 40px 0 rgba(255,214,0,0.10); }
-      }
-      .animate-award-card { animation: award-card 2.5s infinite alternate; }
-    `;
-    document.head.appendChild(style);
-    return () => { document.head.removeChild(style); };
-  }, []);
-
   const navigate = useNavigate();
+  const currentLanguage = getLanguage();
+  const { streak } = useStreak();
+
   const {
     classic,
     timeUntilNext,
@@ -56,9 +33,6 @@ const DailyClassicMode: React.FC = () => {
     saveGuess,
     getGuesses,
   } = useDailyStore();
-  const { toast } = useToast();
-
-  const currentLanguage = getLanguage();
 
   // Local game state
   const [inputValue, setInputValue] = useState('');
@@ -68,6 +42,7 @@ const DailyClassicMode: React.FC = () => {
   const [isGameOver, setIsGameOver] = useState(false);
   const [showVictoryScreen, setShowVictoryScreen] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
+  const [yesterdayData, setYesterdayData] = useState<any>(null);
 
   // Initialize daily modes on component mount
   useEffect(() => {
@@ -80,7 +55,21 @@ const DailyClassicMode: React.FC = () => {
     }, 60000);
     
     return () => clearInterval(interval);
-  }, [initializeDailyModes, updateTimeUntilNext]);
+  }, [initializeDailyModes]);
+
+  // Load yesterday's challenge
+  useEffect(() => {
+    const loadYesterdayData = async () => {
+      try {
+        const yesterdayChallenge = await fetchYesterdayChallenge('classic');
+        setYesterdayData(yesterdayChallenge);
+      } catch (error) {
+        console.error('Error loading yesterday data:', error);
+      }
+    };
+    
+    loadYesterdayData();
+  }, []);
 
   // Load saved guesses when component mounts or classic data changes
   useEffect(() => {
@@ -95,13 +84,13 @@ const DailyClassicMode: React.FC = () => {
   useEffect(() => {
     if (classic.isCompleted) {
       setShowVictoryScreen(true);
+      setIsGameOver(true);
     }
   }, [classic.isCompleted]);
 
-  // Find the correct brawler object
-  const getCorrectBrawler = useCallback(() => {
+  const getCorrectBrawler = () => {
     return brawlers.find(b => b.name.toLowerCase() === classic.brawlerName.toLowerCase()) || brawlers[0];
-  }, [classic.brawlerName]);
+  };
 
   // Handle guess submission
   const handleSubmit = useCallback((brawler?: any) => {
@@ -131,7 +120,6 @@ const DailyClassicMode: React.FC = () => {
       
       const displayName = getBrawlerDisplayName(correctBrawler, currentLanguage);
       toast({
-        id: String(Date.now()),
         title: "Congratulations! 🎉",
         description: `You found ${displayName}!`,
       });
@@ -140,7 +128,7 @@ const DailyClassicMode: React.FC = () => {
     // Reset input
     setInputValue('');
     setSelectedBrawler(null);
-  }, [selectedBrawler, classic.isCompleted, incrementGuessCount, saveGuess, getCorrectBrawler, completeMode, currentLanguage, toast]);
+  }, [selectedBrawler, classic.isCompleted, incrementGuessCount, saveGuess, getCorrectBrawler, completeMode]);
 
   // Handle brawler selection and immediate submission
   const handleSelectBrawler = useCallback((brawler: any) => {
@@ -169,17 +157,68 @@ const DailyClassicMode: React.FC = () => {
     resetGuessCount('classic');
   };
 
+  const formatTime = (time: { hours: number; minutes: number }) => {
+    return `${time.hours.toString().padStart(2, '0')}:${time.minutes.toString().padStart(2, '0')}:00`;
+  };
+
+  // Mode navigation data
+  const modes = [
+    { 
+      key: 'classic', 
+      name: 'Classic', 
+      path: '/daily/classic',
+      color: 'from-yellow-500 to-amber-600',
+      bgColor: 'bg-yellow-500/20'
+    },
+    { 
+      key: 'gadget', 
+      name: 'Gadget', 
+      path: '/daily/gadget',
+      color: 'from-purple-500 to-violet-600',
+      bgColor: 'bg-purple-500/20'
+    },
+    { 
+      key: 'starpower', 
+      name: 'Star Power', 
+      path: '/daily/starpower',
+      color: 'from-orange-500 to-yellow-600',
+      bgColor: 'bg-orange-500/20'
+    },
+    { 
+      key: 'audio', 
+      name: 'Audio', 
+      path: '/daily/audio',
+      color: 'from-emerald-500 to-teal-600',
+      bgColor: 'bg-emerald-500/20'
+    },
+    { 
+      key: 'pixels', 
+      name: 'Pixels', 
+      path: '/daily/pixels',
+      color: 'from-indigo-500 to-blue-600',
+      bgColor: 'bg-indigo-500/20'
+    },
+  ];
+
+  const handleModeClick = (mode: typeof modes[0]) => {
+    if (mode.key !== 'classic') {
+      navigate(mode.path);
+    }
+  };
+
   // Loading state
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-950 flex items-center justify-center">
-        <div className="animate-spin h-8 w-8 border-4 border-brawl-yellow border-t-transparent rounded-full"></div>
+      <div className="daily-mode-container daily-classic-theme">
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="animate-spin h-12 w-12 border-4 border-white/20 border-t-white rounded-full"></div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-950 flex flex-col">
+    <div className="daily-mode-container daily-classic-theme">
       {/* Confetti Animation */}
       {showConfetti && (
         <ReactConfetti
@@ -192,244 +231,191 @@ const DailyClassicMode: React.FC = () => {
         />
       )}
       
-      {/* Top Navigation Bar */}
-      <div className="w-full px-4 py-6">
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
-          {/* Home Button */}
-          <HomeButton />
-          
-          {/* Mode Navigation - Center */}
-          <div className="flex-1 flex justify-center">
-            <DailyModeProgress currentMode="classic" />
+      {/* Header Section */}
+      <div className="w-full max-w-4xl mx-auto px-4 py-4 relative">
+        {/* Top Row: Home Icon, Streak, Timer */}
+        <div className="flex items-center justify-between mb-6">
+          {/* Home Icon */}
+          <button
+            onClick={() => navigate('/')}
+            className="flex items-center justify-center w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20 text-white hover:bg-white/20 transition-all duration-200"
+            aria-label="Go to Home"
+          >
+            <Home className="w-6 h-6" />
+          </button>
+
+          {/* Center: Streak */}
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 px-4 py-2 rounded-full bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg">
+              <span className="text-xl font-bold">{streak}</span>
+              <Flame className="h-4 w-4 text-yellow-300" />
+            </div>
+            <span className="text-sm text-white/70 font-medium">daily streak</span>
           </div>
-          
-          {/* Timer - Right */}
-          <div className="flex items-center gap-2 px-3 py-2 bg-slate-800/60 rounded-full border border-slate-700/50 backdrop-blur-sm">
-            <Clock className="h-4 w-4 text-slate-400" />
-            <span className="text-sm font-medium text-slate-300">
-              {timeUntilNext.hours}h {timeUntilNext.minutes}m
+
+          {/* Timer */}
+          <div className="flex flex-col items-center px-4 py-3 rounded-full bg-black/30 backdrop-blur-sm border border-white/20 text-white/90">
+            <span className="text-xs text-white/60 font-medium uppercase tracking-wide">Next Brawler In</span>
+            <span className="font-mono text-white font-bold text-lg">
+              {formatTime(timeUntilNext)}
             </span>
           </div>
+        </div>
+
+        {/* Mode Navigation Pills */}
+        <div className="flex items-center justify-center gap-3 mb-6">
+          {modes.map((mode) => {
+            const isCurrent = mode.key === 'classic';
+            
+            return (
+              <button
+                key={mode.key}
+                onClick={() => handleModeClick(mode)}
+                className={cn(
+                  "relative px-6 py-3 rounded-full text-sm font-semibold transition-all duration-300",
+                  isCurrent
+                    ? "bg-gradient-to-r from-yellow-500 to-amber-600 text-white shadow-lg"
+                    : "bg-white/10 text-white/60 hover:text-white/80 hover:bg-white/20",
+                  !isCurrent && "cursor-pointer"
+                )}
+                disabled={isCurrent}
+              >
+                {mode.name}
+                
+                {/* Current mode indicator dot */}
+                {isCurrent && (
+                  <div className="absolute -bottom-3 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-white rounded-full"></div>
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Title */}
+        <div className="text-center mb-8">
+          <h1 className="text-4xl md:text-5xl font-black text-white mb-2 tracking-tight">
+            Today's Classic
+          </h1>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col items-center justify-center px-4 pb-8">
-        {/* Page Title */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl md:text-5xl font-black bg-gradient-to-r from-yellow-400 via-orange-400 to-red-400 bg-clip-text text-transparent mb-2">
-            Classic Daily
-          </h1>
-          <p className="text-slate-400 text-lg">
-            Guess the brawler from their stats and clues
-          </p>
-        </div>
-
-        {/* Game Container */}
-        <div className="w-full max-w-2xl">
-          <Card className="bg-gradient-to-br from-slate-800/90 to-slate-900/90 border-2 border-yellow-500/30 shadow-2xl backdrop-blur-sm">
-            <div className="p-6 md:p-8">
-              {showVictoryScreen ? (
-                // Victory Screen
-                <div className="text-center space-y-6">
-                  <div className="space-y-2">
-                    <h2 className="text-3xl font-bold text-yellow-400">
-                      🎉 Congratulations! 🎉
-                    </h2>
-                    <p className="text-xl text-slate-300">
-                      You found <span className="text-yellow-400 font-bold">{getBrawlerDisplayName(getCorrectBrawler(), currentLanguage)}</span> in {guesses.length} {guesses.length === 1 ? 'guess' : 'guesses'}!
-                    </p>
-                  </div>
-
-                  {/* Brawler Portrait */}
-                  <div className="flex justify-center">
-                    <div className="w-48 h-48 rounded-2xl overflow-hidden border-4 border-yellow-400 shadow-xl">
-                      <img
-                        src={`/portraits/${classic.brawlerName}.png`}
-                        alt={classic.brawlerName}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          e.currentTarget.src = '/portraits/shelly.png';
-                        }}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col gap-3 items-center">
-                    <Button
-                      onClick={handleNextMode}
-                      className="bg-gradient-to-r from-emerald-500 to-blue-600 hover:from-emerald-400 hover:to-blue-500 text-white py-3 px-8 text-lg font-semibold shadow-lg hover:shadow-emerald-500/25 transform hover:scale-105 transition-all duration-200"
-                    >
-                      <img 
-                        src="/GadgetIcon.png" 
-                        alt="Next Mode" 
-                        className="h-5 w-5 mr-2"
-                      />
-                      Next Mode
-                    </Button>
-                    <Button
-                      onClick={() => navigate('/')}
-                      variant="ghost"
-                      className="text-slate-400 hover:text-slate-300 hover:bg-slate-800/50"
-                    >
-                      Back to Home
-                    </Button>
-                  </div>
-                </div>
-              ) : (
-                // Game Content
-                <div className="space-y-6">
-                  {/* Search Section */}
-                  <div className="space-y-6">
-                    <BrawlerAutocomplete
-                      brawlers={brawlers}
-                      value={inputValue}
-                      onChange={setInputValue}
-                      onSelect={handleSelectBrawler}
-                      onSubmit={handleSubmit}
-                      disabledBrawlers={guessedBrawlerNames}
-                    />
-                    
-                    {/* Stats Row */}
-                    <div className="flex items-center justify-center gap-6">
-                      <div className="flex items-center gap-2 px-4 py-2 bg-slate-800/60 rounded-full border border-slate-700/50">
-                        <Hash className="h-4 w-4 text-yellow-400" />
-                        <span className="text-sm font-medium text-slate-300">
-                          {guesses.length} {guesses.length === 1 ? 'guess' : 'guesses'}
-                        </span>
-                      </div>
-                      
-                      {guesses.length > 0 && (
-                        <div className="flex items-center gap-2 px-4 py-2 bg-yellow-500/20 rounded-full border border-yellow-500/50">
-                          <span className="text-sm font-medium text-yellow-300">
-                            Keep guessing!
-                          </span>
-                        </div>
+      <div className="flex-1 flex flex-col px-4 pb-4">
+        <div className="daily-mode-game-card daily-mode-animate-pulse">
+          <div className="daily-mode-card-content">
+            {showVictoryScreen ? (
+              // Victory Screen
+              <div className="daily-mode-victory-section">
+                <h2 className="daily-mode-victory-title">
+                  GG EZ
+                </h2>
+                <p className="daily-mode-victory-text">
+                  {t('daily.you.found')} <span className="font-bold" style={{ color: 'hsla(var(--daily-mode-primary), 1)' }}>{getBrawlerDisplayName(getCorrectBrawler(), currentLanguage)}</span> {t('daily.in.guesses')} {classic.guessCount} {t('daily.guesses.count')}
+                </p>
+                
+                <div className="flex flex-col gap-6 items-center">
+                  <Button
+                    onClick={handleNextMode}
+                    className="daily-mode-next-button"
+                  >
+                    <img 
+                      src="/GadgetIcon.png" 
+                      alt="Gadget Mode" 
+                      className={cn(
+                        "h-6 w-6",
+                        currentLanguage === 'he' ? "ml-2" : "mr-2"
                       )}
+                    />
+                    {t('daily.next.mode')}
+                  </Button>
+                  
+                  <Button
+                    onClick={() => navigate('/')}
+                    variant="ghost"
+                    className="text-white/60 hover:text-white/80 hover:bg-white/5 py-3 px-8 text-base border border-white/20 hover:border-white/30 transition-all duration-200 rounded-xl"
+                  >
+                    {t('daily.go.home')}
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              // Game Content
+              <div className="daily-mode-game-area">
+                {/* Question Mark for Classic Mode */}
+                <div className="flex justify-center mb-8">
+                  <div className="w-80 h-80 md:w-96 md:h-96 rounded-3xl border-4 border-white/20 bg-black/20 backdrop-blur-sm flex items-center justify-center overflow-hidden shadow-2xl">
+                    <div className="text-white/40 text-center">
+                      <div className="text-9xl mb-4">❓</div>
+                      <div className="text-xl">Mystery Brawler</div>
                     </div>
                   </div>
-
-                  {/* Game Over Message */}
-                  {isGameOver && !showVictoryScreen && (
-                    <div className="text-center space-y-4 py-6 bg-red-500/10 border border-red-500/20 rounded-xl">
-                      <h2 className="text-2xl font-bold text-red-400">Game Over!</h2>
-                      <p className="text-slate-300">
-                        The correct brawler was <span className="text-yellow-400 font-bold">{getBrawlerDisplayName(getCorrectBrawler(), currentLanguage)}</span>
-                      </p>
-                      <div className="flex flex-col gap-3 items-center">
-                        <Button
-                          onClick={handleNextMode}
-                          className="bg-gradient-to-r from-emerald-500 to-blue-600 hover:from-emerald-400 hover:to-blue-500 text-white py-3 px-8 text-lg font-semibold"
-                        >
-                          Next Mode
-                        </Button>
-                        <Button
-                          onClick={() => navigate('/')}
-                          variant="ghost"
-                          className="text-slate-400 hover:text-slate-300"
-                        >
-                          Back to Home
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Previous Guesses */}
-                  {guesses.length > 0 && (
-                    <div className="space-y-4">
-                      <h3 className="text-lg font-semibold text-slate-300 text-center">
-                        Previous Guesses
-                      </h3>
-                      <div className="space-y-3">
-                        {guesses.map((guess, idx) => {
-                          const isCorrect = classic.brawlerName.toLowerCase() === guess.name.toLowerCase();
-                          const isLastGuess = idx === guesses.length - 1;
-                          return (
-                            <div
-                              key={idx}
-                              className={cn(
-                                "p-4 rounded-xl border-2 transition-all duration-300",
-                                isCorrect 
-                                  ? "bg-green-500/20 border-green-400/50" 
-                                  : "bg-red-500/20 border-red-400/50",
-                                !isCorrect && isLastGuess ? "animate-pulse" : ""
-                              )}
-                            >
-                              <div className="flex items-center gap-4">
-                                <img
-                                  src={`/portraits/${guess.name}.png`}
-                                  alt={guess.name}
-                                  className="w-16 h-16 rounded-lg object-cover border-2 border-slate-600/50"
-                                  onError={(e) => {
-                                    e.currentTarget.src = '/portraits/shelly.png';
-                                  }}
-                                />
-                                <div className="flex-1">
-                                  <h4 className="text-lg font-semibold text-slate-200">
-                                    {getBrawlerDisplayName(guess, currentLanguage)}
-                                  </h4>
-                                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-2 text-sm">
-                                    <div className="flex flex-col items-center p-2 bg-slate-800/50 rounded-lg">
-                                      <span className="text-slate-400">Rarity</span>
-                                      <span className={cn(
-                                        "font-medium",
-                                        isCorrect ? "text-green-400" : "text-slate-300"
-                                      )}>
-                                        {guess.rarity}
-                                      </span>
-                                    </div>
-                                    <div className="flex flex-col items-center p-2 bg-slate-800/50 rounded-lg">
-                                      <span className="text-slate-400">Type</span>
-                                      <span className={cn(
-                                        "font-medium",
-                                        isCorrect ? "text-green-400" : "text-slate-300"
-                                      )}>
-                                        {guess.type}
-                                      </span>
-                                    </div>
-                                    <div className="flex flex-col items-center p-2 bg-slate-800/50 rounded-lg">
-                                      <span className="text-slate-400">Health</span>
-                                      <span className={cn(
-                                        "font-medium",
-                                        isCorrect ? "text-green-400" : "text-slate-300"
-                                      )}>
-                                        {guess.health}
-                                      </span>
-                                    </div>
-                                    <div className="flex flex-col items-center p-2 bg-slate-800/50 rounded-lg">
-                                      <span className="text-slate-400">Speed</span>
-                                      <span className={cn(
-                                        "font-medium",
-                                        isCorrect ? "text-green-400" : "text-slate-300"
-                                      )}>
-                                        {guess.speed}
-                                      </span>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
                 </div>
-              )}
-            </div>
-          </Card>
-        </div>
-      </div>
 
-      {/* Loading State */}
-      {!classic && !isLoading && (
-        <div className="fixed inset-0 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm">
-          <div className="text-center space-y-4 p-8 bg-slate-800/90 rounded-2xl border border-slate-700/50">
-            <div className="animate-spin h-8 w-8 border-4 border-yellow-400 border-t-transparent rounded-full mx-auto"></div>
-            <p className="text-slate-300">Loading today's challenge...</p>
+                {/* Search Bar */}
+                <div className="daily-mode-input-section mb-6">
+                  <BrawlerAutocomplete
+                    brawlers={brawlers}
+                    value={inputValue}
+                    onChange={setInputValue}
+                    onSelect={handleSelectBrawler}
+                    onSubmit={() => handleSubmit()}
+                    disabled={classic.isCompleted}
+                    disabledBrawlers={guessedBrawlerNames}
+                  />
+                </div>
+
+                {/* Guesses Counter */}
+                <div className="flex justify-center mb-6">
+                  <div className="daily-mode-guess-counter">
+                    <Hash className="h-5 w-5" />
+                    <span>{classic.guessCount} {t('guesses.count')}</span>
+                  </div>
+                </div>
+
+                {/* Guesses Grid */}
+                {guesses.length > 0 && (
+                  <div className="daily-mode-guesses-section">
+                    <div className="daily-mode-guesses-grid">
+                      {guesses.map((guess, index) => {
+                        const isCorrect = guess.name.toLowerCase() === getCorrectBrawler().name.toLowerCase();
+                        const portraitSrc = getPortrait(guess.name) || DEFAULT_PORTRAIT;
+                        
+                        return (
+                          <div
+                            key={index}
+                            className={cn(
+                              "daily-mode-guess-item",
+                              isCorrect ? "daily-mode-guess-correct" : "daily-mode-guess-incorrect"
+                            )}
+                          >
+                            <img
+                              src={portraitSrc}
+                              alt={guess.name}
+                              className="daily-mode-guess-portrait"
+                            />
+                            <span className="daily-mode-guess-name">
+                              {getBrawlerDisplayName(guess, currentLanguage)}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Yesterday's Brawler */}
+                {yesterdayData && (
+                  <div className="flex justify-center mt-6">
+                    <span className="text-sm text-white/50">
+                      yesterday's classic was <span className="text-white/70 font-medium">{yesterdayData || 'Mico'}</span>
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 };

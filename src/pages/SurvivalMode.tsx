@@ -316,104 +316,117 @@ const SurvivalModePage: React.FC = () => {
 
   // Render the component
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-950 flex flex-col">
-      {/* Top Bar */}
-      <div className="bg-slate-800/50 border-b border-white/5 py-3 px-4 flex items-center justify-between sticky top-0 z-10">
-        <HomeButton />
+    <div className="survival-mode-container survival-classic-theme">
+      {/* Header Section */}
+      <div className="survival-mode-header">
+        {/* Home Button - Top Left */}
+        <div className="survival-mode-home-btn">
+          <HomeButton />
+        </div>
+
+        {/* Title Section */}
+        <div className="survival-mode-title-section">
+          <h1 className="survival-mode-title">
+            {t('survival.mode.title')}
+          </h1>
+        </div>
       </div>
       
       {/* Loading state */}
       {isLoading && (
-        <div className="flex-1 flex items-center justify-center">
-          <div className="animate-spin h-8 w-8 border-4 border-brawl-yellow border-t-transparent rounded-full"></div>
+        <div className="survival-mode-content">
+          <div className="flex items-center justify-center min-h-[400px]">
+            <div className="animate-spin h-12 w-12 border-4 border-white/20 border-t-white rounded-full"></div>
+          </div>
         </div>
       )}
       
       {/* Default content when no game is running and not in setup */}
       {!isLoading && !showSetupPopup && (!activeRoundState || !activeRoundState.isRoundActive) && gameStatus !== 'gameover' && (
-        <div className="flex-1 flex items-center justify-center">
-          <Button
-            onClick={() => setShowSetupPopup(true)}
-            className="bg-gradient-to-r from-amber-600 to-pink-600 hover:from-amber-500 hover:to-pink-500 text-white py-3 px-6 text-lg"
-          >
-            Start Survival Mode
-          </Button>
+        <div className="survival-mode-content">
+          <div className="flex items-center justify-center min-h-[400px]">
+            <Button
+              onClick={() => setShowSetupPopup(true)}
+              className="survival-mode-guess-counter text-xl py-4 px-8 hover:scale-105 transition-transform"
+            >
+              Start Survival Mode
+            </Button>
+          </div>
         </div>
       )}
       
       {/* Error state when challenge fails to load */}
       {!isLoading && challengeError && (
-        <div className="flex-1 flex items-center justify-center">
-          <div className="max-w-md w-full bg-slate-800/70 p-6 rounded-xl border border-red-500/30 text-center">
-            <h3 className="text-xl font-bold mb-3 text-red-400">Error Loading Challenge</h3>
-            <p className="mb-4 text-white/80">There was a problem loading today's challenge.</p>
-            <Button 
-              onClick={() => {
-                setChallengeError(false);
-                setIsLoading(true);
-                
-                // Small delay before retry to ensure state is reset
-                setTimeout(() => {
-                  try {
-                    startNextRound();
-                    setIsLoading(false);
-                  } catch (error) {
-                    console.error('Retry failed:', error);
-                    setChallengeError(true);
-                    setIsLoading(false);
-                  }
-                }, 500);
-              }}
-              className="bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-2 px-4 rounded"
-            >
-              Try Again
-            </Button>
+        <div className="survival-mode-content">
+          <div className="flex items-center justify-center min-h-[400px]">
+            <div className="survival-mode-game-card max-w-md">
+              <div className="survival-mode-card-content text-center">
+                <h3 className="text-xl font-bold mb-3 text-red-400">Error Loading Challenge</h3>
+                <p className="mb-4 text-white/80">There was a problem loading today's challenge.</p>
+                <Button 
+                  onClick={() => {
+                    setChallengeError(false);
+                    setIsLoading(true);
+                    
+                    // Small delay before retry to ensure state is reset
+                    setTimeout(() => {
+                      try {
+                        startNextRound();
+                        setIsLoading(false);
+                      } catch (error) {
+                        console.error('Retry failed:', error);
+                        setChallengeError(true);
+                        setIsLoading(false);
+                      }
+                    }, 500);
+                  }}
+                  className="bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-2 px-4 rounded"
+                >
+                  Try Again
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
       )}
       
       {/* Main Game Content - Only show if game is active and not loading and no errors */}
       {!isLoading && !showSetupPopup && !challengeError && activeRoundState && activeRoundState.isRoundActive && (
-        <div className="flex-1 flex flex-col p-4 items-center justify-center relative">
-          {/* Confetti Animation (award style) */}
-          
-
-          {/* Updated Round Info - Clean Design */}
-          <div className="mb-6 flex flex-col items-center justify-center relative z-10">
-            <div className="flex flex-wrap items-center justify-center gap-4 px-4 py-3 bg-slate-800/60 rounded-2xl border border-slate-700/50 backdrop-blur-sm">
-              <span className="text-2xl font-bold text-white">
-                {t('survival.round')} {currentRound}
-              </span>
-              <span className="flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-green-500/80 to-emerald-400/70 shadow-lg border border-green-300/50 text-lg font-bold text-white">
-                <Circle className="h-5 w-5 text-white/80 fill-current" />
-                {totalScore} {t('survival.pts')}
-              </span>
+        <div className="survival-mode-content">
+          {/* Game Stats Header */}
+          <div className="mb-1 flex flex-col items-center space-y-1">
+            <div className="flex flex-wrap items-center justify-center gap-4">
+              <div className="survival-mode-guess-counter">
+                <Trophy className="h-5 w-5" />
+                <span>{t('survival.round')} {currentRound}</span>
+              </div>
+              
+              <div className="survival-mode-guess-counter">
+                <Circle className="h-5 w-5 fill-current" />
+                <span>{totalScore} {t('survival.pts')}</span>
+              </div>
+              
               {settings?.timer && (
-                <span className={cn(
-                  "flex items-center gap-2 px-4 py-2 rounded-full shadow-lg border text-lg font-bold text-white transition-all duration-300",
-                  (currentTimerValue ?? activeRoundState.timerLeft) <= 30 
-                    ? "bg-gradient-to-r from-red-500/80 to-red-600/70 border-red-300/50 animate-pulse" 
-                    : (currentTimerValue ?? activeRoundState.timerLeft) <= 60
-                    ? "bg-gradient-to-r from-orange-500/80 to-yellow-500/70 border-orange-300/50"
-                    : "bg-gradient-to-r from-blue-500/80 to-cyan-400/70 border-blue-300/50"
+                <div className={cn(
+                  "survival-mode-guess-counter transition-all duration-300",
+                  (currentTimerValue ?? activeRoundState.timerLeft) <= 30 && "animate-pulse"
                 )}>
                   <Timer className={cn(
-                    "h-5 w-5 text-white/80",
+                    "h-5 w-5",
                     (currentTimerValue ?? activeRoundState.timerLeft) <= 30 && "animate-bounce"
                   )} />
-                  <span className="font-mono text-xl">
+                  <span className="font-mono">
                     {Math.floor((currentTimerValue ?? activeRoundState.timerLeft) / 60)}:
                     {String((currentTimerValue ?? activeRoundState.timerLeft) % 60).padStart(2, '0')}
                   </span>
-                </span>
+                </div>
               )}
             </div>
           </div>
 
-          {/* 3D Award Card for Game Content */}
-          <Card className="flex-1 w-full max-w-2xl mx-auto bg-gradient-to-br from-yellow-200/20 via-pink-100/10 to-slate-900/60 border-4 border-yellow-400 shadow-[0_8px_40px_0_rgba(255,214,0,0.10)] rounded-3xl overflow-hidden relative z-10 animate-award-card">
-            <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-yellow-400 via-pink-400 to-yellow-300 opacity-80 blur-sm animate-award-bar" />
-            <div className="p-4 md:p-8">
+          {/* Game Card */}
+          <div className="survival-mode-game-card survival-mode-animate-pulse">
+            <div className="survival-mode-card-content">
               {currentModeName === 'classic' && (
                 <ClassicMode 
                   key={`${modeKey}-classic`}
@@ -465,7 +478,7 @@ const SurvivalModePage: React.FC = () => {
                 />
               )}
             </div>
-          </Card>
+          </div>
         </div>
       )}
       

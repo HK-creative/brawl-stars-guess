@@ -112,11 +112,10 @@ export const useSurvivalStore = create<SurvivalGameState & SurvivalActions>()(
             const newGuessesQuota = calculateNextGuessesQuota(newRoundNumber);
             console.log(`Guesses quota for round ${newRoundNumber}: ${newGuessesQuota}`);
             
-            // Convert brawlers to format expected by selectNextBrawlerAndMode
-            // IMPORTANT: Preserve each brawler's original ID if it exists, or assign a valid one
-            const brawlersWithId = brawlers.map((b) => ({
-              id: b.id || brawlers.indexOf(b) + 1, // Use existing ID or generate sequential IDs
-              name: b.name || `Unknown Brawler ${brawlers.indexOf(b) + 1}` // Ensure name is present
+            // Ensure all brawlers have IDs for survival mode
+            const brawlersWithId = brawlers.map((b, index) => ({
+              ...b, // Spread all brawler properties
+              id: b.id || index + 1, // Use existing ID or generate sequential IDs
             }));
             
             // Log the valid brawler IDs for debugging
@@ -128,11 +127,8 @@ export const useSurvivalStore = create<SurvivalGameState & SurvivalActions>()(
             // Ensure we have at least one valid brawler
             if (brawlersWithId.length === 0) {
               console.error('No brawlers available for selection');
-              // Create at least one fallback brawler to prevent errors
-              brawlersWithId.push({
-                id: 1,
-                name: 'Shelly' // Default brawler as fallback
-              });
+              // This should never happen with proper brawlers data, but add safety check
+              throw new Error('No brawlers data available');
             }
             
             console.log(`Prepared ${brawlersWithId.length} brawlers for selection`);
@@ -164,10 +160,10 @@ export const useSurvivalStore = create<SurvivalGameState & SurvivalActions>()(
                 if (filteredBrawlers.length === 0) {
                   console.warn('No brawlers available after cooldown filtering, using all brawlers');
                   const randomBrawlerIndex = Math.floor(Math.random() * brawlersWithId.length);
-                  selectedBrawlerId = brawlersWithId[randomBrawlerIndex].id;
+                  selectedBrawlerId = brawlersWithId[randomBrawlerIndex].id!;
                 } else {
                   const randomBrawlerIndex = Math.floor(Math.random() * filteredBrawlers.length);
-                  selectedBrawlerId = filteredBrawlers[randomBrawlerIndex].id;
+                  selectedBrawlerId = filteredBrawlers[randomBrawlerIndex].id!;
                 }
               } else {
                 // Use the standard selection logic with cooldown system

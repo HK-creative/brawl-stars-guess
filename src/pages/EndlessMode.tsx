@@ -236,78 +236,24 @@ const EndlessMode = () => {
   // Inputs will be disabled if gameStatus is 'victory'
 
   return (
-    <div className="max-h-[calc(100vh-70px)] overflow-hidden px-1">
-      <div className="mb-4 md:mb-6">
-        <h1 className="text-3xl md:text-4xl font-bold text-brawl-yellow mb-1 text-center">
-          {t('mode.endless') || 'Endless Mode'}
-        </h1>
+    <div className="survival-mode-container survival-classic-theme">
+      {/* Header Section */}
+      <div className="survival-mode-header">
+        {/* Title Section */}
+        <div className="survival-mode-title-section">
+          <h1 className="survival-mode-title">
+            {t('mode.endless') || 'Endless Mode'}
+          </h1>
+        </div>
       </div>
 
-      <div className="h-[calc(100vh-120px)] flex flex-col">
-        <div className="flex-1 flex flex-col space-y-1">
-          <Card className="brawl-card p-2 mb-1">
-            <form onSubmit={handleSubmitGuess} className="flex flex-col gap-1">
-              <input
-                type="text"
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                onKeyPress={(e) => {
-                  if (e.key === 'Enter' && gameStatus === 'playing') {
-                    e.preventDefault(); 
-                    e.stopPropagation();
-                    
-                    const currentInputText = inputValue.trim();
-                    if (!currentInputText) { // If input is empty and Enter is pressed
-                        console.log("[DEBUG EnterKey] Input is empty. Doing nothing.");
-                        return;
-                    }
-
-                    const exactMatch = brawlers.find(b => b.name.toLowerCase() === currentInputText.toLowerCase());
-
-                    if (exactMatch) {
-                      console.log(`[DEBUG EnterKey] Exact match for "${currentInputText}". Submitting.`);
-                      performGuess(currentInputText); 
-                    } else {
-                      const availableSuggestions = brawlers.filter(b =>
-                        !guessedBrawlers.includes(b.name) && // Consider already guessed for suggestions visibility
-                        b.name.toLowerCase().startsWith(currentInputText.toLowerCase())
-                      );
-
-                      if (availableSuggestions.length > 0) {
-                        const firstSuggestionName = availableSuggestions[0].name;
-                        console.log(`[DEBUG EnterKey] No exact match for "${currentInputText}". First suggestion: "${firstSuggestionName}". Submitting this.`);
-                        setInputValue(firstSuggestionName); // Update input to show what's being guessed
-                        performGuess(firstSuggestionName);
-                      } else {
-                        console.log(`[DEBUG EnterKey] No exact match or suggestions for "${currentInputText}". Doing nothing on Enter.`);
-                        // Do nothing. User can continue typing or click submit button for current input.
-                      }
-                    }
-                  }
-                }}
-                placeholder="Type brawler name..."
-                disabled={gameStatus !== 'playing'}
-                className="pl-3 pr-3 py-2 h-11 text-lg font-medium bg-[#1a1e44] text-white border-2 border-[#2a2f6a] rounded-lg placeholder:text-white/40 focus:ring-2 focus:ring-brawl-yellow/50 focus:border-transparent hover:bg-[#212659] disabled:opacity-50 disabled:cursor-not-allowed w-full"
-                list="brawler-datalist"
-              />
-              <datalist id="brawler-datalist">
-                {brawlers
-                  .filter(b => !guessedBrawlers.includes(b.name)) // Still useful for autocomplete during 'playing'
-                  .map(b => <option key={b.name} value={b.name} />
-                )}
-              </datalist>
-              <Button
-                type="submit"
-                className="w-full bg-brawl-yellow hover:bg-brawl-yellow/80 text-black font-semibold py-1 h-8"
-                disabled={gameStatus !== 'playing' || !inputValue.trim()}
-              >
-                {t('submit.guess')}
-              </Button>
-            </form>
-          </Card>
-
-          <div className="flex-1 flex flex-col min-h-0">
-            <div className="bg-gradient-to-r from-purple-800/80 via-purple-900/90 to-purple-800/80 rounded-lg p-3 mb-3">
+      {/* Main Content */}
+      <div className="survival-mode-content">
+        {/* Game Card */}
+        <div className="survival-mode-game-card survival-mode-animate-pulse">
+          <div className="survival-mode-card-content">
+            {/* Game Info Header */}
+            <div className="bg-gradient-to-r from-purple-800/80 via-purple-900/90 to-purple-800/80 rounded-lg p-3 mb-6">
               <div className="flex justify-between items-center">
                 <div className="flex flex-col">
                   <h3 className="text-xl font-bold text-white leading-tight">Endless Challenge</h3>
@@ -334,22 +280,90 @@ const EndlessMode = () => {
               </div>
             </div>
 
-            <div className={cn("grid", "grid-cols-6", isMobile ? "gap-1 mb-1" : "gap-3 mb-3", isMobile ? "w-full" : "w-[85%] mx-auto")}>
-              {attributeLabels.map((label) => (
-                <div key={label.name} className="w-full aspect-square">
-                  <div className={cn("relative overflow-hidden w-full h-full")}>
-                    <div className="absolute inset-0 backdrop-blur-sm border-b-2 border-brawl-blue rounded-t-lg"></div>
-                    <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-brawl-yellow"></div>
-                    <div className="relative z-10 h-full w-full flex items-center justify-center">
-                      <span className={cn(label.fontSize, "font-extrabold text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] w-[85%] h-[85%] flex items-center justify-center")}>
-                        {label.name}
-                      </span>
+            {/* Input Section */}
+            <div className="survival-mode-input-section">
+              <form onSubmit={handleSubmitGuess} className="flex flex-col gap-4 mb-6">
+                <input
+                  type="text"
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter' && gameStatus === 'playing') {
+                      e.preventDefault(); 
+                      e.stopPropagation();
+                      
+                      const currentInputText = inputValue.trim();
+                      if (!currentInputText) { // If input is empty and Enter is pressed
+                          console.log("[DEBUG EnterKey] Input is empty. Doing nothing.");
+                          return;
+                      }
+
+                      const exactMatch = brawlers.find(b => b.name.toLowerCase() === currentInputText.toLowerCase());
+
+                      if (exactMatch) {
+                        console.log(`[DEBUG EnterKey] Exact match for "${currentInputText}". Submitting.`);
+                        performGuess(currentInputText); 
+                      } else {
+                        const availableSuggestions = brawlers.filter(b =>
+                          !guessedBrawlers.includes(b.name) && // Consider already guessed for suggestions visibility
+                          b.name.toLowerCase().startsWith(currentInputText.toLowerCase())
+                        );
+
+                        if (availableSuggestions.length > 0) {
+                          const firstSuggestionName = availableSuggestions[0].name;
+                          console.log(`[DEBUG EnterKey] No exact match for "${currentInputText}". First suggestion: "${firstSuggestionName}". Submitting this.`);
+                          setInputValue(firstSuggestionName); // Update input to show what's being guessed
+                          performGuess(firstSuggestionName);
+                        } else {
+                          console.log(`[DEBUG EnterKey] No exact match or suggestions for "${currentInputText}". Doing nothing on Enter.`);
+                          // Do nothing. User can continue typing or click submit button for current input.
+                        }
+                      }
+                    }
+                  }}
+                  placeholder="Type brawler name..."
+                  disabled={gameStatus !== 'playing'}
+                  className="pl-3 pr-3 py-2 h-11 text-lg font-medium bg-[#1a1e44] text-white border-2 border-[#2a2f6a] rounded-lg placeholder:text-white/40 focus:ring-2 focus:ring-brawl-yellow/50 focus:border-transparent hover:bg-[#212659] disabled:opacity-50 disabled:cursor-not-allowed w-full"
+                  list="brawler-datalist"
+                />
+                <datalist id="brawler-datalist">
+                  {brawlers
+                    .filter(b => !guessedBrawlers.includes(b.name)) // Still useful for autocomplete during 'playing'
+                    .map(b => <option key={b.name} value={b.name} />
+                  )}
+                </datalist>
+                <Button
+                  type="submit"
+                  className="w-full bg-brawl-yellow hover:bg-brawl-yellow/80 text-black font-semibold py-2 h-10"
+                  disabled={gameStatus !== 'playing' || !inputValue.trim()}
+                >
+                  {t('submit.guess')}
+                </Button>
+              </form>
+
+              {/* Attribute Labels */}
+              <div className={cn("grid", "grid-cols-6", isMobile ? "gap-1 mb-4" : "gap-3 mb-6", isMobile ? "w-full" : "w-[85%] mx-auto")}>
+                {attributeLabels.map((label) => (
+                  <div key={label.name} className="w-full aspect-square">
+                    <div className={cn("relative overflow-hidden w-full h-full")}>
+                      <div className="absolute inset-0 backdrop-blur-sm border-b-2 border-brawl-blue rounded-t-lg"></div>
+                      <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-brawl-yellow"></div>
+                      <div className="relative z-10 h-full w-full flex items-center justify-center">
+                        <span className={cn(label.fontSize, "font-extrabold text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] w-[85%] h-[85%] flex items-center justify-center")}>
+                          {label.name}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
+          </div>
+        </div>
 
+        {/* Previous Guesses */}
+        {guesses.length > 0 && (
+          <div className="survival-mode-guesses-section">
             <div className="overflow-y-auto overflow-x-visible flex-1 min-h-0 max-h-[calc(100vh-250px)] p-1">
               <div className="space-y-1 overflow-visible">
                 {guesses.map((guess, index) => (
@@ -366,22 +380,23 @@ const EndlessMode = () => {
               </div>
             </div>
           </div>
-        </div>
-      </div>
+        )}
 
-      {gameStatus === 'victory' && currentVictoryData && (
-        <div ref={victoryRef} className="mt-6 w-full max-w-xl mx-auto px-2">
-          <VictorySection
-            brawlerName={currentVictoryData.brawlerName}
-            brawlerPortrait={currentVictoryData.portraitPath}
-            tries={currentVictoryData.guessCount}
-            mode="endless"
-            nextModeKey="endless_next"
-            onNextMode={handleNextBrawlerFromModal}
-            onShare={handleShare}
-          />
-        </div>
-      )}
+        {/* Victory Section */}
+        {gameStatus === 'victory' && currentVictoryData && (
+          <div ref={victoryRef} className="mt-6 w-full max-w-xl mx-auto px-2">
+            <VictorySection
+              brawlerName={currentVictoryData.brawlerName}
+              brawlerPortrait={currentVictoryData.portraitPath}
+              tries={currentVictoryData.guessCount}
+              mode="endless"
+              nextModeKey="endless_next"
+              onNextMode={handleNextBrawlerFromModal}
+              onShare={handleShare}
+            />
+          </div>
+        )}
+      </div>
 
       <ShareResultModal
         isOpen={showShareModal}

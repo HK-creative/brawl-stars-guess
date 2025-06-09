@@ -2,18 +2,19 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Clock, Hash } from 'lucide-react';
-import { useToast } from '@/components/ui/use-toast';
+import { Clock, Hash, Flame, Home } from 'lucide-react';
+import { toast } from '@/components/ui/use-toast';
 import { useDailyStore } from '@/stores/useDailyStore';
 import { brawlers, getBrawlerDisplayName } from '@/data/brawlers';
 import { getPortrait } from '@/lib/image-helpers';
 import BrawlerAutocomplete from '@/components/BrawlerAutocomplete';
-import HomeButton from '@/components/ui/home-button';
-import DailyModeProgress from '@/components/DailyModeProgress';
 import ReactConfetti from 'react-confetti';
-import { fetchDailyChallenge } from '@/lib/daily-challenges';
+import { fetchDailyChallenge, fetchYesterdayChallenge } from '@/lib/daily-challenges';
 import { t, getLanguage } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
+import { useStreak } from '@/contexts/StreakContext';
+
+const DEFAULT_PORTRAIT = '/portraits/shelly.png';
 
 // Helper to get gadget image path with fallback variants
 const getGadgetImageVariants = (brawler: string, gadgetName?: string): string[] => {
@@ -69,36 +70,7 @@ const getGadgetImageVariants = (brawler: string, gadgetName?: string): string[] 
 const DailyGadgetMode: React.FC = () => {
   const navigate = useNavigate();
   const currentLanguage = getLanguage();
-  const { toast } = useToast();
-
-  // Inject custom award styles into the document head
-  useEffect(() => {
-    const style = document.createElement('style');
-    style.innerHTML = `
-      @keyframes award-glow {
-        0% { text-shadow: 0 0 1.5px rgba(255,214,0,0.09), 0 0 3px rgba(255,214,0,0.09), 0 0 4.5px rgba(255,214,0,0.06); }
-        100% { text-shadow: 0 0 2.4px rgba(255,214,0,0.12), 0 0 4.8px rgba(255,214,0,0.09), 0 0 7.2px rgba(255,214,0,0.075); }
-      }
-      .animate-award-glow { 
-        animation: award-glow 3s infinite alternate; 
-        will-change: transform, text-shadow;
-      }
-      @keyframes award-bar {
-        0% { opacity: 0.5; }
-        50% { opacity: 1; }
-        100% { opacity: 0.5; }
-      }
-      .animate-award-bar { animation: award-bar 3s infinite; }
-      @keyframes award-card {
-        0% { box-shadow: 0 8px 40px 0 rgba(255,214,0,0.10); }
-        50% { box-shadow: 0 16px 64px 0 rgba(255,214,0,0.18); }
-        100% { box-shadow: 0 8px 40px 0 rgba(255,214,0,0.10); }
-      }
-      .animate-award-card { animation: award-card 2.5s infinite alternate; }
-    `;
-    document.head.appendChild(style);
-    return () => { document.head.removeChild(style); };
-  }, []);
+  const { streak } = useStreak();
 
   const {
     gadget,
@@ -126,6 +98,7 @@ const DailyGadgetMode: React.FC = () => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageVariants, setImageVariants] = useState<string[]>([]);
   const [currentVariantIndex, setCurrentVariantIndex] = useState(0);
+  const [yesterdayData, setYesterdayData] = useState<any>(null);
 
   // Initialize daily modes on component mount
   useEffect(() => {
@@ -138,15 +111,20 @@ const DailyGadgetMode: React.FC = () => {
     }, 60000);
     
     return () => clearInterval(interval);
-  }, [initializeDailyModes, updateTimeUntilNext]);
+  }, [initializeDailyModes]);
 
   // Load gadget data and generate image
   useEffect(() => {
     const loadGadgetData = async () => {
       try {
-        const data = await fetchDailyChallenge('gadget');
+        const [data, yesterdayChallenge] = await Promise.all([
+          fetchDailyChallenge('gadget'),
+          fetchYesterdayChallenge('gadget')
+        ]);
+        
         console.log('Loaded gadget data:', data);
         setGadgetData(data);
+        setYesterdayData(yesterdayChallenge);
         
         // Generate gadget image variants
         if (data?.brawler) {
@@ -163,21 +141,20 @@ const DailyGadgetMode: React.FC = () => {
           setImageLoaded(false); // Reset image loaded state
         } else {
           console.warn('No brawler data found in gadget challenge');
-          // Don't set any fallback image - just leave it empty
-          setGadgetImage('');
-          setImageVariants([]);
-          setCurrentVariantIndex(0);
-          setImageLoaded(false);
-        }
-              } catch (error) {
-          console.error('Error loading gadget data:', error);
-          // Don't set any fallback image on error - just leave it empty
           setGadgetImage('');
           setImageVariants([]);
           setCurrentVariantIndex(0);
           setImageLoaded(false);
           setGadgetData(null);
         }
+      } catch (error) {
+        console.error('Error loading gadget data:', error);
+        setGadgetImage('');
+        setImageVariants([]);
+        setCurrentVariantIndex(0);
+        setImageLoaded(false);
+        setGadgetData(null);
+      }
     };
     
     loadGadgetData();
@@ -196,13 +173,16 @@ const DailyGadgetMode: React.FC = () => {
   useEffect(() => {
     if (gadget.isCompleted) {
       setShowVictoryScreen(true);
+      setIsGameOver(true);
     }
   }, [gadget.isCompleted]);
 
-  // Find the correct brawler object
-  const getCorrectBrawler = useCallback(() => {
+  const getCorrectBrawler = () => {
+    if (gadgetData?.brawler) {
+      return brawlers.find(b => b.name.toLowerCase() === gadgetData.brawler.toLowerCase()) || brawlers[0];
+    }
     return brawlers.find(b => b.name.toLowerCase() === gadget.brawlerName.toLowerCase()) || brawlers[0];
-  }, [gadget.brawlerName]);
+  };
 
   // Handle guess submission
   const handleSubmit = useCallback((brawler?: any) => {
@@ -230,17 +210,17 @@ const DailyGadgetMode: React.FC = () => {
       setShowVictoryScreen(true);
       setShowConfetti(true);
       
+      const displayName = getBrawlerDisplayName(correctBrawler, currentLanguage);
       toast({
-        id: String(Date.now()),
         title: "Congratulations! 🎉",
-        description: `You found ${getBrawlerDisplayName(correctBrawler, currentLanguage)}!`,
+        description: `You found ${displayName}!`,
       });
     }
     
     // Reset input
     setInputValue('');
     setSelectedBrawler(null);
-  }, [selectedBrawler, gadget.isCompleted, incrementGuessCount, saveGuess, getCorrectBrawler, completeMode, currentLanguage, toast]);
+  }, [selectedBrawler, gadget.isCompleted, incrementGuessCount, saveGuess, getCorrectBrawler, completeMode]);
 
   // Handle brawler selection and immediate submission
   const handleSelectBrawler = useCallback((brawler: any) => {
@@ -269,17 +249,88 @@ const DailyGadgetMode: React.FC = () => {
     resetGuessCount('gadget');
   };
 
+  const handleImageError = () => {
+    console.error('Image failed to load:', gadgetImage);
+    // Try next variant if available
+    if (currentVariantIndex < imageVariants.length - 1) {
+      const nextIndex = currentVariantIndex + 1;
+      setCurrentVariantIndex(nextIndex);
+      setGadgetImage(imageVariants[nextIndex]);
+      console.log('Trying next variant:', imageVariants[nextIndex]);
+    } else {
+      console.warn('All gadget image variants failed to load');
+      setGadgetImage('');
+      setImageLoaded(false);
+    }
+  };
+
+  const handleImageLoad = () => {
+    console.log('Gadget image loaded successfully:', gadgetImage);
+    setImageLoaded(true);
+  };
+
+  const formatTime = (time: { hours: number; minutes: number }) => {
+    return `${time.hours.toString().padStart(2, '0')}:${time.minutes.toString().padStart(2, '0')}:00`;
+  };
+
+  // Mode navigation data
+  const modes = [
+    { 
+      key: 'classic', 
+      name: 'Classic', 
+      path: '/daily/classic',
+      color: 'from-yellow-500 to-amber-600',
+      bgColor: 'bg-yellow-500/20'
+    },
+    { 
+      key: 'gadget', 
+      name: 'Gadget', 
+      path: '/daily/gadget',
+      color: 'from-purple-500 to-violet-600',
+      bgColor: 'bg-purple-500/20'
+    },
+    { 
+      key: 'starpower', 
+      name: 'Star Power', 
+      path: '/daily/starpower',
+      color: 'from-orange-500 to-yellow-600',
+      bgColor: 'bg-orange-500/20'
+    },
+    { 
+      key: 'audio', 
+      name: 'Audio', 
+      path: '/daily/audio',
+      color: 'from-emerald-500 to-teal-600',
+      bgColor: 'bg-emerald-500/20'
+    },
+    { 
+      key: 'pixels', 
+      name: 'Pixels', 
+      path: '/daily/pixels',
+      color: 'from-indigo-500 to-blue-600',
+      bgColor: 'bg-indigo-500/20'
+    },
+  ];
+
+  const handleModeClick = (mode: typeof modes[0]) => {
+    if (mode.key !== 'gadget') {
+      navigate(mode.path);
+    }
+  };
+
   // Loading state
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-950 flex items-center justify-center">
-        <div className="animate-spin h-8 w-8 border-4 border-brawl-yellow border-t-transparent rounded-full"></div>
+      <div className="daily-mode-container daily-gadget-theme">
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="animate-spin h-12 w-12 border-4 border-white/20 border-t-white rounded-full"></div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-950 flex flex-col">
+    <div className="daily-mode-container daily-gadget-theme">
       {/* Confetti Animation */}
       {showConfetti && (
         <ReactConfetti
@@ -292,231 +343,216 @@ const DailyGadgetMode: React.FC = () => {
         />
       )}
       
-      {/* Top Navigation Bar */}
-      <div className="w-full px-4 py-6">
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
-          {/* Home Button */}
-          <HomeButton />
-          
-          {/* Mode Navigation - Center */}
-          <div className="flex-1 flex justify-center">
-            <DailyModeProgress currentMode="gadget" />
+      {/* Header Section */}
+      <div className="w-full max-w-4xl mx-auto px-4 py-4 relative">
+        {/* Top Row: Home Icon, Streak, Timer */}
+        <div className="flex items-center justify-between mb-6">
+          {/* Home Icon */}
+          <button
+            onClick={() => navigate('/')}
+            className="flex items-center justify-center w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20 text-white hover:bg-white/20 transition-all duration-200"
+            aria-label="Go to Home"
+          >
+            <Home className="w-6 h-6" />
+          </button>
+
+          {/* Center: Streak */}
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 px-4 py-2 rounded-full bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg">
+              <span className="text-xl font-bold">{streak}</span>
+              <Flame className="h-4 w-4 text-yellow-300" />
+            </div>
+            <span className="text-sm text-white/70 font-medium">daily streak</span>
           </div>
-          
-          {/* Timer - Right */}
-          <div className="flex items-center gap-2 px-3 py-2 bg-slate-800/60 rounded-full border border-slate-700/50 backdrop-blur-sm">
-            <Clock className="h-4 w-4 text-slate-400" />
-            <span className="text-sm font-medium text-slate-300">
-              {timeUntilNext.hours}h {timeUntilNext.minutes}m
+
+          {/* Timer */}
+          <div className="flex flex-col items-center px-4 py-3 rounded-full bg-black/30 backdrop-blur-sm border border-white/20 text-white/90">
+            <span className="text-xs text-white/60 font-medium uppercase tracking-wide">Next Brawler In</span>
+            <span className="font-mono text-white font-bold text-lg">
+              {formatTime(timeUntilNext)}
             </span>
           </div>
+        </div>
+
+        {/* Mode Navigation Pills */}
+        <div className="flex items-center justify-center gap-3 mb-6">
+          {modes.map((mode) => {
+            const isCurrent = mode.key === 'gadget';
+            
+            return (
+              <button
+                key={mode.key}
+                onClick={() => handleModeClick(mode)}
+                className={cn(
+                  "relative px-6 py-3 rounded-full text-sm font-semibold transition-all duration-300",
+                  isCurrent
+                    ? "bg-gradient-to-r from-purple-500 to-violet-600 text-white shadow-lg"
+                    : "bg-white/10 text-white/60 hover:text-white/80 hover:bg-white/20",
+                  !isCurrent && "cursor-pointer"
+                )}
+                disabled={isCurrent}
+              >
+                {mode.name}
+                
+                {/* Current mode indicator dot */}
+                {isCurrent && (
+                  <div className="absolute -bottom-3 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-white rounded-full"></div>
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Title */}
+        <div className="text-center mb-8">
+          <h1 className="text-4xl md:text-5xl font-black text-white mb-2 tracking-tight">
+            Today's Gadget
+          </h1>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col items-center justify-center px-4 pb-8">
-        {/* Page Title */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl md:text-5xl font-black bg-gradient-to-r from-emerald-400 via-green-400 to-teal-400 bg-clip-text text-transparent mb-2">
-            Gadget Daily
-          </h1>
-          <p className="text-slate-400 text-lg">
-            Guess the brawler by their gadget
-          </p>
-        </div>
-
-        {/* Game Container */}
-        <div className="w-full max-w-2xl">
-          <Card className="bg-gradient-to-br from-slate-800/90 to-slate-900/90 border-2 border-emerald-500/30 shadow-2xl backdrop-blur-sm">
-            <div className="p-6 md:p-8">
-              {showVictoryScreen ? (
-                // Victory Screen
-                <div className="text-center space-y-6">
-                  <div className="space-y-2">
-                    <h2 className="text-3xl font-bold text-emerald-400">
-                      🎉 Congratulations! 🎉
-                    </h2>
-                    <p className="text-xl text-slate-300">
-                      You found <span className="text-emerald-400 font-bold">{gadgetData?.brawler}</span> in {guesses.length} {guesses.length === 1 ? 'guess' : 'guesses'}!
-                    </p>
-                  </div>
-
-                  {/* Gadget Image */}
-                  <div className="flex justify-center">
-                    <div className="w-48 h-48 rounded-2xl overflow-hidden border-4 border-emerald-400 shadow-xl bg-slate-800/50 flex items-center justify-center">
-                      {gadgetImage ? (
-                        <img
-                          src={gadgetImage}
-                          alt={`${gadgetData?.brawler} Gadget`}
-                          className="w-full h-full object-contain"
-                          onError={(e) => {
-                            e.currentTarget.src = '/GadgetImages/shelly_gadget_01.png';
-                          }}
-                        />
-                      ) : (
-                        <div className="text-slate-400 text-center">
-                          <div className="text-4xl mb-2">🔧</div>
-                          <div className="text-sm">Gadget Image</div>
-                        </div>
+      <div className="flex-1 flex flex-col px-4 pb-4">
+        <div className="daily-mode-game-card daily-mode-animate-pulse">
+          <div className="daily-mode-card-content">
+            {showVictoryScreen ? (
+              // Victory Screen
+              <div className="daily-mode-victory-section">
+                <h2 className="daily-mode-victory-title">
+                  GG EZ
+                </h2>
+                <p className="daily-mode-victory-text">
+                  {t('daily.you.found')} <span className="font-bold" style={{ color: 'hsla(var(--daily-mode-primary), 1)' }}>{getBrawlerDisplayName(getCorrectBrawler(), currentLanguage)}</span> {t('daily.in.guesses')} {gadget.guessCount} {t('daily.guesses.count')}
+                </p>
+                
+                <div className="flex flex-col gap-6 items-center">
+                  <Button
+                    onClick={handleNextMode}
+                    className="daily-mode-next-button"
+                  >
+                    <img 
+                      src="/StarpowerIcon.png" 
+                      alt="Star Power Mode" 
+                      className={cn(
+                        "h-6 w-6",
+                        currentLanguage === 'he' ? "ml-2" : "mr-2"
                       )}
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col gap-3 items-center">
-                    <Button
-                      onClick={handleNextMode}
-                      className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-400 hover:to-purple-500 text-white py-3 px-8 text-lg font-semibold shadow-lg hover:shadow-blue-500/25 transform hover:scale-105 transition-all duration-200"
-                    >
-                      <img 
-                        src="/StarPowerIcon.png" 
-                        alt="Next Mode" 
-                        className="h-5 w-5 mr-2"
-                      />
-                      Next Mode
-                    </Button>
-                    <Button
-                      onClick={() => navigate('/')}
-                      variant="ghost"
-                      className="text-slate-400 hover:text-slate-300 hover:bg-slate-800/50"
-                    >
-                      Back to Home
-                    </Button>
-                  </div>
-                </div>
-              ) : (
-                // Game Content
-                <div className="space-y-6">
-                  {/* Gadget Display */}
-                  <div className="flex justify-center mb-8">
-                    <div className="w-96 h-96 rounded-3xl overflow-hidden border-4 border-emerald-500/40 bg-gradient-to-br from-slate-800/80 to-slate-900/80 shadow-2xl backdrop-blur-sm flex items-center justify-center">
-                      {gadgetImage ? (
-                        <img
-                          src={gadgetImage}
-                          alt="Brawler Gadget"
-                          className="w-full h-full object-contain p-8"
-                          onLoad={() => setImageLoaded(true)}
-                          onError={(e) => {
-                            e.currentTarget.src = '/GadgetImages/shelly_gadget_01.png';
-                          }}
-                        />
-                      ) : (
-                        <div className="text-slate-400 text-center">
-                          <div className="text-6xl mb-4">🔧</div>
-                          <div className="text-lg">Loading gadget...</div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Search Section */}
-                  <div className="space-y-6">
-                    <BrawlerAutocomplete
-                      brawlers={brawlers}
-                      value={inputValue}
-                      onChange={setInputValue}
-                      onSelect={handleSelectBrawler}
-                      onSubmit={handleSubmit}
-                      disabledBrawlers={guessedBrawlerNames}
                     />
-                    
-                    {/* Stats Row */}
-                    <div className="flex items-center justify-center gap-6">
-                      <div className="flex items-center gap-2 px-4 py-2 bg-slate-800/60 rounded-full border border-slate-700/50">
-                        <Hash className="h-4 w-4 text-emerald-400" />
-                        <span className="text-sm font-medium text-slate-300">
-                          {guesses.length} {guesses.length === 1 ? 'guess' : 'guesses'}
-                        </span>
+                    {t('daily.next.mode')}
+                  </Button>
+                  
+                  <Button
+                    onClick={() => navigate('/')}
+                    variant="ghost"
+                    className="text-white/60 hover:text-white/80 hover:bg-white/5 py-3 px-8 text-base border border-white/20 hover:border-white/30 transition-all duration-200 rounded-xl"
+                  >
+                    {t('daily.go.home')}
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              // Game Content
+              <div className="daily-mode-game-area">
+                {/* Gadget Image */}
+                <div className="flex justify-center mb-8">
+                  <div className="w-80 h-80 md:w-96 md:h-96 rounded-3xl border-4 border-white/20 bg-black/20 backdrop-blur-sm flex items-center justify-center overflow-hidden shadow-2xl">
+                    {gadgetImage && imageLoaded ? (
+                      <img
+                        src={gadgetImage}
+                        alt="Mystery Gadget"
+                        className="w-full h-full object-contain"
+                        onLoad={handleImageLoad}
+                        onError={handleImageError}
+                      />
+                    ) : gadgetImage ? (
+                      <img
+                        src={gadgetImage}
+                        alt="Mystery Gadget"
+                        className="w-full h-full object-contain opacity-0"
+                        onLoad={handleImageLoad}
+                        onError={handleImageError}
+                      />
+                    ) : (
+                      <div className="text-white/40 text-center">
+                        <div className="text-6xl mb-4">🔧</div>
+                        <div>Mystery Gadget</div>
                       </div>
-                      
-                      {guesses.length > 0 && (
-                        <div className="flex items-center gap-2 px-4 py-2 bg-emerald-500/20 rounded-full border border-emerald-500/50">
-                          <span className="text-sm font-medium text-emerald-300">
-                            Keep guessing!
-                          </span>
-                        </div>
-                      )}
+                    )}
+                    
+                    {/* Loading overlay */}
+                    {gadgetImage && !imageLoaded && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                        <div className="animate-spin h-8 w-8 border-4 border-white/20 border-t-white rounded-full"></div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Search Bar */}
+                <div className="daily-mode-input-section mb-6">
+                  <BrawlerAutocomplete
+                    brawlers={brawlers}
+                    value={inputValue}
+                    onChange={setInputValue}
+                    onSelect={handleSelectBrawler}
+                    onSubmit={() => handleSubmit()}
+                    disabled={gadget.isCompleted}
+                    disabledBrawlers={guessedBrawlerNames}
+                  />
+                </div>
+
+                {/* Guesses Counter */}
+                <div className="flex justify-center mb-6">
+                  <div className="daily-mode-guess-counter">
+                    <Hash className="h-5 w-5" />
+                    <span>{gadget.guessCount} {t('guesses.count')}</span>
+                  </div>
+                </div>
+
+                {/* Guesses Grid */}
+                {guesses.length > 0 && (
+                  <div className="daily-mode-guesses-section">
+                    <div className="daily-mode-guesses-grid">
+                      {guesses.map((guess, index) => {
+                        const isCorrect = guess.name.toLowerCase() === getCorrectBrawler().name.toLowerCase();
+                        const portraitSrc = getPortrait(guess.name) || DEFAULT_PORTRAIT;
+                        
+                        return (
+                          <div
+                            key={index}
+                            className={cn(
+                              "daily-mode-guess-item",
+                              isCorrect ? "daily-mode-guess-correct" : "daily-mode-guess-incorrect"
+                            )}
+                          >
+                            <img
+                              src={portraitSrc}
+                              alt={guess.name}
+                              className="daily-mode-guess-portrait"
+                            />
+                            <span className="daily-mode-guess-name">
+                              {getBrawlerDisplayName(guess, currentLanguage)}
+                            </span>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
+                )}
 
-                  {/* Game Over Message */}
-                  {isGameOver && !showVictoryScreen && (
-                    <div className="text-center space-y-4 py-6 bg-red-500/10 border border-red-500/20 rounded-xl">
-                      <h2 className="text-2xl font-bold text-red-400">Game Over!</h2>
-                      <p className="text-slate-300">
-                        The correct brawler was <span className="text-emerald-400 font-bold">{gadgetData?.brawler}</span>
-                      </p>
-                      <div className="flex flex-col gap-3 items-center">
-                        <Button
-                          onClick={handleNextMode}
-                          className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-400 hover:to-purple-500 text-white py-3 px-8 text-lg font-semibold"
-                        >
-                          Next Mode
-                        </Button>
-                        <Button
-                          onClick={() => navigate('/')}
-                          variant="ghost"
-                          className="text-slate-400 hover:text-slate-300"
-                        >
-                          Back to Home
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Previous Guesses */}
-                  {guesses.length > 0 && (
-                    <div className="space-y-4">
-                      <h3 className="text-lg font-semibold text-slate-300 text-center">
-                        Previous Guesses
-                      </h3>
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                        {guesses.map((guess, idx) => {
-                          const isCorrect = gadgetData && guess.name.toLowerCase() === gadgetData.brawler.toLowerCase();
-                          const isLastGuess = idx === guesses.length - 1;
-                          return (
-                            <div
-                              key={idx}
-                              className={cn(
-                                "flex flex-col items-center p-3 rounded-xl border-2 transition-all duration-300",
-                                isCorrect 
-                                  ? "bg-green-500/20 border-green-400/50" 
-                                  : "bg-red-500/20 border-red-400/50",
-                                !isCorrect && isLastGuess ? "animate-pulse" : ""
-                              )}
-                            >
-                              <img
-                                src={getPortrait(guess.name)}
-                                alt={getBrawlerDisplayName(guess, currentLanguage)}
-                                className="w-12 h-12 rounded-lg object-cover border-2 border-slate-600/50"
-                                onError={(e) => {
-                                  e.currentTarget.src = '/portraits/shelly.png';
-                                }}
-                              />
-                              <span className="text-sm font-medium text-slate-300 text-center mt-2 truncate w-full">
-                                {getBrawlerDisplayName(guess, currentLanguage)}
-                              </span>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          </Card>
-        </div>
-      </div>
-
-      {/* Loading State */}
-      {!gadgetData && !isLoading && (
-        <div className="fixed inset-0 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm">
-          <div className="text-center space-y-4 p-8 bg-slate-800/90 rounded-2xl border border-slate-700/50">
-            <div className="animate-spin h-8 w-8 border-4 border-emerald-400 border-t-transparent rounded-full mx-auto"></div>
-            <p className="text-slate-300">Loading today's challenge...</p>
+                {/* Yesterday's Gadget */}
+                {yesterdayData && (
+                  <div className="flex justify-center mt-6">
+                    <span className="text-sm text-white/50">
+                      yesterday's gadget was <span className="text-white/70 font-medium">{yesterdayData.brawler || 'Mico'}</span>
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 };

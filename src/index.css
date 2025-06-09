@@ -70,6 +70,37 @@ body {
     --ring: 45 100% 51%; /* #FFC107 */
 
     --radius: 0.75rem;
+
+    /* Daily Mode Specific Color Variables */
+    /* Classic Mode - Enhanced Gold/Amber */
+    --daily-classic-primary: 45 100% 55%;
+    --daily-classic-secondary: 35 100% 45%;
+    --daily-classic-accent: 50 100% 65%;
+    --daily-classic-glow: 45 100% 55%;
+
+    /* Gadget Mode - Enhanced Purple/Violet */
+    --daily-gadget-primary: 275 75% 55%;
+    --daily-gadget-secondary: 285 80% 50%;
+    --daily-gadget-accent: 265 70% 60%;
+    --daily-gadget-glow: 275 75% 55%;
+
+    /* Star Power Mode - Enhanced Yellow/Orange */
+    --daily-starpower-primary: 40 100% 60%;
+    --daily-starpower-secondary: 30 100% 55%;
+    --daily-starpower-accent: 50 100% 70%;
+    --daily-starpower-glow: 40 100% 60%;
+
+    /* Audio Mode - Enhanced Purple/Blue */
+    --daily-audio-primary: 270 75% 60%;
+    --daily-audio-secondary: 250 80% 55%;
+    --daily-audio-accent: 280 70% 65%;
+    --daily-audio-glow: 270 75% 60%;
+
+    /* Pixels Mode - Enhanced Indigo/Cyan */
+    --daily-pixels-primary: 240 75% 60%;
+    --daily-pixels-secondary: 200 80% 55%;
+    --daily-pixels-accent: 220 70% 65%;
+    --daily-pixels-glow: 240 75% 60%;
   }
 }
 
@@ -124,6 +155,399 @@ body {
   
   .brawl-icon-box {
     @apply flex items-center justify-center p-2 rounded-full bg-secondary/50 text-primary;
+  }
+
+  /* Enhanced Daily Mode Specific Classes */
+  .daily-mode-container {
+    @apply min-h-screen flex flex-col relative;
+    background: linear-gradient(135deg, rgb(15 23 42) 0%, rgb(2 6 23) 100%);
+  }
+
+  .daily-mode-header {
+    @apply w-full max-w-4xl mx-auto px-4 py-3 relative;
+  }
+
+  .daily-mode-timer {
+    @apply absolute top-2 right-4 flex items-center gap-2 px-3 py-2 rounded-full 
+           bg-black/20 backdrop-blur-sm border border-white/10 text-white/70 text-sm font-medium;
+  }
+
+  .daily-mode-home-btn {
+    @apply absolute top-2 left-4;
+  }
+
+  .daily-mode-title-section {
+    @apply flex flex-col items-center justify-center pt-4 pb-4 space-y-4;
+  }
+
+  .daily-mode-title {
+    @apply text-3xl md:text-4xl font-black text-center leading-tight tracking-tight;
+    background: linear-gradient(135deg, var(--daily-mode-primary, #fbbf24) 0%, var(--daily-mode-secondary, #f59e0b) 50%, var(--daily-mode-accent, #fcd34d) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 4px 12px hsla(var(--daily-mode-glow, 45 100% 55%), 0.3));
+  }
+
+  .daily-mode-progress-container {
+    @apply flex justify-center;
+  }
+
+  .daily-mode-content {
+    @apply flex-1 flex flex-col px-4 pb-4;
+  }
+
+  .daily-mode-game-card {
+    @apply w-full max-w-4xl mx-auto rounded-3xl overflow-hidden relative;
+    background: linear-gradient(135deg, 
+      hsla(var(--daily-mode-primary, 45 100% 55%), 0.15) 0%, 
+      hsla(var(--daily-mode-secondary, 35 100% 45%), 0.08) 50%, 
+      rgba(15, 23, 42, 0.8) 100%);
+    border: 2px solid hsla(var(--daily-mode-primary, 45 100% 55%), 0.3);
+    box-shadow: 0 20px 60px hsla(var(--daily-mode-glow, 45 100% 55%), 0.15);
+  }
+
+  .daily-mode-game-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, 
+      hsla(var(--daily-mode-primary, 45 100% 55%), 0.8) 0%, 
+      hsla(var(--daily-mode-accent, 50 100% 65%), 0.9) 50%, 
+      hsla(var(--daily-mode-secondary, 35 100% 45%), 0.8) 100%);
+    animation: daily-mode-glow 3s ease-in-out infinite alternate;
+  }
+
+  .daily-mode-card-content {
+    @apply p-4 md:p-6 space-y-6;
+  }
+
+  .daily-mode-input-section {
+    @apply space-y-4;
+  }
+
+  .daily-mode-search-container {
+    @apply relative;
+  }
+
+  .daily-mode-guess-counter {
+    @apply flex items-center gap-3 px-5 py-3 rounded-2xl font-bold text-lg text-white shadow-xl;
+    background: linear-gradient(135deg, 
+      hsla(var(--daily-mode-primary, 45 100% 55%), 0.9) 0%, 
+      hsla(var(--daily-mode-secondary, 35 100% 45%), 0.7) 100%);
+    border: 2px solid hsla(var(--daily-mode-primary, 45 100% 55%), 0.6);
+    box-shadow: 0 8px 25px hsla(var(--daily-mode-glow, 45 100% 55%), 0.3);
+    backdrop-filter: blur(8px);
+    transition: all 0.3s ease;
+  }
+
+  .daily-mode-guess-counter:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 35px hsla(var(--daily-mode-glow, 45 100% 55%), 0.4);
+  }
+
+  .daily-mode-guesses-section {
+    @apply space-y-4;
+  }
+
+  .daily-mode-guesses-grid {
+    @apply grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-w-4xl mx-auto;
+  }
+
+  .daily-mode-guess-item {
+    @apply flex flex-col items-center justify-center p-4 rounded-2xl border-2 
+           transition-all duration-300 animate-fade-in min-h-[120px] space-y-3;
+  }
+
+  .daily-mode-guess-correct {
+    @apply bg-green-600/20 border-green-400/60;
+    box-shadow: 0 4px 20px rgba(34, 197, 94, 0.2);
+  }
+
+  .daily-mode-guess-incorrect {
+    @apply bg-red-600/20 border-red-400/60;
+    box-shadow: 0 4px 20px rgba(239, 68, 68, 0.2);
+  }
+
+  .daily-mode-guess-portrait {
+    @apply w-16 h-16 md:w-20 md:h-20 rounded-xl object-cover shadow-lg;
+    border: 2px solid hsla(var(--daily-mode-primary, 45 100% 55%), 0.6);
+  }
+
+  .daily-mode-guess-name {
+    @apply text-sm md:text-base font-bold text-white text-center leading-tight;
+  }
+
+  .daily-mode-game-area {
+    @apply space-y-4;
+  }
+
+  .daily-mode-victory-section {
+    @apply text-center space-y-6 py-6;
+  }
+
+  .daily-mode-victory-title {
+    @apply text-3xl font-black mb-4;
+    color: hsla(var(--daily-mode-primary, 45 100% 55%), 1);
+    filter: drop-shadow(0 4px 12px hsla(var(--daily-mode-glow, 45 100% 55%), 0.4));
+  }
+
+  .daily-mode-victory-text {
+    @apply text-lg text-white/90 mb-6 leading-relaxed;
+  }
+
+  .daily-mode-next-button {
+    @apply w-full max-w-sm py-4 px-8 text-xl font-bold rounded-2xl shadow-xl 
+           transform hover:scale-105 transition-all duration-300 border-2;
+    background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
+    border-color: rgba(16, 185, 129, 0.5);
+    box-shadow: 0 10px 30px rgba(16, 185, 129, 0.3);
+  }
+
+  .daily-mode-next-button:hover {
+    box-shadow: 0 15px 40px rgba(16, 185, 129, 0.4);
+  }
+
+  /* Enhanced Survival Mode Specific Classes */
+  .survival-mode-container {
+    @apply min-h-screen flex flex-col relative;
+    background: linear-gradient(135deg, rgb(15 23 42) 0%, rgb(2 6 23) 100%);
+  }
+
+  .survival-mode-header {
+    @apply w-full max-w-4xl mx-auto px-4 py-3 relative;
+  }
+
+  .survival-mode-timer {
+    @apply absolute top-2 right-4 flex items-center gap-2 px-3 py-2 rounded-full 
+           bg-black/20 backdrop-blur-sm border border-white/10 text-white/70 text-sm font-medium;
+  }
+
+  .survival-mode-home-btn {
+    @apply absolute top-2 left-4;
+  }
+
+  .survival-mode-title-section {
+    @apply flex flex-col items-center justify-center pt-4 pb-4 space-y-4;
+  }
+
+  .survival-mode-title {
+    @apply text-3xl md:text-4xl font-black text-center leading-tight tracking-tight;
+    background: linear-gradient(135deg, var(--survival-mode-primary, #fbbf24) 0%, var(--survival-mode-secondary, #f59e0b) 50%, var(--survival-mode-accent, #fcd34d) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 4px 12px hsla(var(--survival-mode-glow, 45 100% 55%), 0.3));
+  }
+
+  .survival-mode-content {
+    @apply flex-1 flex flex-col px-4 pb-4;
+  }
+
+  .survival-mode-game-card {
+    @apply w-full max-w-4xl mx-auto rounded-3xl overflow-hidden relative;
+    background: linear-gradient(135deg, 
+      hsla(var(--survival-mode-primary, 45 100% 55%), 0.15) 0%, 
+      hsla(var(--survival-mode-secondary, 35 100% 45%), 0.08) 50%, 
+      rgba(15, 23, 42, 0.8) 100%);
+    border: 2px solid hsla(var(--survival-mode-primary, 45 100% 55%), 0.3);
+    box-shadow: 0 20px 60px hsla(var(--survival-mode-glow, 45 100% 55%), 0.15);
+  }
+
+  .survival-mode-game-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, 
+      hsla(var(--survival-mode-primary, 45 100% 55%), 0.8) 0%, 
+      hsla(var(--survival-mode-accent, 50 100% 65%), 0.9) 50%, 
+      hsla(var(--survival-mode-secondary, 35 100% 45%), 0.8) 100%);
+    animation: survival-mode-glow 3s ease-in-out infinite alternate;
+  }
+
+  .survival-mode-card-content {
+    @apply p-4 md:p-6 space-y-6;
+  }
+
+  .survival-mode-input-section {
+    @apply space-y-4;
+  }
+
+  .survival-mode-guess-counter {
+    @apply flex items-center gap-3 px-5 py-3 rounded-2xl font-bold text-lg text-white shadow-xl;
+    background: linear-gradient(135deg, 
+      hsla(var(--survival-mode-primary, 45 100% 55%), 0.9) 0%, 
+      hsla(var(--survival-mode-secondary, 35 100% 45%), 0.7) 100%);
+    border: 2px solid hsla(var(--survival-mode-primary, 45 100% 55%), 0.6);
+    box-shadow: 0 8px 25px hsla(var(--survival-mode-glow, 45 100% 55%), 0.3);
+    backdrop-filter: blur(8px);
+    transition: all 0.3s ease;
+  }
+
+  .survival-mode-guess-counter:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 35px hsla(var(--survival-mode-glow, 45 100% 55%), 0.4);
+  }
+
+  .survival-mode-guesses-section {
+    @apply space-y-4;
+  }
+
+  .survival-mode-guesses-grid {
+    @apply grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-w-4xl mx-auto;
+  }
+
+  .survival-mode-guess-item {
+    @apply flex flex-col items-center justify-center p-4 rounded-2xl border-2 
+           transition-all duration-300 animate-fade-in min-h-[120px] space-y-3;
+  }
+
+  .survival-mode-guess-correct {
+    @apply bg-green-600/20 border-green-400/60;
+    box-shadow: 0 4px 20px rgba(34, 197, 94, 0.2);
+  }
+
+  .survival-mode-guess-incorrect {
+    @apply bg-red-600/20 border-red-400/60;
+    box-shadow: 0 4px 20px rgba(239, 68, 68, 0.2);
+  }
+
+  .survival-mode-guess-portrait {
+    @apply w-16 h-16 md:w-20 md:h-20 rounded-xl object-cover shadow-lg;
+    border: 2px solid hsla(var(--survival-mode-primary, 45 100% 55%), 0.6);
+  }
+
+  .survival-mode-guess-name {
+    @apply text-sm md:text-base font-bold text-white text-center leading-tight;
+  }
+
+  .survival-mode-animate-pulse {
+    animation: survival-mode-pulse 3s ease-in-out infinite;
+  }
+
+  /* Mode-specific CSS custom properties */
+  .daily-classic-theme {
+    --daily-mode-primary: var(--daily-classic-primary);
+    --daily-mode-secondary: var(--daily-classic-secondary);
+    --daily-mode-accent: var(--daily-classic-accent);
+    --daily-mode-glow: var(--daily-classic-glow);
+  }
+
+  .daily-gadget-theme {
+    --daily-mode-primary: var(--daily-gadget-primary);
+    --daily-mode-secondary: var(--daily-gadget-secondary);
+    --daily-mode-accent: var(--daily-gadget-accent);
+    --daily-mode-glow: var(--daily-gadget-glow);
+  }
+
+  .daily-starpower-theme {
+    --daily-mode-primary: var(--daily-starpower-primary);
+    --daily-mode-secondary: var(--daily-starpower-secondary);
+    --daily-mode-accent: var(--daily-starpower-accent);
+    --daily-mode-glow: var(--daily-starpower-glow);
+  }
+
+  .daily-audio-theme {
+    --daily-mode-primary: var(--daily-audio-primary);
+    --daily-mode-secondary: var(--daily-audio-secondary);
+    --daily-mode-accent: var(--daily-audio-accent);
+    --daily-mode-glow: var(--daily-audio-glow);
+  }
+
+  .daily-pixels-theme {
+    --daily-mode-primary: var(--daily-pixels-primary);
+    --daily-mode-secondary: var(--daily-pixels-secondary);
+    --daily-mode-accent: var(--daily-pixels-accent);
+    --daily-mode-glow: var(--daily-pixels-glow);
+  }
+
+  /* Survival Mode Themes */
+  .survival-classic-theme {
+    --survival-mode-primary: var(--daily-classic-primary);
+    --survival-mode-secondary: var(--daily-classic-secondary);
+    --survival-mode-accent: var(--daily-classic-accent);
+    --survival-mode-glow: var(--daily-classic-glow);
+  }
+
+  .survival-gadget-theme {
+    --survival-mode-primary: var(--daily-gadget-primary);
+    --survival-mode-secondary: var(--daily-gadget-secondary);
+    --survival-mode-accent: var(--daily-gadget-accent);
+    --survival-mode-glow: var(--daily-gadget-glow);
+  }
+
+  .survival-starpower-theme {
+    --survival-mode-primary: var(--daily-starpower-primary);
+    --survival-mode-secondary: var(--daily-starpower-secondary);
+    --survival-mode-accent: var(--daily-starpower-accent);
+    --survival-mode-glow: var(--daily-starpower-glow);
+  }
+
+  .survival-audio-theme {
+    --survival-mode-primary: var(--daily-audio-primary);
+    --survival-mode-secondary: var(--daily-audio-secondary);
+    --survival-mode-accent: var(--daily-audio-accent);
+    --survival-mode-glow: var(--daily-audio-glow);
+  }
+
+  .survival-pixels-theme {
+    --survival-mode-primary: var(--daily-pixels-primary);
+    --survival-mode-secondary: var(--daily-pixels-secondary);
+    --survival-mode-accent: var(--daily-pixels-accent);
+    --survival-mode-glow: var(--daily-pixels-glow);
+  }
+
+  .survival-endless-theme {
+    --survival-mode-primary: 280 100% 60%;
+    --survival-mode-secondary: 260 100% 55%;
+    --survival-mode-accent: 300 100% 70%;
+    --survival-mode-glow: 280 100% 60%;
+  }
+
+  /* Enhanced animations */
+  @keyframes daily-mode-glow {
+    0% { opacity: 0.6; }
+    50% { opacity: 1; }
+    100% { opacity: 0.6; }
+  }
+
+  @keyframes daily-mode-pulse {
+    0% { 
+      box-shadow: 0 20px 60px hsla(var(--daily-mode-glow, 45 100% 55%), 0.15);
+    }
+    50% { 
+      box-shadow: 0 25px 80px hsla(var(--daily-mode-glow, 45 100% 55%), 0.25);
+    }
+    100% { 
+      box-shadow: 0 20px 60px hsla(var(--daily-mode-glow, 45 100% 55%), 0.15);
+    }
+  }
+
+  .daily-mode-animate-pulse {
+    animation: daily-mode-pulse 3s ease-in-out infinite;
+  }
+
+  @keyframes survival-mode-glow {
+    0% { opacity: 0.6; }
+    100% { opacity: 1; }
+  }
+
+  @keyframes survival-mode-pulse {
+    0% { 
+      box-shadow: 0 20px 60px hsla(var(--survival-mode-glow, 45 100% 55%), 0.15);
+    }
+    50% { 
+      box-shadow: 0 25px 80px hsla(var(--survival-mode-glow, 45 100% 55%), 0.25);
+    }
+    100% { 
+      box-shadow: 0 20px 60px hsla(var(--survival-mode-glow, 45 100% 55%), 0.15);
+    }
   }
 
   /* Abraham Font for Hebrew Headlines and Labels */
@@ -1100,6 +1524,26 @@ html[dir="rtl"] .app-title-main {
     font-size: 16rem !important; /* Scaled for tablets */
     line-height: 0.72 !important;
   }
+}
+
+/* Hint Animation Classes */
+@keyframes slide-in-from-top {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-in {
+  animation-fill-mode: both;
+}
+
+.slide-in-from-top-2 {
+  animation: slide-in-from-top 0.5s ease-out;
 }
 
 

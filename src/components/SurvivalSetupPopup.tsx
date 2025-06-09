@@ -245,7 +245,7 @@ const SurvivalSetupPopup: React.FC<SurvivalSetupPopupProps> = ({ onStart, onCanc
             {/* Mode Description */}
             <div className="text-center text-amber-200/80 text-sm font-medium">
               <p>{t('survival.how.many')}</p>
-              <p className="text-amber-300/60 text-xs mt-1">{t('survival.gets.harder')}</p>
+              
             </div>
           </div>
         </div>

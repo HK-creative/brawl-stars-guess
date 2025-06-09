@@ -870,6 +870,9 @@ const AudioMode = ({
 
   const handleBrawlerSelect = (brawler: Brawler) => {
     setSelectedBrawler(brawler);
+    setGuess(brawler.name);
+    // Immediately submit the guess
+    handleGuess();
   };
 
   const update = () => {
@@ -908,7 +911,7 @@ const AudioMode = ({
   }
 
   return (
-    <div key={gameKey} className="relative">
+    <div key={gameKey} className="survival-mode-container survival-audio-theme">
       {/* Confetti effect for correct guesses */}
       {showConfetti && (
         <ReactConfetti
@@ -920,146 +923,168 @@ const AudioMode = ({
         />
       )}
 
-      <div className="flex flex-col min-h-[70vh] w-full max-w-2xl mx-auto">
-        {/* Main Challenge Content */}
-        <div className="flex-1 mb-8">
-          {/* Title */}
-          <h1 className="text-2xl md:text-3xl font-bold text-center text-white mb-3 survival-mode-header">
+      {/* Header Section */}
+      <div className="survival-mode-header">
+        {/* Title Section */}
+        <div className="survival-mode-title-section">
+          <h1 className="survival-mode-title">
             {t('survival.guess.sound')}
           </h1>
-          
-          {/* Audio Player */}
-          <div className="flex flex-col items-center mb-6">
-            <div className="relative w-32 h-32 md:w-40 md:h-40 mx-auto mb-4 flex items-center justify-center">
-              {/* Sound Icon Background */}
-              <div className={cn(
-                "w-full h-full rounded-full flex items-center justify-center transition-all duration-300",
-                isPlaying ? "bg-blue-500/20 animate-pulse" : "bg-white/10",
-                audioError && "bg-red-500/20"
-              )}>
-                {/* Play Button */}
-                <button
-                  onClick={playAudio}
-                  disabled={isPlaying || !audioReady || audioError}
-                  className={cn(
-                    "w-20 h-20 md:w-24 md:h-24 flex items-center justify-center rounded-full shadow-lg transition-all",
-                    isPlaying ? "bg-blue-500 scale-95" : "bg-blue-600 hover:bg-blue-500",
-                    "border-4 border-white",
-                    audioError && "bg-red-500 cursor-not-allowed"
-                  )}
-                >
-                  {isPlaying ? (
-                    <Volume2 size={40} className="text-white animate-pulse" />
-                  ) : (
-                    <Play size={40} className="text-white ml-2" />
-                  )}
-                </button>
-                
-                {/* Audio visualization rings (show during playback) */}
-                {isPlaying && (
-                  <>
-                    <div className="absolute inset-0 rounded-full border-4 border-blue-400/40 animate-ping-slow"></div>
-                    <div className="absolute inset-[-15px] rounded-full border-2 border-blue-300/30 animate-ping-slow-2"></div>
-                  </>
-                )}
-              </div>
-            </div>
-            
-            {/* Status Text */}
-            <div className="text-center">
-              <p className="text-sm md:text-base text-white/80 max-w-md mx-auto italic">
-                {audioError 
-                  ? "Error playing audio. Please try again later." 
-                  : isPlaying 
-                    ? "Now playing..." 
-                    : t('survival.click.play.sound')
-                }
-              </p>
-              
-              {/* Show brawler name if game is over */}
-              {showResult && (
-                <h2 className="text-xl md:text-2xl font-extrabold text-brawl-yellow mt-4">
-                  {dailyChallenge.brawler}
-                </h2>
-              )}
-            </div>
-          </div>
+        </div>
+      </div>
 
-          {/* Hint System */}
-          {showHint && hintAudioFile && !showResult && (
-            <div className="flex items-center justify-center gap-3 px-4 py-2 bg-yellow-500/20 rounded-full border border-yellow-400/50 mb-4 max-w-md mx-auto">
-              <span className="text-yellow-300 text-sm font-medium">Need a hint?</span>
-              <button
-                onClick={playHintAudio}
-                disabled={isHintPlaying || hintAudioError}
-                className={cn(
-                  "flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium transition-all",
-                  isHintPlaying ? "bg-yellow-500/30 text-yellow-200" : "bg-yellow-500/50 hover:bg-yellow-500/70 text-yellow-100"
+      {/* Main Content */}
+      <div className="survival-mode-content">
+        {/* Game Card */}
+        <div className="survival-mode-game-card survival-mode-animate-pulse">
+          <div className="survival-mode-card-content">
+            {/* Main Challenge Content */}
+            <div className="survival-mode-input-section">
+              {/* Audio Player */}
+              <div className="flex flex-col items-center mb-1">
+                <div className="relative w-20 h-20 md:w-24 md:h-24 mx-auto mb-1 flex items-center justify-center">
+                  {/* Sound Icon Background */}
+                  <div className={cn(
+                    "w-full h-full rounded-full flex items-center justify-center transition-all duration-300",
+                    isPlaying ? "bg-blue-500/20 animate-pulse" : "bg-white/10",
+                    audioError && "bg-red-500/20"
+                  )}>
+                    {/* Play Button */}
+                    <button
+                      onClick={playAudio}
+                      disabled={isPlaying || !audioReady || audioError}
+                      className={cn(
+                        "w-12 h-12 md:w-14 md:h-14 flex items-center justify-center rounded-full shadow-lg transition-all",
+                        isPlaying ? "bg-blue-500 scale-95" : "bg-blue-600 hover:bg-blue-500",
+                        "border-4 border-white",
+                        audioError && "bg-red-500 cursor-not-allowed"
+                      )}
+                    >
+                      {isPlaying ? (
+                        <Volume2 size={20} className="text-white animate-pulse" />
+                      ) : (
+                        <Play size={20} className="text-white ml-1" />
+                      )}
+                    </button>
+                    
+                    {/* Audio visualization rings (show during playback) */}
+                    {isPlaying && (
+                      <>
+                        <div className="absolute inset-0 rounded-full border-4 border-blue-400/40 animate-ping-slow"></div>
+                        <div className="absolute inset-[-15px] rounded-full border-2 border-blue-300/30 animate-ping-slow-2"></div>
+                      </>
+                    )}
+                  </div>
+                </div>
+                
+                {/* Status Text */}
+                <div className="text-center">
+                  <p className="text-sm md:text-base text-white/80 max-w-md mx-auto italic">
+                    {audioError 
+                      ? "Error playing audio. Please try again later." 
+                      : isPlaying 
+                        ? "Now playing..." 
+                        : t('survival.click.play.sound')
+                    }
+                  </p>
+                  
+                  {/* Show brawler name if game is over */}
+                  {showResult && (
+                    <h2 className="text-xl md:text-2xl font-extrabold text-brawl-yellow mt-4">
+                      {dailyChallenge.brawler}
+                    </h2>
+                  )}
+                </div>
+              </div>
+
+              {/* Hint Indicator - Show before 4 guesses */}
+              {!showHint && hintAudioFile && attempts < 4 && attempts > 0 && !showResult && (
+                <div className="flex items-center justify-center space-x-2 px-3 py-2 rounded-full bg-yellow-500/10 border border-yellow-400/20 mb-4 max-w-md mx-auto">
+                  <span className="text-yellow-400/70 text-xs">💡</span>
+                  <span className="text-yellow-400/70 text-xs font-medium">
+                    Hint in {4 - attempts} {4 - attempts === 1 ? 'guess' : 'guesses'}
+                  </span>
+                </div>
+              )}
+
+              {/* Hint System - Show after 4 guesses */}
+              {showHint && hintAudioFile && !showResult && (
+                <div className="flex items-center justify-center gap-3 px-4 py-2 bg-yellow-500/20 rounded-full border border-yellow-400/50 mb-4 max-w-md mx-auto animate-in slide-in-from-top-2 duration-500">
+                  <span className="text-yellow-300 text-sm font-medium">Need a hint?</span>
+                  <button
+                    onClick={playHintAudio}
+                    disabled={isHintPlaying || hintAudioError}
+                    className={cn(
+                      "flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium transition-all",
+                      isHintPlaying ? "bg-yellow-500/30 text-yellow-200" : "bg-yellow-500/50 hover:bg-yellow-500/70 text-yellow-100"
+                    )}
+                  >
+                    <Play size={14} className={isHintPlaying ? "animate-pulse" : ""} />
+                    {isHintPlaying ? "Playing..." : "Play Hint"}
+                  </button>
+                </div>
+              )}
+              
+              {/* Input Form */}
+              <form onSubmit={handleSubmit} className="mb-4 max-w-md mx-auto px-2">
+                <BrawlerAutocomplete
+                  brawlers={brawlers} // Use the imported brawlers array
+                  value={guess}
+                  onChange={setGuess}
+                  onSelect={handleBrawlerSelect}
+                  onSubmit={handleGuess}
+                  disabled={showResult}
+                  disabledBrawlers={guesses}
+                />
+              </form>
+              
+              {/* Guess Counter */}
+              <div className="w-full flex justify-center gap-4 mt-2">
+                {isSurvivalMode ? (
+                  <div className="survival-mode-guess-counter">
+                    <span className="text-lg font-bold tracking-wide">{t('guesses.left')}</span>
+                    <span className={`text-2xl font-extrabold ${(maxGuesses - attempts) <= 3 ? 'text-red-400 animate-bounce' : 'text-white'}`}>{maxGuesses - attempts}</span>
+                  </div>
+                ) : (
+                  <div className="survival-mode-guess-counter">
+                    <span className="text-base font-semibold">Number of Guesses</span>
+                    <span className="text-base font-bold">{attempts}</span>
+                  </div>
                 )}
-              >
-                <Play size={14} className={isHintPlaying ? "animate-pulse" : ""} />
-                {isHintPlaying ? "Playing..." : "Play Hint"}
-              </button>
+              </div>
             </div>
-          )}
-          
-          {/* Input Form */}
-          <form onSubmit={handleSubmit} className="mb-4 max-w-md mx-auto px-2">
-            <BrawlerAutocomplete
-              brawlers={brawlers} // Use the imported brawlers array
-              value={guess}
-              onChange={setGuess}
-              onSelect={handleBrawlerSelect}
-              onSubmit={handleGuess}
-              disabled={showResult}
-              disabledBrawlers={guesses}
-            />
-          </form>
-          {/* Guess Counter */}
-          <div className="w-full flex justify-center gap-4 mt-4">
-            {isSurvivalMode ? (
-              <div className="flex items-center gap-2 bg-black/70 border-2 border-brawl-yellow px-6 py-2 rounded-full shadow-xl animate-pulse">
-                <span className="text-brawl-yellow text-lg font-bold tracking-wide">{t('guesses.left')}</span>
-                <span className={`text-2xl font-extrabold ${(maxGuesses - attempts) <= 3 ? 'text-brawl-red animate-bounce' : 'text-white'}`}>{maxGuesses - attempts}</span>
-              </div>
-            ) : (
-              <div className="flex items-center gap-2 bg-black/50 backdrop-blur px-4 py-1 rounded-full shadow-lg">
-                <span className="text-white text-base font-semibold">Number of Guesses</span>
-                <span className="text-white text-base font-bold">{attempts}</span>
-              </div>
-            )}
           </div>
         </div>
+
         {/* Previous Guesses */}
-        <div className="w-full max-w-md mx-auto mb-6 px-2">
-          <ul className="grid grid-cols-1 md:grid-cols-2 gap-y-3 md:gap-x-4 md:gap-y-3">
+        <div className="survival-mode-guesses-section">
+          <div className="survival-mode-guesses-grid">
             {guesses.map((pastGuess, idx) => {
               const isCorrect = pastGuess.toLowerCase() === dailyChallenge.brawler.toLowerCase();
               const isLastGuess = idx === guesses.length - 1;
               return (
-                <li
+                <div
                   key={idx}
                   className={cn(
-                    "flex flex-col items-center justify-center py-2 md:py-4 rounded-2xl border-2 transition-all duration-300 animate-fade-in w-36 md:w-40 mx-auto md:min-h-[120px]",
-                    isCorrect ? "bg-brawl-green border-yellow-400" : "bg-brawl-red border-yellow-400",
+                    "survival-mode-guess-item",
+                    isCorrect ? "survival-mode-guess-correct" : "survival-mode-guess-incorrect",
                     !isCorrect && isLastGuess ? "animate-shake" : ""
                   )}
-                  style={{ minHeight: '81px' }}
                 >
                   <img
                     src={getPortrait(pastGuess)}
                     alt={pastGuess}
-                    className="w-14 h-14 md:w-20 md:h-20 rounded-xl object-cover border border-yellow-400 shadow-lg mx-auto"
-                    style={{ display: 'block' }}
+                    className="survival-mode-guess-portrait"
                   />
-                  <span className="text-base md:text-2xl font-extrabold text-white text-center mt-2 truncate w-full" style={{lineHeight: 1.1}}>
+                  <span className="survival-mode-guess-name">
                     {pastGuess}
                   </span>
-                </li>
+                </div>
               );
             })}
-          </ul>
+          </div>
         </div>
+
         {/* Victory popup - only show if not in survival mode */}
         {isGameOver && !skipVictoryScreen && (
           <div ref={victoryRef}>
@@ -1098,6 +1123,7 @@ const AudioMode = ({
             })()}
           </div>
         )}
+
         {/* Yesterday's Audio */}
         {yesterdayAudio && yesterdayAudio.audio && (
           <div className="w-full flex flex-col items-center justify-center mt-8">

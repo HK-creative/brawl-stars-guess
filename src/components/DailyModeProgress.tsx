@@ -24,7 +24,9 @@ const DailyModeProgress: React.FC<DailyModeProgressProps> = ({
       state: classic,
       iconSrc: '/ClassicIcon.png',
       path: '/daily/classic',
-      color: 'from-pink-500 to-pink-600'
+      color: 'from-yellow-500 to-amber-600',
+      bgColor: 'bg-yellow-500/20',
+      borderColor: 'border-yellow-400/40'
     },
     { 
       key: 'gadget' as const, 
@@ -32,7 +34,9 @@ const DailyModeProgress: React.FC<DailyModeProgressProps> = ({
       state: gadget,
       iconSrc: '/GadgetIcon.png',
       path: '/daily/gadget',
-      color: 'from-purple-500 to-purple-600'
+      color: 'from-purple-500 to-violet-600',
+      bgColor: 'bg-purple-500/20',
+      borderColor: 'border-purple-400/40'
     },
     { 
       key: 'starpower' as const, 
@@ -40,7 +44,9 @@ const DailyModeProgress: React.FC<DailyModeProgressProps> = ({
       state: starpower,
       iconSrc: '/StarpowerIcon.png',
       path: '/daily/starpower',
-      color: 'from-yellow-500 to-yellow-600'
+      color: 'from-orange-500 to-yellow-600',
+      bgColor: 'bg-orange-500/20',
+      borderColor: 'border-orange-400/40'
     },
     { 
       key: 'audio' as const, 
@@ -48,7 +54,9 @@ const DailyModeProgress: React.FC<DailyModeProgressProps> = ({
       state: audio,
       iconSrc: '/AudioIcon.png',
       path: '/daily/audio',
-      color: 'from-orange-500 to-orange-600'
+      color: 'from-emerald-500 to-teal-600',
+      bgColor: 'bg-emerald-500/20',
+      borderColor: 'border-emerald-400/40'
     },
     { 
       key: 'pixels' as const, 
@@ -56,7 +64,9 @@ const DailyModeProgress: React.FC<DailyModeProgressProps> = ({
       state: pixels,
       iconSrc: '/PixelsIcon.png',
       path: '/daily/pixels',
-      color: 'from-indigo-500 to-indigo-600'
+      color: 'from-indigo-500 to-blue-600',
+      bgColor: 'bg-indigo-500/20',
+      borderColor: 'border-indigo-400/40'
     },
   ];
 
@@ -67,44 +77,64 @@ const DailyModeProgress: React.FC<DailyModeProgressProps> = ({
   };
 
   return (
-    <div className={cn("flex items-center gap-6", className)}>
-      {/* Minimal Mode Icons */}
-      {modes.map((mode) => {
+    <div className={cn("flex items-center justify-center gap-3 md:gap-4", className)}>
+      {/* Enhanced Mode Icons */}
+      {modes.map((mode, index) => {
         const isCompleted = mode.state.isCompleted;
         const isCurrent = mode.key === currentMode;
         
         return (
-          <button
-            key={mode.key}
-            onClick={() => handleModeClick(mode)}
-            className={cn(
-              "relative w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-yellow-400/50",
-              isCompleted
-                ? "bg-green-500 text-white shadow-lg shadow-green-500/30 hover:shadow-green-500/50"
-                : isCurrent
-                ? "bg-yellow-500 text-white shadow-lg shadow-yellow-500/30 hover:shadow-yellow-500/50"
-                : "bg-slate-700/70 text-slate-400 hover:bg-slate-600/70 shadow-md hover:shadow-lg",
-              !isCurrent && "cursor-pointer"
-            )}
-            disabled={isCurrent}
-            title={mode.name}
-          >
-            {isCompleted ? (
-              <Check className="h-6 w-6" />
-            ) : (
-              <img 
-                src={mode.iconSrc} 
-                alt={mode.name} 
-                className="h-6 w-6 object-contain"
-              />
-            )}
+          <div key={mode.key} className="flex flex-col items-center gap-2">
+            <button
+              onClick={() => handleModeClick(mode)}
+              className={cn(
+                "relative w-14 h-14 md:w-16 md:h-16 rounded-2xl flex items-center justify-center transition-all duration-300 transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-white/30 shadow-lg",
+                isCompleted
+                  ? "bg-gradient-to-br from-green-500 to-emerald-600 text-white shadow-green-500/30 hover:shadow-green-500/50"
+                  : isCurrent
+                  ? `bg-gradient-to-br ${mode.color} text-white shadow-xl hover:shadow-2xl`
+                  : `${mode.bgColor} ${mode.borderColor} border-2 text-white/70 hover:text-white hover:bg-opacity-30 shadow-md hover:shadow-lg`,
+                !isCurrent && "cursor-pointer"
+              )}
+              disabled={isCurrent}
+              title={mode.name}
+            >
+              {isCompleted ? (
+                <Check className="h-7 w-7 md:h-8 md:w-8 drop-shadow-sm" />
+              ) : (
+                <img 
+                  src={mode.iconSrc} 
+                  alt={mode.name} 
+                  className="h-7 w-7 md:h-8 md:w-8 object-contain drop-shadow-sm"
+                />
+              )}
+              
+              {/* Current mode indicator */}
+              {isCurrent && (
+                <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-white rounded-full shadow-lg animate-pulse"></div>
+              )}
+              
+              {/* Completion indicator */}
+              {isCompleted && !isCurrent && (
+                <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-400 rounded-full border-2 border-slate-900 flex items-center justify-center">
+                  <Check className="h-2.5 w-2.5 text-slate-900" />
+                </div>
+              )}
+            </button>
             
-            {/* Small completion dot indicator */}
-            {isCompleted && !isCurrent && (
-              <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full border-2 border-slate-900">
-              </div>
+            {/* Mode label */}
+            <span className={cn(
+              "text-xs font-medium text-center leading-tight transition-colors duration-200",
+              isCurrent ? "text-white" : "text-white/60"
+            )}>
+              {mode.name}
+            </span>
+            
+            {/* Connection line to next mode */}
+            {index < modes.length - 1 && (
+              <div className="hidden md:block absolute top-7 left-full w-4 h-0.5 bg-white/20 transform translate-x-2"></div>
             )}
-          </button>
+          </div>
         );
       })}
     </div>

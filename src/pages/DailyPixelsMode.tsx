@@ -2,53 +2,25 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Clock, Hash } from 'lucide-react';
+import { Clock, Hash, Home, Flame } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import { useDailyStore } from '@/stores/useDailyStore';
 import { brawlers, getBrawlerDisplayName } from '@/data/brawlers';
 import { getPortrait, DEFAULT_PORTRAIT } from '@/lib/image-helpers';
 import BrawlerAutocomplete from '@/components/BrawlerAutocomplete';
-import HomeButton from '@/components/ui/home-button';
-import DailyModeProgress from '@/components/DailyModeProgress';
 import ReactConfetti from 'react-confetti';
-import { fetchDailyChallenge } from '@/lib/daily-challenges';
+import { fetchDailyChallenge, fetchYesterdayChallenge } from '@/lib/daily-challenges';
 import { t, getLanguage } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 import PixelatedImage from '@/components/PixelatedImage';
+import { useStreak } from '@/contexts/StreakContext';
 
 const DailyPixelsMode: React.FC = () => {
   const navigate = useNavigate();
+  const { streak } = useStreak();
   const currentLanguage = getLanguage();
 
-  // Inject custom award styles into the document head
-  useEffect(() => {
-    const style = document.createElement('style');
-    style.innerHTML = `
-      @keyframes award-glow {
-        0% { text-shadow: 0 0 1.5px rgba(255,214,0,0.09), 0 0 3px rgba(255,214,0,0.09), 0 0 4.5px rgba(255,214,0,0.06); }
-        100% { text-shadow: 0 0 2.4px rgba(255,214,0,0.12), 0 0 4.8px rgba(255,214,0,0.09), 0 0 7.2px rgba(255,214,0,0.075); }
-      }
-      .animate-award-glow { 
-        animation: award-glow 3s infinite alternate; 
-        will-change: transform, text-shadow;
-      }
-      @keyframes award-bar {
-        0% { opacity: 0.5; }
-        50% { opacity: 1; }
-        100% { opacity: 0.5; }
-      }
-      .animate-award-bar { animation: award-bar 3s infinite; }
-      @keyframes award-card {
-        0% { box-shadow: 0 8px 40px 0 rgba(255,214,0,0.10); }
-        50% { box-shadow: 0 16px 64px 0 rgba(255,214,0,0.18); }
-        100% { box-shadow: 0 8px 40px 0 rgba(255,214,0,0.10); }
-      }
-      .animate-award-card { animation: award-card 2.5s infinite alternate; }
-    `;
-    document.head.appendChild(style);
-    return () => { document.head.removeChild(style); };
-  }, []);
-
+  // Daily store
   const {
     pixels,
     timeUntilNext,
@@ -73,6 +45,16 @@ const DailyPixelsMode: React.FC = () => {
   const [pixelsData, setPixelsData] = useState<any>(null);
   const [portraitImage, setPortraitImage] = useState<string>('');
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [yesterdayData, setYesterdayData] = useState<any>(null);
+
+  // Mode navigation
+  const modes = [
+    { key: 'classic', name: 'Classic', path: '/daily/classic' },
+    { key: 'gadget', name: 'Gadget', path: '/daily/gadget' },
+    { key: 'starpower', name: 'Star Power', path: '/daily/starpower' },
+    { key: 'audio', name: 'Audio', path: '/daily/audio' },
+    { key: 'pixels', name: 'Pixels', path: '/daily/pixels' },
+  ];
 
   // Initialize daily modes on component mount
   useEffect(() => {
@@ -85,24 +67,26 @@ const DailyPixelsMode: React.FC = () => {
     }, 60000);
     
     return () => clearInterval(interval);
-  }, [initializeDailyModes, updateTimeUntilNext]);
+  }, [initializeDailyModes]);
 
-  // Load pixels data and generate image
+  // Load pixels data and yesterday's challenge
   useEffect(() => {
     const loadPixelsData = async () => {
       try {
-        const data = await fetchDailyChallenge('pixels');
-        console.log('Loaded pixels data:', data);
+        const [data, yesterdayChallenge] = await Promise.all([
+          fetchDailyChallenge('pixels'),
+          fetchYesterdayChallenge('pixels')
+        ]);
+        
         setPixelsData(data);
+        setYesterdayData(yesterdayChallenge);
         
         // Generate portrait image path
         if (data?.brawler) {
           const imagePath = getPortrait(data.brawler.toLowerCase());
-          console.log('Generated portrait image path:', imagePath);
           setPortraitImage(imagePath);
-          setImageLoaded(false); // Reset image loaded state
+          setImageLoaded(false);
         } else {
-          console.warn('No brawler data found in pixels challenge');
           setPortraitImage('');
         }
       } catch (error) {
@@ -120,7 +104,6 @@ const DailyPixelsMode: React.FC = () => {
   useEffect(() => {
     const savedGuesses = getGuesses('pixels');
     setGuesses(savedGuesses);
-    // Extract brawler names from saved guesses to prevent duplicates
     const brawlerNames = savedGuesses.map(guess => guess.name);
     setGuessedBrawlerNames(brawlerNames);
   }, [pixels.brawlerName, getGuesses]);
@@ -144,14 +127,13 @@ const DailyPixelsMode: React.FC = () => {
     return brawlers.find(b => b.name.toLowerCase() === pixels.brawlerName.toLowerCase()) || brawlers[0];
   }, [pixels.brawlerName]);
 
-  const handleSubmit = useCallback((brawler?: any) => {
-    const brawlerToSubmit = brawler || selectedBrawler;
-    
-    if (!brawlerToSubmit || !pixelsData || guessedBrawlerNames.includes(brawlerToSubmit.name)) {
+  const handleSubmit = useCallback((e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedBrawler || !pixelsData || guessedBrawlerNames.includes(selectedBrawler.name)) {
       return;
     }
 
-    const newGuess = brawlerToSubmit;
+    const newGuess = selectedBrawler;
     const updatedGuesses = [...guesses, newGuess];
     setGuesses(updatedGuesses);
     setGuessedBrawlerNames([...guessedBrawlerNames, newGuess.name]);
@@ -186,254 +168,254 @@ const DailyPixelsMode: React.FC = () => {
       const displayName = getBrawlerDisplayName(brawler, currentLanguage);
       setInputValue(displayName);
     }
-    
-    // Immediately submit the guess
-    handleSubmit(brawler);
-  }, [handleSubmit, currentLanguage]);
-
-  const handleNextMode = () => {
-    navigate('/');
-  };
-
-  const handlePlayAgain = () => {
-    navigate('/');
-  };
+  }, [currentLanguage]);
 
   const handleImageLoad = () => {
     setImageLoaded(true);
   };
 
   const handleImageError = () => {
-    console.error('Failed to load portrait image:', portraitImage);
+    setImageLoaded(false);
   };
 
   const formatTime = (time: { hours: number; minutes: number }) => {
-    return `${time.hours.toString().padStart(2, '0')}:${time.minutes.toString().padStart(2, '0')}`;
+    const hours = String(time.hours).padStart(2, '0');
+    const minutes = String(time.minutes).padStart(2, '0');
+    const seconds = '00'; // Always show 00 for seconds
+    return `${hours}:${minutes}:${seconds}`;
+  };
+
+  const handleModeClick = (mode: typeof modes[0]) => {
+    if (mode.key !== 'pixels') {
+      navigate(mode.path);
+    }
+  };
+
+  const handleNextMode = () => {
+    navigate('/daily/classic');
   };
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-950 flex items-center justify-center">
-        <div className="animate-spin h-8 w-8 border-4 border-brawl-yellow border-t-transparent rounded-full"></div>
+      <div className="min-h-screen bg-gradient-to-br from-blue-900 via-indigo-900 to-purple-900 flex items-center justify-center">
+        <div className="animate-spin h-8 w-8 border-4 border-white/20 border-t-white rounded-full"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-950 flex flex-col">
-      {/* Confetti Animation */}
-      {showConfetti && (
-        <ReactConfetti
-          width={window.innerWidth}
-          height={window.innerHeight}
-          recycle={false}
-          numberOfPieces={300}
-          onConfettiComplete={() => setShowConfetti(false)}
-          className="fixed top-0 left-0 w-full h-full z-50 pointer-events-none"
-        />
-      )}
+    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-indigo-900 to-purple-900 flex flex-col">
+      {showConfetti && <ReactConfetti />}
       
-      {/* Top Navigation Bar */}
-      <div className="w-full px-4 py-6">
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
+      {/* Header */}
+      <div className="px-4 pt-4 pb-2">
+        {/* Top Bar */}
+        <div className="flex items-center justify-between mb-6">
           {/* Home Button */}
-          <HomeButton />
-          
-          {/* Mode Navigation - Center */}
-          <div className="flex-1 flex justify-center">
-            <DailyModeProgress currentMode="pixels" />
+          <button
+            onClick={() => navigate('/')}
+            className="p-3 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20 transition-all duration-200"
+          >
+            <Home className="h-6 w-6 text-white" />
+          </button>
+
+          {/* Streak */}
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 px-4 py-2 rounded-full bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg">
+              <span className="text-xl font-bold">{streak}</span>
+              <Flame className="h-4 w-4 text-yellow-300" />
+            </div>
+            <span className="text-sm text-white/70 font-medium">daily streak</span>
           </div>
-          
-          {/* Timer - Right */}
-          <div className="flex items-center gap-2 px-3 py-2 bg-slate-800/60 rounded-full border border-slate-700/50 backdrop-blur-sm">
-            <Clock className="h-4 w-4 text-slate-400" />
-            <span className="text-sm font-medium text-slate-300">
+
+          {/* Timer */}
+          <div className="flex flex-col items-center px-4 py-3 rounded-full bg-black/30 backdrop-blur-sm border border-white/20 text-white/90">
+            <span className="text-xs text-white/60 font-medium uppercase tracking-wide">Next Brawler In</span>
+            <span className="font-mono text-white font-bold text-lg">
               {formatTime(timeUntilNext)}
             </span>
           </div>
         </div>
+
+        {/* Mode Navigation Pills */}
+        <div className="flex items-center justify-center gap-3 mb-6">
+          {modes.map((mode) => {
+            const isCurrent = mode.key === 'pixels';
+            
+            return (
+              <button
+                key={mode.key}
+                onClick={() => handleModeClick(mode)}
+                className={cn(
+                  "relative px-6 py-3 rounded-full text-sm font-semibold transition-all duration-300",
+                  isCurrent
+                    ? "bg-gradient-to-r from-indigo-500 to-blue-600 text-white shadow-lg"
+                    : "bg-white/10 text-white/60 hover:text-white/80 hover:bg-white/20",
+                  !isCurrent && "cursor-pointer"
+                )}
+                disabled={isCurrent}
+              >
+                {mode.name}
+                
+                {/* Current mode indicator dot */}
+                {isCurrent && (
+                  <div className="absolute -bottom-3 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-white rounded-full"></div>
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Title */}
+        <div className="text-center mb-8">
+          <h1 className="text-4xl md:text-5xl font-black text-white mb-2 tracking-tight">
+            Today's Pixels
+          </h1>
+        </div>
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col items-center justify-center px-4 pb-8">
-        {/* Page Title */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl md:text-5xl font-black bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent mb-2">
-            Guess the Pixelated Brawler!
-          </h1>
-          <p className="text-slate-400 text-lg">
-            The image becomes clearer with each guess
-          </p>
-        </div>
-
-        {/* Game Container */}
-        <div className="w-full max-w-2xl">
-          <Card className="bg-gradient-to-br from-slate-800/90 to-slate-900/90 border-2 border-indigo-500/30 shadow-2xl backdrop-blur-sm">
-            <div className="p-6 md:p-8">
-              {showVictoryScreen ? (
-                // Victory Screen
-                <div className="text-center space-y-6">
-                  <div className="space-y-2">
-                    <h2 className="text-3xl font-bold text-indigo-400">
-                      🎉 Congratulations! 🎉
-                    </h2>
-                    <p className="text-xl text-slate-300">
-                      You found <span className="text-indigo-400 font-bold">{pixelsData?.brawler}</span> in {guesses.length} {guesses.length === 1 ? 'guess' : 'guesses'}!
-                    </p>
-                  </div>
-
-                  {/* Clear Portrait Image */}
-                  {portraitImage && (
-                    <div className="flex justify-center">
-                      <div className="w-48 h-48 rounded-2xl overflow-hidden border-4 border-indigo-400 shadow-xl">
-                        <PixelatedImage
-                          src={portraitImage}
-                          alt={pixelsData?.brawler || 'Brawler'}
-                          pixelationLevel={6}
-                          fallbackSrc={DEFAULT_PORTRAIT}
-                          className="w-full h-full"
-                          onLoad={handleImageLoad}
-                          onError={handleImageError}
-                        />
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="flex flex-col gap-3 items-center">
-                    <Button
-                      onClick={handleNextMode}
-                      className="bg-gradient-to-r from-emerald-500 to-blue-600 hover:from-emerald-400 hover:to-blue-500 text-white py-3 px-8 text-lg font-semibold shadow-lg hover:shadow-emerald-500/25 transform hover:scale-105 transition-all duration-200"
-                    >
-                      🏠 Back to Home
-                    </Button>
-                  </div>
-                </div>
-              ) : (
-                // Game Content
-                <div className="space-y-6">
-                  {/* Pixelated Portrait Display */}
-                  <div className="flex justify-center mb-8">
-                    <div className="w-96 h-96 rounded-3xl overflow-hidden border-4 border-indigo-500/40 bg-gradient-to-br from-slate-800/80 to-slate-900/80 shadow-2xl backdrop-blur-sm">
-                      {portraitImage ? (
-                        <PixelatedImage
-                          src={portraitImage}
-                          alt="Pixelated Brawler Portrait"
-                          pixelationLevel={getPixelationLevel()}
-                          fallbackSrc={DEFAULT_PORTRAIT}
-                          className="w-full h-full"
-                          onLoad={handleImageLoad}
-                          onError={handleImageError}
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <div className="animate-spin h-8 w-8 border-4 border-indigo-400 border-t-transparent rounded-full"></div>
-                        </div>
+      <div className="flex-1 flex flex-col px-4 pb-4">
+        <div className="daily-mode-game-card daily-mode-animate-pulse">
+          <div className="daily-mode-card-content">
+            {showVictoryScreen ? (
+              // Victory Screen
+              <div className="daily-mode-victory-section">
+                <h2 className="daily-mode-victory-title">
+                  GG EZ
+                </h2>
+                <p className="daily-mode-victory-text">
+                  {t('daily.you.found')} <span className="font-bold" style={{ color: 'hsla(var(--daily-mode-primary), 1)' }}>{getBrawlerDisplayName(getCorrectBrawler(), currentLanguage)}</span> {t('daily.in.guesses')} {pixels.guessCount} {t('daily.guesses.count')}
+                </p>
+                
+                <div className="flex flex-col gap-6 items-center">
+                  <Button
+                    onClick={handleNextMode}
+                    className="daily-mode-next-button"
+                  >
+                    <img 
+                      src="/ClassicIcon.png" 
+                      alt="Classic Mode" 
+                      className={cn(
+                        "h-6 w-6",
+                        currentLanguage === 'he' ? "ml-2" : "mr-2"
                       )}
-                    </div>
-                  </div>
-
-                  {/* Search Section */}
-                  <div className="space-y-6">
-                    <BrawlerAutocomplete
-                      brawlers={brawlers}
-                      value={inputValue}
-                      onChange={setInputValue}
-                      onSelect={handleBrawlerSelect}
-                      onSubmit={handleSubmit}
-                      disabledBrawlers={guessedBrawlerNames}
                     />
-                    
-                    {/* Stats Row */}
-                    <div className="flex items-center justify-center gap-6">
-                      <div className="flex items-center gap-2 px-4 py-2 bg-slate-800/60 rounded-full border border-slate-700/50">
-                        <Hash className="h-4 w-4 text-indigo-400" />
-                        <span className="text-sm font-medium text-slate-300">
-                          {guesses.length} {guesses.length === 1 ? 'guess' : 'guesses'}
-                        </span>
+                    {t('daily.next.mode')}
+                  </Button>
+                  
+                  <Button
+                    onClick={() => navigate('/')}
+                    variant="ghost"
+                    className="text-white/60 hover:text-white/80 hover:bg-white/5 py-3 px-8 text-base border border-white/20 hover:border-white/30 transition-all duration-200 rounded-xl"
+                  >
+                    {t('daily.go.home')}
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              // Game Content
+              <div className="daily-mode-game-area">
+                {/* Pixelated Image */}
+                <div className="flex justify-center mb-8">
+                  <div className="w-80 h-80 md:w-96 md:h-96 rounded-3xl border-4 border-white/20 bg-black/20 backdrop-blur-sm flex items-center justify-center overflow-hidden shadow-2xl">
+                    {portraitImage && pixelsData ? (
+                      <PixelatedImage
+                        src={portraitImage}
+                        alt="Mystery Brawler"
+                        pixelationLevel={getPixelationLevel()}
+                        className="w-full h-full object-contain"
+                        onLoad={handleImageLoad}
+                        onError={handleImageError}
+                      />
+                    ) : (
+                      <div className="text-white/40 text-center">
+                        <div className="text-6xl mb-4">🖼️</div>
+                        <div>Mystery Pixels</div>
                       </div>
-                      
-                      {guesses.length > 0 && (
-                        <div className="flex items-center gap-2 px-4 py-2 bg-indigo-500/20 rounded-full border border-indigo-500/50">
-                          <span className="text-sm font-medium text-indigo-300">
-                            Getting clearer...
-                          </span>
-                        </div>
-                      )}
+                    )}
+                    
+                    {/* Loading overlay */}
+                    {portraitImage && !imageLoaded && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                        <div className="animate-spin h-8 w-8 border-4 border-white/20 border-t-white rounded-full"></div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Pixelation Info */}
+                <div className="flex justify-center mb-6">
+                  <div className="px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white/70 text-sm">
+                    Pixelation Level: {6 - getPixelationLevel()}/6
+                  </div>
+                </div>
+
+                {/* Search Bar */}
+                <div className="daily-mode-input-section mb-6">
+                  <BrawlerAutocomplete
+                    brawlers={brawlers}
+                    value={inputValue}
+                    onChange={setInputValue}
+                    onSelect={handleBrawlerSelect}
+                    onSubmit={() => handleSubmit({ preventDefault: () => {} } as React.FormEvent)}
+                    disabled={pixels.isCompleted}
+                    disabledBrawlers={guessedBrawlerNames}
+                  />
+                </div>
+
+                {/* Guesses Counter */}
+                <div className="flex justify-center mb-6">
+                  <div className="daily-mode-guess-counter">
+                    <Hash className="h-5 w-5" />
+                    <span>{pixels.guessCount} {t('guesses.count')}</span>
+                  </div>
+                </div>
+
+                {/* Guesses Grid */}
+                {guesses.length > 0 && (
+                  <div className="daily-mode-guesses-section">
+                    <div className="daily-mode-guesses-grid">
+                      {guesses.map((guess, index) => {
+                        const isCorrect = guess.name.toLowerCase() === getCorrectBrawler().name.toLowerCase();
+                        const portraitSrc = getPortrait(guess.name) || DEFAULT_PORTRAIT;
+                        
+                        return (
+                          <div
+                            key={index}
+                            className={cn(
+                              "daily-mode-guess-item",
+                              isCorrect ? "daily-mode-guess-correct" : "daily-mode-guess-incorrect"
+                            )}
+                          >
+                            <img
+                              src={portraitSrc}
+                              alt={guess.name}
+                              className="daily-mode-guess-portrait"
+                            />
+                            <span className="daily-mode-guess-name">
+                              {getBrawlerDisplayName(guess, currentLanguage)}
+                            </span>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
+                )}
 
-                  {/* Game Over Message */}
-                  {isGameOver && !showVictoryScreen && (
-                    <div className="text-center space-y-4 py-6 bg-red-500/10 border border-red-500/20 rounded-xl">
-                      <h2 className="text-2xl font-bold text-red-400">Game Over!</h2>
-                      <p className="text-slate-300">
-                        The correct brawler was <span className="text-indigo-400 font-bold">{pixelsData?.brawler}</span>
-                      </p>
-                      <div className="flex flex-col gap-3 items-center">
-                        <Button
-                          onClick={handleNextMode}
-                          className="bg-gradient-to-r from-emerald-500 to-blue-600 hover:from-emerald-400 hover:to-blue-500 text-white py-3 px-8 text-lg font-semibold"
-                        >
-                          🏠 Back to Home
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Previous Guesses */}
-                  {guesses.length > 0 && (
-                    <div className="space-y-4">
-                      <h3 className="text-lg font-semibold text-slate-300 text-center">
-                        Previous Guesses
-                      </h3>
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                        {guesses.map((guess, idx) => {
-                          const isCorrect = pixelsData && guess.name.toLowerCase() === pixelsData.brawler.toLowerCase();
-                          const isLastGuess = idx === guesses.length - 1;
-                          return (
-                            <div
-                              key={idx}
-                              className={cn(
-                                "flex flex-col items-center p-3 rounded-xl border-2 transition-all duration-300",
-                                isCorrect 
-                                  ? "bg-green-500/20 border-green-400/50" 
-                                  : "bg-red-500/20 border-red-400/50",
-                                !isCorrect && isLastGuess ? "animate-pulse" : ""
-                              )}
-                            >
-                              <img
-                                src={getPortrait(guess.name)}
-                                alt={getBrawlerDisplayName(guess, currentLanguage)}
-                                className="w-12 h-12 rounded-lg object-cover border-2 border-slate-600/50"
-                                onError={(e) => {
-                                  e.currentTarget.src = DEFAULT_PORTRAIT;
-                                }}
-                              />
-                              <span className="text-sm font-medium text-slate-300 text-center mt-2 truncate w-full">
-                                {getBrawlerDisplayName(guess, currentLanguage)}
-                              </span>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          </Card>
-        </div>
-      </div>
-
-      {/* Loading State */}
-      {!pixelsData && !isLoading && (
-        <div className="fixed inset-0 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm">
-          <div className="text-center space-y-4 p-8 bg-slate-800/90 rounded-2xl border border-slate-700/50">
-            <div className="animate-spin h-8 w-8 border-4 border-indigo-400 border-t-transparent rounded-full mx-auto"></div>
-            <p className="text-slate-300">Loading today's challenge...</p>
+                {/* Yesterday's Pixels */}
+                {yesterdayData && (
+                  <div className="flex justify-center mt-6">
+                    <span className="text-sm text-white/50">
+                      yesterday's pixels was <span className="text-white/70 font-medium">{yesterdayData.brawler || 'Mico'}</span>
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 };

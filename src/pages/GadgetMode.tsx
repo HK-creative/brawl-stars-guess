@@ -182,6 +182,8 @@ const GadgetMode = ({
     if (brawler) {
       const displayName = getBrawlerDisplayName(brawler, currentLanguage);
       setGuess(displayName);
+      // Immediately submit the guess
+      setTimeout(() => handleGuess(), 0);
     }
   };
 
@@ -427,7 +429,8 @@ const GadgetMode = ({
   }
 
   return (
-    <div key={gameKey} className="relative">
+    <div key={gameKey} className="survival-mode-container survival-gadget-theme">
+      {/* Confetti effect for correct guesses */}
       {showConfetti && (
         <ReactConfetti
           width={windowSize.width}
@@ -438,147 +441,159 @@ const GadgetMode = ({
         />
       )}
 
-      {!isSurvivalMode && (
-        <div className="flex justify-between items-center mb-4">
-          <div className="flex items-center gap-2">
-            {!isEndlessMode ? (
-              <span className="text-sm text-white/60">Daily Challenge</span>
-            ) : (
-              <span className="text-sm text-white/60">Endless Mode</span>
-            )}
-            <div className="flex items-center gap-1">
-              <Switch 
-                checked={isEndlessMode}
-                onCheckedChange={(checked) => {
-                  setIsEndlessMode(checked);
-                  resetGame();
-                }}
-                className="data-[state=checked]:bg-amber-500"
-              />
-              <InfinityIcon className="h-4 w-4 text-white/60" />
-            </div>
-          </div>
-        </div>
-      )}
-
-      <div className="flex flex-col min-h-[70vh] w-full max-w-2xl mx-auto">
-        <div className="flex-1 mb-8">
-          <h1 className="text-2xl md:text-3xl font-bold text-center text-white mb-3 survival-mode-header">
+      {/* Header Section */}
+      <div className="survival-mode-header">
+        {/* Title Section */}
+        <div className="survival-mode-title-section">
+          <h1 className="survival-mode-title">
             {t('survival.guess.gadget')}
           </h1>
           
-          <div className="flex flex-col items-center mb-6">
-            <div className="relative w-32 h-32 md:w-40 md:h-40 mx-auto mb-4">
-              {dailyChallenge?.image && (
-                <img
-                  src={dailyChallenge.image}
-                  alt={`${dailyChallenge.brawler}'s Gadget`}
-                  className="w-full h-full object-contain transform transition-all duration-300 hover:scale-105"
-                  onLoad={(e) => {
-                    console.log('Gadget image loaded successfully');
-                    e.currentTarget.style.display = 'block';
-                    // Hide loading state
-                    const parent = e.currentTarget.parentElement;
-                    if (parent) {
-                      const loadingEl = parent.querySelector('.loading-placeholder') as HTMLElement;
-                      if (loadingEl) {
-                        loadingEl.style.display = 'none';
-                      }
-                    }
+          {/* Only show the infinite mode toggle if not in survival mode */}
+          {!isSurvivalMode && (
+            <div className="flex items-center gap-3 mt-4">
+              <span className="text-sm text-white/60">
+                {!isEndlessMode ? "Daily Challenge" : "Endless Mode"}
+              </span>
+              <div className="flex items-center gap-2">
+                <Switch 
+                  checked={isEndlessMode}
+                  onCheckedChange={(checked) => {
+                    setIsEndlessMode(checked);
+                    resetGame();
                   }}
-                  onError={(e) => {
-                    console.log('Gadget image load failed, showing error state');
-                          e.currentTarget.style.display = 'none';
-                    // Show error state
-                    const parent = e.currentTarget.parentElement;
-                    if (parent) {
-                      const loadingEl = parent.querySelector('.loading-placeholder') as HTMLElement;
-                      if (loadingEl) {
-                        loadingEl.innerHTML = `
-                          <div class="w-full h-full flex flex-col items-center justify-center space-y-4">
-                            <div class="text-red-400 text-sm">Failed to load gadget image</div>
-                            <button onclick="window.location.reload()" class="text-xs bg-red-600 hover:bg-red-500 px-3 py-1 rounded text-white">
-                              Refresh Page
-                            </button>
-                          </div>
-                        `;
-                      }
-                    }
-                  }}
-                  style={{ display: 'none' }}
+                  className="data-[state=checked]:bg-amber-500"
                 />
-              )}
-              {/* Loading state */}
-              <div className="w-full h-full flex flex-col items-center justify-center space-y-4 loading-placeholder">
-                <div className="loading-spinner"></div>
-                <p className="text-yellow-400 text-sm">Loading gadget...</p>
-                <div className="loading-dots">
-                  <div className="loading-dot"></div>
-                  <div className="loading-dot"></div>
-                  <div className="loading-dot"></div>
+                <InfinityIcon className="h-4 w-4 text-white/60" />
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="survival-mode-content">
+        {/* Game Card */}
+        <div className="survival-mode-game-card survival-mode-animate-pulse">
+          <div className="survival-mode-card-content">
+            {/* Main Challenge Content */}
+            <div className="survival-mode-input-section">
+              {/* Gadget Image */}
+              <div className="flex flex-col items-center mb-1">
+                <div className="relative w-20 h-20 md:w-24 md:h-24 mx-auto mb-1">
+                  {dailyChallenge?.image && (
+                    <img
+                      src={dailyChallenge.image}
+                      alt={`${dailyChallenge.brawler}'s Gadget`}
+                      className="w-full h-full object-contain transform transition-all duration-300 hover:scale-105"
+                      onLoad={(e) => {
+                        console.log('Gadget image loaded successfully');
+                        e.currentTarget.style.display = 'block';
+                        // Hide loading state
+                        const parent = e.currentTarget.parentElement;
+                        if (parent) {
+                          const loadingEl = parent.querySelector('.loading-placeholder') as HTMLElement;
+                          if (loadingEl) {
+                            loadingEl.style.display = 'none';
+                          }
+                        }
+                      }}
+                      onError={(e) => {
+                        console.log('Gadget image load failed, retrying...');
+                        e.currentTarget.style.display = 'none';
+                        // Keep showing loading state and retry after a delay
+                        const parent = e.currentTarget.parentElement;
+                        if (parent) {
+                          const loadingEl = parent.querySelector('.loading-placeholder') as HTMLElement;
+                          if (loadingEl) {
+                            loadingEl.style.display = 'flex';
+                            // Retry loading the image after 2 seconds
+                            setTimeout(() => {
+                              const currentSrc = e.currentTarget.src;
+                              e.currentTarget.src = '';
+                              e.currentTarget.src = currentSrc + '?retry=' + Date.now();
+                            }, 2000);
+                          }
+                        }
+                      }}
+                      style={{ display: 'none' }}
+                    />
+                  )}
+                  {/* Loading state */}
+                  <div className="w-full h-full flex flex-col items-center justify-center space-y-4 loading-placeholder">
+                    <div className="loading-spinner"></div>
+                    <p className="text-yellow-400 text-sm">Loading gadget...</p>
+                    <div className="loading-dots">
+                      <div className="loading-dot"></div>
+                      <div className="loading-dot"></div>
+                      <div className="loading-dot"></div>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Gadget Name (only shown if game is over) */}
+                <div className="text-center">
+                  <h2 className="text-xl md:text-2xl font-extrabold text-brawl-yellow mb-2">
+                    {showResult && dailyChallenge ? dailyChallenge.gadgetName : ""}
+                  </h2>
+                  {showResult && dailyChallenge && (
+                    <p className="text-sm md:text-base text-white/80 max-w-md mx-auto italic">
+                      "{dailyChallenge.tip}"
+                    </p>
+                  )}
                 </div>
               </div>
-            </div>
-            
-            <div className="text-center">
-              <h2 className="text-xl md:text-2xl font-extrabold text-brawl-yellow mb-2">
-                {showResult && dailyChallenge ? dailyChallenge.gadgetName : ""}
-              </h2>
-              {showResult && dailyChallenge && (
-                <p className="text-sm md:text-base text-white/80 max-w-md mx-auto italic">
-                  "{dailyChallenge.tip}"
-                </p>
-              )}
-            </div>
-          </div>
-          
-          <form onSubmit={handleSubmit} className="mb-4 max-w-md mx-auto px-2">
-            <BrawlerAutocomplete
-              brawlers={brawlers} 
-              value={guess}
-              onChange={setGuess}
-              onSelect={handleBrawlerSelect}
-              onSubmit={handleGuess}
-              disabled={showResult}
-              disabledBrawlers={guesses}
-            />
-          </form>
+              
+              {/* Input Form */}
+              <form onSubmit={handleSubmit} className="mb-4 max-w-md mx-auto px-2">
+                <BrawlerAutocomplete
+                  brawlers={brawlers} 
+                  value={guess}
+                  onChange={setGuess}
+                  onSelect={handleBrawlerSelect}
+                  onSubmit={handleGuess}
+                  disabled={showResult}
+                  disabledBrawlers={guesses}
+                />
+              </form>
 
-          <div className="w-full flex justify-center gap-4 mt-4">
-            {isSurvivalMode ? (
-              <div className="flex items-center gap-2 bg-black/70 border-2 border-brawl-yellow px-6 py-2 rounded-full shadow-xl animate-pulse">
-                <span className="text-brawl-yellow text-lg font-bold tracking-wide">{t('guesses.left')}</span>
-                <span className={`text-2xl font-extrabold ${(maxGuesses - attempts) <= 3 ? 'text-brawl-red animate-bounce' : 'text-white'}`}>{maxGuesses - attempts}</span>
+              {/* Guess Counter */}
+              <div className="w-full flex justify-center gap-4 mt-2">
+                {isSurvivalMode ? (
+                  <div className="survival-mode-guess-counter">
+                    <span className="text-lg font-bold tracking-wide">{t('guesses.left')}</span>
+                    <span className={`text-2xl font-extrabold ${(maxGuesses - attempts) <= 3 ? 'text-red-400 animate-bounce' : 'text-white'}`}>{maxGuesses - attempts}</span>
+                  </div>
+                ) : (
+                  <div className="survival-mode-guess-counter">
+                    <span className="text-base font-semibold">Number of Guesses</span>
+                    <span className="text-base font-bold">{attempts}</span>
+                  </div>
+                )}
               </div>
-            ) : (
-              <div className="flex items-center gap-2 bg-black/50 backdrop-blur px-4 py-1 rounded-full shadow-lg">
-                <span className="text-white text-base font-semibold">Number of Guesses</span>
-                <span className="text-white text-base font-bold">{attempts}</span>
-              </div>
-            )}
+            </div>
           </div>
         </div>
 
-        <div className="w-full max-w-md mx-auto mb-6 px-2">
-          <ul className="grid grid-cols-1 md:grid-cols-2 gap-y-3 md:gap-x-4 md:gap-y-3">
+        {/* Previous Guesses */}
+        <div className="survival-mode-guesses-section">
+          <div className="survival-mode-guesses-grid">
             {guesses.map((pastGuess, idx) => {
               const isCorrect = dailyChallenge && pastGuess.toLowerCase() === dailyChallenge.brawler.toLowerCase();
               const isLastGuess = idx === guesses.length - 1;
               return (
-                <li
+                <div
                   key={idx}
                   className={cn(
-                    "flex flex-col items-center justify-center py-2 md:py-4 rounded-2xl border-2 transition-all duration-300 animate-fade-in w-36 md:w-40 mx-auto md:min-h-[120px]",
-                    isCorrect ? "bg-brawl-green border-yellow-400" : "bg-brawl-red border-yellow-400",
+                    "survival-mode-guess-item",
+                    isCorrect ? "survival-mode-guess-correct" : "survival-mode-guess-incorrect",
                     !isCorrect && isLastGuess ? "animate-shake" : ""
                   )}
-                  style={{ minHeight: '81px' }}
                 >
                   <img
                     src={getPortrait(pastGuess)}
                     alt={pastGuess}
-                    className="w-14 h-14 md:w-20 md:h-20 rounded-xl object-cover border border-yellow-400 shadow-lg mx-auto"
-                    style={{ display: 'block' }}
+                    className="survival-mode-guess-portrait"
                     onError={(e) => {
                       console.log(`Failed to load portrait for ${pastGuess}, trying fallback`);
                       e.currentTarget.src = DEFAULT_PORTRAIT;
@@ -588,15 +603,16 @@ const GadgetMode = ({
                       };
                     }}
                   />
-                  <span className="text-base md:text-2xl font-extrabold text-white text-center mt-2 truncate w-full" style={{ lineHeight: 1.1 }}>
+                  <span className="survival-mode-guess-name">
                     {pastGuess}
                   </span>
-                </li>
+                </div>
               );
             })}
-          </ul>
+          </div>
         </div>
 
+        {/* Victory Section - only show if not in survival mode */}
         {isGameOver && dailyChallenge && !skipVictoryScreen && (
           <div ref={victoryRef} className="w-full">
             <VictorySection

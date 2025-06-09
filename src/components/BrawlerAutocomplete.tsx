@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Input } from '@/components/ui/input';
 import { Brawler, getBrawlerDisplayName, getBrawlerByDisplayName, filterBrawlersByName } from '@/data/brawlers';
 import { getPin, DEFAULT_PIN } from '@/lib/image-helpers';
@@ -36,6 +36,24 @@ const BrawlerAutocomplete: React.FC<BrawlerAutocompleteProps> = ({
   
   const currentLanguage = getLanguage();
   const { toast } = useToast();
+
+  const handleSelectBrawler = useCallback((brawler: Brawler) => {
+    if (disabledBrawlers.includes(brawler.name)) return;
+    const displayName = getBrawlerDisplayName(brawler, currentLanguage);
+    onChange(displayName);
+    onSelect(brawler);
+    setIsOpen(false);
+  }, [disabledBrawlers, currentLanguage, onChange, onSelect]);
+  
+  const handleSelectBrawlerWithSubmit = useCallback((brawler: Brawler) => {
+    if (disabledBrawlers.includes(brawler.name)) return;
+    handleSelectBrawler(brawler);
+    if (onSubmit) {
+      setTimeout(() => {
+        onSubmit();
+      }, 10);
+    }
+  }, [disabledBrawlers, handleSelectBrawler, onSubmit]);
   
   useEffect(() => {
     if (value.trim() === '') {
@@ -50,23 +68,23 @@ const BrawlerAutocomplete: React.FC<BrawlerAutocompleteProps> = ({
     setFilteredBrawlers(filtered);
     setHighlightedIndex(-1);
 
-    if (onSubmit) {
-      const exactMatch = filtered.find(brawler => {
-        const displayName = getBrawlerDisplayName(brawler, currentLanguage);
-        return displayName.toLowerCase() === value.toLowerCase();
-      });
+    // Auto-submit on exact match (case insensitive)
+    if (onSubmit && value.trim()) {
+      const exactMatchBrawler = filtered.find(
+        b => {
+          const displayName = getBrawlerDisplayName(b, currentLanguage);
+          return displayName.toLowerCase() === value.toLowerCase();
+        }
+      );
       
-      if (
-        exactMatch &&
-        !disabledBrawlers.includes(exactMatch.name)
-      ) {
-        onSelect(exactMatch);
+      if (exactMatchBrawler && !disabledBrawlers.includes(exactMatchBrawler.name)) {
+        // Auto-submit after a short delay to allow for UI updates
         setTimeout(() => {
-          onSubmit();
-        }, 0);
+          handleSelectBrawlerWithSubmit(exactMatchBrawler);
+        }, 100);
       }
     }
-  }, [value, brawlers, disabledBrawlers, onSelect, onSubmit, currentLanguage]);
+  }, [value, brawlers, disabledBrawlers, currentLanguage, onSubmit, handleSelectBrawlerWithSubmit]);
   
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -92,24 +110,6 @@ const BrawlerAutocomplete: React.FC<BrawlerAutocompleteProps> = ({
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onChange(e.target.value);
     setIsOpen(true);
-  };
-  
-  const handleSelectBrawler = (brawler: Brawler) => {
-    if (disabledBrawlers.includes(brawler.name)) return;
-    const displayName = getBrawlerDisplayName(brawler, currentLanguage);
-    onChange(displayName);
-    onSelect(brawler);
-    setIsOpen(false);
-  };
-  
-  const handleSelectBrawlerWithSubmit = (brawler: Brawler) => {
-    if (disabledBrawlers.includes(brawler.name)) return;
-    handleSelectBrawler(brawler);
-    if (onSubmit) {
-      setTimeout(() => {
-        onSubmit();
-      }, 10);
-    }
   };
 
   const handleClearInput = () => {
@@ -276,12 +276,13 @@ const BrawlerAutocomplete: React.FC<BrawlerAutocompleteProps> = ({
           id="brawler-list"
           role="listbox"
           className={cn(
-            "absolute z-20 w-full mt-2",
+            "absolute z-[9999] w-full mt-2",
             "bg-[#1A1A1A] backdrop-blur-sm",
             "border-2 border-[#FFC107] rounded-2xl shadow-2xl",
             "max-h-[300px] overflow-y-auto",
             "scrollbar-thin scrollbar-thumb-[#FFC107]/30 scrollbar-track-transparent"
           )}
+          style={{ zIndex: 9999 }}
         >
           {filteredBrawlers.map((brawler, index) => {
             const pinPath = getPin(brawler.name);

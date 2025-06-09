@@ -2,70 +2,25 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Clock, Hash, Volume2, Play, Pause } from 'lucide-react';
+import { Clock, Hash, Volume2, Play, Pause, RotateCcw, Home, Flame } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { useDailyStore } from '@/stores/useDailyStore';
 import { brawlers, getBrawlerDisplayName } from '@/data/brawlers';
-import { getPortrait } from '@/lib/image-helpers';
+import { getPortrait, DEFAULT_PORTRAIT } from '@/lib/image-helpers';
 import BrawlerAutocomplete from '@/components/BrawlerAutocomplete';
-import HomeButton from '@/components/ui/home-button';
-import DailyModeProgress from '@/components/DailyModeProgress';
 import ReactConfetti from 'react-confetti';
-import { fetchDailyChallenge, getTodaysBrawlers, getTomorrowsBrawlers } from '@/lib/daily-challenges';
+import { fetchDailyChallenge, fetchYesterdayChallenge } from '@/lib/daily-challenges';
 import { cn } from '@/lib/utils';
 import { t, getLanguage } from '@/lib/i18n';
+import { useStreak } from '@/contexts/StreakContext';
 
 const DailyAudioMode: React.FC = () => {
-  // Inject custom award styles into the document head
-  useEffect(() => {
-    const style = document.createElement('style');
-    style.innerHTML = `
-      @keyframes award-glow {
-        0% { text-shadow: 0 0 1.5px rgba(255,214,0,0.09), 0 0 3px rgba(255,214,0,0.09), 0 0 4.5px rgba(255,214,0,0.06); }
-        100% { text-shadow: 0 0 2.4px rgba(255,214,0,0.12), 0 0 4.8px rgba(255,214,0,0.09), 0 0 7.2px rgba(255,214,0,0.075); }
-      }
-      .animate-award-glow { 
-        animation: award-glow 3s infinite alternate; 
-        will-change: transform, text-shadow;
-      }
-      @keyframes award-bar {
-        0% { opacity: 0.5; }
-        50% { opacity: 1; }
-        100% { opacity: 0.5; }
-      }
-      .animate-award-bar { animation: award-bar 3s infinite; }
-      @keyframes award-card {
-        0% { box-shadow: 0 8px 40px 0 rgba(255,214,0,0.10); }
-        50% { box-shadow: 0 16px 64px 0 rgba(255,214,0,0.18); }
-        100% { box-shadow: 0 8px 40px 0 rgba(255,214,0,0.10); }
-      }
-      .animate-award-card { animation: award-card 2.5s infinite alternate; }
-      @keyframes ping-slow { 75%, 100% { transform: scale(1.2); opacity: 0; } }
-      .animate-ping-slow { animation: ping-slow 2.5s cubic-bezier(0,0,0.2,1) infinite; }
-      @keyframes ping-slow-2 { 75%, 100% { transform: scale(1.4); opacity: 0; } }
-      .animate-ping-slow-2 { animation: ping-slow-2 3s cubic-bezier(0,0,0.2,1) infinite; }
-    `;
-    document.head.appendChild(style);
-    
-    // Add debug functions to window object in development
-    if (process.env.NODE_ENV === 'development') {
-      (window as any).getTodaysBrawlers = getTodaysBrawlers;
-      (window as any).getTomorrowsBrawlers = getTomorrowsBrawlers;
-      console.log('🎯 Debug functions available:');
-      console.log('  - getTodaysBrawlers() - Show today\'s brawlers for all modes');
-      console.log('  - getTomorrowsBrawlers() - Show tomorrow\'s brawlers for all modes');
-    }
-    
-    return () => { 
-      document.head.removeChild(style);
-      if (process.env.NODE_ENV === 'development') {
-        delete (window as any).getTodaysBrawlers;
-        delete (window as any).getTomorrowsBrawlers;
-      }
-    };
-  }, []);
-
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const { streak } = useStreak();
+  const currentLanguage = getLanguage();
+
+  // Daily store
   const {
     audio,
     timeUntilNext,
@@ -78,9 +33,6 @@ const DailyAudioMode: React.FC = () => {
     saveGuess,
     getGuesses,
   } = useDailyStore();
-
-  const currentLanguage = getLanguage();
-  const { toast } = useToast();
 
   // Local game state
   const [inputValue, setInputValue] = useState('');
@@ -95,6 +47,7 @@ const DailyAudioMode: React.FC = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [audioReady, setAudioReady] = useState(false);
   const [audioError, setAudioError] = useState(false);
+  const [yesterdayData, setYesterdayData] = useState<any>(null);
   
   // Hint system state
   const [hintAudioElement, setHintAudioElement] = useState<HTMLAudioElement | null>(null);
@@ -102,6 +55,15 @@ const DailyAudioMode: React.FC = () => {
   const [hintAudioReady, setHintAudioReady] = useState(false);
   const [hintAudioError, setHintAudioError] = useState(false);
   const [showHint, setShowHint] = useState(false);
+
+  // Mode navigation
+  const modes = [
+    { key: 'classic', name: 'Classic', path: '/daily/classic' },
+    { key: 'gadget', name: 'Gadget', path: '/daily/gadget' },
+    { key: 'starpower', name: 'Star Power', path: '/daily/starpower' },
+    { key: 'audio', name: 'Audio', path: '/daily/audio' },
+    { key: 'pixels', name: 'Pixels', path: '/daily/pixels' },
+  ];
 
   // Initialize daily modes on component mount
   useEffect(() => {
@@ -114,130 +76,94 @@ const DailyAudioMode: React.FC = () => {
     }, 60000);
     
     return () => clearInterval(interval);
-  }, [initializeDailyModes, updateTimeUntilNext]);
+  }, [initializeDailyModes]);
 
-  // Load audio data
+  // Load audio data and yesterday's challenge
   useEffect(() => {
     const loadAudioData = async () => {
-      console.log('Loading audio data for DailyAudioMode...');
       try {
-        const data = await fetchDailyChallenge('audio');
-        console.log('Received audio challenge data:', data);
-        console.log('Today\'s audio brawler:', data?.brawler);
-        console.log('Audio file path:', data?.audioFile);
-        console.log('Has hint:', data?.hasHint);
-        console.log('Hint audio file:', data?.hintAudioFile);
+        const [data, yesterdayChallenge] = await Promise.all([
+          fetchDailyChallenge('audio'),
+          fetchYesterdayChallenge('audio')
+        ]);
+        
         setAudioData(data);
+        setYesterdayData(yesterdayChallenge);
         
         // Create audio element
         if (data?.audioFile) {
-          console.log('Creating audio element with file:', data.audioFile);
           const audio = new Audio(data.audioFile);
           
           audio.addEventListener('ended', () => {
-            console.log('Audio playback ended');
             setIsPlaying(false);
           });
           
           audio.addEventListener('canplaythrough', () => {
-            console.log('Audio can play through - audio is ready');
             setAudioReady(true);
             setAudioError(false);
           });
           
           audio.addEventListener('loadeddata', () => {
-            console.log('Audio data loaded successfully');
             setAudioReady(true);
             setAudioError(false);
           });
           
           audio.addEventListener('error', (e) => {
-            console.error('Audio loading error:', e, 'src:', audio.src);
             setAudioError(true);
             setAudioReady(false);
-            
-            console.log('Audio failed to load, showing error state');
           });
           
-          // Start loading the audio
           audio.load();
           setAudioElement(audio);
           
           // Create hint audio element if available
           if (data?.hintAudioFile && data?.hasHint) {
-            console.log('Creating hint audio element with file:', data.hintAudioFile);
             const hintAudio = new Audio(data.hintAudioFile);
             
             hintAudio.addEventListener('ended', () => {
-              console.log('Hint audio playback ended');
               setIsHintPlaying(false);
             });
             
             hintAudio.addEventListener('canplaythrough', () => {
-              console.log('Hint audio can play through - hint audio is ready');
               setHintAudioReady(true);
               setHintAudioError(false);
             });
             
             hintAudio.addEventListener('loadeddata', () => {
-              console.log('Hint audio data loaded successfully');
               setHintAudioReady(true);
               setHintAudioError(false);
             });
             
             hintAudio.addEventListener('error', (e) => {
-              console.error('Hint audio loading error:', e, 'src:', hintAudio.src);
               setHintAudioError(true);
               setHintAudioReady(false);
             });
             
-            // Start loading the hint audio
             hintAudio.load();
             setHintAudioElement(hintAudio);
           }
         } else {
-          // No audio file provided, show error instead of fallback
-          console.warn('No audio file in challenge data');
-            setAudioError(true);
-            setAudioReady(false);
+          setAudioError(true);
+          setAudioReady(false);
         }
       } catch (error) {
         console.error('Error loading audio data:', error);
-          setAudioError(true);
-          setAudioReady(false);
+        setAudioError(true);
+        setAudioReady(false);
+        setAudioData(null);
       }
     };
     
     loadAudioData();
-    
-    // Cleanup audio on unmount
-    return () => {
-      if (audioElement) {
-        console.log('Cleaning up audio element');
-        audioElement.pause();
-        audioElement.src = '';
-      }
-      if (hintAudioElement) {
-        console.log('Cleaning up hint audio element');
-        hintAudioElement.pause();
-        hintAudioElement.src = '';
-      }
-    };
   }, []);
 
   // Load saved guesses when component mounts or audio data changes
   useEffect(() => {
     const savedGuesses = getGuesses('audio');
     setGuesses(savedGuesses);
-    // Extract brawler names from saved guesses to prevent duplicates
     const brawlerNames = savedGuesses.map(guess => guess.name);
     setGuessedBrawlerNames(brawlerNames);
-    
-    // Check if hint should be shown based on saved guesses
-    if (savedGuesses.length >= 4 && audioData?.hasHint && !audio.isCompleted) {
-      setShowHint(true);
-    }
-  }, [audio.brawlerName, getGuesses, audioData?.hasHint, audio.isCompleted]);
+  }, [audio.brawlerName, getGuesses]);
 
   // Reset game when already completed
   useEffect(() => {
@@ -246,486 +172,346 @@ const DailyAudioMode: React.FC = () => {
     }
   }, [audio.isCompleted]);
 
-  // Find the correct brawler object
   const getCorrectBrawler = useCallback(() => {
     return brawlers.find(b => b.name.toLowerCase() === audio.brawlerName.toLowerCase()) || brawlers[0];
   }, [audio.brawlerName]);
 
-  // Handle audio play/pause (survival mode style)
   const playAudio = () => {
-    console.log('playAudio called', { audioElement: !!audioElement, audioReady, audioError });
-    
     if (audioElement && audioReady && !audioError) {
-      audioElement.currentTime = 0; // Reset to beginning
-      console.log('Attempting to play audio:', audioElement.src);
-      
-      audioElement.play()
-        .then(() => {
-          console.log('Audio play started successfully');
-          setIsPlaying(true);
-        })
-        .catch((error) => {
-          console.error('Failed to play audio:', error);
-          setAudioError(true);
-          toast({
-            id: String(Date.now()),
-            title: "Audio Error",
-            description: "Failed to play audio. Please try refreshing the page.",
-          });
-        });
-    } else if (!audioReady) {
-      console.log('Audio not ready yet');
-      toast({
-        id: String(Date.now()),
-        title: "Audio Loading",
-        description: "Audio file is still loading. Please wait a moment.",
-      });
-    } else if (audioError) {
-      console.log('Audio has error, attempting to reload');
-      toast({
-        id: String(Date.now()),
-        title: "Audio Error",
-        description: "There was an issue with the audio. Please refresh the page.",
-      });
-    } else {
-      console.log('No audio element available');
-      toast({
-        id: String(Date.now()),
-        title: "Audio Error",
-        description: "Audio is not available. Please refresh the page.",
-      });
+      if (isPlaying) {
+        audioElement.pause();
+        audioElement.currentTime = 0;
+        setIsPlaying(false);
+      } else {
+        audioElement.play();
+        setIsPlaying(true);
+      }
     }
   };
 
-  // Handle hint audio play/pause
   const playHintAudio = () => {
-    console.log('playHintAudio called', { hintAudioElement: !!hintAudioElement, hintAudioReady, hintAudioError });
-    
     if (hintAudioElement && hintAudioReady && !hintAudioError) {
-      hintAudioElement.currentTime = 0; // Reset to beginning
-      console.log('Attempting to play hint audio:', hintAudioElement.src);
-      
-      hintAudioElement.play()
-        .then(() => {
-          console.log('Hint audio play started successfully');
-          setIsHintPlaying(true);
-        })
-        .catch((error) => {
-          console.error('Failed to play hint audio:', error);
-          setHintAudioError(true);
-          toast({
-            id: String(Date.now()),
-            title: "Hint Audio Error",
-            description: "Failed to play hint audio. Please try refreshing the page.",
-          });
-        });
-    } else if (!hintAudioReady) {
-      console.log('Hint audio not ready yet');
-      toast({
-        id: String(Date.now()),
-        title: "Hint Audio Loading",
-        description: "Hint audio file is still loading. Please wait a moment.",
-      });
-    } else if (hintAudioError) {
-      console.log('Hint audio has error');
-      toast({
-        id: String(Date.now()),
-        title: "Hint Audio Error",
-        description: "There was an issue with the hint audio. Please refresh the page.",
-      });
-    } else {
-      console.log('No hint audio element available');
-      toast({
-        id: String(Date.now()),
-        title: "Hint Audio Error",
-        description: "Hint audio is not available.",
-      });
+      if (isHintPlaying) {
+        hintAudioElement.pause();
+        hintAudioElement.currentTime = 0;
+        setIsHintPlaying(false);
+      } else {
+        hintAudioElement.play();
+        setIsHintPlaying(true);
+      }
     }
   };
 
-  // Handle guess submission
-  const handleSubmit = useCallback((brawler?: any) => {
-    const brawlerToSubmit = brawler || selectedBrawler;
-    
-    if (!brawlerToSubmit || audio.isCompleted) return;
+  const handleSubmit = useCallback(() => {
+    if (!selectedBrawler || !audioData || guessedBrawlerNames.includes(selectedBrawler.name)) {
+      return;
+    }
 
-    // Increment guess count in store
-    incrementGuessCount('audio');
+    const newGuess = selectedBrawler;
+    const updatedGuesses = [...guesses, newGuess];
+    setGuesses(updatedGuesses);
+    setGuessedBrawlerNames([...guessedBrawlerNames, newGuess.name]);
     
-    // Add guess to store and local state
-    const newGuess = brawlerToSubmit;
+    // Save guess to store
     saveGuess('audio', newGuess);
-    setGuesses(prev => [...prev, newGuess]);
-    setGuessedBrawlerNames(prev => [...prev, brawlerToSubmit.name]);
-    
-    // Check if correct
-    const correctBrawler = getCorrectBrawler();
-    const isCorrect = brawlerToSubmit.name.toLowerCase() === correctBrawler.name.toLowerCase();
+    incrementGuessCount('audio');
+
+    const isCorrect = newGuess.name.toLowerCase() === audioData.brawler.toLowerCase();
     
     if (isCorrect) {
-      // Mark mode as completed
-      completeMode('audio');
+      // Correct guess
       setIsGameOver(true);
       setShowVictoryScreen(true);
       setShowConfetti(true);
+      completeMode('audio');
       
-      // Stop audio
-      if (audioElement) {
-        audioElement.pause();
-        setIsPlaying(false);
-      }
-      if (hintAudioElement) {
-        hintAudioElement.pause();
-        setIsHintPlaying(false);
-      }
+      setTimeout(() => setShowConfetti(false), 3000);
       
-      toast({
-        id: String(Date.now()),
-        title: "Congratulations! 🎉",
-        description: `You found ${getBrawlerDisplayName(correctBrawler, currentLanguage)}!`,
-      });
-    } else {
-      // Check if we should show hint after 4 wrong guesses
-      const newGuessCount = audio.guessCount + 1;
-      if (newGuessCount >= 4 && audioData?.hasHint && !showHint) {
+      // Unlock hint after first correct guess
+      if (guesses.length === 0) {
         setShowHint(true);
-        toast({
-          id: String(Date.now()),
-          title: "Hint Available! 💡",
-          description: "A second audio clip is now available to help you!",
-        });
       }
+    } else if (updatedGuesses.length >= 6) {
+      // Game over - max guesses reached
+      setIsGameOver(true);
+    } else if (updatedGuesses.length >= 3) {
+      // Show hint after 3 wrong guesses
+      setShowHint(true);
     }
-    
-    // Reset input
+
+    // Reset form
     setInputValue('');
     setSelectedBrawler(null);
-  }, [selectedBrawler, audio.isCompleted, incrementGuessCount, saveGuess, getCorrectBrawler, completeMode, audioElement, hintAudioElement, currentLanguage, toast, audio.guessCount, audioData?.hasHint, showHint]);
+  }, [selectedBrawler, audioData, guessedBrawlerNames, guesses, saveGuess, incrementGuessCount, completeMode]);
 
-  // Handle brawler selection and immediate submission
   const handleSelectBrawler = useCallback((brawler: any) => {
     setSelectedBrawler(brawler);
-    const displayName = getBrawlerDisplayName(brawler, currentLanguage);
-    setInputValue(displayName);
-    
-    // Immediately submit the guess
-    handleSubmit(brawler);
-  }, [handleSubmit, currentLanguage]);
+    if (brawler) {
+      const displayName = getBrawlerDisplayName(brawler, currentLanguage);
+      setInputValue(displayName);
+    }
+  }, [currentLanguage]);
 
-  // Handle next mode navigation
+  const formatTime = (time: { hours: number; minutes: number }) => {
+    const hours = String(time.hours).padStart(2, '0');
+    const minutes = String(time.minutes).padStart(2, '0');
+    const seconds = '00'; // Always show 00 for seconds
+    return `${hours}:${minutes}:${seconds}`;
+  };
+
+  const handleModeClick = (mode: typeof modes[0]) => {
+    if (mode.key !== 'audio') {
+      navigate(mode.path);
+    }
+  };
+
   const handleNextMode = () => {
     navigate('/daily/pixels');
   };
 
-  // Handle play again
-  const handlePlayAgain = () => {
-    setGuesses([]);
-    setGuessedBrawlerNames([]);
-    setIsGameOver(false);
-    setShowVictoryScreen(false);
-    setShowConfetti(false);
-    setInputValue('');
-    setSelectedBrawler(null);
-    setShowHint(false);
-    resetGuessCount('audio');
-    
-    // Stop audio
-    if (audioElement) {
-      audioElement.pause();
-      setIsPlaying(false);
-    }
-    if (hintAudioElement) {
-      hintAudioElement.pause();
-      setIsHintPlaying(false);
-    }
-  };
-
-  // Loading state
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-950 flex items-center justify-center">
-        <div className="animate-spin h-8 w-8 border-4 border-brawl-yellow border-t-transparent rounded-full"></div>
+      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center">
+        <div className="animate-spin h-8 w-8 border-4 border-white/20 border-t-white rounded-full"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-950 flex flex-col">
-      {/* Confetti Animation */}
-      {showConfetti && (
-        <ReactConfetti
-          width={window.innerWidth}
-          height={window.innerHeight}
-          recycle={false}
-          numberOfPieces={300}
-          onConfettiComplete={() => setShowConfetti(false)}
-          className="fixed top-0 left-0 w-full h-full z-50 pointer-events-none"
-        />
-      )}
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex flex-col">
+      {showConfetti && <ReactConfetti />}
       
-      {/* Top Navigation Bar */}
-      <div className="w-full px-4 py-6">
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
+      {/* Header */}
+      <div className="px-4 pt-4 pb-2">
+        {/* Top Bar */}
+        <div className="flex items-center justify-between mb-6">
           {/* Home Button */}
-          <HomeButton />
-          
-          {/* Mode Navigation - Center */}
-          <div className="flex-1 flex justify-center">
-            <DailyModeProgress currentMode="audio" />
+          <button
+            onClick={() => navigate('/')}
+            className="p-3 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20 transition-all duration-200"
+          >
+            <Home className="h-6 w-6 text-white" />
+          </button>
+
+          {/* Streak */}
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 px-4 py-2 rounded-full bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg">
+              <span className="text-xl font-bold">{streak}</span>
+              <Flame className="h-4 w-4 text-yellow-300" />
+            </div>
+            <span className="text-sm text-white/70 font-medium">daily streak</span>
           </div>
-          
-          {/* Timer - Right */}
-          <div className="flex items-center gap-2 px-3 py-2 bg-slate-800/60 rounded-full border border-slate-700/50 backdrop-blur-sm">
-            <Clock className="h-4 w-4 text-slate-400" />
-            <span className="text-sm font-medium text-slate-300">
-              {timeUntilNext.hours}h {timeUntilNext.minutes}m
+
+          {/* Timer */}
+          <div className="flex flex-col items-center px-4 py-3 rounded-full bg-black/30 backdrop-blur-sm border border-white/20 text-white/90">
+            <span className="text-xs text-white/60 font-medium uppercase tracking-wide">Next Brawler In</span>
+            <span className="font-mono text-white font-bold text-lg">
+              {formatTime(timeUntilNext)}
             </span>
           </div>
+        </div>
+
+        {/* Mode Navigation Pills */}
+        <div className="flex items-center justify-center gap-3 mb-6">
+          {modes.map((mode) => {
+            const isCurrent = mode.key === 'audio';
+            
+            return (
+              <button
+                key={mode.key}
+                onClick={() => handleModeClick(mode)}
+                className={cn(
+                  "relative px-6 py-3 rounded-full text-sm font-semibold transition-all duration-300",
+                  isCurrent
+                    ? "bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg"
+                    : "bg-white/10 text-white/60 hover:text-white/80 hover:bg-white/20",
+                  !isCurrent && "cursor-pointer"
+                )}
+                disabled={isCurrent}
+              >
+                {mode.name}
+                
+                {/* Current mode indicator dot */}
+                {isCurrent && (
+                  <div className="absolute -bottom-3 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-white rounded-full"></div>
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Title */}
+        <div className="text-center mb-8">
+          <h1 className="text-4xl md:text-5xl font-black text-white mb-2 tracking-tight">
+            Today's Audio
+          </h1>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col items-center justify-center px-4 pb-8">
-        {/* Page Title */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl md:text-5xl font-black bg-gradient-to-r from-blue-400 via-cyan-400 to-teal-400 bg-clip-text text-transparent mb-2">
-            Audio Daily
-          </h1>
-          <p className="text-slate-400 text-lg">
-            Guess the brawler by their audio
-          </p>
-        </div>
-
-        {/* Game Container */}
-        <div className="w-full max-w-2xl">
-          <Card className="bg-gradient-to-br from-slate-800/90 to-slate-900/90 border-2 border-blue-500/30 shadow-2xl backdrop-blur-sm">
-            <div className="p-6 md:p-8">
-              {showVictoryScreen ? (
-                // Victory Screen
-                <div className="text-center space-y-6">
-                  <div className="space-y-2">
-                    <h2 className="text-3xl font-bold text-blue-400">
-                      🎉 Congratulations! 🎉
-                    </h2>
-                    <p className="text-xl text-slate-300">
-                      You found <span className="text-blue-400 font-bold">{audioData?.brawler}</span> in {guesses.length} {guesses.length === 1 ? 'guess' : 'guesses'}!
-                    </p>
-                  </div>
-
-                  {/* Audio Player */}
-                  <div className="flex justify-center">
-                    <div className="w-48 h-48 rounded-2xl overflow-hidden border-4 border-blue-400 shadow-xl bg-slate-800/50 flex items-center justify-center">
-                      <div className="text-slate-300 text-center">
-                        <div className="text-4xl mb-2">🎵</div>
-                        <div className="text-sm">Audio Challenge</div>
-                        <Button
-                          onClick={playAudio}
-                          className="mt-3 bg-blue-500 hover:bg-blue-400 text-white px-4 py-2 rounded-lg"
-                        >
-                          {isPlaying ? 'Playing...' : 'Play Audio'}
-                        </Button>
-                      </div>
+      <div className="flex-1 flex flex-col px-4 pb-4">
+        <div className="daily-mode-game-card daily-mode-animate-pulse">
+          <div className="daily-mode-card-content">
+            {showVictoryScreen ? (
+              // Victory Screen
+              <div className="daily-mode-victory-section">
+                <h2 className="daily-mode-victory-title">
+                  GG EZ
+                </h2>
+                <p className="daily-mode-victory-text">
+                  {t('daily.you.found')} <span className="font-bold" style={{ color: 'hsla(var(--daily-mode-primary), 1)' }}>{getBrawlerDisplayName(getCorrectBrawler(), currentLanguage)}</span> {t('daily.in.guesses')} {audio.guessCount} {t('daily.guesses.count')}
+                </p>
+                
+                <div className="flex flex-col gap-6 items-center">
+                  <Button
+                    onClick={handleNextMode}
+                    className="daily-mode-next-button"
+                  >
+                    <img 
+                      src="/PixelatedIcon.png" 
+                      alt="Pixels Mode" 
+                      className={cn(
+                        "h-6 w-6",
+                        currentLanguage === 'he' ? "ml-2" : "mr-2"
+                      )}
+                    />
+                    {t('daily.next.mode')}
+                  </Button>
+                  
+                  <Button
+                    onClick={() => navigate('/')}
+                    variant="ghost"
+                    className="text-white/60 hover:text-white/80 hover:bg-white/5 py-3 px-8 text-base border border-white/20 hover:border-white/30 transition-all duration-200 rounded-xl"
+                  >
+                    {t('daily.go.home')}
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              // Game Content
+              <div className="daily-mode-game-area">
+                {/* Audio Player */}
+                <div className="flex flex-col items-center gap-6 mb-8">
+                  {/* Main Audio */}
+                  <div className="w-80 h-80 md:w-96 md:h-96 rounded-3xl border-4 border-white/20 bg-black/20 backdrop-blur-sm flex items-center justify-center overflow-hidden shadow-2xl">
+                    <div className="text-center">
+                      <div className="text-8xl mb-6">🎵</div>
+                      <div className="text-white/70 mb-6">Mystery Audio</div>
+                      
+                      <button
+                        onClick={playAudio}
+                        disabled={!audioReady || audioError}
+                        className={cn(
+                          "px-8 py-4 rounded-full text-white font-medium transition-all duration-200 flex items-center gap-3 mx-auto",
+                          audioReady && !audioError
+                            ? "bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 shadow-lg"
+                            : "bg-gray-500 cursor-not-allowed opacity-50"
+                        )}
+                      >
+                        {isPlaying ? (
+                          <>
+                            <Pause className="h-5 w-5" />
+                            Pause
+                          </>
+                        ) : (
+                          <>
+                            <Play className="h-5 w-5" />
+                            Play Audio
+                          </>
+                        )}
+                      </button>
                     </div>
                   </div>
 
-                  <div className="flex flex-col gap-3 items-center">
-                    <Button
-                      onClick={handleNextMode}
-                      className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 text-white py-3 px-8 text-lg font-semibold shadow-lg hover:shadow-indigo-500/25 transform hover:scale-105 transition-all duration-200"
-                    >
-                      <img 
-                        src="/PixelsIcon.png" 
-                        alt="Next Mode" 
-                        className="h-5 w-5 mr-2"
-                      />
-                      Next Mode
-                    </Button>
-                    <Button
-                      onClick={() => navigate('/')}
-                      variant="ghost"
-                      className="text-slate-400 hover:text-slate-300 hover:bg-slate-800/50"
-                    >
-                      Back to Home
-                    </Button>
+                  {/* Hint Audio */}
+                  {showHint && hintAudioReady && (
+                    <div className="flex flex-col items-center gap-4">
+                      <div className="text-white/50 text-sm">Hint Audio Available</div>
+                      <button
+                        onClick={playHintAudio}
+                        className="px-6 py-3 rounded-full bg-gradient-to-r from-yellow-500 to-orange-600 text-white font-medium transition-all duration-200 flex items-center gap-2 hover:from-yellow-600 hover:to-orange-700 shadow-lg"
+                      >
+                        {isHintPlaying ? (
+                          <>
+                            <Pause className="h-4 w-4" />
+                            Pause Hint
+                          </>
+                        ) : (
+                          <>
+                            <Play className="h-4 w-4" />
+                            Play Hint
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Search Bar */}
+                <div className="daily-mode-input-section mb-6">
+                  <BrawlerAutocomplete
+                    brawlers={brawlers}
+                    value={inputValue}
+                    onChange={setInputValue}
+                    onSelect={handleSelectBrawler}
+                    onSubmit={handleSubmit}
+                    disabled={audio.isCompleted}
+                    disabledBrawlers={guessedBrawlerNames}
+                  />
+                </div>
+
+                {/* Guesses Counter */}
+                <div className="flex justify-center mb-6">
+                  <div className="daily-mode-guess-counter">
+                    <Hash className="h-5 w-5" />
+                    <span>{audio.guessCount} {t('guesses.count')}</span>
                   </div>
                 </div>
-              ) : (
-                // Game Content
-                <div className="space-y-6">
-                  {/* Audio Player Section */}
-                  <div className="flex justify-center mb-8">
-                    <div className="w-96 h-96 rounded-3xl overflow-hidden border-4 border-blue-500/40 bg-gradient-to-br from-slate-800/80 to-slate-900/80 shadow-2xl backdrop-blur-sm flex items-center justify-center">
-                      <div className="text-center space-y-6">
-                        <div className="text-8xl text-blue-400">🎵</div>
-                        <div className="space-y-4">
-                          <Button
-                            onClick={playAudio}
-                            disabled={!audioReady || audioError}
+
+                {/* Guesses Grid */}
+                {guesses.length > 0 && (
+                  <div className="daily-mode-guesses-section">
+                    <div className="daily-mode-guesses-grid">
+                      {guesses.map((guess, index) => {
+                        const isCorrect = guess.name.toLowerCase() === getCorrectBrawler().name.toLowerCase();
+                        const portraitSrc = getPortrait(guess.name) || DEFAULT_PORTRAIT;
+                        
+                        return (
+                          <div
+                            key={index}
                             className={cn(
-                              "px-8 py-4 rounded-xl font-semibold transition-all duration-200 text-lg",
-                              audioReady && !audioError
-                                ? "bg-blue-500 hover:bg-blue-400 text-white shadow-lg hover:shadow-blue-500/25"
-                                : "bg-slate-600 text-slate-400 cursor-not-allowed"
+                              "daily-mode-guess-item",
+                              isCorrect ? "daily-mode-guess-correct" : "daily-mode-guess-incorrect"
                             )}
                           >
-                            {isPlaying ? (
-                              <>
-                                <Pause className="h-5 w-5 mr-2" />
-                                Playing...
-                              </>
-                            ) : (
-                              <>
-                                <Play className="h-5 w-5 mr-2" />
-                                {audioReady ? 'Play Audio' : 'Loading...'}
-                              </>
-                            )}
-                          </Button>
-                          
-                          {/* Hint Audio Button */}
-                          {showHint && audioData?.hasHint && (
-                            <Button
-                              onClick={playHintAudio}
-                              disabled={!hintAudioReady || hintAudioError}
-                              className={cn(
-                                "px-8 py-4 rounded-xl font-semibold transition-all duration-200 text-lg",
-                                hintAudioReady && !hintAudioError
-                                  ? "bg-amber-500 hover:bg-amber-400 text-white shadow-lg hover:shadow-amber-500/25"
-                                  : "bg-slate-600 text-slate-400 cursor-not-allowed"
-                              )}
-                            >
-                              {isHintPlaying ? (
-                                <>
-                                  <Pause className="h-5 w-5 mr-2" />
-                                  Playing Hint...
-                                </>
-                              ) : (
-                                <>
-                                  <Play className="h-5 w-5 mr-2" />
-                                  💡 Play Hint
-                                </>
-                              )}
-                            </Button>
-                          )}
-                        </div>
-                        
-                        {audioError && (
-                          <div className="text-red-400 text-sm">
-                            Audio failed to load
+                            <img
+                              src={portraitSrc}
+                              alt={guess.name}
+                              className="daily-mode-guess-portrait"
+                            />
+                            <span className="daily-mode-guess-name">
+                              {getBrawlerDisplayName(guess, currentLanguage)}
+                            </span>
                           </div>
-                        )}
-                      </div>
+                        );
+                      })}
                     </div>
                   </div>
+                )}
 
-                  {/* Search Section */}
-                  <div className="space-y-6">
-                    <BrawlerAutocomplete
-                      brawlers={brawlers}
-                      value={inputValue}
-                      onChange={setInputValue}
-                      onSelect={handleSelectBrawler}
-                      onSubmit={handleSubmit}
-                      disabledBrawlers={guessedBrawlerNames}
-                    />
-                    
-                    {/* Stats Row */}
-                    <div className="flex items-center justify-center gap-6">
-                      <div className="flex items-center gap-2 px-4 py-2 bg-slate-800/60 rounded-full border border-slate-700/50">
-                        <Hash className="h-4 w-4 text-blue-400" />
-                        <span className="text-sm font-medium text-slate-300">
-                          {guesses.length} {guesses.length === 1 ? 'guess' : 'guesses'}
-                        </span>
-                      </div>
-                      
-                      {guesses.length >= 4 && audioData?.hasHint && (
-                        <div className="flex items-center gap-2 px-4 py-2 bg-amber-500/20 rounded-full border border-amber-500/50">
-                          <span className="text-sm font-medium text-amber-300">
-                            💡 Hint available!
-                          </span>
-                        </div>
-                      )}
-                    </div>
+                {/* Yesterday's Audio */}
+                {yesterdayData && (
+                  <div className="flex justify-center mt-6">
+                    <span className="text-sm text-white/50">
+                      yesterday's audio was <span className="text-white/70 font-medium">{yesterdayData.brawler || 'Mico'}</span>
+                    </span>
                   </div>
-
-                  {/* Game Over Message */}
-                  {isGameOver && !showVictoryScreen && (
-                    <div className="text-center space-y-4 py-6 bg-red-500/10 border border-red-500/20 rounded-xl">
-                      <h2 className="text-2xl font-bold text-red-400">Game Over!</h2>
-                      <p className="text-slate-300">
-                        The correct brawler was <span className="text-blue-400 font-bold">{audioData?.brawler}</span>
-                      </p>
-                      <div className="flex flex-col gap-3 items-center">
-                        <Button
-                          onClick={handleNextMode}
-                          className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 text-white py-3 px-8 text-lg font-semibold"
-                        >
-                          Next Mode
-                        </Button>
-                        <Button
-                          onClick={() => navigate('/')}
-                          variant="ghost"
-                          className="text-slate-400 hover:text-slate-300"
-                        >
-                          Back to Home
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Previous Guesses */}
-                  {guesses.length > 0 && (
-                    <div className="space-y-4">
-                      <h3 className="text-lg font-semibold text-slate-300 text-center">
-                        Previous Guesses
-                      </h3>
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                        {guesses.map((guess, idx) => {
-                          const isCorrect = audioData && guess.name.toLowerCase() === audioData.brawler.toLowerCase();
-                          const isLastGuess = idx === guesses.length - 1;
-                          return (
-                            <div
-                              key={idx}
-                              className={cn(
-                                "flex flex-col items-center p-3 rounded-xl border-2 transition-all duration-300",
-                                isCorrect 
-                                  ? "bg-green-500/20 border-green-400/50" 
-                                  : "bg-red-500/20 border-red-400/50",
-                                !isCorrect && isLastGuess ? "animate-pulse" : ""
-                              )}
-                            >
-                              <img
-                                src={getPortrait(guess.name)}
-                                alt={getBrawlerDisplayName(guess, currentLanguage)}
-                                className="w-12 h-12 rounded-lg object-cover border-2 border-slate-600/50"
-                                onError={(e) => {
-                                  e.currentTarget.src = '/portraits/shelly.png';
-                                }}
-                              />
-                              <span className="text-sm font-medium text-slate-300 text-center mt-2 truncate w-full">
-                                {getBrawlerDisplayName(guess, currentLanguage)}
-                              </span>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          </Card>
-        </div>
-      </div>
-
-      {/* Loading State */}
-      {!audioData && !isLoading && (
-        <div className="fixed inset-0 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm">
-          <div className="text-center space-y-4 p-8 bg-slate-800/90 rounded-2xl border border-slate-700/50">
-            <div className="animate-spin h-8 w-8 border-4 border-blue-400 border-t-transparent rounded-full mx-auto"></div>
-            <p className="text-slate-300">Loading today's challenge...</p>
+                )}
+              </div>
+            )}
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 };

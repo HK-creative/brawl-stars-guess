@@ -164,7 +164,12 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({
   };
 
   // Helper function to get abbreviation and determine text size based on length
-  const getTextDisplay = (text: string): { text: string, className: string } => {
+  const getTextDisplay = (text: string | undefined): { text: string, className: string } => {
+    // Handle undefined or null text
+    if (!text) {
+      return { text: '', className: 'text-sm' };
+    }
+    
     // Short abbreviations for long texts
     const abbrevMap: Record<string, string> = {
       "Very Long": "V.Long",
