@@ -312,31 +312,30 @@ const DailyClassicMode: React.FC = () => {
           {/* Home Icon */}
           <button
             onClick={() => navigate('/')}
-            className="flex items-center justify-center w-12 h-12 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 text-white hover:bg-white/20 transition-all duration-200"
-            aria-label="Go to Home"
+            className="flex items-center justify-center w-14 h-14 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 text-white hover:bg-white/20 transition-all duration-200"
+            aria-label={t('button.go.home')}
           >
             <img 
               src="/bs_home_icon.png"
-              alt="Home"
-              className="w-8 h-8"
+              alt={t('button.go.home')}
+              className="w-11 h-11"
             />
           </button>
 
           {/* Right side: Streak and Timer */}
           <div className="flex items-center gap-3">
-            {/* Streak */}
+            {/* Daily Streak - moved to the right */}
             <div className="flex flex-col items-center">
               <div className="flex items-center gap-1">
-                <span className="text-2xl font-bold leading-none text-yellow-500">{streak}</span>
-                <div className="text-2xl">🔥</div>
+                <span className="text-3xl font-bold leading-none text-yellow-500">{streak}</span>
+                <div className="text-3xl">🔥</div>
               </div>
-              <span className="text-xs text-white/70 font-medium mt-1">daily streak</span>
             </div>
 
-            {/* Timer */}
-            <div className="flex flex-col items-center px-2 py-1 rounded-full bg-black/30 backdrop-blur-sm border border-white/20 text-white/90">
-              <span className="text-[8px] text-white/60 font-medium uppercase tracking-wide">Next Brawler In</span>
-              <span className="font-mono text-white font-bold text-xs">
+            {/* Next Brawler In Timer - moved below yesterday's */}
+            <div className="flex flex-col items-center text-white/90 px-3">
+              <span className="text-xs text-white/60 font-medium uppercase tracking-wide">{t('daily.next.brawler.in')}</span>
+              <span className="font-mono text-white font-bold text-xl">
                 {formatTime(timeUntilNext)}
               </span>
             </div>
@@ -344,7 +343,7 @@ const DailyClassicMode: React.FC = () => {
         </div>
 
         {/* Mode Navigation Pills */}
-        <div className="flex items-center justify-center gap-1.5 mb-4 mt-3">
+        <div className="flex items-center justify-center gap-2.5 mb-4 mt-3">
           {modes.map((mode) => {
             const isCurrent = mode.key === 'classic';
             
@@ -353,7 +352,7 @@ const DailyClassicMode: React.FC = () => {
                 key={mode.key}
                 onClick={() => handleModeClick(mode)}
                 className={cn(
-                  "relative flex flex-col items-center justify-center w-12 h-12 rounded-full transition-all duration-300",
+                  "relative flex flex-col items-center justify-center w-14 h-14 rounded-full transition-all duration-300",
                   isCurrent
                     ? `bg-gradient-to-r ${mode.color} text-white shadow-lg shadow-${mode.color.split(' ')[1]}/30`
                     : `${mode.bgColor} ${mode.borderColor} text-white/70 hover:text-white/90 border-2 opacity-40 hover:opacity-70`,
@@ -364,7 +363,7 @@ const DailyClassicMode: React.FC = () => {
                 <img 
                   src={mode.icon}
                   alt={`${mode.name} Icon`}
-                  className="w-6 h-6"
+                  className="w-7 h-7"
                 />
                 
                 {/* Current mode indicator dot */}
@@ -377,9 +376,9 @@ const DailyClassicMode: React.FC = () => {
         </div>
 
         {/* Title */}
-        <div className="text-center mb-6">
-          <h1 className="text-4xl md:text-5xl font-black text-white mb-2 tracking-tight">
-            Today's Classic
+        <div className="text-center mb-6 mt-2">
+          <h1 className="text-4xl md:text-5xl font-black mb-2 tracking-tight bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 bg-clip-text text-transparent">
+            {t('daily.today.classic')}
           </h1>
         </div>
       </div>
@@ -428,29 +427,45 @@ const DailyClassicMode: React.FC = () => {
               <div className="daily-mode-game-area">
                 {/* Attribute Discovery Box for Classic Mode */}
                 <div className="flex justify-center mb-6">
-                  <div className="w-64 h-64 md:w-72 md:h-72 rounded-3xl border-4 border-white/20 bg-black/20 backdrop-blur-sm flex items-center justify-center overflow-hidden shadow-2xl">
+                  <div className="w-64 h-64 md:w-72 md:h-72 rounded-3xl border-4 border-amber-500/60 bg-black/20 backdrop-blur-sm flex items-center justify-center overflow-hidden shadow-2xl">
                     <div className="flex flex-col justify-center p-3 w-full h-full">
                       <div className="flex flex-col gap-2 h-full justify-center">
                         {/* Rarity */}
-                        <div className="flex-1 aspect-square flex items-center bg-green-500/20 border border-green-500/40 rounded-lg px-3 py-2 min-h-0">
+                        <div className={cn(
+                          "flex-1 aspect-square flex items-center rounded-lg px-3 py-2 min-h-0",
+                          discoveredAttributes.rarity 
+                            ? "bg-green-500/20 border border-green-500/40" 
+                            : "bg-gray-500/20 border border-gray-500/40"
+                        )}>
                           <div className={cn(
                             "flex items-center justify-between w-full",
                             currentLanguage === 'he' ? "flex-row-reverse" : "flex-row"
                           )}>
-                            <div className="text-green-400 text-xs font-medium">Rarity</div>
+                            <div className={cn(
+                              "text-xs font-medium",
+                              discoveredAttributes.rarity ? "text-green-400" : "text-gray-400"
+                            )}>{t('attribute.label.rarity')}</div>
                             <div className="text-white text-sm font-bold">
-                              {discoveredAttributes.rarity || '?'}
+                              {discoveredAttributes.rarity ? t(`rarity.${discoveredAttributes.rarity.toLowerCase().replace(' ', '.')}`) : '?'}
                             </div>
                           </div>
                         </div>
                         
                         {/* Class */}
-                        <div className="flex-1 aspect-square flex items-center bg-blue-500/20 border border-blue-500/40 rounded-lg px-3 py-2 min-h-0">
+                        <div className={cn(
+                          "flex-1 aspect-square flex items-center rounded-lg px-3 py-2 min-h-0",
+                          discoveredAttributes.class 
+                            ? "bg-green-500/20 border border-green-500/40" 
+                            : "bg-gray-500/20 border border-gray-500/40"
+                        )}>
                           <div className={cn(
                             "flex items-center justify-between w-full",
                             currentLanguage === 'he' ? "flex-row-reverse" : "flex-row"
                           )}>
-                            <div className="text-blue-400 text-xs font-medium">Class</div>
+                            <div className={cn(
+                              "text-xs font-medium",
+                              discoveredAttributes.class ? "text-green-400" : "text-gray-400"
+                            )}>{t('attribute.label.class')}</div>
                             <div className="text-white text-sm font-bold">
                               {discoveredAttributes.class || '?'}
                             </div>
@@ -458,38 +473,62 @@ const DailyClassicMode: React.FC = () => {
                         </div>
                         
                         {/* Range */}
-                        <div className="flex-1 aspect-square flex items-center bg-purple-500/20 border border-purple-500/40 rounded-lg px-3 py-2 min-h-0">
+                        <div className={cn(
+                          "flex-1 aspect-square flex items-center rounded-lg px-3 py-2 min-h-0",
+                          discoveredAttributes.range 
+                            ? "bg-green-500/20 border border-green-500/40" 
+                            : "bg-gray-500/20 border border-gray-500/40"
+                        )}>
                           <div className={cn(
                             "flex items-center justify-between w-full",
                             currentLanguage === 'he' ? "flex-row-reverse" : "flex-row"
                           )}>
-                            <div className="text-purple-400 text-xs font-medium">Range</div>
+                            <div className={cn(
+                              "text-xs font-medium",
+                              discoveredAttributes.range ? "text-green-400" : "text-gray-400"
+                            )}>{t('attribute.label.range')}</div>
                             <div className="text-white text-sm font-bold">
-                              {discoveredAttributes.range || '?'}
+                              {discoveredAttributes.range ? t(`range.${discoveredAttributes.range.toLowerCase().replace(' ', '.')}`) : '?'}
                             </div>
                           </div>
                         </div>
                         
                         {/* Wall Break */}
-                        <div className="flex-1 aspect-square flex items-center bg-orange-500/20 border border-orange-500/40 rounded-lg px-3 py-2 min-h-0">
+                        <div className={cn(
+                          "flex-1 aspect-square flex items-center rounded-lg px-3 py-2 min-h-0",
+                          discoveredAttributes.wallbreak !== null 
+                            ? "bg-green-500/20 border border-green-500/40" 
+                            : "bg-gray-500/20 border border-gray-500/40"
+                        )}>
                           <div className={cn(
                             "flex items-center justify-between w-full",
                             currentLanguage === 'he' ? "flex-row-reverse" : "flex-row"
                           )}>
-                            <div className="text-orange-400 text-[10px] font-medium">Wall Break</div>
+                            <div className={cn(
+                              "text-[10px] font-medium",
+                              discoveredAttributes.wallbreak !== null ? "text-green-400" : "text-gray-400"
+                            )}>{t('attribute.label.wallbreak')}</div>
                             <div className="text-white text-sm font-bold">
-                              {discoveredAttributes.wallbreak || '?'}
+                              {discoveredAttributes.wallbreak !== null ? t(`wallbreak.${discoveredAttributes.wallbreak ? 'yes' : 'no'}`) : '?'}
                             </div>
                           </div>
                         </div>
                         
                         {/* Release Year */}
-                        <div className="flex-1 aspect-square flex items-center bg-yellow-500/20 border border-yellow-500/40 rounded-lg px-3 py-2 min-h-0">
+                        <div className={cn(
+                          "flex-1 aspect-square flex items-center rounded-lg px-3 py-2 min-h-0",
+                          discoveredAttributes.releaseYear 
+                            ? "bg-green-500/20 border border-green-500/40" 
+                            : "bg-gray-500/20 border border-gray-500/40"
+                        )}>
                           <div className={cn(
                             "flex items-center justify-between w-full",
                             currentLanguage === 'he' ? "flex-row-reverse" : "flex-row"
                           )}>
-                            <div className="text-yellow-400 text-xs font-medium">Year</div>
+                            <div className={cn(
+                              "text-xs font-medium",
+                              discoveredAttributes.releaseYear ? "text-green-400" : "text-gray-400"
+                            )}>{t('attribute.label.year')}</div>
                             <div className="text-white text-sm font-bold">
                               {discoveredAttributes.releaseYear || '?'}
                             </div>
@@ -516,8 +555,8 @@ const DailyClassicMode: React.FC = () => {
                 {/* Guesses Counter */}
                 <div className="flex justify-center mb-4">
                   <div className="daily-mode-guess-counter">
-                    <Hash className="h-5 w-5" />
-                    <span>{classic.guessCount} {t('guesses.count')}</span>
+                    <span className="font-bold text-lg">#{classic.guessCount}</span>
+                    <span className="text-white/80 ml-1">{t('guesses.count')}</span>
                   </div>
                 </div>
 
@@ -527,12 +566,12 @@ const DailyClassicMode: React.FC = () => {
                     <div className="space-y-3">
                       {/* Header Row */}
                       <div className="grid grid-cols-6 gap-2 text-center text-white/60 text-sm font-medium mb-2">
-                        <div className="border-b border-white/20 pb-1">Brawler</div>
-                        <div className="border-b border-white/20 pb-1">Rarity</div>
-                        <div className="border-b border-white/20 pb-1">Class</div>
-                        <div className="border-b border-white/20 pb-1">Range</div>
-                        <div className="border-b border-white/20 pb-1">Wall Break</div>
-                        <div className="border-b border-white/20 pb-1">Year</div>
+                        <div className="border-b border-white/20 pb-1">{t('attribute.label.brawler')}</div>
+                        <div className="border-b border-white/20 pb-1">{t('attribute.label.rarity')}</div>
+                        <div className="border-b border-white/20 pb-1">{t('attribute.label.class')}</div>
+                        <div className="border-b border-white/20 pb-1">{t('attribute.label.range')}</div>
+                        <div className="border-b border-white/20 pb-1 text-[10px]">{t('attribute.label.wallbreak')}</div>
+                        <div className="border-b border-white/20 pb-1">{t('attribute.label.year')}</div>
                       </div>
                       
                       {/* Guess Rows */}
@@ -541,7 +580,7 @@ const DailyClassicMode: React.FC = () => {
                           key={`${guess.name}-${index}`}
                           guess={guess}
                           correctAnswer={getCorrectBrawler()}
-                          isMobile={false}
+                          isMobile={window.innerWidth < 768}
                           gridTemplateClass="grid-cols-6"
                           isNew={index === guesses.length - 1} // Only animate the newest guess
                         />
@@ -554,10 +593,20 @@ const DailyClassicMode: React.FC = () => {
                 {yesterdayData && (
                   <div className="flex justify-center mt-4">
                     <span className="text-sm text-white/50">
-                      yesterday's classic was <span className="text-yellow-500 font-medium">{yesterdayData || 'Mico'}</span>
+                      {t('daily.yesterday.classic')} <span className="text-yellow-500 font-medium">{yesterdayData.brawler || 'Mico'}</span>
                     </span>
                   </div>
                 )}
+
+                {/* Next Brawler In Timer - moved below yesterday's */}
+                <div className="flex justify-center mt-3">
+                  <div className="flex flex-col items-center text-white/90 px-3">
+                    <span className="text-xs text-white/60 font-medium uppercase tracking-wide">{t('daily.next.brawler.in')}</span>
+                    <span className="font-mono text-white font-bold text-xl">
+                      {formatTime(timeUntilNext)}
+                    </span>
+                  </div>
+                </div>
               </div>
             )}
           </div>

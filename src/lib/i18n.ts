@@ -747,7 +747,7 @@ const translations: Translations = {
   },
   "auth.reset.link": {
     en: "Send Reset Link",
-    he: "שלח לינק לאיפוס הסיסמא"
+    he: "שלח קישור איפוס"
   },
   "auth.remember.password": {
     en: "Remembered your password?",
@@ -756,6 +756,114 @@ const translations: Translations = {
   "auth.back.login": {
     en: "Back to Login",
     he: "כנס לחשבון שלך"
+  },
+
+  // Daily Mode UI Elements
+  "daily.streak": {
+    en: "daily streak",
+    he: "רצף יומי"
+  },
+  "daily.next.brawler.in": {
+    en: "Next Brawler In",
+    he: "הבראולר הבא בעוד"
+  },
+  "daily.today.classic": {
+    en: "Today's Classic",
+    he: "הקלאסי של היום"
+  },
+  "daily.today.gadget": {
+    en: "Today's Gadget", 
+    he: "הגאדג'ט של היום"
+  },
+  "daily.today.starpower": {
+    en: "Today's Star Power",
+    he: "הכוח כוכב של היום"
+  },
+  "daily.today.audio": {
+    en: "Today's Audio",
+    he: "הקול של היום"
+  },
+  "daily.today.pixels": {
+    en: "Today's Pixels",
+    he: "הפיקסלים של היום"
+  },
+
+  // Attribute Labels for Content Box and Headers
+  "attribute.label.brawler": {
+    en: "Brawler",
+    he: "בראולר"
+  },
+  "attribute.label.rarity": {
+    en: "Rarity",
+    he: "נדירות"
+  },
+  "attribute.label.class": {
+    en: "Class",
+    he: "סוג"
+  },
+  "attribute.label.range": {
+    en: "Range",
+    he: "טווח"
+  },
+  "attribute.label.wallbreak": {
+    en: "Wall Break",
+    he: "שובר קירות"
+  },
+  "attribute.label.year": {
+    en: "Year",
+    he: "שנה"
+  },
+
+  // Audio Mode Specific
+  "audio.play.hint": {
+    en: "Play Hint",
+    he: "נגן רמז"
+  },
+  "audio.pause.hint": {
+    en: "Pause Hint",
+    he: "עצור רמז"
+  },
+  "audio.hint.available.in": {
+    en: "Hint available in",
+    he: "רמז זמין בעוד"
+  },
+  "audio.hint.guesses": {
+    en: "guesses",
+    he: "ניסיונות"
+  },
+
+  // Yesterday's Challenge
+  "daily.yesterday.classic": {
+    en: "yesterday's classic was",
+    he: "הקלאסי של אתמול היה"
+  },
+  "daily.yesterday.gadget": {
+    en: "yesterday's gadget was",
+    he: "הגאדג'ט של אתמול היה"
+  },
+  "daily.yesterday.starpower": {
+    en: "yesterday's star power was",
+    he: "הכוח כוכב של אתמול היה"
+  },
+  "daily.yesterday.audio": {
+    en: "yesterday's audio was",
+    he: "הקול של אתמול היה"
+  },
+  "daily.yesterday.pixels": {
+    en: "yesterday's pixels was",
+    he: "הפיקסלים של אתמול היה"
+  },
+
+  // Loading Text
+  "loading": {
+    en: "Loading...",
+    he: "טוען..."
+  },
+
+  // Home Button
+  "button.go.home": {
+    en: "Go to Home",
+    he: "עבור לדף הבית"
   }
 };
 
