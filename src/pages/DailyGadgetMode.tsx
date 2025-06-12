@@ -147,14 +147,14 @@ const DailyGadgetMode: React.FC = () => {
           setImageLoaded(false);
           setGadgetData(null);
         }
-      } catch (error) {
-        console.error('Error loading gadget data:', error);
-        setGadgetImage('');
-        setImageVariants([]);
-        setCurrentVariantIndex(0);
-        setImageLoaded(false);
-        setGadgetData(null);
-      }
+              } catch (error) {
+          console.error('Error loading gadget data:', error);
+          setGadgetImage('');
+          setImageVariants([]);
+          setCurrentVariantIndex(0);
+          setImageLoaded(false);
+          setGadgetData(null);
+        }
     };
     
     loadGadgetData();
@@ -253,7 +253,7 @@ const DailyGadgetMode: React.FC = () => {
     console.error('Image failed to load:', gadgetImage);
     // Try next variant if available
     if (currentVariantIndex < imageVariants.length - 1) {
-      const nextIndex = currentVariantIndex + 1;
+    const nextIndex = currentVariantIndex + 1;
       setCurrentVariantIndex(nextIndex);
       setGadgetImage(imageVariants[nextIndex]);
       console.log('Trying next variant:', imageVariants[nextIndex]);
@@ -487,24 +487,24 @@ const DailyGadgetMode: React.FC = () => {
 
                 {/* Search Bar */}
                 <div className="daily-mode-input-section mb-8">
-                  <BrawlerAutocomplete
-                    brawlers={brawlers}
-                    value={inputValue}
-                    onChange={setInputValue}
-                    onSelect={handleSelectBrawler}
-                    onSubmit={() => handleSubmit()}
+                      <BrawlerAutocomplete
+                        brawlers={brawlers}
+                        value={inputValue}
+                        onChange={setInputValue}
+                        onSelect={handleSelectBrawler}
+                        onSubmit={() => handleSubmit()}
                     disabled={gadget.isCompleted}
-                    disabledBrawlers={guessedBrawlerNames}
-                  />
-                </div>
+                        disabledBrawlers={guessedBrawlerNames}
+                      />
+                    </div>
 
                 {/* Guesses Counter */}
                 <div className="flex justify-center mb-4">
                   <div className="daily-mode-guess-counter">
                     <span className="font-bold text-lg">#{gadget.guessCount}</span>
                     <span className="text-white/80 ml-1">{t('guesses.count')}</span>
+                    </div>
                   </div>
-                </div>
 
                 {/* Guesses Grid */}
                 {guesses.length > 0 && (

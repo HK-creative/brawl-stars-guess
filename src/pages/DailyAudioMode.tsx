@@ -183,13 +183,13 @@ const DailyAudioMode: React.FC = () => {
             setHintAudioElement(hintAudio);
           }
         } else {
-          setAudioError(true);
-          setAudioReady(false);
+            setAudioError(true);
+            setAudioReady(false);
         }
       } catch (error) {
         console.error('Error loading audio data:', error);
-        setAudioError(true);
-        setAudioReady(false);
+          setAudioError(true);
+          setAudioReady(false);
         setAudioData(null);
       }
     };
@@ -224,7 +224,7 @@ const DailyAudioMode: React.FC = () => {
         setIsPlaying(false);
       } else {
         audioElement.play();
-        setIsPlaying(true);
+          setIsPlaying(true);
       }
     }
   };
@@ -237,7 +237,7 @@ const DailyAudioMode: React.FC = () => {
         setIsHintPlaying(false);
       } else {
         hintAudioElement.play();
-        setIsHintPlaying(true);
+          setIsHintPlaying(true);
       }
     }
   };
@@ -255,7 +255,7 @@ const DailyAudioMode: React.FC = () => {
     // Save guess to store
     saveGuess('audio', newGuess);
     incrementGuessCount('audio');
-
+    
     const isCorrect = newGuess.name.toLowerCase() === audioData.brawler.toLowerCase();
     
     if (isCorrect) {
@@ -278,7 +278,7 @@ const DailyAudioMode: React.FC = () => {
       // Show hint after 3 wrong guesses
       setShowHint(true);
     }
-
+    
     // Reset form
     setInputValue('');
     setSelectedBrawler(null);
@@ -287,8 +287,8 @@ const DailyAudioMode: React.FC = () => {
   const handleSelectBrawler = useCallback((brawler: any) => {
     setSelectedBrawler(brawler);
     if (brawler) {
-      const displayName = getBrawlerDisplayName(brawler, currentLanguage);
-      setInputValue(displayName);
+    const displayName = getBrawlerDisplayName(brawler, currentLanguage);
+    setInputValue(displayName);
     }
   }, [currentLanguage]);
 
@@ -332,7 +332,7 @@ const DailyAudioMode: React.FC = () => {
           className="fixed top-0 left-0 w-full h-full z-50 pointer-events-none"
         />
       )}
-      
+
       {/* Header Section */}
       <div className="w-full max-w-4xl mx-auto px-4 py-2 relative">
         {/* Top Row: Home Icon, Streak, Timer */}
@@ -483,7 +483,7 @@ const DailyAudioMode: React.FC = () => {
                         {showHint && hintAudioReady ? (
                           <>
                             {isHintPlaying ? (
-                              <>
+                          <>
                                 <Pause className="w-5 h-5" />
                                 {t('audio.pause.hint')}
                               </>
@@ -491,13 +491,13 @@ const DailyAudioMode: React.FC = () => {
                               <>
                                 <Play className="w-5 h-5" />
                                 {t('audio.play.hint')}
-                              </>
-                            )}
+                          </>
+                        )}
                           </>
                         ) : (
                           <div className="text-white/60 text-sm">
                             {t('audio.hint.available.in')} {Math.max(0, 4 - audio.guessCount)} {t('audio.hint.guesses')}
-                          </div>
+                        </div>
                         )}
                       </button>
                     </div>

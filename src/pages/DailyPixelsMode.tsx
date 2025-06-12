@@ -342,7 +342,7 @@ const DailyPixelsMode: React.FC = () => {
                 <p className="daily-mode-victory-text">
                   {t('daily.you.found')} <span className="font-bold" style={{ color: 'hsla(var(--daily-mode-primary), 1)' }}>{getBrawlerDisplayName(getCorrectBrawler(), currentLanguage)}</span> {t('daily.in.guesses')} {pixels.guessCount} {t('daily.guesses.count')}
                 </p>
-                
+
                 <div className="flex flex-col gap-6 items-center">
                   <Button
                     onClick={handleNextMode}
@@ -408,24 +408,24 @@ const DailyPixelsMode: React.FC = () => {
 
                           {/* Search Bar */}
           <div className="daily-mode-input-section mb-8">
-                  <BrawlerAutocomplete
-                    brawlers={brawlers}
-                    value={inputValue}
-                    onChange={setInputValue}
-                    onSelect={handleBrawlerSelect}
-                    onSubmit={() => handleSubmit({ preventDefault: () => {} } as React.FormEvent)}
+                      <BrawlerAutocomplete
+                        brawlers={brawlers}
+                        value={inputValue}
+                        onChange={setInputValue}
+                        onSelect={handleBrawlerSelect}
+                        onSubmit={() => handleSubmit({ preventDefault: () => {} } as React.FormEvent)}
                     disabled={pixels.isCompleted}
-                    disabledBrawlers={guessedBrawlerNames}
-                  />
-                </div>
+                        disabledBrawlers={guessedBrawlerNames}
+                      />
+                    </div>
 
                 {/* Guesses Counter */}
                 <div className="flex justify-center mb-4">
                   <div className="daily-mode-guess-counter">
                     <span className="font-bold text-lg">#{pixels.guessCount}</span>
                     <span className="text-white/80 ml-1">{t('guesses.count')}</span>
+                    </div>
                   </div>
-                </div>
 
                 {/* Guesses Grid */}
                 {guesses.length > 0 && (

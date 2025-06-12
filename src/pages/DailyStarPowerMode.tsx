@@ -342,7 +342,7 @@ const DailyStarPowerMode: React.FC = () => {
           className="fixed top-0 left-0 w-full h-full z-50 pointer-events-none"
         />
       )}
-      
+
       {/* Header Section */}
       <div className="w-full max-w-4xl mx-auto px-4 py-2 relative">
         {/* Top Row: Home Icon, Streak, Timer */}
@@ -470,8 +470,8 @@ const DailyStarPowerMode: React.FC = () => {
                       <div className="text-center">
                         <div className="animate-spin h-12 w-12 border-4 border-white/20 border-t-white rounded-full mx-auto mb-4"></div>
                         <div className="text-white/50 text-sm">Loading...</div>
-                      </div>
-                    )}
+                  </div>
+                )}
                   </div>
                 </div>
 

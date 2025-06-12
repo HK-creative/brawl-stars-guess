@@ -43,7 +43,7 @@ const DailyClassicMode: React.FC = () => {
   const [isGameOver, setIsGameOver] = useState(false);
   const [showVictoryScreen, setShowVictoryScreen] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
-  const [yesterdayData, setYesterdayData] = useState<string | null>(null);
+  const [yesterdayData, setYesterdayData] = useState<any>(null);
   
   // New state for discovered attributes
   const [discoveredAttributes, setDiscoveredAttributes] = useState<{
@@ -322,22 +322,14 @@ const DailyClassicMode: React.FC = () => {
             />
           </button>
 
-          {/* Right side: Streak and Timer */}
+          {/* Right side: Streak only */}
           <div className="flex items-center gap-3">
-            {/* Daily Streak - moved to the right */}
+            {/* Daily Streak */}
             <div className="flex flex-col items-center">
               <div className="flex items-center gap-1">
                 <span className="text-3xl font-bold leading-none text-yellow-500">{streak}</span>
                 <div className="text-3xl">🔥</div>
               </div>
-            </div>
-
-            {/* Next Brawler In Timer - moved below yesterday's */}
-            <div className="flex flex-col items-center text-white/90 px-3">
-              <span className="text-xs text-white/60 font-medium uppercase tracking-wide">{t('daily.next.brawler.in')}</span>
-              <span className="font-mono text-white font-bold text-xl">
-                {formatTime(timeUntilNext)}
-              </span>
             </div>
           </div>
         </div>
@@ -541,15 +533,15 @@ const DailyClassicMode: React.FC = () => {
 
                 {/* Search Bar */}
                 <div className="daily-mode-input-section mb-8">
-                  <BrawlerAutocomplete
-                    brawlers={brawlers}
-                    value={inputValue}
-                    onChange={setInputValue}
-                    onSelect={handleSelectBrawler}
-                    onSubmit={() => handleSubmit()}
-                    disabled={classic.isCompleted}
-                    disabledBrawlers={guessedBrawlerNames}
-                  />
+                    <BrawlerAutocomplete
+                      brawlers={brawlers}
+                      value={inputValue}
+                      onChange={setInputValue}
+                      onSelect={handleSelectBrawler}
+                      onSubmit={() => handleSubmit()}
+                      disabled={classic.isCompleted}
+                      disabledBrawlers={guessedBrawlerNames}
+                    />
                 </div>
 
                 {/* Guesses Counter */}
