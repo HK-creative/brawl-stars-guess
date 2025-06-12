@@ -300,7 +300,7 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({
                 "bg-gray-800/50 backdrop-blur-sm",
                 cardBorderStyle,
                 "relative",
-                isMobile ? "min-h-[60px]" : "min-h-[80px]", // Ensure minimum size on mobile
+                isMobile ? "" : "min-h-[80px]", // Remove min-height on mobile to preserve aspect ratio
                 isNew && isRevealed && "animate-card-reveal"
               )}
             >
@@ -327,7 +327,7 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({
                 rarityClass,
                 cardBorderStyle, // Add border
                 "font-bold",
-                isMobile ? "min-h-[60px] px-1" : "min-h-[80px]", // Ensure minimum size and padding
+                isMobile ? "px-1" : "min-h-[80px]", // Remove min-height on mobile to preserve aspect ratio
                 isNew && isRevealed && "animate-card-reveal" // Only animate if this is a new guess and revealed
               )}
             >
@@ -358,7 +358,7 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({
                 classClass,
                 cardBorderStyle, // Add border
                 "relative overflow-visible",
-                isMobile ? "min-h-[60px]" : "min-h-[80px]", // Ensure minimum size
+                isMobile ? "" : "min-h-[80px]", // Remove min-height on mobile to preserve aspect ratio
                 isNew && isRevealed && "animate-card-reveal"
               )}
             >
@@ -437,7 +437,7 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({
                 rangeClass,
                 cardBorderStyle, // Add border
                 "font-bold",
-                isMobile ? "min-h-[60px] px-1" : "min-h-[80px]", // Ensure minimum size and padding
+                isMobile ? "px-1" : "min-h-[80px]", // Remove min-height on mobile to preserve aspect ratio
                 isNew && isRevealed && "animate-card-reveal" // Only animate if this is a new guess and revealed
               )}
             >
@@ -467,7 +467,7 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({
                 wallbreakClass,
                 cardBorderStyle, // Add border
                 "font-bold",
-                isMobile ? "min-h-[60px] px-1" : "min-h-[80px]", // Ensure minimum size and padding
+                isMobile ? "px-1" : "min-h-[80px]", // Remove min-height on mobile to preserve aspect ratio
                 isNew && isRevealed && "animate-card-reveal" // Only animate if this is a new guess and revealed
               )}
             >
@@ -493,7 +493,7 @@ const BrawlerGuessRow: React.FC<BrawlerGuessRowProps> = ({
                 releaseYearClass,
                 cardBorderStyle, // Add border
                 "font-bold",
-                isMobile ? "min-h-[60px]" : "min-h-[80px]", // Ensure minimum size
+                isMobile ? "" : "min-h-[80px]", // Remove min-height on mobile to preserve aspect ratio
                 isNew && isRevealed && "animate-card-reveal" // Only animate if this is a new guess and revealed
               )}
             >

@@ -56,13 +56,53 @@ const DailyAudioMode: React.FC = () => {
   const [hintAudioError, setHintAudioError] = useState(false);
   const [showHint, setShowHint] = useState(false);
 
-  // Mode navigation
+  // Mode navigation data
   const modes = [
-    { key: 'classic', name: 'Classic', path: '/daily/classic' },
-    { key: 'gadget', name: 'Gadget', path: '/daily/gadget' },
-    { key: 'starpower', name: 'Star Power', path: '/daily/starpower' },
-    { key: 'audio', name: 'Audio', path: '/daily/audio' },
-    { key: 'pixels', name: 'Pixels', path: '/daily/pixels' },
+    { 
+      key: 'classic', 
+      name: 'Classic', 
+      path: '/daily/classic',
+      icon: '/ClassicIcon.png',
+      color: 'from-amber-800 to-yellow-900',
+      bgColor: 'bg-amber-800/30',
+      borderColor: 'border-amber-600'
+    },
+    { 
+      key: 'gadget', 
+      name: 'Gadget', 
+      path: '/daily/gadget',
+      icon: '/GadgetIcon.png',
+      color: 'from-green-500 to-emerald-600',
+      bgColor: 'bg-green-600/30',
+      borderColor: 'border-green-500'
+    },
+    { 
+      key: 'starpower', 
+      name: 'Star Power', 
+      path: '/daily/starpower',
+      icon: '/StarpowerIcon.png',
+      color: 'from-orange-500 to-yellow-600',
+      bgColor: 'bg-orange-600/30',
+      borderColor: 'border-orange-500'
+    },
+    { 
+      key: 'audio', 
+      name: 'Audio', 
+      path: '/daily/audio',
+      icon: '/AudioIcon.png',
+      color: 'from-purple-500 to-violet-600',
+      bgColor: 'bg-purple-600/30',
+      borderColor: 'border-purple-500'
+    },
+    { 
+      key: 'pixels', 
+      name: 'Pixels', 
+      path: '/daily/pixels',
+      icon: '/PixelsIcon.png',
+      color: 'from-blue-500 to-indigo-600',
+      bgColor: 'bg-blue-600/30',
+      borderColor: 'border-blue-500'
+    },
   ];
 
   // Initialize daily modes on component mount
@@ -271,48 +311,67 @@ const DailyAudioMode: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center">
-        <div className="animate-spin h-8 w-8 border-4 border-white/20 border-t-white rounded-full"></div>
+      <div className="daily-mode-container daily-audio-theme">
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="animate-spin h-12 w-12 border-4 border-white/20 border-t-white rounded-full"></div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex flex-col">
-      {showConfetti && <ReactConfetti />}
+    <div className="daily-mode-container daily-audio-theme">
+      {/* Confetti Animation */}
+      {showConfetti && (
+        <ReactConfetti
+          width={window.innerWidth}
+          height={window.innerHeight}
+          recycle={false}
+          numberOfPieces={300}
+          onConfettiComplete={() => setShowConfetti(false)}
+          className="fixed top-0 left-0 w-full h-full z-50 pointer-events-none"
+        />
+      )}
       
-      {/* Header */}
-      <div className="px-4 pt-4 pb-2">
+      {/* Header Section */}
+      <div className="w-full max-w-4xl mx-auto px-4 py-2 relative">
         {/* Top Bar */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-4">
           {/* Home Button */}
           <button
             onClick={() => navigate('/')}
-            className="p-3 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20 transition-all duration-200"
+            className="p-2 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20 transition-all duration-200"
           >
-            <Home className="h-6 w-6 text-white" />
+            <img 
+              src="/bs_home_icon.png"
+              alt="Home"
+              className="h-8 w-8"
+            />
           </button>
 
-          {/* Streak */}
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1 px-4 py-2 rounded-full bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg">
-              <span className="text-xl font-bold">{streak}</span>
-              <Flame className="h-4 w-4 text-yellow-300" />
+          {/* Right side: Streak and Timer */}
+          <div className="flex items-center gap-3">
+            {/* Streak */}
+            <div className="flex flex-col items-center">
+              <div className="flex items-center gap-1">
+                <span className="text-2xl font-bold leading-none text-yellow-500">{streak}</span>
+                <div className="text-2xl">🔥</div>
+              </div>
+              <span className="text-xs text-white/70 font-medium mt-1">daily streak</span>
             </div>
-            <span className="text-sm text-white/70 font-medium">daily streak</span>
-          </div>
 
-          {/* Timer */}
-          <div className="flex flex-col items-center px-4 py-3 rounded-full bg-black/30 backdrop-blur-sm border border-white/20 text-white/90">
-            <span className="text-xs text-white/60 font-medium uppercase tracking-wide">Next Brawler In</span>
-            <span className="font-mono text-white font-bold text-lg">
-              {formatTime(timeUntilNext)}
-            </span>
+            {/* Timer */}
+            <div className="flex flex-col items-center px-2 py-1 rounded-full bg-black/30 backdrop-blur-sm border border-white/20 text-white/90">
+              <span className="text-[8px] text-white/60 font-medium uppercase tracking-wide">Next Brawler In</span>
+              <span className="font-mono text-white font-bold text-xs">
+                {formatTime(timeUntilNext)}
+              </span>
+            </div>
           </div>
         </div>
 
         {/* Mode Navigation Pills */}
-        <div className="flex items-center justify-center gap-3 mb-6">
+        <div className="flex items-center justify-center gap-1.5 mb-4 mt-3">
           {modes.map((mode) => {
             const isCurrent = mode.key === 'audio';
             
@@ -321,19 +380,23 @@ const DailyAudioMode: React.FC = () => {
                 key={mode.key}
                 onClick={() => handleModeClick(mode)}
                 className={cn(
-                  "relative px-6 py-3 rounded-full text-sm font-semibold transition-all duration-300",
+                  "relative flex flex-col items-center justify-center w-12 h-12 rounded-full transition-all duration-300",
                   isCurrent
-                    ? "bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg"
-                    : "bg-white/10 text-white/60 hover:text-white/80 hover:bg-white/20",
+                    ? `bg-gradient-to-r ${mode.color} text-white shadow-lg shadow-${mode.color.split(' ')[1]}/30`
+                    : `${mode.bgColor} ${mode.borderColor} text-white/70 hover:text-white/90 border-2 opacity-40 hover:opacity-70`,
                   !isCurrent && "cursor-pointer"
                 )}
                 disabled={isCurrent}
               >
-                {mode.name}
+                <img 
+                  src={mode.icon}
+                  alt={`${mode.name} Icon`}
+                  className="w-6 h-6"
+                />
                 
                 {/* Current mode indicator dot */}
                 {isCurrent && (
-                  <div className="absolute -bottom-3 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-white rounded-full"></div>
+                  <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2 w-3 h-3 bg-white rounded-full border-2 border-gray-800"></div>
                 )}
               </button>
             );
@@ -341,7 +404,7 @@ const DailyAudioMode: React.FC = () => {
         </div>
 
         {/* Title */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-6">
           <h1 className="text-4xl md:text-5xl font-black text-white mb-2 tracking-tight">
             Today's Audio
           </h1>
@@ -391,64 +454,67 @@ const DailyAudioMode: React.FC = () => {
               // Game Content
               <div className="daily-mode-game-area">
                 {/* Audio Player */}
-                <div className="flex flex-col items-center gap-6 mb-8">
+                <div className="flex flex-col items-center gap-6 mb-6">
                   {/* Main Audio */}
-                  <div className="w-80 h-80 md:w-96 md:h-96 rounded-3xl border-4 border-white/20 bg-black/20 backdrop-blur-sm flex items-center justify-center overflow-hidden shadow-2xl">
-                    <div className="text-center">
-                      <div className="text-8xl mb-6">🎵</div>
-                      <div className="text-white/70 mb-6">Mystery Audio</div>
-                      
+                  <div className="w-64 h-64 md:w-72 md:h-72 rounded-3xl border-4 border-white/20 bg-black/20 backdrop-blur-sm flex flex-col items-center justify-center overflow-hidden shadow-2xl p-6">
+                    <div className="text-center flex-1 flex flex-col justify-center gap-6">
+                      {/* Main Play Button - Cool Circle Design */}
                       <button
                         onClick={playAudio}
                         disabled={!audioReady || audioError}
                         className={cn(
-                          "px-8 py-4 rounded-full text-white font-medium transition-all duration-200 flex items-center gap-3 mx-auto",
+                          "w-20 h-20 rounded-full text-white font-medium transition-all duration-300 flex items-center justify-center mx-auto relative overflow-hidden",
                           audioReady && !audioError
-                            ? "bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 shadow-lg"
+                            ? "bg-gradient-to-br from-blue-500 via-purple-600 to-blue-700 hover:from-blue-600 hover:via-purple-700 hover:to-blue-800 shadow-2xl hover:shadow-blue-500/30 transform hover:scale-105"
                             : "bg-gray-500 cursor-not-allowed opacity-50"
                         )}
                       >
+                        <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent rounded-full"></div>
                         {isPlaying ? (
+                          <Pause className="h-8 w-8 relative z-10" />
+                        ) : (
+                          <Play className="h-8 w-8 relative z-10 ml-1" />
+                        )}
+                      </button>
+                      
+                      {/* Hint Button - Always Visible */}
+                      <button
+                        onClick={playHintAudio}
+                        disabled={!showHint || !hintAudioReady}
+                        className={cn(
+                          "px-6 py-3 rounded-full font-medium transition-all duration-300 flex items-center gap-2 mx-auto",
+                          showHint && hintAudioReady
+                            ? "bg-gradient-to-r from-yellow-500 to-orange-600 text-white hover:from-yellow-600 hover:to-orange-700 shadow-lg transform hover:scale-105"
+                            : "bg-gray-600/50 text-white/50 cursor-not-allowed"
+                        )}
+                      >
+                        {showHint && hintAudioReady ? (
                           <>
-                            <Pause className="h-5 w-5" />
-                            Pause
+                            {isHintPlaying ? (
+                              <>
+                                <Pause className="h-4 w-4" />
+                                Pause Hint
+                              </>
+                            ) : (
+                              <>
+                                <Play className="h-4 w-4" />
+                                Play Hint
+                              </>
+                            )}
                           </>
                         ) : (
                           <>
-                            <Play className="h-5 w-5" />
-                            Play Audio
+                            <div className="h-4 w-4 rounded-full border-2 border-white/50"></div>
+                            Hint available in {Math.max(0, 4 - audio.guessCount)} guesses
                           </>
                         )}
                       </button>
                     </div>
                   </div>
-
-                  {/* Hint Audio */}
-                  {showHint && hintAudioReady && (
-                    <div className="flex flex-col items-center gap-4">
-                      <div className="text-white/50 text-sm">Hint Audio Available</div>
-                      <button
-                        onClick={playHintAudio}
-                        className="px-6 py-3 rounded-full bg-gradient-to-r from-yellow-500 to-orange-600 text-white font-medium transition-all duration-200 flex items-center gap-2 hover:from-yellow-600 hover:to-orange-700 shadow-lg"
-                      >
-                        {isHintPlaying ? (
-                          <>
-                            <Pause className="h-4 w-4" />
-                            Pause Hint
-                          </>
-                        ) : (
-                          <>
-                            <Play className="h-4 w-4" />
-                            Play Hint
-                          </>
-                        )}
-                      </button>
-                    </div>
-                  )}
                 </div>
 
                 {/* Search Bar */}
-                <div className="daily-mode-input-section mb-6">
+                <div className="daily-mode-input-section mb-8">
                   <BrawlerAutocomplete
                     brawlers={brawlers}
                     value={inputValue}
@@ -461,7 +527,7 @@ const DailyAudioMode: React.FC = () => {
                 </div>
 
                 {/* Guesses Counter */}
-                <div className="flex justify-center mb-6">
+                <div className="flex justify-center mb-4">
                   <div className="daily-mode-guess-counter">
                     <Hash className="h-5 w-5" />
                     <span>{audio.guessCount} {t('guesses.count')}</span>
@@ -501,9 +567,9 @@ const DailyAudioMode: React.FC = () => {
 
                 {/* Yesterday's Audio */}
                 {yesterdayData && (
-                  <div className="flex justify-center mt-6">
+                  <div className="flex justify-center mt-4">
                     <span className="text-sm text-white/50">
-                      yesterday's audio was <span className="text-white/70 font-medium">{yesterdayData.brawler || 'Mico'}</span>
+                      yesterday's audio was <span className="text-yellow-500 font-medium">{yesterdayData.brawler || 'Mico'}</span>
                     </span>
                   </div>
                 )}
