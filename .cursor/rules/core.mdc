@@ -1,0 +1,16 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+• Read docs/ first.  
+• On any code change: update every impacted docs/ file in same PR; docs must stay 100 % accurate.  
+• Use Bun only via package.json scripts.  
+• Stack: React + Vite + TS-strict, Tailwind/shadcn-ui, Zustand, Supabase.  
+• Edits: smallest diff; unchanged lines → "// ... existing code ...".  
+• Commits start with `[ai]`; include doc updates.  
+• No placeholders/secrets (only anon Supabase key from .env.sample).  
+• Follow current naming, folder, lint, formatting - unless the task explicitly introduces a new convention; in that case update all affected code + docs to the new standard.
+• Security: respect Supabase RLS; `dangerouslySetInnerHTML` only in ui/chart.tsx.  
+• Replies brief; zero fluff; ask if context missing.
+
