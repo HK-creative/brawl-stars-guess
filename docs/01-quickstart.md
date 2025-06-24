@@ -102,4 +102,3 @@ If you are configuring **your own Supabase project**, see
 
 * Explore the code via [`02-folder-structure.md`](02-folder-structure.md).
 * Review architecture & data flow docs before implementing features.
-* Happy hacking! 🎉 

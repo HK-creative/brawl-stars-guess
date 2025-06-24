@@ -55,81 +55,65 @@ const EndlessMode = () => {
     { name: "Wallbreak", fontSize: isMobile ? "text-xs" : "text-xl" }
   ];
 
-  const initializeNewRound = (currentRound: number, calledFrom: 'initial' | 'next_brawler' | 'skip_retry') => {
-    console.log(`[DEBUG] Attempting initializeNewRound. Current gameStatus: ${gameStatus}, Called from: ${calledFrom}, Current round: ${currentRound}`);
-
+  const initializeNewRound = async (calledFrom: 'initial' | 'next_brawler' | 'skip_retry') => {
+    // Guard against multiple calls or calls in wrong state
     if (calledFrom === 'initial' && gameStatus !== 'loading') {
-      console.warn(`[DEBUG] Blocked initializeNewRound: initial call but gameStatus is ${gameStatus}`);
       return;
     }
     if (calledFrom === 'next_brawler' && gameStatus !== 'victory') {
-      console.warn(`[DEBUG] Blocked initializeNewRound: next_brawler call but gameStatus is ${gameStatus}`);
       return;
     }
-    if (calledFrom === 'skip_retry' && gameStatus !== 'playing' && gameStatus !== 'error') {
-      console.warn(`[DEBUG] Blocked initializeNewRound: skip_retry call but gameStatus is ${gameStatus}`);
+    if (calledFrom === 'skip_retry' && gameStatus !== 'playing') {
       return;
     }
 
-    console.log("[DEBUG] Proceeding with initializeNewRound. Setting gameStatus to 'loading'");
     setGameStatus('loading');
-    setShowConfetti(false);
-    setCurrentVictoryData(null);
+    setErrorMessage('');
 
-    setTimeout(() => {
-      try {
-        const newBrawler = getRandomBrawler();
-        if (!newBrawler) {
-          throw new Error("Failed to get new brawler.");
-        }
-
-        setCorrectBrawler(newBrawler);
-        setGuesses([]);
-        setGuessCount(0);
-        setGuessedBrawlers([]);
-        setInputValue('');
-        setSelectedBrawlerForGuess(null);
-        setRound(prev => prev + 1);
-        setErrorMessage(null);
-        
-        setTimeout(() => {
-          setGameStatus('playing');
-          console.log("[DEBUG] New round initialized. Brawler:", newBrawler.name);
-        }, 0);
-      } catch (error) {
-        console.error("[DEBUG] Error initializing new round:", error);
-        setErrorMessage(error instanceof Error ? error.message : "Failed to load brawler for new round.");
-        setGameStatus('error');
+    try {
+      const newBrawler = getRandomBrawler();
+      if (!newBrawler) {
+        throw new Error("Failed to get new brawler.");
       }
-    }, 0);
+
+      setCorrectBrawler(newBrawler);
+      setGuesses([]);
+      setGuessCount(0);
+      setGuessedBrawlers([]);
+      setInputValue('');
+      setSelectedBrawlerForGuess(null);
+      setRound(prev => prev + 1);
+      setGameStatus('playing');
+    } catch (error) {
+      console.error("[DEBUG] Error initializing new round:", error);
+      setErrorMessage(error instanceof Error ? error.message : "Failed to load brawler for new round.");
+      setGameStatus('error');
+    }
   };
 
-  // Effect for initial game setup
+  // Initialize the game when component mounts
   useEffect(() => {
-    console.log("[DEBUG] Initializing game (useEffect)");
-    initializeNewRound(0, 'initial'); // Start round 1
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    initializeNewRound('initial');
   }, []);
 
   // Effect to log guessedBrawlers changes for deep debugging
   useEffect(() => {
-    console.log(`[DEBUG guessedBrawlers EFFECT] guessedBrawlers is now: [${guessedBrawlers.join(", ")}]. gameStatus: ${gameStatus}, Round: ${round}`);
+    // Debug logging removed
   }, [guessedBrawlers, gameStatus, round]);
 
   const performGuess = (nameToGuess: string) => {
     if (gameStatus !== 'playing') {
-      console.warn("[DEBUG performGuess] Guess submitted while not in 'playing' status:", gameStatus);
       return;
     }
 
     const trimmedNameToGuess = nameToGuess.trim();
     if (!trimmedNameToGuess) {
-      toast({ title: "Error", description: "Brawler name for guess is empty.", variant: "destructive" });
+      toast({ title: t('message.error'), description: t('error.brawler.name.empty'), variant: "destructive" });
       return;
     }
 
     if (!correctBrawler) {
-      toast({ title: "Game Error", description: "Correct brawler not set. Please try refreshing.", variant: "destructive" });
+      toast({ title: t('error.game.error'), description: t('error.correct.brawler.not.set'), variant: "destructive" });
       setGameStatus('error');
       setErrorMessage("Internal: correctBrawler was null during guess processing.");
       return;
@@ -138,12 +122,12 @@ const EndlessMode = () => {
     const submittedBrawler = brawlers.find(b => b.name.toLowerCase() === trimmedNameToGuess.toLowerCase());
 
     if (!submittedBrawler) {
-      toast({ title: "Invalid Brawler", description: `"${trimmedNameToGuess}" is not a recognized Brawler.`, variant: "destructive" });
+      toast({ title: t('error.invalid.brawler'), description: `"${trimmedNameToGuess}" ${t('error.not.recognized')}`, variant: "destructive" });
       return;
     }
 
     if (guessedBrawlers.includes(submittedBrawler.name)) {
-      toast({ title: "Already Guessed", description: `You've already guessed ${submittedBrawler.name} this round!`, variant: "destructive" });
+      toast({ title: t('toast.already.guessed'), description: `${t('error.already.guessed.this.round')} ${submittedBrawler.name} ${t('error.this.round')}`, variant: "destructive" });
       return;
     }
 
@@ -181,21 +165,19 @@ const EndlessMode = () => {
     }
   };
 
-  const handleSubmitGuess = (e: React.FormEvent) => {
-    // This function is now ONLY for the form's direct onSubmit (e.g. click button)
-    e.preventDefault();
-    e.stopPropagation();
-    console.log(`[DEBUG Form onSubmit] Form submitted. Current inputValue: "${inputValue}". Calling performGuess.`);
-    if (gameStatus === 'playing') {
-      performGuess(inputValue); // Uses the current state of inputValue
-    } else {
-      console.warn(`[DEBUG Form onSubmit] Submission blocked, gameStatus is ${gameStatus}`);
-    }
-  };
+      const handleSubmitGuess = (e: React.FormEvent) => {
+      e.preventDefault();
+      
+      if (gameStatus !== 'playing') {
+        return;
+      }
+
+      performGuess(inputValue);
+    };
 
   const handleNextBrawlerFromModal = () => {
     if (gameStatus === 'victory') {
-      initializeNewRound(round, 'next_brawler');
+      initializeNewRound('next_brawler');
     }
   };
 
@@ -205,10 +187,29 @@ const EndlessMode = () => {
 
   const handleSkipOrRetry = () => {
     if (gameStatus === 'playing' || gameStatus === 'error') {
-      console.log("[DEBUG] Skip/Retry button clicked. Current status:", gameStatus, "Initializing new round.");
-      initializeNewRound(round, 'skip_retry');
-    } else {
-      console.warn("[DEBUG] Skip/Retry clicked in unexpected state:", gameStatus);
+      initializeNewRound('skip_retry');
+    }
+  };
+
+  const handleEnterKey = (currentInputText: string, suggestions: Brawler[]) => {
+    if (!currentInputText.trim()) {
+      return;
+    }
+
+    // Try to find exact match
+    const exactMatch = brawlers.find(b => 
+      b.name.toLowerCase() === currentInputText.toLowerCase()
+    );
+
+    if (exactMatch) {
+      performGuess(exactMatch.name);
+      return;
+    }
+
+    // If no exact match, use first suggestion if available
+    if (suggestions.length > 0) {
+      const firstSuggestionName = suggestions[0].name;
+      performGuess(firstSuggestionName);
     }
   };
 
@@ -222,9 +223,9 @@ const EndlessMode = () => {
       <div className="flex justify-center items-center h-40">
          <Card className="brawl-card p-6">
             <div className="text-center">
-              <h3 className="text-xl font-bold text-brawl-yellow mb-2">Error Loading Challenge</h3>
-              <p className="text-white/80">{errorMessage || "An unknown error occurred."}</p>
-              <Button onClick={handleSkipOrRetry} className="mt-4">Try Again / New Brawler</Button>
+              <h3 className="text-xl font-bold text-brawl-yellow mb-2">{t('error.loading.challenge')}</h3>
+              <p className="text-white/80">{errorMessage || t('error.unknown')}</p>
+              <Button onClick={handleSkipOrRetry} className="mt-4">{t('button.try.again.new')}</Button>
             </div>
           </Card>
       </div>
@@ -256,13 +257,13 @@ const EndlessMode = () => {
             <div className="bg-gradient-to-r from-purple-800/80 via-purple-900/90 to-purple-800/80 rounded-lg p-3 mb-6">
               <div className="flex justify-between items-center">
                 <div className="flex flex-col">
-                  <h3 className="text-xl font-bold text-white leading-tight">Endless Challenge</h3>
+                  <h3 className="text-xl font-bold text-white leading-tight">{t('game.endless.challenge')}</h3>
                   <div className="flex items-center space-x-2 mt-1">
                     <div className="bg-purple-700/50 text-white/90 text-xs px-2 py-1 rounded-full">
-                      {guessCount} {guessCount === 1 ? 'attempt' : 'attempts'}
+                      {guessCount} {guessCount === 1 ? t('game.attempt') : t('game.attempts')}
                     </div>
                     <div className="bg-purple-700/50 text-white/90 text-xs px-2 py-1 rounded-full">
-                      Round: {round}
+                      {t('game.round')} {round}
                     </div>
                     <Button
                       onClick={handleSkipOrRetry}
@@ -272,7 +273,7 @@ const EndlessMode = () => {
                       disabled={gameStatus !== 'playing'}
                     >
                       <RefreshCw className="w-3 h-3" />
-                      Skip Brawler
+                      {t('button.skip.brawler')}
                     </Button>
                   </div>
                 </div>
@@ -298,30 +299,17 @@ const EndlessMode = () => {
                           return;
                       }
 
-                      const exactMatch = brawlers.find(b => b.name.toLowerCase() === currentInputText.toLowerCase());
+                                             const availableSuggestions = brawlers.filter(b =>
+                         !guessedBrawlers.includes(b.name) && // Consider already guessed for suggestions visibility
+                         b.name.toLowerCase().startsWith(currentInputText.toLowerCase())
+                       );
 
-                      if (exactMatch) {
-                        console.log(`[DEBUG EnterKey] Exact match for "${currentInputText}". Submitting.`);
-                        performGuess(currentInputText); 
-                      } else {
-                        const availableSuggestions = brawlers.filter(b =>
-                          !guessedBrawlers.includes(b.name) && // Consider already guessed for suggestions visibility
-                          b.name.toLowerCase().startsWith(currentInputText.toLowerCase())
-                        );
-
-                        if (availableSuggestions.length > 0) {
-                          const firstSuggestionName = availableSuggestions[0].name;
-                          console.log(`[DEBUG EnterKey] No exact match for "${currentInputText}". First suggestion: "${firstSuggestionName}". Submitting this.`);
-                          setInputValue(firstSuggestionName); // Update input to show what's being guessed
-                          performGuess(firstSuggestionName);
-                        } else {
-                          console.log(`[DEBUG EnterKey] No exact match or suggestions for "${currentInputText}". Doing nothing on Enter.`);
-                          // Do nothing. User can continue typing or click submit button for current input.
-                        }
-                      }
+                       if (availableSuggestions.length > 0) {
+                         handleEnterKey(currentInputText, availableSuggestions);
+                       }
                     }
                   }}
-                  placeholder="Type brawler name..."
+                  placeholder={t('game.type.brawler.name')}
                   disabled={gameStatus !== 'playing'}
                   className="pl-3 pr-3 py-2 h-11 text-lg font-medium bg-[#1a1e44] text-white border-2 border-[#2a2f6a] rounded-lg placeholder:text-white/40 focus:ring-2 focus:ring-brawl-yellow/50 focus:border-transparent hover:bg-[#212659] disabled:opacity-50 disabled:cursor-not-allowed w-full"
                   list="brawler-datalist"

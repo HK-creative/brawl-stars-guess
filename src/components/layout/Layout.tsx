@@ -32,8 +32,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           <RotatingBackground />
         </div>
 
-        {/* Auth buttons - positioned exactly like language selection but on left side */}
-        {isHomePage && (
+        {/* Auth buttons - positioned exactly like language selection but on left side - ONLY show on non-homepage */}
+        {!isHomePage && (
           <div className="absolute top-2 left-4 md:top-4 md:left-1/2 md:translate-x-96 z-50">
             {!isLoggedIn ? (
               <div className="md:relative md:bg-black/10 md:backdrop-blur-sm md:rounded-xl md:border md:border-white/10 md:p-3 md:shadow-sm">
@@ -137,14 +137,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           </div>
         )}
 
-        {/* Language selection - hidden on PC home page, visible on mobile and other pages */}
-        <div 
-          className={cn(
-            "absolute top-2 right-4 md:top-4 md:right-16 z-50 flex gap-2",
-            // Hide on PC when on home page, but keep visible on mobile and other pages
-            isHomePage ? "md:hidden" : ""
-          )}
-        >
+        {/* Language selection - ONLY show on non-homepage */}
+        {!isHomePage && (
+          <div className="absolute top-2 right-4 md:top-4 md:right-16 z-50 flex gap-2">
           <button
             onClick={() => changeLanguage('en')}
             className={cn(
@@ -183,10 +178,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             />
           </button>
         </div>
+        )}
         
         <main className={cn(
           "relative z-10 min-h-screen",
-          isHomePage ? "pt-24" : "pt-8 px-4",
+          !isHomePage ? "pt-8 px-4" : "",
             "overflow-visible"
           )}>
           {children || <Outlet />}

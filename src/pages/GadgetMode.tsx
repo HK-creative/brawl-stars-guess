@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { t, getLanguage } from '@/lib/i18n';
+import { t } from '@/lib/i18n';
 import { Switch } from '@/components/ui/switch';
-import { Check, X, Infinity as InfinityIcon, Share2 } from 'lucide-react';
+import { Check, X, Infinity as InfinityIcon } from 'lucide-react';
 import BrawlerAutocomplete from '@/components/BrawlerAutocomplete';
-import { brawlers, Brawler, getBrawlerDisplayName } from '@/data/brawlers';
+import { brawlers, Brawler } from '@/data/brawlers';
 import { toast } from 'sonner';
 import { fetchDailyChallenge, getTimeUntilNextChallenge, fetchYesterdayChallenge } from '@/lib/daily-challenges';
 import { getPortrait, getPin, DEFAULT_PIN, DEFAULT_PORTRAIT } from '@/lib/image-helpers';
@@ -18,7 +18,6 @@ import ReactConfetti from 'react-confetti';
 import { useIsMobile } from "@/hooks/use-mobile";
 import GameModeTracker from '@/components/GameModeTracker';
 import HomeButton from '@/components/ui/home-button';
-import ShareResultModal from '@/components/ShareResultModal';
 
 // Helper function to get the next mode key for the VictorySection
 const getNextModeKey = (currentMode: string) => {
@@ -29,33 +28,14 @@ const getNextModeKey = (currentMode: string) => {
 
 // Helper to get gadget image path
 const getGadgetImage = (brawler: string, gadgetName?: string): string => {
+  // If no brawler provided, use a specific default brawler's gadget instead of generic GadgetIcon
   if (!brawler) {
+    // Return a specific brawler's gadget image as fallback
     return `/GadgetImages/shelly_gadget_01.png`;
   }
   
   // Clean up brawler name for file path
   const normalizedBrawler = brawler.toLowerCase().replace(/ /g, '_');
-  
-  // Handle special cases
-  if (normalizedBrawler === 'mr.p') return `/GadgetImages/mrp_gadget_01.png`;
-  if (normalizedBrawler === 'el primo') return `/GadgetImages/elprimo_gadget_01.png`;
-  if (normalizedBrawler === 'colonel ruffs') return `/GadgetImages/colonel_ruffs_gadget_01.png`;
-  // Special case for R-T (use lowercase, no dash, as in asset: rt_gadget_01.png)
-  if (brawler.toLowerCase().replace(/[-_ ]/g, '') === 'rt') {
-    if (gadgetName && gadgetName.match(/2|second/i)) {
-      return '/GadgetImages/rt_gadget_02.png';
-    }
-    return '/GadgetImages/rt_gadget_01.png';
-  }
-  // Special case for Jae-Yong (file is capitalized and uses dash)
-  if (brawler.toLowerCase().replace(/[-_ ]/g, '') === 'jaeyong') {
-    // Try both gadget 1 and gadget 2 based on gadgetName
-    if (gadgetName && gadgetName.match(/2|second/i)) {
-      return '/GadgetImages/Jae-Yong_gadget_2.png';
-    }
-    // Default to gadget 1 if not specified
-    return '/GadgetImages/Jae-Yong_gadget_1.png';
-  }
   
   // First, try to determine the base gadget number from the name
   let baseNum = '01';
@@ -85,13 +65,7 @@ const getGadgetImage = (brawler: string, gadgetName?: string): string => {
   
   // Check if either variant is banned
   if (isBannedImage(variant1) || isBannedImage(variant2)) {
-    // Return a specific brawler's gadget that matches the actual brawler
-    // Try first to return this brawler's gadget instead of defaulting to Shelly
-    if (normalizedBrawler !== 'shelly') {
-      // Try the base pattern without specific numbering
-      const basicVariant = `/GadgetImages/${normalizedBrawler}_gadget.png`;
-      return basicVariant;
-    }
+    // If banned, return a known good gadget image
     return `/GadgetImages/shelly_gadget_01.png`;
   }
   
@@ -103,7 +77,7 @@ interface GadgetChallenge {
   brawler: string;
   gadgetName: string;
   tip: string;
-  image?: string;
+  image?: string; // Not always present, so we build it
 }
 
 const modeOrder = [
@@ -129,13 +103,13 @@ const GadgetMode = ({
   isEndlessMode: propIsEndlessMode = false,
   isSurvivalMode = false,
   skipVictoryScreen = false
-}: GadgetModeProps) => {
-  const navigate = useNavigate();
+}: GadgetModeProps = {}) => {
   const [guess, setGuess] = useState('');
   const [guesses, setGuesses] = useState<string[]>([]);
   const [isCorrect, setIsCorrect] = useState(false);
   const [selectedBrawler, setSelectedBrawler] = useState<Brawler | null>(null);
   const [attempts, setAttempts] = useState(0);
+  // Survival Mode: Track guesses left
   const [guessesLeft, setGuessesLeft] = useState(maxGuesses);
   const [showResult, setShowResult] = useState(false);
   const [dailyChallenge, setDailyChallenge] = useState<GadgetChallenge | null>(null);
@@ -143,6 +117,7 @@ const GadgetMode = ({
   const [timeUntilNext, setTimeUntilNext] = useState({ hours: 0, minutes: 0, seconds: 0 });
   const [gadgetImage, setGadgetImage] = useState<string>('');
   const [correctBrawler, setCorrectBrawler] = useState<string>('');
+  // This state variable is exclusively for tracking which brawler was correctly guessed for the victory screen
   const [victoryBrawler, setVictoryBrawler] = useState<string>('');
   const [actualBrawlerForGadget, setActualBrawlerForGadget] = useState<Brawler | null>(null);
   const [yesterdayGadget, setYesterdayGadget] = useState<{ image: string, brawler: string } | null>(null);
@@ -152,15 +127,163 @@ const GadgetMode = ({
   const [correctGadgetName, setCorrectGadgetName] = useState<string>('');
   const [showConfetti, setShowConfetti] = useState(false);
   const [isEndlessMode, setIsEndlessMode] = useState(propIsEndlessMode);
+  // Track recently used brawlers to prevent repetition within 3 rounds
   const [recentlyUsedBrawlers, setRecentlyUsedBrawlers] = useState<string[]>([]);
   const [selectedGadget, setSelectedGadget] = useState<any>(null);
   const victoryRef = useRef<HTMLDivElement>(null);
-  const [gameKey, setGameKey] = useState(Date.now().toString());
+  const [gameKey, setGameKey] = useState(Date.now().toString()); // Key to force re-render
+  const navigate = useNavigate();
+
+  // Confetti window size
   const [windowSize, setWindowSize] = useState({ width: window.innerWidth, height: window.innerHeight });
+  
+  useEffect(() => {
+    const handleResize = () => setWindowSize({ width: window.innerWidth, height: window.innerHeight });
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
-  const currentLanguage = getLanguage();
+  // CRITICAL: This effect detects when brawlerId changes and resets the game
+  useEffect(() => {
+    console.log(`BrawlerId changed to: ${brawlerId}`);
+    
+    // Reset game state for the new brawler
+    setGuess('');
+    setGuesses([]);
+    setIsCorrect(false);
+    setSelectedBrawler(null);
+    setAttempts(0);
+    setShowResult(false);
+    setIsGameOver(false);
+    setGuessCount(0);
+    setShowConfetti(false);
+    setGuessesLeft(maxGuesses); // Reset guesses left for new round
+    
+    // Generate a new key to force complete component re-initialization
+    setGameKey(Date.now().toString());
+    
+    // Load the new challenge with the changed brawlerId
+    loadChallenge();
+  }, [brawlerId, maxGuesses]); // Also re-run if maxGuesses changes
 
-  // Function to update countdown
+  // Update countdown for challenges
+  useEffect(() => {
+    const intervalId = setInterval(updateCountdown, 1000);
+    return () => clearInterval(intervalId);
+  }, []);
+
+  // Confetti effect for correct guesses
+  useEffect(() => {
+    if (showConfetti) {
+      const timer = setTimeout(() => {
+        setShowConfetti(false);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [showConfetti]);
+
+  // Load the challenge on component mount
+  useEffect(() => {
+    // Only use the daily challenge if not in endless mode or survival mode
+    if (!isEndlessMode && !isSurvivalMode) {
+      loadChallenge();
+    }
+    // If in survival mode, the challenge will be loaded by the brawlerId effect
+  }, [isEndlessMode, isSurvivalMode]);
+
+  const loadChallenge = async () => {
+    setIsLoading(true);
+    
+    try {
+      // If we're in survival mode, use the brawlerId to determine the challenge
+      if (isSurvivalMode && brawlerId !== undefined) {
+        console.log(`Loading survival challenge with brawlerId: ${brawlerId}`);
+        
+        try {
+          // Try to find the brawler with the exact ID
+          let selectedBrawler = brawlers.find(b => b.id === brawlerId);
+          
+          // If brawler with the ID doesn't exist, use a fallback
+          if (!selectedBrawler) {
+            console.error(`Brawler with ID ${brawlerId} not found in data. Using fallback.`);
+            
+            // Try to find Shelly as a fallback (ID 1)
+            selectedBrawler = brawlers.find(b => b.id === 1);
+            
+            // If even Shelly isn't found, pick a random brawler
+            if (!selectedBrawler && brawlers.length > 0) {
+              const randomIndex = Math.floor(Math.random() * brawlers.length);
+              selectedBrawler = brawlers[randomIndex];
+              console.log(`Using random brawler as fallback: ${selectedBrawler.name}`);
+            }
+            
+            if (!selectedBrawler) {
+              // Create a fallback brawler if nothing else works
+              selectedBrawler = brawlers[0] || { 
+                id: 1, 
+                name: 'Shelly',
+                rarity: 'Starter',
+                class: 'Damage Dealer',
+                movement: 'Fast',
+                range: 'Long',
+                reload: 'Normal',
+                wallbreak: 'No', // must be string
+                starPowers: [], // correct property name
+                gadgets: []
+              };
+              console.warn('No valid brawlers found in data, using hardcoded Shelly');
+            }
+          }
+          
+          // Set the selected brawler as the correct one
+          setVictoryBrawler(selectedBrawler.name);
+          setCorrectBrawlerName(selectedBrawler.name);
+          
+          console.log(`Getting gadget for brawler: ${selectedBrawler.name} (ID: ${selectedBrawler.id})`);
+          
+          // Always get the brawler object from your data
+          const actualBrawler = brawlers.find(b => b.id === selectedBrawler.id);
+          let selectedGadget = null;
+          let gadgetImage = '';
+          if (actualBrawler && actualBrawler.gadgets && actualBrawler.gadgets.length > 0) {
+            // Pick a random gadget from the brawler's gadgets
+            selectedGadget = actualBrawler.gadgets[Math.floor(Math.random() * actualBrawler.gadgets.length)];
+            
+            // Get the image for this gadget
+            gadgetImage = getGadgetImage(actualBrawler.name, selectedGadget.name);
+            console.log(`Using gadget image: ${gadgetImage}`);
+          } else {
+            console.warn(`No gadgets found for brawler: ${selectedBrawler.name}. Using default.`);
+            gadgetImage = getGadgetImage(selectedBrawler.name);
+          }
+          
+          setGadgetImage(gadgetImage);
+          setCorrectBrawler(actualBrawler?.name || selectedBrawler.name);
+          setActualBrawlerForGadget(actualBrawler);
+          setSelectedGadget(selectedGadget);
+  
+          // Create gadget challenge object
+          const gadgetChallenge: GadgetChallenge = {
+            brawler: actualBrawler ? actualBrawler.name : selectedBrawler.name,
+            gadgetName: selectedGadget ? selectedGadget.name : 'Unknown Gadget',
+            tip: selectedGadget && selectedGadget.tip ? selectedGadget.tip : `Special gadget for ${actualBrawler ? actualBrawler.name : selectedBrawler.name}.`,
+            image: gadgetImage
+          };
+  
+          setDailyChallenge(gadgetChallenge);
+          setVictoryBrawler(gadgetChallenge.brawler);
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading gadget challenge:', error);
+      setIsLoading(false);
+      toast.error('Error loading challenge');
+    }
+  };
+
+  // Update countdown function
   const updateCountdown = () => {
     const nextTime = getTimeUntilNextChallenge();
     setTimeUntilNext({
@@ -168,6 +291,28 @@ const GadgetMode = ({
       minutes: nextTime.minutes,
       seconds: 0
     });
+  };
+  
+  const resetGame = () => {
+    setGuess('');
+    setGuesses([]);
+    setIsCorrect(false);
+    setSelectedBrawler(null);
+    setAttempts(0);
+    setShowResult(false);
+    setIsGameOver(false);
+    setGuessCount(0);
+    setShowConfetti(false);
+    
+    // If a brawler was used in this round, add it to recently used list
+    if (correctBrawler) {
+      // Add current brawler to recently used and keep only the last 2
+      setRecentlyUsedBrawlers(prev => {
+        const updated = [correctBrawler, ...prev].slice(0, 2);
+        console.log('Recently used brawlers (will be avoided):', updated);
+        return updated;
+      });
+    }
   };
 
   // Function to handle form submission
@@ -180,51 +325,26 @@ const GadgetMode = ({
   const handleBrawlerSelect = (brawler: Brawler | null) => {
     setSelectedBrawler(brawler);
     if (brawler) {
-      const displayName = getBrawlerDisplayName(brawler, currentLanguage);
-      setGuess(displayName);
-      // Immediately submit the guess
-      setTimeout(() => handleGuess(), 0);
+      setGuess(brawler.name);
     }
   };
 
   // Function to handle making a guess
   const handleGuess = () => {
+    // Don't process empty guesses
     if (!guess || !dailyChallenge) return;
 
-    // Find the exact brawler from our data to ensure we use the full correct name
-    const exactBrawler = selectedBrawler || brawlers.find(b => 
-      getBrawlerDisplayName(b, currentLanguage).toLowerCase() === guess.toLowerCase() ||
-      b.name.toLowerCase() === guess.toLowerCase() ||
-      b.nameHebrew?.toLowerCase() === guess.toLowerCase()
-    );
-    
-    // Only proceed if we have a valid brawler - this ensures we never use partial names
-    if (!exactBrawler) {
-      toast.error('Please select a valid brawler from the list');
-      return;
-    }
-
-    // Check if this brawler has already been guessed
-    if (guesses.some(g => g.toLowerCase() === exactBrawler.name.toLowerCase())) {
-      const displayName = getBrawlerDisplayName(exactBrawler, currentLanguage);
-      toast.error(`You've already guessed ${displayName}`);
-      return;
-    }
-
-    // Add the FULL brawler name to guesses, not the raw input
-    const fullBrawlerName = exactBrawler.name;
-    setGuesses([...guesses, fullBrawlerName]);
+    // Add the guess to the list
+    setGuesses([...guesses, guess]);
     setAttempts(attempts + 1);
     
+    // Update guesses left for survival mode
     if (isSurvivalMode) {
-      // In survival mode, don't manage local guesses - let the parent handle it
-      // The parent (SurvivalMode) will track guesses through its own state
-    } else {
-      // Only manage local guesses in non-survival modes
       setGuessesLeft(prev => prev - 1);
     }
 
-    const isGuessCorrect = fullBrawlerName.toLowerCase() === dailyChallenge.brawler.toLowerCase();
+    // Check if the guess is correct
+    const isGuessCorrect = guess.toLowerCase() === dailyChallenge.brawler.toLowerCase();
     
     if (isGuessCorrect) {
       setIsCorrect(true);
@@ -232,193 +352,37 @@ const GadgetMode = ({
       setIsGameOver(true);
       setShowConfetti(true);
       
+      // Call the onRoundEnd callback if provided (for survival mode)
       if (onRoundEnd) {
         onRoundEnd({ success: true, brawlerName: dailyChallenge.brawler });
       }
       
       toast.success('Correct! You guessed the brawler!');
     } else {
-      const outOfGuesses = isSurvivalMode ? attempts + 1 >= maxGuesses : attempts + 1 >= maxGuesses;
+      // If incorrect and out of guesses, show the result
+      const outOfGuesses = isSurvivalMode ? guessesLeft <= 1 : attempts + 1 >= maxGuesses;
       
       if (outOfGuesses) {
         setShowResult(true);
         setIsGameOver(true);
         
+        // Call the onRoundEnd callback if provided (for survival mode)
         if (onRoundEnd) {
           onRoundEnd({ success: false, brawlerName: dailyChallenge.brawler });
         }
         
-        const correctBrawlerObj = brawlers.find(b => b.name.toLowerCase() === dailyChallenge.brawler.toLowerCase());
-        const correctDisplayName = correctBrawlerObj ? getBrawlerDisplayName(correctBrawlerObj, currentLanguage) : dailyChallenge.brawler;
-        toast.error(`Game over! The correct brawler was ${correctDisplayName}.`);
+        toast.error(`Game over! The correct brawler was ${dailyChallenge.brawler}.`);
       } else {
         toast.error('Incorrect! Try again.');
       }
     }
     
+    // Clear input after guessing
     setGuess('');
     setSelectedBrawler(null);
   };
 
-  // Reset game state
-  const resetGame = () => {
-    setGuess('');
-    setGuesses([]);
-    setIsCorrect(false);
-    setSelectedBrawler(null);
-    setAttempts(0);
-    setShowResult(false);
-    setIsGameOver(false);
-    setGuessCount(0);
-    setShowConfetti(false);
-    
-    if (correctBrawler) {
-      setRecentlyUsedBrawlers(prev => {
-        const updated = [correctBrawler, ...prev].slice(0, 2);
-        return updated;
-      });
-    }
-  };
-
-  // Load challenge function
-  const loadChallenge = async () => {
-    setIsLoading(true);
-    
-    try {
-      if (isSurvivalMode) {
-        console.log('Loading random brawler for Survival Mode Gadget challenge');
-        
-        // Get all brawlers that have gadgets
-        const brawlersWithGadgets = brawlers.filter(b => 
-          b.gadgets && b.gadgets.length > 0 && 
-          !recentlyUsedBrawlers.includes(b.name)
-        );
-        
-        // Make sure we have enough eligible brawlers, otherwise use all brawlers with gadgets
-        const eligibleBrawlers = brawlersWithGadgets.length >= 5 ?
-          brawlersWithGadgets :
-          brawlers.filter(b => b.gadgets && b.gadgets.length > 0);
-        
-        // Shuffle the brawlers array to pick a random one
-        const shuffledBrawlers = [...eligibleBrawlers];
-        for (let i = shuffledBrawlers.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [shuffledBrawlers[i], shuffledBrawlers[j]] = [shuffledBrawlers[j], shuffledBrawlers[i]];
-        }
-        
-        // Pick the first brawler from shuffled array
-        const randomBrawler = shuffledBrawlers[0] || brawlers[0];
-        console.log(`Selected random brawler: ${randomBrawler.name} (ID: ${randomBrawler.id})`);
-
-        // Get a random gadget from the brawler
-        let selectedGadget = null;
-        let gadgetImage = '';
-        
-        if (randomBrawler.gadgets && randomBrawler.gadgets.length > 0) {
-          // Shuffle gadgets to pick a random one
-          const shuffledGadgets = [...randomBrawler.gadgets];
-          for (let i = shuffledGadgets.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [shuffledGadgets[i], shuffledGadgets[j]] = [shuffledGadgets[j], shuffledGadgets[i]];
-          }
-          
-          selectedGadget = shuffledGadgets[0];
-          gadgetImage = getGadgetImage(randomBrawler.name, selectedGadget.name);
-          console.log(`Selected gadget: ${selectedGadget.name}`);
-        } else {
-          gadgetImage = getGadgetImage(randomBrawler.name);
-          console.log(`No gadgets found for ${randomBrawler.name}, using default image`);
-        }
-
-        // Cross-check: ensure the correct brawler is the owner of the shown gadget
-        let correctBrawlerName = randomBrawler.name;
-        if (selectedGadget) {
-          // Find the brawler who owns this gadget (should always be randomBrawler, but double-check)
-          const trueOwner = brawlers.find(b => b.gadgets && b.gadgets.some(g => g.name === selectedGadget.name));
-          if (trueOwner && trueOwner.name !== randomBrawler.name) {
-            console.warn(`Mismatch detected: gadget '${selectedGadget.name}' belongs to ${trueOwner.name}, not ${randomBrawler.name}! Fixing assignment.`);
-            correctBrawlerName = trueOwner.name;
-          }
-        }
-
-        setVictoryBrawler(correctBrawlerName);
-        setCorrectBrawlerName(correctBrawlerName);
-        setGadgetImage(gadgetImage);
-        setCorrectBrawler(correctBrawlerName);
-        setActualBrawlerForGadget(brawlers.find(b => b.name === correctBrawlerName) || randomBrawler);
-        setSelectedGadget(selectedGadget);
-  
-        const gadgetChallenge: GadgetChallenge = {
-          brawler: randomBrawler.name,
-          gadgetName: selectedGadget ? selectedGadget.name : `Unknown Gadget`,
-          tip: selectedGadget && selectedGadget.tip ? selectedGadget.tip : `Special gadget for ${randomBrawler.name}.`,
-          image: gadgetImage
-        };
-  
-        setDailyChallenge(gadgetChallenge);
-        setVictoryBrawler(gadgetChallenge.brawler);
-      } else if (!isEndlessMode) {
-        const challenge = await fetchDailyChallenge('gadget');
-        if (challenge) {
-          setDailyChallenge(challenge);
-          setGadgetImage(challenge.image || '');
-          setCorrectBrawler(challenge.brawler);
-          setVictoryBrawler(challenge.brawler);
-        }
-      }
-    } catch (error) {
-      console.error('Error loading gadget challenge:', error);
-      toast.error('Error loading challenge');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    const handleResize = () => setWindowSize({ width: window.innerWidth, height: window.innerHeight });
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  useEffect(() => {
-    if (brawlerId !== undefined) {
-      setGuess('');
-      setGuesses([]);
-      setIsCorrect(false);
-      setSelectedBrawler(null);
-      setAttempts(0);
-      setShowResult(false);
-      setIsGameOver(false);
-      setGuessCount(0);
-      setShowConfetti(false);
-      setGuessesLeft(maxGuesses);
-      
-      setGameKey(Date.now().toString());
-      
-      loadChallenge();
-    }
-  }, [brawlerId, maxGuesses]);
-
-  useEffect(() => {
-    const intervalId = setInterval(updateCountdown, 1000);
-    return () => clearInterval(intervalId);
-  }, []);
-
-  useEffect(() => {
-    if (showConfetti) {
-      const timer = setTimeout(() => {
-        setShowConfetti(false);
-      }, 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [showConfetti]);
-
-  useEffect(() => {
-    if (!isEndlessMode && !isSurvivalMode) {
-      loadChallenge();
-    }
-  }, [isEndlessMode, isSurvivalMode]);
-
+  // Loading state
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[70vh]">
@@ -429,7 +393,7 @@ const GadgetMode = ({
   }
 
   return (
-    <div key={gameKey} className="survival-mode-container survival-gadget-theme">
+    <div key={gameKey} className="relative">
       {/* Confetti effect for correct guesses */}
       {showConfetti && (
         <ReactConfetti
@@ -441,205 +405,182 @@ const GadgetMode = ({
         />
       )}
 
-      {/* Header Section */}
-      <div className="survival-mode-header">
-        {/* Title Section */}
-        <div className="survival-mode-title-section">
-          <h1 className="survival-mode-title">
-            {t('survival.guess.gadget')}
+      {/* Only show the infinite mode toggle if not in survival mode */}
+      {!isSurvivalMode && (
+        <div className="flex justify-between items-center mb-4">
+          <div className="flex items-center gap-2">
+            {!isEndlessMode ? (
+              <span className="text-sm text-white/60">Daily Challenge</span>
+            ) : (
+              <span className="text-sm text-white/60">Endless Mode</span>
+            )}
+            <div className="flex items-center gap-1">
+              <Switch 
+                checked={isEndlessMode}
+                onCheckedChange={(checked) => {
+                  setIsEndlessMode(checked);
+                  resetGame();
+                }}
+                className="data-[state=checked]:bg-amber-500"
+              />
+              <InfinityIcon className="h-4 w-4 text-white/60" />
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="flex flex-col min-h-[70vh] w-full max-w-2xl mx-auto">
+        {/* Main Challenge Content */}
+        <div className="flex-1 mb-8">
+          {/* Title */}
+          <h1 className="text-2xl md:text-3xl font-bold text-center text-white mb-3">
+            Guess the Brawler with this Gadget
           </h1>
           
-          {/* Only show the infinite mode toggle if not in survival mode */}
-          {!isSurvivalMode && (
-            <div className="flex items-center gap-3 mt-4">
-              <span className="text-sm text-white/60">
-                {!isEndlessMode ? "Daily Challenge" : "Endless Mode"}
-              </span>
-              <div className="flex items-center gap-2">
-                <Switch 
-                  checked={isEndlessMode}
-                  onCheckedChange={(checked) => {
-                    setIsEndlessMode(checked);
-                    resetGame();
+          {/* Gadget Image */}
+          <div className="flex flex-col items-center mb-6">
+            <div className="relative w-32 h-32 md:w-40 md:h-40 mx-auto mb-4">
+              {gadgetImage ? (
+                <img
+                  src={dailyChallenge?.image || '/GadgetImages/shelly_gadget_01.png'}
+                  alt="Brawler Gadget"
+                  className="w-full h-full object-contain transform transition-all duration-300 hover:scale-105"
+                  onError={(e) => {
+                    console.log('Image load failed. Using fallback gadget image.');
+                    // Use a specific brawler's gadget image instead of generic GadgetIcon
+                    e.currentTarget.src = '/GadgetImages/shelly_gadget_01.png';
+                    
+                    // If that fails too, try another specific brawler's gadget
+                    e.currentTarget.onerror = () => {
+                      console.log('First fallback failed, trying another brawler gadget');
+                      e.currentTarget.src = '/GadgetImages/colt_gadget_01.png';
+                      
+                      // If all fallbacks fail, hide the image
+                      e.currentTarget.onerror = () => {
+                        console.log('All fallback images failed, hiding image');
+                        e.currentTarget.style.display = 'none';
+                      };
+                    };
                   }}
-                  className="data-[state=checked]:bg-amber-500"
                 />
-                <InfinityIcon className="h-4 w-4 text-white/60" />
+              ) : null}
+            </div>
+            
+            {/* Gadget Name (shown if game is over) */}
+            <div className="text-center">
+              <h2 className="text-xl md:text-2xl font-extrabold text-brawl-yellow mb-2">
+                {showResult ? dailyChallenge?.gadgetName : ""}
+              </h2>
+              {/* Only show the tip when the game is over */}
+              {showResult && dailyChallenge && (
+                <p className="text-sm md:text-base text-white/80 max-w-md mx-auto italic">
+                  "{dailyChallenge.tip}"
+                </p>
+              )}
+            </div>
+          </div>
+          
+          {/* Input Form */}
+          <form onSubmit={handleSubmit} className="mb-4 max-w-md mx-auto px-2">
+            <BrawlerAutocomplete
+              brawlers={brawlers} 
+              value={guess}
+              onChange={setGuess}
+              onSelect={handleBrawlerSelect}
+              onSubmit={handleGuess}
+              disabled={showResult}
+              disabledBrawlers={guesses}
+            />
+          </form>
+
+          {/* Guess Counter */}
+          <div className="w-full flex justify-center gap-4 mt-4">
+            {isSurvivalMode ? (
+              <div className="flex items-center gap-2 bg-black/70 border-2 border-brawl-yellow px-6 py-2 rounded-full shadow-xl animate-pulse">
+                <span className="text-lg font-bold text-brawl-yellow">
+                  {guessesLeft} {guessesLeft === 1 ? 'Guess' : 'Guesses'} Left
+                </span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 bg-black/70 border-2 border-brawl-yellow px-6 py-2 rounded-full shadow-xl">
+                <span className="text-lg font-bold text-brawl-yellow">
+                  {attempts}/{maxGuesses} Guesses
+                </span>
+              </div>
+            )}
+          </div>
+
+          {/* Previous Guesses */}
+          {guesses.length > 0 && (
+            <div className="mt-6">
+              <h3 className="text-lg font-bold text-white mb-3 text-center">Previous Guesses:</h3>
+              <div className="flex flex-wrap justify-center gap-2">
+                {guesses.map((prevGuess, index) => (
+                  <div key={index} className="flex items-center gap-2 bg-red-900/50 border border-red-500 px-3 py-1 rounded-lg">
+                    <img
+                      src={getPortrait(prevGuess)}
+                      alt={prevGuess}
+                      className="w-6 h-6 rounded-full"
+                      onError={(e) => {
+                        console.log(`Failed to load portrait for ${prevGuess}, trying fallback`);
+                        e.currentTarget.src = DEFAULT_PORTRAIT;
+                        e.currentTarget.onerror = () => {
+                          console.log(`Failed to load fallback portrait for ${prevGuess}, hiding image`);
+                          e.currentTarget.style.display = 'none';
+                        };
+                      }}
+                    />
+                    <span className="text-sm text-white">{prevGuess}</span>
+                    <X className="w-4 h-4 text-red-400" />
+                  </div>
+                ))}
               </div>
             </div>
           )}
         </div>
-      </div>
 
-      {/* Main Content */}
-      <div className="survival-mode-content">
-        {/* Game Card */}
-        <div className="survival-mode-game-card survival-mode-animate-pulse">
-          <div className="survival-mode-card-content">
-            {/* Main Challenge Content */}
-            <div className="survival-mode-input-section">
-              {/* Gadget Image */}
-              <div className="flex flex-col items-center mb-1">
-                <div className="relative w-20 h-20 md:w-24 md:h-24 mx-auto mb-1">
-                  {dailyChallenge?.image && (
+        {/* Result Section */}
+        {showResult && (
+          <div className="mt-8">
+            {isCorrect ? (
+              <div className="text-center">
+                <div className="bg-green-900/50 border-2 border-green-500 rounded-lg p-6 mb-4">
+                  <Check className="w-16 h-16 text-green-400 mx-auto mb-4" />
+                  <h2 className="text-2xl font-bold text-green-400 mb-2">Correct!</h2>
+                  <p className="text-white">You guessed {dailyChallenge?.brawler} in {attempts} {attempts === 1 ? 'guess' : 'guesses'}!</p>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center">
+                <div className="bg-red-900/50 border-2 border-red-500 rounded-lg p-6 mb-4">
+                  <X className="w-16 h-16 text-red-400 mx-auto mb-4" />
+                  <h2 className="text-2xl font-bold text-red-400 mb-2">Game Over!</h2>
+                  <p className="text-white mb-4">The correct answer was:</p>
+                  <div className="flex items-center justify-center gap-3">
                     <img
-                      src={dailyChallenge.image}
-                      alt={`${dailyChallenge.brawler}'s Gadget`}
-                      className="w-full h-full object-contain transform transition-all duration-300 hover:scale-105"
-                      onLoad={(e) => {
-                        console.log('Gadget image loaded successfully');
-                        e.currentTarget.style.display = 'block';
-                        // Hide loading state
-                        const parent = e.currentTarget.parentElement;
-                        if (parent) {
-                          const loadingEl = parent.querySelector('.loading-placeholder') as HTMLElement;
-                          if (loadingEl) {
-                            loadingEl.style.display = 'none';
-                          }
-                        }
-                      }}
-                      onError={(e) => {
-                        console.log('Gadget image load failed, retrying...');
-                        e.currentTarget.style.display = 'none';
-                        // Keep showing loading state and retry after a delay
-                        const parent = e.currentTarget.parentElement;
-                        if (parent) {
-                          const loadingEl = parent.querySelector('.loading-placeholder') as HTMLElement;
-                          if (loadingEl) {
-                            loadingEl.style.display = 'flex';
-                            // Retry loading the image after 2 seconds
-                            setTimeout(() => {
-                              const currentSrc = e.currentTarget.src;
-                              e.currentTarget.src = '';
-                              e.currentTarget.src = currentSrc + '?retry=' + Date.now();
-                            }, 2000);
-                          }
-                        }
-                      }}
-                      style={{ display: 'none' }}
+                      src={getPortrait(dailyChallenge?.brawler || '')}
+                      alt={dailyChallenge?.brawler}
+                      className="w-12 h-12 rounded-full border-2 border-brawl-yellow"
                     />
-                  )}
-                  {/* Loading state */}
-                  <div className="w-full h-full flex flex-col items-center justify-center space-y-4 loading-placeholder">
-                    <div className="loading-spinner"></div>
-                    <p className="text-yellow-400 text-sm">Loading gadget...</p>
-                    <div className="loading-dots">
-                      <div className="loading-dot"></div>
-                      <div className="loading-dot"></div>
-                      <div className="loading-dot"></div>
-                    </div>
+                    <span className="text-xl font-bold text-brawl-yellow">{dailyChallenge?.brawler}</span>
                   </div>
                 </div>
-                
-                {/* Gadget Name (only shown if game is over) */}
-                <div className="text-center">
-                  <h2 className="text-xl md:text-2xl font-extrabold text-brawl-yellow mb-2">
-                    {showResult && dailyChallenge ? dailyChallenge.gadgetName : ""}
-                  </h2>
-                  {showResult && dailyChallenge && (
-                    <p className="text-sm md:text-base text-white/80 max-w-md mx-auto italic">
-                      "{dailyChallenge.tip}"
-                    </p>
-                  )}
-                </div>
               </div>
-              
-              {/* Input Form */}
-              <form onSubmit={handleSubmit} className="mb-4 max-w-md mx-auto px-2">
-                <BrawlerAutocomplete
-                  brawlers={brawlers} 
-                  value={guess}
-                  onChange={setGuess}
-                  onSelect={handleBrawlerSelect}
-                  onSubmit={handleGuess}
-                  disabled={showResult}
-                  disabledBrawlers={guesses}
+            )}
+
+            {/* Victory Section - only show if not in survival mode or if skipVictoryScreen is false */}
+            {!isSurvivalMode && !skipVictoryScreen && (
+              <div ref={victoryRef}>
+                <VictorySection
+                  isCorrect={isCorrect}
+                  correctBrawler={victoryBrawler}
+                  attempts={attempts}
+                  maxAttempts={maxGuesses}
+                  nextModeKey={getNextModeKey('gadget')}
+                  gameMode="gadget"
                 />
-              </form>
-
-              {/* Guess Counter */}
-              <div className="w-full flex justify-center gap-4 mt-2">
-                {isSurvivalMode ? (
-                  <div className="survival-mode-guess-counter">
-                    <span className="text-lg font-bold tracking-wide">{t('guesses.left')}</span>
-                    <span className={`text-2xl font-extrabold ${(maxGuesses - attempts) <= 3 ? 'text-red-400 animate-bounce' : 'text-white'}`}>{maxGuesses - attempts}</span>
-                  </div>
-                ) : (
-                  <div className="survival-mode-guess-counter">
-                    <span className="text-base font-semibold">Number of Guesses</span>
-                    <span className="text-base font-bold">{attempts}</span>
-                  </div>
-                )}
               </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Previous Guesses */}
-        <div className="survival-mode-guesses-section">
-          <div className="survival-mode-guesses-grid">
-            {guesses.map((pastGuess, idx) => {
-              const isCorrect = dailyChallenge && pastGuess.toLowerCase() === dailyChallenge.brawler.toLowerCase();
-              const isLastGuess = idx === guesses.length - 1;
-              return (
-                <div
-                  key={idx}
-                  className={cn(
-                    "survival-mode-guess-item",
-                    isCorrect ? "survival-mode-guess-correct" : "survival-mode-guess-incorrect",
-                    !isCorrect && isLastGuess ? "animate-shake" : ""
-                  )}
-                >
-                  <img
-                    src={getPortrait(pastGuess)}
-                    alt={pastGuess}
-                    className="survival-mode-guess-portrait"
-                    onError={(e) => {
-                      console.log(`Failed to load portrait for ${pastGuess}, trying fallback`);
-                      e.currentTarget.src = DEFAULT_PORTRAIT;
-                      e.currentTarget.onerror = () => {
-                        console.log(`Failed to load fallback portrait for ${pastGuess}, hiding image`);
-                        e.currentTarget.style.display = 'none';
-                      };
-                    }}
-                  />
-                  <span className="survival-mode-guess-name">
-                    {pastGuess}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Victory Section - only show if not in survival mode */}
-        {isGameOver && dailyChallenge && !skipVictoryScreen && (
-          <div ref={victoryRef} className="w-full">
-            <VictorySection
-              brawlerName={victoryBrawler || correctBrawler || correctBrawlerName || dailyChallenge.brawler}
-              brawlerPortrait={getPortrait(victoryBrawler || correctBrawler || correctBrawlerName || dailyChallenge.brawler)}
-              tries={guesses.length}
-              mode="gadget"
-              nextModeKey={getNextModeKey('gadget')}
-              onNextMode={() => {
-                const nextMode = getNextModeKey('gadget');
-                navigate(`/${nextMode}`);
-              }}
-              nextBrawlerIn={timeUntilNext}
-              onShare={() => {
-                const shareText = `I guessed the correct brawler in ${guesses.length} ${guesses.length === 1 ? 'try' : 'tries'}!`;
-                if (navigator.share) {
-                  navigator.share({
-                    title: 'Brawl Stars Guess',
-                    text: shareText,
-                    url: window.location.href,
-                  }).catch(console.error);
-                } else {
-                  navigator.clipboard.writeText(`${shareText} ${window.location.href}`);
-                  toast.success('Link copied to clipboard!');
-                }
-              }}
-            />
+            )}
           </div>
         )}
       </div>

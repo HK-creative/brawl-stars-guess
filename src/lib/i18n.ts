@@ -61,6 +61,10 @@ const translations: Translations = {
     en: "Survival Mode",
     he: "מצב הישרדות"
   },
+  "mode.endless": {
+    en: "Endless Mode",
+    he: "מצב אינסופי"
+  },
   
   // Page Titles & Headers
   "mode.classic.title": {
@@ -267,6 +271,30 @@ const translations: Translations = {
     en: "Already have an account?",
     he: "כבר יש לך חשבון?"
   },
+  "auth.reset.password": {
+    en: "Reset Password",
+    he: "איפוס סיסמא"
+  },
+  "auth.create.your.account": {
+    en: "Create Your Account",
+    he: "צור את החשבון שלך"
+  },
+  "auth.welcome.back": {
+    en: "Welcome Back",
+    he: "ברוכים השבים"
+  },
+  "auth.create.account.button": {
+    en: "Create Account",
+    he: "צור חשבון"
+  },
+  "auth.sign.in.button": {
+    en: "Sign In",
+    he: "התחבר"
+  },
+  "auth.failed": {
+    en: "Authentication failed",
+    he: "ההתחברות נכשלה"
+  },
   
   // Game Setup & Configuration
   "survival.configure": {
@@ -385,6 +413,22 @@ const translations: Translations = {
     en: "Try Again / New Brawler",
     he: "נסה שוב / בראולר חדש"
   },
+  "button.skip.brawler": {
+    en: "Skip Brawler",
+    he: "דלג על הבראולר"
+  },
+  "button.play.hint": {
+    en: "Play Hint",
+    he: "נגן רמז"
+  },
+  "button.playing": {
+    en: "Playing...",
+    he: "מנגן..."
+  },
+  "submit.guess": {
+    en: "Submit Guess",
+    he: "שלח ניחוש"
+  },
   
   // Game Messages & Notifications
   "error.load.challenge": {
@@ -431,6 +475,122 @@ const translations: Translations = {
     en: "An unknown error occurred.",
     he: "אירעה שגיאה לא ידועה"
   },
+  "error.brawler.name.empty": {
+    en: "Brawler name for guess is empty.",
+    he: "שם הבראולר לניחוש ריק."
+  },
+  "error.game.error": {
+    en: "Game Error",
+    he: "שגיאת משחק"
+  },
+  "error.correct.brawler.not.set": {
+    en: "Correct brawler not set. Please try refreshing.",
+    he: "הבראולר הנכון לא נקבע. נסה לרענן את הדף."
+  },
+  "error.invalid.brawler": {
+    en: "Invalid Brawler",
+    he: "בראולר לא תקין"
+  },
+  "error.not.recognized": {
+    en: "is not a recognized Brawler.",
+    he: "אינו בראולר מוכר."
+  },
+  "error.already.guessed.this.round": {
+    en: "You've already guessed",
+    he: "כבר ניחשת את"
+  },
+  "error.this.round": {
+    en: "this round!",
+    he: "בסיבוב הזה!"
+  },
+  "message.offline.mode": {
+    en: "Offline Mode",
+    he: "מצב לא מקוון"
+  },
+  "message.already.guessed": {
+    en: "Already guessed",
+    he: "כבר נוחש"
+  },
+  "message.game.over": {
+    en: "Game Over",
+    he: "המשחק נגמר"
+  },
+  "message.correct": {
+    en: "Correct!",
+    he: "נכון!"
+  },
+  "message.error": {
+    en: "Error",
+    he: "שגיאה"
+  },
+  "message.out.of.attempts": {
+    en: "Out of attempts! The correct answer was",
+    he: "נגמרו הניסיונות! התשובה הנכונה הייתה"
+  },
+  "message.wrong.guess": {
+    en: "Wrong guess!",
+    he: "ניחוש שגוי!"
+  },
+  "message.attempts.left": {
+    en: "attempts left.",
+    he: "ניסיונות נותרו."
+  },
+  "message.please.select.valid.brawler": {
+    en: "Please select a valid brawler from the list",
+    he: "אנא בחר בראולר תקין מהרשימה"
+  },
+  "message.you.already.guessed": {
+    en: "You've already guessed",
+    he: "כבר ניחשת את"
+  },
+  "message.correct.you.guessed": {
+    en: "Correct! You guessed the brawler!",
+    he: "נכון! ניחשת את הבראולר!"
+  },
+  "message.game.over.correct.was": {
+    en: "Game over! The correct brawler was",
+    he: "המשחק נגמר! הבראולר הנכון היה"
+  },
+  "message.incorrect.try.again": {
+    en: "Incorrect! Try again.",
+    he: "לא נכון! נסה שוב."
+  },
+  "message.link.copied": {
+    en: "Link copied to clipboard!",
+    he: "הקישור הועתק ללוח!"
+  },
+  "message.failed.load.challenge": {
+    en: "Failed to load challenge",
+    he: "נכשל בטעינת האתגר"
+  },
+  "message.error.loading.challenge": {
+    en: "Error loading challenge",
+    he: "שגיאה בטעינת האתגר"
+  },
+  "message.email.verified": {
+    en: "Email verified successfully!",
+    he: "האימייל אומת בהצלחה!"
+  },
+  "message.passwords.not.match": {
+    en: "Passwords do not match",
+    he: "הסיסמאות לא תואמות"
+  },
+  "message.password.updated": {
+    en: "Password updated successfully!",
+    he: "הסיסמא עודכנה בהצלחה!"
+  },
+  "message.failed.update.password": {
+    en: "Failed to update password",
+    he: "נכשל בעדכון הסיסמא"
+  },
+  "message.error.playing.audio": {
+    en: "Error playing audio:",
+    he: "שגיאה בהשמעת הקול:"
+  },
+  "message.error.playing.hint.audio": {
+    en: "Error playing hint audio:",
+    he: "שגיאה בהשמעת רמז הקול:"
+  },
   
   // Game Interface Elements
   "game.daily.description": {
@@ -441,7 +601,7 @@ const translations: Translations = {
     en: "Previous Guesses:",
     he: "ניחושים קודמים:"
   },
-  "game.attempts": {
+  "game.attempts.label": {
     en: "Attempts:",
     he: "ניסיונות:"
   },
@@ -468,6 +628,26 @@ const translations: Translations = {
   "game.modes": {
     en: "modes",
     he: "מצבים"
+  },
+  "game.endless.challenge": {
+    en: "Endless Challenge",
+    he: "אתגר אינסופי"
+  },
+  "game.attempt": {
+    en: "attempt",
+    he: "ניסיון"
+  },
+  "game.attempts": {
+    en: "attempts",
+    he: "ניסיונות"
+  },
+  "game.round": {
+    en: "Round:",
+    he: "סיבוב:"
+  },
+  "game.type.brawler.name": {
+    en: "Type brawler name...",
+    he: "הקלד שם בראולר..."
   },
   
   // Time & Counters
@@ -499,17 +679,21 @@ const translations: Translations = {
   },
   "attribute.wallbreak": {
     en: "Wallbreak",
-    he: "שובר קירות"
+    he: "שבירת קיר"
+  },
+  "attribute.speed": {
+    en: "Speed",
+    he: "מהירות"
   },
   "attribute.release.year": {
-    en: "Year",
-    he: "שנה"
+    en: "Release Year",
+    he: "שנת יציאה"
   },
   
   // Rarity Values
   "rarity.starter": {
     en: "Starter",
-    he: "ראשונה"
+    he: "מתחיל"
   },
   "rarity.rare": {
     en: "Rare",
@@ -517,15 +701,15 @@ const translations: Translations = {
   },
   "rarity.super.rare": {
     en: "Super Rare",
-    he: "נדיר במיוחד"
+    he: "סופר נדיר"
   },
   "rarity.epic": {
     en: "Epic",
-    he: "אדיר"
+    he: "אפי"
   },
   "rarity.mythic": {
     en: "Mythic",
-    he: "מדהים"
+    he: "מיתי"
   },
   "rarity.legendary": {
     en: "Legendary",
@@ -547,349 +731,211 @@ const translations: Translations = {
   },
   "range.long": {
     en: "Long",
-    he: "רחוק"
+    he: "ארוך"
   },
   "range.very.long": {
     en: "Very Long",
-    he: "ממש רחוק"
+    he: "ארוך מאוד"
+  },
+  "range.very.short": {
+    en: "Very Short",
+    he: "קצר מאוד"
   },
   
-  // Wallbreak Values
-  "wallbreak.no": {
-    en: "No",
-    he: "לא"
+  // Speed Values
+  "speed.very.fast": {
+    en: "Very Fast",
+    he: "מהיר מאוד"
   },
-  "wallbreak.yes": {
+  "speed.fast": {
+    en: "Fast",
+    he: "מהיר"
+  },
+  "speed.normal": {
+    en: "Normal",
+    he: "רגיל"
+  },
+  "speed.slow": {
+    en: "Slow",
+    he: "איטי"
+  },
+  "speed.very.slow": {
+    en: "Very Slow",
+    he: "איטי מאוד"
+  },
+  
+  // Class Values
+  "class.damage.dealer": {
+    en: "Damage Dealer",
+    he: "לוחם נזק"
+  },
+  "class.tank": {
+    en: "Tank",
+    he: "טנק"
+  },
+  "class.support": {
+    en: "Support",
+    he: "תמיכה"
+  },
+  "class.assassin": {
+    en: "Assassin",
+    he: "רוצח"
+  },
+  "class.thrower": {
+    en: "Thrower",
+    he: "זורק"
+  },
+  "class.marksman": {
+    en: "Marksman",
+    he: "קלע"
+  },
+  "class.controller": {
+    en: "Controller",
+    he: "בקר"
+  },
+  
+  // Boolean Values
+  "boolean.yes": {
     en: "Yes",
     he: "כן"
   },
-  
-  // Settings
-  "settings": {
-    en: "Settings",
-    he: "הגדרות"
-  },
-  "language": {
-    en: "Language",
-    he: "שפה"
-  },
-  "english": {
-    en: "English",
-    he: "אנגלית"
-  },
-  "hebrew": {
-    en: "Hebrew",
-    he: "עברית"
+  "boolean.no": {
+    en: "No",
+    he: "לא"
   },
   
-  // Accessibility Labels
-  "aria.switch.english": {
-    en: "Switch to English",
-    he: "עבור לאנגלית"
+  // Toast/Notification Categories
+  "toast.already.guessed": {
+    en: "Already Guessed",
+    he: "כבר נוחש"
   },
-  "aria.switch.hebrew": {
-    en: "Switch to Hebrew",
-    he: "עבור לעברית"
+  "toast.brawler.not.found": {
+    en: "Brawler not found",
+    he: "בראולר לא נמצא"
+  },
+  "toast.brawler.already.guessed": {
+    en: "Brawler already guessed",
+    he: "הבראולר כבר נוחש"
   },
   
-  // Legacy translations (keeping for compatibility)
-  "mode.voice.description": {
-    en: "Guess the brawler by their voice lines",
-    he: "נחש את הבראולר לפי קווי הקול שלהם"
+  // Navigation and UI
+  "nav.toggle.sidebar": {
+    en: "Toggle Sidebar",
+    he: "החלף תפריט צד"
   },
-  "submit.guess": {
-    en: "Submit Guess",
-    he: "שלח ניחוש"
+  "ui.invisible.absolute": {
+    en: "invisible absolute",
+    he: "בלתי נראה מוחלט"
   },
-  "coming.soon": {
-    en: "Coming Soon",
-    he: "בקרוב"
+  
+  // Score Share
+  "share.classic.mode": {
+    en: "Classic Mode",
+    he: "מצב קלאסי"
   },
-
-  // Game Over Section
-  "game.over": {
-    en: "GAME OVER",
-    he: "GAME OVER"
+  "share.audio.mode": {
+    en: "Audio Mode",
+    he: "מצב שמע"
   },
-  "game.over.correct.brawler": {
-    en: "The correct brawler was:",
-    he: "הבראולר הנכון היה:"
+  "share.gadget.mode": {
+    en: "Gadget Mode",
+    he: "מצב גאדג'ט"
   },
-  "game.over.final.score": {
-    en: "Final Score",
-    he: "ציון סופי"
+  
+  // Survival Mode Messages
+  "survival.pixels": {
+    en: "Survival Pixels",
+    he: "פיקסלים הישרדות"
   },
-  "game.over.rounds.completed": {
-    en: "Rounds Completed:",
-    he: "ניצחונות:"
+  "survival.endless.pixels": {
+    en: "Endless Pixels",
+    he: "פיקסלים אינסופי"
   },
-  "game.over.home": {
-    en: "Home",
-    he: "דף הבית"
+  "survival.daily.pixels.challenge": {
+    en: "Daily Pixels Challenge",
+    he: "אתגר פיקסלים יומי"
   },
-  "game.over.try.again": {
-    en: "Try Again",
-    he: "שחק שוב"
+  
+  // Image Alt Text
+  "alt.survival.background": {
+    en: "Survival Background",
+    he: "רקע הישרדות"
   },
-
-  // Survival Game Modes
-  "survival.pts": {
-    en: "pts",
-    he: "נקודות"
+  "alt.classic.mode": {
+    en: "Classic Mode",
+    he: "מצב קלאסי"
   },
-  "survival.round": {
-    en: "Round",
-    he: "סבב"
+  "alt.mystery.brawler": {
+    en: "Mystery Brawler",
+    he: "בראולר מסתורי"
   },
-  "survival.seconds": {
-    en: "s",
-    he: "שניות"
+  "alt.audio.mode": {
+    en: "Audio Mode",
+    he: "מצב שמע"
   },
-  "survival.guess.gadget": {
-    en: "Guess the Brawler with this Gadget",
-    he: "נחש את הבראולר לפי הגאדג'ט"
+  "alt.mystery.gadget": {
+    en: "Mystery Gadget",
+    he: "גאדג'ט מסתורי"
   },
-  "survival.guess.sound": {
-    en: "Guess the Brawler by Sound",
-    he: "נחש את הבראולר לפי הקול"
+  "alt.gadget.mode": {
+    en: "Gadget Mode",
+    he: "מצב גאדג'ט"
   },
-  "survival.click.play.sound": {
-    en: "Click to play attack sound",
-    he: "לחץ כאן כדי לשמוע"
+  "alt.pixels.mode": {
+    en: "Pixels Mode",
+    he: "מצב פיקסלים"
   },
-  "survival.guess.starpower": {
-    en: "Guess the Brawler with this Star Power",
-    he: "נחש את הבראולר לפי הכוח כוכב"
+  "alt.brawler.gadget": {
+    en: "Brawler Gadget",
+    he: "גאדג'ט בראולר"
   },
-
-  // Correct Screen
-  "correct.screen.title": {
-    en: "Correct!",
-    he: "ניצחת בסבב!"
+  "alt.very.fast": {
+    en: "Very Fast",
+    he: "מהיר מאוד"
   },
-  "correct.screen.points.earned": {
-    en: "Points earned",
-    he: "נקודות שקיבלתם"
-  },
-  "correct.screen.base.points": {
-    en: "base points",
-    he: "נקודות על ניצחון"
-  },
-  "correct.screen.guess.bonus": {
-    en: "Guess bonus",
-    he: "בונוס ניסיונות"
-  },
-  "correct.screen.guesses.used": {
-    en: "guesses used",
-    he: "ניסיונות נוצלו"
-  },
-  "correct.screen.time.bonus": {
-    en: "Time bonus",
-    he: "בונוס זמן"
-  },
-  "correct.screen.seconds.elapsed": {
-    en: "s elapsed",
-    he: "שניות עברו"
-  },
-  "correct.screen.next.round": {
-    en: "Next Round",
-    he: "סבב הבא"
-  },
-  "correct.screen.get.ready": {
-    en: "Get ready for the next challenge!",
-    he: "התכוננו לסבב הבא!"
-  },
-  "correct.screen.total.score": {
-    en: "Total Score:",
-    he: "סך הנקודות שלכם:"
-  },
-
-  // Daily Modes Congratulations Section
-  "daily.congratulations": {
-    en: "Congratulations!",
-    he: "GG EZ"
-  },
-  "daily.you.found": {
-    en: "You found",
-    he: "מצאת את"
-  },
-  "daily.in.guesses": {
-    en: "in",
-    he: "ב"
-  },
-  "daily.guesses.count": {
-    en: "guesses!",
-    he: "ניסיונות!"
-  },
-  "daily.ready.next.challenge": {
-    en: "Ready for the next challenge?",
-    he: "מוכן לאתגר הבא?"
-  },
-  "daily.all.modes.completed": {
-    en: "All daily modes completed!",
-    he: "האתגרים היומיים הושלמו בהצלחה!"
-  },
-  "daily.back.to": {
-    en: "Back to",
-    he: "חזור ל"
-  },
-  "daily.next.mode": {
-    en: "Next Mode",
-    he: "עבור ל"
-  },
-  "daily.go.home": {
-    en: "Go Home",
-    he: "דף הבית"
-  },
-  "auth.reset.password.title": {
-    en: "Reset your password",
-    he: "אפס סיסמא"
-  },
-  "auth.reset.link": {
-    en: "Send Reset Link",
-    he: "שלח קישור איפוס"
-  },
-  "auth.remember.password": {
-    en: "Remembered your password?",
-    he: "זוכר את הסיסמא?"
-  },
-  "auth.back.login": {
-    en: "Back to Login",
-    he: "כנס לחשבון שלך"
-  },
-
-  // Daily Mode UI Elements
-  "daily.streak": {
-    en: "daily streak",
-    he: "רצף יומי"
-  },
-  "daily.next.brawler.in": {
-    en: "Next Brawler In",
-    he: "הבראולר הבא בעוד"
-  },
-  "daily.today.classic": {
-    en: "Today's Classic",
-    he: "הקלאסי של היום"
-  },
-  "daily.today.gadget": {
-    en: "Today's Gadget", 
-    he: "הגאדג'ט של היום"
-  },
-  "daily.today.starpower": {
-    en: "Today's Star Power",
-    he: "הכוח כוכב של היום"
-  },
-  "daily.today.audio": {
-    en: "Today's Audio",
-    he: "הקול של היום"
-  },
-  "daily.today.pixels": {
-    en: "Today's Pixels",
-    he: "הפיקסלים של היום"
-  },
-
-  // Attribute Labels for Content Box and Headers
-  "attribute.label.brawler": {
-    en: "Brawler",
-    he: "בראולר"
-  },
-  "attribute.label.rarity": {
-    en: "Rarity",
-    he: "נדירות"
-  },
-  "attribute.label.class": {
-    en: "Class",
-    he: "סוג"
-  },
-  "attribute.label.range": {
-    en: "Range",
-    he: "טווח"
-  },
-  "attribute.label.wallbreak": {
-    en: "Wall Break",
-    he: "שובר קירות"
-  },
-  "attribute.label.year": {
-    en: "Year",
-    he: "שנה"
-  },
-
-  // Audio Mode Specific
-  "audio.play.hint": {
-    en: "Play Hint",
-    he: "נגן רמז"
-  },
-  "audio.pause.hint": {
-    en: "Pause Hint",
-    he: "עצור רמז"
-  },
-  "audio.hint.available.in": {
-    en: "Hint available in",
-    he: "רמז זמין בעוד"
-  },
-  "audio.hint.guesses": {
-    en: "guesses",
-    he: "ניסיונות"
-  },
-
-  // Yesterday's Challenge
-  "daily.yesterday.classic": {
-    en: "yesterday's classic was",
-    he: "הקלאסי של אתמול היה"
-  },
-  "daily.yesterday.gadget": {
-    en: "yesterday's gadget was",
-    he: "הגאדג'ט של אתמול היה"
-  },
-  "daily.yesterday.starpower": {
-    en: "yesterday's star power was",
-    he: "הכוח כוכב של אתמול היה"
-  },
-  "daily.yesterday.audio": {
-    en: "yesterday's audio was",
-    he: "הקול של אתמול היה"
-  },
-  "daily.yesterday.pixels": {
-    en: "yesterday's pixels was",
-    he: "הפיקסלים של אתמול היה"
-  },
-
-  // Loading Text
-  "loading": {
-    en: "Loading...",
-    he: "טוען..."
-  },
-
-  // Home Button
-  "button.go.home": {
-    en: "Go to Home",
-    he: "עבור לדף הבית"
+  "alt.very.slow": {
+    en: "Very Slow",
+    he: "איטי מאוד"
   }
 };
 
-// Store the current language in localStorage, default to English
+// Language detection and storage
+const LANGUAGE_KEY = 'brawldle-language';
+
 const getCurrentLanguage = (): SupportedLanguages => {
-  const storedLang = localStorage.getItem('language');
-  return (storedLang as SupportedLanguages) || 'en';
+  // Check localStorage first
+  const stored = localStorage.getItem(LANGUAGE_KEY);
+  if (stored && (stored === 'en' || stored === 'he')) {
+    return stored as SupportedLanguages;
+  }
+  
+  // Default to Hebrew as requested
+  return 'he';
 };
 
-// Set the language
 export const setLanguage = (language: SupportedLanguages): void => {
-  localStorage.setItem('language', language);
-  document.documentElement.dir = language === 'he' ? 'rtl' : 'ltr';
+  localStorage.setItem(LANGUAGE_KEY, language);
+  
+  // Update document direction and language
   document.documentElement.lang = language;
+  document.documentElement.dir = language === 'he' ? 'rtl' : 'ltr';
 };
 
-// Get a translation by key
 export const t = (key: string): string => {
-  const lang = getCurrentLanguage();
-  return translations[key]?.[lang] || key;
+  const language = getCurrentLanguage();
+  const translation = translations[key];
+  
+  if (!translation) {
+    console.warn(`Translation key "${key}" not found`);
+    return key; // Return the key itself as fallback
+  }
+  
+  return translation[language] || translation.en || key;
 };
 
-// Initialize language
 export const initLanguage = (): void => {
-  const lang = getCurrentLanguage();
-  setLanguage(lang);
+  const language = getCurrentLanguage();
+  setLanguage(language);
 };
 
 export const getLanguage = (): SupportedLanguages => getCurrentLanguage();

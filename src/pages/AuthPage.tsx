@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { AuthForm, AuthFormMode } from '@/components/AuthForm';
 import { useAuthModal } from '@/contexts/AuthModalContext';
+import { t } from '@/lib/i18n';
 
 // This page can now be a fallback or primarily for handling specific redirects 
 // if the modal doesn't cover all cases (e.g., email verification link landing).
@@ -54,18 +55,17 @@ const AuthPage = () => {
             onClick={() => { closeAuthModal(); navigate('/'); }}
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Home
+            {t('button.back')}
           </Button>
           {/* Title can reflect pageAuthMode if AuthForm is visible directly */}
           <CardTitle className="text-3xl font-bold text-center text-gray-800 dark:text-white">
-            {pageAuthMode === 'reset' ? 'Reset Password' : pageAuthMode === 'signup' ? 'Create Your Account' : 'Welcome Back'}
+            {pageAuthMode === 'reset' ? t('auth.reset.password') : pageAuthMode === 'signup' ? t('auth.create.your.account') : t('auth.welcome.back')}
           </CardTitle>
           <CardDescription className="text-center text-gray-600 dark:text-gray-400 pt-1">
-            {pageAuthMode === 'reset' ? 'Enter your email to receive reset instructions.' 
-              : pageAuthMode === 'signup' ? 'Join Brawldle and save your amazing progress!' 
-              : 'Sign in to continue your Brawldle adventure.'
+            {pageAuthMode === 'reset' ? t('auth.reset.instructions') 
+              : pageAuthMode === 'signup' ? t('auth.join.unlock') 
+              : t('auth.access.stats')
             }
-            Or click "Back to Home" and use the popup.
           </CardDescription>
         </CardHeader>
         <CardContent className="p-6 sm:p-8 pt-0">

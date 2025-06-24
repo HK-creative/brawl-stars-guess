@@ -20,6 +20,67 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    // Optimize bundle size
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Vendor chunk for large third-party libraries
+          vendor: ['react', 'react-dom', 'react-router-dom'],
+          // UI library chunk
+          ui: ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-toast', 'lucide-react'],
+          // Supabase chunk
+          supabase: ['@supabase/supabase-js'],
+          // Game data chunk
+          gameData: ['@/data/brawlers'],
+        },
+      },
+    },
+    // Optimize chunk size warnings
+    chunkSizeWarningLimit: 1000,
+    // Enable minification
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: mode === 'production',
+        drop_debugger: mode === 'production',
+      },
+    },
+    // Enable CSS code splitting
+    cssCodeSplit: true,
+    // Optimize assets - reduce inline limit for better caching
+    assetsInlineLimit: 2048, // 2kb - smaller files inlined, larger files cached
+    // Improve asset file naming for better caching
+    assetFileNames: (assetInfo: { name: string }) => {
+      const info = assetInfo.name.split('.');
+      let extType = info[info.length - 1];
+      
+      // Group assets by type for better caching
+      if (/png|jpe?g|svg|gif|tiff|bmp|ico/i.test(extType)) {
+        extType = 'images';
+      } else if (/woff2?|eot|ttf|otf/i.test(extType)) {
+        extType = 'fonts';
+      }
+      
+      return `assets/${extType}/[name]-[hash][extname]`;
+    },
+  },
+  // Optimize dependencies
+  optimizeDeps: {
+    include: [
+      'react',
+      'react-dom',
+      'react-router-dom',
+      '@supabase/supabase-js',
+      'zustand',
+      'sonner',
+    ],
+    exclude: [
+      // Exclude large assets that should be lazy loaded
+    ],
+  },
+  // Image optimization settings
+  assetsInclude: ['**/*.png', '**/*.jpg', '**/*.jpeg', '**/*.gif', '**/*.svg', '**/*.webp'],
   test: {
     globals: true,
     environment: 'jsdom',

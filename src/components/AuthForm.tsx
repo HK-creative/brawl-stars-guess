@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import { Mail, Lock, Loader2 } from 'lucide-react';
 import { Label } from '@/components/ui/label';
+import { t } from '@/lib/i18n';
 
 export type AuthFormMode = 'signin' | 'signup' | 'reset';
 
@@ -59,20 +60,20 @@ export const AuthForm: React.FC<AuthFormProps> = ({ mode, onModeChange, onSucces
           if (onModeChange) onModeChange('signin');
           if (onSuccess) onSuccess();
         }
-      } else { // mode === 'signin'
+              } else { // mode === 'signin'
         result = await supabase.auth.signInWithPassword({
           email,
           password,
         });
         if (result.error) throw result.error;
         if (result.data?.user) {
-          toast.success('Welcome back!');
+          toast.success(t('auth.welcome.back'));
           if (onSuccess) onSuccess();
           else navigate('/'); 
         }
       }
     } catch (error: any) {
-      const errorMessage = error.message || 'Authentication failed';
+      const errorMessage = error.message || t('auth.failed');
       setError(errorMessage);
       toast.error(errorMessage);
     } finally {
@@ -132,7 +133,7 @@ export const AuthForm: React.FC<AuthFormProps> = ({ mode, onModeChange, onSucces
       <form onSubmit={mode === 'reset' ? handlePasswordResetOp : handleAuthOp} className="space-y-6">
         {/* Email Input */}
         <div className="space-y-2">
-          <Label htmlFor={`email-authform-${mode}`}>Email</Label>
+          <Label htmlFor={`email-authform-${mode}`}>{t('auth.email')}</Label>
           <div className="relative flex items-center">
             <Mail className="absolute left-3 h-5 w-5 text-gray-400 dark:text-gray-500" />
             <Input
@@ -150,13 +151,13 @@ export const AuthForm: React.FC<AuthFormProps> = ({ mode, onModeChange, onSucces
         {/* Password Input (not for reset mode) */}
         {mode !== 'reset' && (
           <div className="space-y-2">
-            <Label htmlFor={`password-authform-${mode}`}>Password</Label>
+            <Label htmlFor={`password-authform-${mode}`}>{t('auth.password')}</Label>
             <div className="relative flex items-center">
               <Lock className="absolute left-3 h-5 w-5 text-gray-400 dark:text-gray-500" />
               <Input
                 id={`password-authform-${mode}`}
                 type="password"
-                placeholder="Enter your password"
+                placeholder={t('auth.password')}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="pl-10 pr-3 py-2.5 text-base border-gray-300 dark:border-gray-600 focus:ring-primary focus:border-primary bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white rounded-md transition duration-150 ease-in-out"
@@ -175,10 +176,10 @@ export const AuthForm: React.FC<AuthFormProps> = ({ mode, onModeChange, onSucces
         >
           {loading && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
           {mode === 'reset' 
-            ? (resetSent ? 'Reset Link Sent ✔️' : 'Send Reset Instructions')
+            ? (resetSent ? `${t('auth.reset.instructions')} ✔️` : t('auth.reset.instructions'))
             : mode === 'signup' 
-              ? 'Create Account' 
-              : 'Sign In'
+              ? t('auth.create.account.button') 
+              : t('auth.sign.in.button')
           }
         </Button>
       </form>
@@ -187,16 +188,16 @@ export const AuthForm: React.FC<AuthFormProps> = ({ mode, onModeChange, onSucces
       <div className="mt-6 text-center text-sm">
         {mode === 'signin' && (
           <div className="space-x-1">
-            <Button variant="link" onClick={() => handleModeChange('reset')} className="p-1 text-primary hover:text-primary/80 dark:text-blue-400 dark:hover:text-blue-300 font-medium">Forgot password?</Button>
+            <Button variant="link" onClick={() => handleModeChange('reset')} className="p-1 text-primary hover:text-primary/80 dark:text-blue-400 dark:hover:text-blue-300 font-medium">{t('auth.forgot.password')}</Button>
             <span className="text-gray-400 dark:text-gray-600">|</span>
-            <Button variant="link" onClick={() => handleModeChange('signup')} className="p-1 text-primary hover:text-primary/80 dark:text-blue-400 dark:hover:text-blue-300 font-medium">Don't have an account?</Button>
+            <Button variant="link" onClick={() => handleModeChange('signup')} className="p-1 text-primary hover:text-primary/80 dark:text-blue-400 dark:hover:text-blue-300 font-medium">{t('auth.no.account')}</Button>
           </div>
         )}
         {mode === 'signup' && (
-          <Button variant="link" onClick={() => handleModeChange('signin')} className="p-1 text-primary hover:text-primary/80 dark:text-blue-400 dark:hover:text-blue-300 font-medium">Already have an account? Sign In</Button>
+          <Button variant="link" onClick={() => handleModeChange('signin')} className="p-1 text-primary hover:text-primary/80 dark:text-blue-400 dark:hover:text-blue-300 font-medium">{t('auth.have.account')}</Button>
         )}
         {mode === 'reset' && (
-          <Button variant="link" onClick={() => handleModeChange('signin')} className="p-1 text-primary hover:text-primary/80 dark:text-blue-400 dark:hover:text-blue-300 font-medium">Back to Sign In</Button>
+          <Button variant="link" onClick={() => handleModeChange('signin')} className="p-1 text-primary hover:text-primary/80 dark:text-blue-400 dark:hover:text-blue-300 font-medium">{t('auth.sign.in.button')}</Button>
         )}
       </div>
     </div>

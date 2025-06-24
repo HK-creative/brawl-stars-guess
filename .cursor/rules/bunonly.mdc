@@ -1,0 +1,6 @@
+---
+description: only If need to use something like npm or bun
+globs: 
+alwaysApply: false
+---
+always use bun over others like npm

@@ -1,0 +1,263 @@
+{
+  "version": "1.0.0",
+  "metadata": {
+    "createdAt": "2024-12-28T00:00:00Z",
+    "lastUpdated": "2024-12-28T00:00:00Z",
+    "totalTasks": 20,
+    "completedTasks": 0
+  },
+  "tags": {
+    "master": {
+      "name": "master",
+      "description": "Main development tasks for Brawl Star Master",
+      "createdAt": "2024-12-28T00:00:00Z",
+      "metadata": {
+        "totalTasks": 20,
+        "completedTasks": 0
+      },
+      "tasks": [
+        {
+          "id": "1",
+          "title": "Complete Hebrew Translations",
+          "description": "Add missing Hebrew translations for all UI elements, focusing on newer features",
+          "status": "done",
+          "priority": "high",
+          "createdAt": "2024-12-28T00:00:00Z",
+          "updatedAt": "2024-12-28T00:00:00Z",
+          "dependencies": [],
+          "details": "Based on self-notes: 'remember to add all the new words to hebrew as well'. Audit the i18n system and identify missing Hebrew translations. Focus on: daily modes, new game features, error messages, and user interface elements. Update the translation files in src/lib/i18n.ts and ensure all text displays correctly in Hebrew.",
+          "testStrategy": "Test the app in Hebrew mode and verify all text is translated. Check for any English text appearing in Hebrew mode. Test on mobile devices for proper RTL text display."
+        },
+        {
+          "id": "2", 
+          "title": "Optimize Bundle Size and Loading Performance",
+          "description": "Improve loading times by optimizing bundle size and implementing code splitting",
+          "status": "done",
+          "priority": "high",
+          "createdAt": "2024-12-28T00:00:00Z",
+          "updatedAt": "2024-12-28T00:00:00Z",
+          "dependencies": [],
+          "details": "Self-notes mention 'improve loading time'. Analyze current bundle size using tools like webpack-bundle-analyzer. Implement code splitting for game modes, lazy load images and audio files, optimize imports, and remove unused dependencies. Consider implementing service worker for better caching.",
+          "testStrategy": "Measure current loading times and bundle size. After optimization, verify loading time is under 3 seconds on 3G connections. Test that all features still work correctly after code splitting."
+        },
+        {
+          "id": "3",
+          "title": "Fix Hebrew Typography Scaling Issues", 
+          "description": "Resolve systematic Hebrew font scaling problems and remove nuclear CSS overrides",
+          "status": "pending",
+          "priority": "high",
+          "createdAt": "2024-12-28T00:00:00Z",
+          "updatedAt": "2024-12-28T00:00:00Z",
+          "dependencies": [],
+          "details": "The CSS file contains extensive 'nuclear option' overrides for Hebrew text sizing. This indicates systematic typography issues. Review the Hebrew font implementation, create a proper typography system for RTL layout, and remove the emergency CSS fixes. Focus on the Abraham font usage and proper scaling across different screen sizes.",
+          "testStrategy": "Test Hebrew text display across all pages and screen sizes. Verify text is properly sized and readable without the nuclear CSS overrides. Check that Hebrew titles scale appropriately."
+        },
+        {
+          "id": "4",
+          "title": "Standardize Design System Across Daily Modes",
+          "description": "Apply consistent design principles and theming to daily challenge modes",
+          "status": "pending", 
+          "priority": "medium",
+          "createdAt": "2024-12-28T00:00:00Z",
+          "updatedAt": "2024-12-28T00:00:00Z",
+          "dependencies": [],
+          "details": "Self-notes mention 'apply design principles and theme to challenges as well'. Daily modes (DailyClassicMode, DailyAudioMode, etc.) lack the polished styling of regular modes. Create a consistent design system, apply proper theming, ensure visual consistency, and improve the overall user experience for daily challenges.",
+          "testStrategy": "Compare daily modes with regular modes visually. Verify consistent styling, proper theming, and cohesive user experience across all daily challenge modes."
+        },
+        {
+          "id": "5",
+          "title": "Streamline Audio System Reliability",
+          "description": "Simplify and improve the audio system to reduce failures and complex fallback mechanisms",
+          "status": "pending",
+          "priority": "medium", 
+          "createdAt": "2024-12-28T00:00:00Z",
+          "updatedAt": "2024-12-28T00:00:00Z",
+          "dependencies": [],
+          "details": "AudioMode.tsx has complex fallback mechanisms and multiple error handling paths, suggesting audio system instability. Refactor the audio loading and playback system, implement proper preloading, reduce fallback complexity, and improve error handling. Focus on making audio playback more reliable across different browsers and devices.",
+          "testStrategy": "Test audio playback across different browsers and devices. Verify audio loads reliably without fallbacks. Test hint audio functionality and ensure smooth audio transitions."
+        },
+        {
+          "id": "6",
+          "title": "Remove Debug Code and Clean Up Codebase",
+          "description": "Remove console.log statements and clean up development artifacts",
+          "status": "pending",
+          "priority": "low",
+          "createdAt": "2024-12-28T00:00:00Z", 
+          "updatedAt": "2024-12-28T00:00:00Z",
+          "dependencies": [],
+          "details": "Multiple console.log statements found throughout the codebase, particularly in EndlessMode.tsx, AudioMode.tsx, and other components. Remove debug statements, clean up unused imports, remove duplicate files, and ensure production-ready code quality.",
+          "testStrategy": "Search codebase for console.log statements and verify they're removed. Check that functionality still works correctly after cleanup. Ensure no broken imports or unused files remain."
+        },
+        {
+          "id": "7",
+          "title": "Implement Proper Error Boundaries",
+          "description": "Add React error boundaries to gracefully handle component failures", 
+          "status": "pending",
+          "priority": "medium",
+          "createdAt": "2024-12-28T00:00:00Z",
+          "updatedAt": "2024-12-28T00:00:00Z",
+          "dependencies": [],
+          "details": "Add error boundaries around major components and game modes to prevent entire app crashes. Implement user-friendly error messages, error reporting, and graceful fallback UI. Focus on game modes that have complex logic or external dependencies.",
+          "testStrategy": "Trigger errors in different components and verify error boundaries catch them properly. Test that users see helpful error messages and can recover from errors."
+        },
+        {
+          "id": "8",
+          "title": "Enhance Mobile Touch Interactions",
+          "description": "Improve mobile user experience with better touch interactions and gestures",
+          "status": "pending",
+          "priority": "medium",
+          "createdAt": "2024-12-28T00:00:00Z",
+          "updatedAt": "2024-12-28T00:00:00Z", 
+          "dependencies": [],
+          "details": "Enhance mobile experience with proper touch feedback, swipe gestures where appropriate, better button sizing for touch, and improved mobile navigation. Focus on game mode interactions, autocomplete selection, and navigation between modes.",
+          "testStrategy": "Test on various mobile devices and screen sizes. Verify touch interactions feel responsive and natural. Test gesture navigation and button accessibility on mobile."
+        },
+        {
+          "id": "9",
+          "title": "Implement Comprehensive Leaderboard System",
+          "description": "Build global and friend-based leaderboard functionality with proper ranking",
+          "status": "pending",
+          "priority": "medium",
+          "createdAt": "2024-12-28T00:00:00Z",
+          "updatedAt": "2024-12-28T00:00:00Z",
+          "dependencies": [],
+          "details": "Extend the existing basic leaderboard system to include global rankings, friend leaderboards, mode-specific rankings, and proper scoring algorithms. Implement real-time updates, proper pagination, and user rank display.",
+          "testStrategy": "Test leaderboard updates with multiple users. Verify rankings are calculated correctly. Test performance with large numbers of users and ensure real-time updates work properly."
+        },
+        {
+          "id": "10",
+          "title": "Add User Profiles with Statistics",
+          "description": "Create detailed user profiles showing game statistics and achievements",
+          "status": "pending", 
+          "priority": "medium",
+          "createdAt": "2024-12-28T00:00:00Z",
+          "updatedAt": "2024-12-28T00:00:00Z",
+          "dependencies": ["9"],
+          "details": "Build user profile pages displaying game statistics, streak history, favorite modes, achievement badges, and performance analytics. Include mode-specific stats, daily challenge completion rates, and social features.",
+          "testStrategy": "Test profile data accuracy across different game modes. Verify statistics update correctly and display properly. Test profile privacy settings and social features."
+        },
+        {
+          "id": "11",
+          "title": "Implement TierList Mode",
+          "description": "Create new game mode where users rank brawlers by various criteria",
+          "status": "pending",
+          "priority": "low",
+          "createdAt": "2024-12-28T00:00:00Z",
+          "updatedAt": "2024-12-28T00:00:00Z",
+          "dependencies": [],
+          "details": "Based on TierListPage.tsx in untracked files. Implement a drag-and-drop tier list mode where users rank brawlers by different criteria (strength, fun factor, design, etc.). Include daily tier list challenges and community comparisons.",
+          "testStrategy": "Test drag-and-drop functionality across devices. Verify tier list saves correctly and displays properly. Test different ranking criteria and community comparison features."
+        },
+        {
+          "id": "12", 
+          "title": "Build Feedback System",
+          "description": "Implement user feedback collection and management system",
+          "status": "pending",
+          "priority": "low",
+          "createdAt": "2024-12-28T00:00:00Z",
+          "updatedAt": "2024-12-28T00:00:00Z",
+          "dependencies": [],
+          "details": "Based on FeedbackPage.tsx in untracked files. Create a comprehensive feedback system allowing users to report bugs, suggest features, and provide general feedback. Include feedback categorization, admin review system, and user notification of feedback status.",
+          "testStrategy": "Test feedback submission across different categories. Verify admin can review and respond to feedback. Test user notifications and feedback status tracking."
+        },
+        {
+          "id": "13",
+          "title": "Implement Join Us Community Features",
+          "description": "Create community engagement page with social features",
+          "status": "pending",
+          "priority": "low", 
+          "createdAt": "2024-12-28T00:00:00Z",
+          "updatedAt": "2024-12-28T00:00:00Z",
+          "dependencies": [],
+          "details": "Based on JoinUsPage.tsx in untracked files. Build community features including Discord/social media integration, community challenges, user-generated content, and social engagement tools.",
+          "testStrategy": "Test social media integration and community features. Verify user engagement tools work correctly and community content displays properly."
+        },
+        {
+          "id": "14",
+          "title": "Enhance Social Sharing with Custom Graphics",
+          "description": "Improve sharing functionality with custom-generated result graphics",
+          "status": "pending",
+          "priority": "medium",
+          "createdAt": "2024-12-28T00:00:00Z",
+          "updatedAt": "2024-12-28T00:00:00Z",
+          "dependencies": [],
+          "details": "Enhance the existing share functionality to generate custom graphics showing user results, streaks, and achievements. Include social media optimization, custom images for different platforms, and improved sharing UX.",
+          "testStrategy": "Test sharing across different social media platforms. Verify custom graphics generate correctly and display properly when shared. Test sharing UX and image quality."
+        },
+        {
+          "id": "15",
+          "title": "Implement Progressive Loading System",
+          "description": "Add skeleton loading states and progressive content loading",
+          "status": "pending",
+          "priority": "medium",
+          "createdAt": "2024-12-28T00:00:00Z",
+          "updatedAt": "2024-12-28T00:00:00Z",
+          "dependencies": ["2"],
+          "details": "Implement skeleton loading states, progressive image loading, and better perceived performance. Add loading indicators for different content types and ensure smooth transitions between loading and loaded states.",
+          "testStrategy": "Test loading states across different connection speeds. Verify skeleton loaders match final content layout. Test that loading indicators provide good user feedback."
+        },
+        {
+          "id": "16",
+          "title": "Add User Preferences and Customization",
+          "description": "Implement user settings for customizing game experience",
+          "status": "pending",
+          "priority": "low",
+          "createdAt": "2024-12-28T00:00:00Z",
+          "updatedAt": "2024-12-28T00:00:00Z",
+          "dependencies": ["10"],
+          "details": "Add user preferences including theme selection, audio settings, notification preferences, difficulty settings, and interface customization options. Store preferences in user profile and sync across devices.",
+          "testStrategy": "Test preference saving and loading across sessions. Verify settings apply correctly to game experience. Test preference sync across different devices."
+        },
+        {
+          "id": "17",
+          "title": "Build Admin Dashboard for Content Management",
+          "description": "Create admin interface for managing daily challenges and content",
+          "status": "pending",
+          "priority": "low",
+          "createdAt": "2024-12-28T00:00:00Z",
+          "updatedAt": "2024-12-28T00:00:00Z",
+          "dependencies": [],
+          "details": "Build admin dashboard for managing daily challenges, viewing user analytics, moderating content, and configuring app settings. Include tools for creating custom challenges and managing the daily challenge queue.",
+          "testStrategy": "Test admin authentication and permissions. Verify admin can manage challenges and view analytics. Test content moderation tools and configuration management."
+        },
+        {
+          "id": "18",
+          "title": "Implement User Analytics and Engagement Tracking",
+          "description": "Add comprehensive analytics to track user behavior and engagement",
+          "status": "pending",
+          "priority": "low",
+          "createdAt": "2024-12-28T00:00:00Z",
+          "updatedAt": "2024-12-28T00:00:00Z",
+          "dependencies": ["17"],
+          "details": "Implement privacy-compliant analytics to track user engagement, popular game modes, completion rates, and user journey. Include funnel analysis, retention metrics, and performance indicators.",
+          "testStrategy": "Test analytics data collection and privacy compliance. Verify metrics are accurate and useful for decision making. Test analytics dashboard functionality."
+        },
+        {
+          "id": "19",
+          "title": "Create Weekly Tournaments and Special Events",
+          "description": "Implement tournament system with special challenges and rewards",
+          "status": "pending",
+          "priority": "low",
+          "createdAt": "2024-12-28T00:00:00Z",
+          "updatedAt": "2024-12-28T00:00:00Z",
+          "dependencies": ["9", "10"],
+          "details": "Create tournament system with weekly competitions, special event challenges, seasonal content, and reward systems. Include tournament brackets, special scoring, and community events.",
+          "testStrategy": "Test tournament creation and participation. Verify scoring and bracket systems work correctly. Test special event functionality and reward distribution."
+        },
+        {
+          "id": "20",
+          "title": "Add A/B Testing Framework",
+          "description": "Implement framework for testing new features with user segments",
+          "status": "pending",
+          "priority": "low",
+          "createdAt": "2024-12-28T00:00:00Z",
+          "updatedAt": "2024-12-28T00:00:00Z",
+          "dependencies": ["18"],
+          "details": "Build A/B testing framework for experimenting with new features, UI changes, and game mechanics. Include user segmentation, experiment tracking, and statistical analysis of results.",
+          "testStrategy": "Test A/B experiment creation and user segmentation. Verify experiments run correctly and results are tracked accurately. Test statistical analysis and reporting features."
+        }
+      ]
+    }
+  },
+  "currentTag": "master"
+} 

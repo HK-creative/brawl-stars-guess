@@ -1,0 +1,170 @@
+# Brawl Star Master - Current State & Enhancement PRD
+
+## 1. Project Overview
+
+**Project Name**: Brawl Star Master (Brawldle)  
+**Project Type**: Progressive Web App - Daily Guessing Game  
+**Current Status**: PRODUCTION-READY with active daily challenges  
+**Tech Stack**: React 18 + TypeScript + Vite + Tailwind CSS + Supabase + Zustand  
+**Languages**: Hebrew (primary) + English with i18n system  
+**Deployment**: Live with automated daily challenge generation
+
+## 2. Current Implementation Status
+
+### ✅ FULLY IMPLEMENTED FEATURES:
+
+#### Game Modes (All Working):
+- **Classic Mode**: Guess brawler by attributes (rarity, class, range, wallbreak, release year)
+- **Audio Mode**: Guess by attack sounds with hint system
+- **Gadget Mode**: Guess by gadget descriptions and images  
+- **Star Power Mode**: Guess by star power icons and descriptions
+- **Pixels Mode**: Guess by pixelated portraits
+- **Survival Mode**: Challenge mode with lives system
+- **Endless Mode**: Continuous play with skip/retry
+
+#### Daily Challenge System:
+- Automated daily reset at 00:00 Israel time (UTC+2)
+- Supabase-powered daily challenge generation via cron
+- Daily streak tracking with visual indicators
+- Yesterday's answer display
+- Countdown timer to next challenge
+
+#### User System:
+- Supabase authentication (signup/signin)
+- User profiles with email display
+- Streak persistence across sessions
+- Progress tracking per mode
+
+#### UI/UX Features:
+- Mobile-first responsive design
+- Hebrew/English language toggle
+- Rotating background animations
+- Victory celebrations with confetti
+- Share functionality for results
+- Custom loading states and error handling
+
+#### Technical Infrastructure:
+- Comprehensive state management (Zustand)
+- Image optimization and lazy loading
+- Audio system with preloading
+- PWA capabilities
+- Test coverage with Vitest
+- ESLint + TypeScript strict mode
+
+## 3. CURRENT ISSUES & IMPROVEMENT AREAS
+
+### 🔧 Priority Issues (from codebase analysis):
+
+#### A. Internationalization Gaps:
+- **Issue**: Self-notes indicate "remember to add all the new words to hebrew as well"
+- **Impact**: Incomplete Hebrew translations for newer features
+- **Current**: i18n system exists but needs completion
+
+#### B. Performance Optimization:
+- **Issue**: Self-notes mention "improve loading time"  
+- **Impact**: Slower initial load and mode transitions
+- **Current**: No bundle optimization, potential over-fetching
+
+#### C. Design Consistency:
+- **Issue**: Self-notes mention "apply design principles and theme to challenges as well"
+- **Impact**: Inconsistent visual design across daily vs regular modes
+- **Current**: Daily modes lack the polished styling of main modes
+
+#### D. Hebrew Typography Issues:
+- **Issue**: CSS shows extensive Hebrew font size overrides
+- **Impact**: Text scaling problems in RTL layout
+- **Current**: Nuclear CSS fixes suggest systematic typography issues
+
+#### E. Audio System Reliability:
+- **Issue**: Multiple fallback mechanisms in AudioMode.tsx
+- **Impact**: Audio failures require manual fallbacks
+- **Current**: Complex error handling suggests instability
+
+### 🆕 Enhancement Opportunities:
+
+#### F. New Game Modes:
+- **Tier List Mode**: Rank brawlers by various criteria
+- **Join Us Page**: Community engagement features  
+- **Feedback System**: User feedback collection
+
+#### G. Social Features:
+- **Leaderboards**: Global and friend rankings
+- **Sharing**: Enhanced social media integration
+- **Tournaments**: Weekly/monthly competitions
+
+#### H. Content Management:
+- **Admin Panel**: Manage daily challenges manually
+- **Analytics**: Track user engagement and mode popularity
+- **A/B Testing**: Test new features with user segments
+
+## 4. Technical Debt & Code Quality
+
+### Current Strengths:
+- Well-structured component architecture
+- Comprehensive TypeScript typing
+- Good separation of concerns (stores, lib, components)
+- Extensive test coverage infrastructure
+
+### Areas for Improvement:
+- Multiple debug console.log statements throughout codebase
+- Some unused/duplicate files (e.g., GadgetMode-fixed.tsx)
+- Complex audio handling with multiple fallback paths
+- CSS with "nuclear option" overrides indicating systematic issues
+
+## 5. Proposed Enhancement Phases
+
+### Phase 1: Polish & Performance (Immediate)
+1. Complete Hebrew translations for all UI elements
+2. Optimize bundle size and loading performance  
+3. Standardize design system across daily modes
+4. Fix Hebrew typography scaling issues
+5. Streamline audio system reliability
+
+### Phase 2: User Experience (Short-term)
+6. Implement proper error boundaries and user feedback
+7. Add progressive loading for better perceived performance
+8. Enhance mobile touch interactions and gestures
+9. Implement proper offline functionality (PWA)
+10. Add user preferences and customization options
+
+### Phase 3: Community Features (Medium-term)
+11. Build comprehensive leaderboard system
+12. Implement social sharing with custom graphics
+13. Add user profiles with statistics and achievements
+14. Create weekly tournaments and special events
+15. Implement referral and invitation system
+
+### Phase 4: Content & Analytics (Long-term)
+16. Build admin dashboard for content management
+17. Implement user analytics and engagement tracking
+18. Add A/B testing framework for feature experiments
+19. Create automated content generation for special events
+20. Build community feedback and suggestion system
+
+## 6. Success Metrics
+
+### User Engagement:
+- Daily active users (target: maintain 80%+ retention)
+- Average session duration (target: 10+ minutes)
+- Mode completion rates (target: 70%+ per mode)
+- Streak maintenance (target: 30%+ users with 7+ day streaks)
+
+### Technical Performance:
+- Initial load time (target: <3 seconds)
+- Mode transition time (target: <1 second)
+- Audio loading success rate (target: 95%+)
+- Error rate (target: <1% of user sessions)
+
+### Content Quality:
+- Daily challenge variety (ensure no repeats within 30 days)
+- User satisfaction scores (target: 4.5+ stars)
+- Bug report frequency (target: <5 per week)
+- Feature request fulfillment (target: 80% within 3 months)
+
+## 7. Implementation Notes
+
+**Priority Order**: Focus on Phase 1 items first as they address immediate user experience issues identified in the codebase. The existing infrastructure is solid, so enhancements should build upon the current architecture rather than requiring major refactoring.
+
+**Technical Approach**: Maintain the current React + Supabase architecture while optimizing performance and completing the user experience. The daily challenge system is working well and should be preserved.
+
+**User Impact**: All changes should prioritize the Hebrew-speaking user base while maintaining English language support. Mobile experience should remain the primary focus given the game's nature 

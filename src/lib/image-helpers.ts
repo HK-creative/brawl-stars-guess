@@ -1,6 +1,6 @@
 /**
- * Image helper functions for accessing pin and portrait images
- * Updated to work with images directly in the public folder
+ * Advanced image helper functions with optimization for better performance
+ * Includes WebP support, lazy loading, and intelligent caching
  */
 
 // Default fallback images - using existing files
@@ -8,21 +8,257 @@ export const DEFAULT_PIN = "/amber_pin.png";
 export const DEFAULT_PORTRAIT = "/shelly_portrait.png";
 
 /**
- * Generate path for pin images
- * Format: /{brawlerName}_pin.png
+ * Check if WebP is supported by the browser
  */
-export function getPin(name: string): string {
-  if (!name) return DEFAULT_PIN;
-  // Direct path to the pin image in the public folder
-  return `/${name.toLowerCase()}_pin.png`;
+export function supportsWebP(): boolean {
+  if (typeof window === 'undefined') return false;
+  
+  const canvas = document.createElement('canvas');
+  canvas.width = 1;
+  canvas.height = 1;
+  return canvas.toDataURL('image/webp').indexOf('data:image/webp') === 0;
 }
 
 /**
- * Generate path for portrait images
- * Format: /{brawlerName}_portrait.png
+ * Get optimized image source with WebP fallback
+ */
+export function getOptimizedImageSrc(basePath: string, useWebP: boolean = true): string {
+  if (!basePath) return DEFAULT_PORTRAIT;
+  
+  // If WebP is supported and enabled, try WebP first
+  if (useWebP && supportsWebP()) {
+    const webpPath = basePath.replace(/\.(png|jpg|jpeg)$/i, '.webp');
+    return webpPath;
+  }
+  
+  return basePath;
+}
+
+/**
+ * Generate path for pin images with optimization
+ */
+export function getPin(name: string): string {
+  if (!name) return DEFAULT_PIN;
+  const basePath = `/${name.toLowerCase()}_pin.png`;
+  return getOptimizedImageSrc(basePath);
+}
+
+/**
+ * Generate path for portrait images with optimization
  */
 export function getPortrait(name: string): string {
   if (!name) return DEFAULT_PORTRAIT;
-  // Direct path to the portrait image in the public folder
-  return `/${name.toLowerCase()}_portrait.png`;
+  const basePath = `/${name.toLowerCase()}_portrait.png`;
+  return getOptimizedImageSrc(basePath);
 }
+
+/**
+ * Preload image with better error handling and timeout
+ */
+export function preloadImage(src: string, timeout: number = 5000): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const timeoutId = setTimeout(() => {
+      reject(new Error(`Image load timeout: ${src}`));
+    }, timeout);
+    
+    img.onload = () => {
+      clearTimeout(timeoutId);
+      resolve();
+    };
+    
+    img.onerror = () => {
+      clearTimeout(timeoutId);
+      reject(new Error(`Failed to load image: ${src}`));
+    };
+    
+    img.src = src;
+  });
+}
+
+/**
+ * Preload multiple images with concurrent limit
+ */
+export async function preloadImages(srcs: string[], concurrency: number = 5): Promise<void> {
+  const chunks: string[][] = [];
+  for (let i = 0; i < srcs.length; i += concurrency) {
+    chunks.push(srcs.slice(i, i + concurrency));
+  }
+  
+  for (const chunk of chunks) {
+    try {
+      await Promise.all(chunk.map(src => preloadImage(src)));
+    } catch (error) {
+      console.warn('Some images in chunk failed to preload:', error);
+    }
+  }
+}
+
+/**
+ * Advanced lazy loading with IntersectionObserver
+ */
+export function setupAdvancedImageLazyLoading(): IntersectionObserver | null {
+  if (!('IntersectionObserver' in window)) {
+    // Fallback for browsers without IntersectionObserver
+    document.querySelectorAll('img[data-src]').forEach(img => {
+      const imgEl = img as HTMLImageElement;
+      const src = imgEl.dataset.src;
+      if (src) {
+        imgEl.src = src;
+        imgEl.removeAttribute('data-src');
+      }
+    });
+    return null;
+  }
+
+  const imageObserver = new IntersectionObserver((entries, observer) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const img = entry.target as HTMLImageElement;
+        const src = img.dataset.src;
+        
+        if (src) {
+          // Add loading class for smooth transition
+          img.classList.add('loading');
+          
+          // Create a new image to preload
+          const newImg = new Image();
+          newImg.onload = () => {
+            img.src = src;
+            img.classList.remove('loading');
+            img.classList.add('loaded');
+            img.removeAttribute('data-src');
+            observer.unobserve(img);
+          };
+          
+          newImg.onerror = () => {
+            // Try fallback image
+            const fallback = img.dataset.fallback || DEFAULT_PORTRAIT;
+            img.src = fallback;
+            img.classList.remove('loading');
+            img.classList.add('error');
+            observer.unobserve(img);
+          };
+          
+          newImg.src = src;
+        }
+      }
+    });
+  }, {
+    rootMargin: '50px 0px', // Start loading 50px before the image enters viewport
+    threshold: 0.1
+  });
+
+  // Observe all images with data-src attribute
+  document.querySelectorAll('img[data-src]').forEach(img => {
+    imageObserver.observe(img);
+  });
+
+  return imageObserver;
+}
+
+/**
+ * Create responsive image sources for different screen sizes
+ */
+export function createResponsiveImageSrcs(baseName: string, type: 'pin' | 'portrait'): {
+  small: string;
+  medium: string;
+  large: string;
+} {
+  const suffix = type === 'pin' ? '_pin.png' : '_portrait.png';
+  const base = `/${baseName.toLowerCase()}${suffix}`;
+  
+  return {
+    small: getOptimizedImageSrc(base),
+    medium: getOptimizedImageSrc(base),
+    large: getOptimizedImageSrc(base)
+  };
+}
+
+/**
+ * Preload critical game images with priority
+ */
+export async function preloadCriticalImages(): Promise<void> {
+  const highPriorityImages = [
+    DEFAULT_PIN,
+    DEFAULT_PORTRAIT,
+    "/ClassicIcon.png",
+    "/AudioIcon.png",
+    "/GadgetIcon.png",
+    "/bs_home_icon.png"
+  ];
+
+  const mediumPriorityImages = [
+    "/BRAWLDLE-HOME-BACKGROUND-MOBILE.png",
+    "/AudioMode_Background.png",
+    "/ClassicMode_Background.png",
+    "/GadgetMode_Background.png"
+  ];
+
+  try {
+    // Load high priority images first
+    await preloadImages(highPriorityImages, 3);
+    console.log('High priority images preloaded');
+    
+    // Load medium priority images in background
+    setTimeout(() => {
+      preloadImages(mediumPriorityImages, 2).then(() => {
+        console.log('Medium priority images preloaded');
+      }).catch(error => {
+        console.warn('Some medium priority images failed to preload:', error);
+      });
+    }, 1000);
+    
+  } catch (error) {
+    console.warn('Some critical images failed to preload:', error);
+  }
+}
+
+/**
+ * Image cache management
+ */
+class ImageCache {
+  private cache = new Map<string, HTMLImageElement>();
+  private maxSize = 50;
+
+  get(src: string): HTMLImageElement | undefined {
+    return this.cache.get(src);
+  }
+
+  set(src: string, img: HTMLImageElement): void {
+    if (this.cache.size >= this.maxSize) {
+      const firstKey = this.cache.keys().next().value;
+      this.cache.delete(firstKey);
+    }
+    this.cache.set(src, img);
+  }
+
+  clear(): void {
+    this.cache.clear();
+  }
+}
+
+export const imageCache = new ImageCache();
+
+/**
+ * Optimized image loading with caching
+ */
+export function loadImageWithCache(src: string): Promise<HTMLImageElement> {
+  const cached = imageCache.get(src);
+  if (cached) {
+    return Promise.resolve(cached);
+  }
+
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      imageCache.set(src, img);
+      resolve(img);
+    };
+    img.onerror = reject;
+    img.src = src;
+  });
+}
+
+// Legacy exports for backward compatibility
+export { setupAdvancedImageLazyLoading as setupImageLazyLoading };
