@@ -656,8 +656,8 @@ const translations: Translations = {
     he: "150 שניות לכל סיבוב"
   },
   "time.per.round.seconds": {
-    en: "150s per round",
-    he: "150 שניות לכל סבב"
+    en: "seconds per round",
+    he: "שניות לסיבוב"
   },
   
   // Attribute Labels
@@ -896,6 +896,83 @@ const translations: Translations = {
   "alt.very.slow": {
     en: "Very Slow",
     he: "איטי מאוד"
+  },
+  
+  "number.of.guesses": {
+    en: "Number of Guesses",
+    he: "מספר ניחושים"
+  },
+  "fixed.timer.150.seconds": {
+    en: "Fixed Timer: 150 seconds",
+    he: "טיימר קבוע: 150 שניות"
+  },
+  "no.tip.available": {
+    en: "No tip available",
+    he: "אין טיפ זמין"
+  },
+  "offline.mode": {
+    en: "Offline Mode",
+    he: "מצב לא מקוון"
+  },
+  "error": {
+    en: "Error",
+    he: "שגיאה"
+  },
+  "brawler.star.power": {
+    en: "Brawler Star Power",
+    he: "כוח כוכב הבראולר"
+  },
+  "retry": {
+    en: "Retry",
+    he: "נסה שוב"
+  },
+  "coming.soon": {
+    en: "Coming Soon",
+    he: "בקרוב"
+  },
+  "tier.list.page.title": {
+    en: "Brawler Tier List",
+    he: "רשימת דירוג בראולרים"
+  },
+  "tier.list.description": {
+    en: "Rank your favorite brawlers from best to worst",
+    he: "דרג את הבראולרים המועדפים עליך מהטוב לפחות טוב"
+  },
+  "tier.list.coming.soon": {
+    en: "Tier List Coming Soon!",
+    he: "רשימת דירוג בקרוב!"
+  },
+  "tier.list.working": {
+    en: "We're working on an awesome tier list feature where you can rank all the brawlers!",
+    he: "אנחנו עובדים על תכונת דירוג מדהימה שבה תוכל לדרג את כל הבראולרים!"
+  },
+  "back.to.home": {
+    en: "Back to Home",
+    he: "חזור לעמוד הבית"
+  },
+  "attribute.label.brawler": {
+    en: "Brawler",
+    he: "לוחם"
+  },
+  "attribute.label.rarity": {
+    en: "Rarity", 
+    he: "נדירות"
+  },
+  "attribute.label.class": {
+    en: "Class",
+    he: "מחלקה"
+  },
+  "attribute.label.range": {
+    en: "Range",
+    he: "טווח"
+  },
+  "attribute.label.wallbreak": {
+    en: "Wallbreak",
+    he: "שבירת קיר"
+  },
+  "attribute.label.release.year": {
+    en: "Release Year",
+    he: "שנת יציאה"
   }
 };
 

@@ -29,18 +29,18 @@ const TierListPage = () => {
           </div>
           
           <h1 className="text-3xl font-bold text-white mb-4">
-            Tier List
+            {t('tier.list.coming.soon')}
           </h1>
           
           <p className="text-slate-300 mb-6">
-            Rank your favorite brawlers! Tier list features are coming soon.
+            {t('tier.list.working')}
           </p>
           
           <Button
             onClick={() => navigate('/')}
             className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold px-6 py-3 rounded-xl"
           >
-            Return Home
+            {t('back.to.home')}
           </Button>
         </div>
       </div>

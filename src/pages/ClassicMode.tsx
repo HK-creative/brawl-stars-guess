@@ -190,9 +190,9 @@ const ClassicMode = ({
       
       // Try to fetch the daily challenge from the backend
       try {
-        const response = await fetchDailyChallenge('classic'); // Pass 'classic' as the mode parameter
-        if (response?.success) {
-          setCorrectBrawlerName(response.brawlerName);
+        const brawlerName = await fetchDailyChallenge('classic'); // Pass 'classic' as the mode parameter
+        if (brawlerName && typeof brawlerName === 'string') {
+          setCorrectBrawlerName(brawlerName);
           setIsBackendConnected(true);
         } else {
           throw new Error('Failed to fetch daily challenge');
@@ -377,12 +377,12 @@ const ClassicMode = ({
   
   // Attribute labels for the header
   const attributeLabels = [
-    t('attribute.brawler'),
-    t('attribute.rarity'), 
-    t('attribute.class'),
-    t('attribute.range'),
-    t('attribute.wallbreak'),
-    t('attribute.release.year')
+    t('attribute.label.brawler'),
+    t('attribute.label.rarity'), 
+    t('attribute.label.class'),
+    t('attribute.label.range'),
+    t('attribute.label.wallbreak'),
+    t('attribute.label.release.year')
   ];
   
   if (isLoading) {

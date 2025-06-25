@@ -458,20 +458,32 @@ const getDeterministicDailyChallenge = (mode: string, date: string): any => {
     case 'gadget':
       // Get the first gadget for the brawler (most brawlers have at least one)
       const gadget = brawler.gadgets?.[0];
+      // Handle special cases for image naming
+      let gadgetImageName = brawler.name.toLowerCase().replace(/ /g, '_');
+      if (brawler.name === 'Larry & Lawrie') {
+        gadgetImageName = 'larry_lawrie_';
+      }
       return {
         brawler: brawler.name,
         gadgetName: gadget?.name || "Mystery Gadget",
-        tip: gadget?.tip || "This gadget has mysterious powers."
+        tip: gadget?.tip || "This gadget has mysterious powers.",
+        image: `/GadgetImages/${gadgetImageName}_gadget_01.png`
       };
       
     case 'starpower':
       // Get the first star power for the brawler
       const starPower = brawler.starPowers?.[0];
+      // Handle special cases for image naming
+      let imageName = brawler.name.toLowerCase().replace(/ /g, '_');
+      // Special case for Larry & Lawrie (double underscore in file name)
+      if (brawler.name === 'Larry & Lawrie') {
+        imageName = 'larry_lawrie_';
+      }
       return {
         brawler: brawler.name,
         starPowerName: starPower?.name || "Mystery Star Power",
         tip: starPower?.tip || "This star power grants mysterious abilities.",
-        image: `${brawler.name.toLowerCase().replace(/ /g, '_')}_starpower_01.png`
+        image: `/${imageName}_starpower_01.png`
       };
       
     case 'voice':

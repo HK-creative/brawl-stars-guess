@@ -22,15 +22,11 @@ export function supportsWebP(): boolean {
 /**
  * Get optimized image source with WebP fallback
  */
-export function getOptimizedImageSrc(basePath: string, useWebP: boolean = true): string {
+export function getOptimizedImageSrc(basePath: string, useWebP: boolean = false): string {
   if (!basePath) return DEFAULT_PORTRAIT;
   
-  // If WebP is supported and enabled, try WebP first
-  if (useWebP && supportsWebP()) {
-    const webpPath = basePath.replace(/\.(png|jpg|jpeg)$/i, '.webp');
-    return webpPath;
-  }
-  
+  // For now, disable WebP conversion since we don't have WebP versions
+  // TODO: Add WebP versions of images in the future
   return basePath;
 }
 
@@ -39,8 +35,19 @@ export function getOptimizedImageSrc(basePath: string, useWebP: boolean = true):
  */
 export function getPin(name: string): string {
   if (!name) return DEFAULT_PIN;
-  const basePath = `/${name.toLowerCase()}_pin.png`;
-  return getOptimizedImageSrc(basePath);
+  
+  // Handle special cases for brawler names with spaces or special characters
+  let fileName = name.toLowerCase().replace(/\s+/g, ' ');
+  
+  // Special case mappings
+  if (fileName === 'el primo') {
+    fileName = 'el primo';
+  } else if (fileName === 'larry & lawrie') {
+    fileName = 'larry & lawrie';
+  }
+  
+  const basePath = `/${fileName}_pin.png`;
+  return basePath;
 }
 
 /**
@@ -48,8 +55,19 @@ export function getPin(name: string): string {
  */
 export function getPortrait(name: string): string {
   if (!name) return DEFAULT_PORTRAIT;
-  const basePath = `/${name.toLowerCase()}_portrait.png`;
-  return getOptimizedImageSrc(basePath);
+  
+  // Handle special cases for brawler names with spaces or special characters
+  let fileName = name.toLowerCase().replace(/\s+/g, ' ');
+  
+  // Special case mappings
+  if (fileName === 'el primo') {
+    fileName = 'el primo';
+  } else if (fileName === 'larry & lawrie') {
+    fileName = 'larry & lawrie';
+  }
+  
+  const basePath = `/${fileName}_portrait.png`;
+  return basePath;
 }
 
 /**

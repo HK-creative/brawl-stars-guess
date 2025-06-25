@@ -184,11 +184,11 @@ const GadgetMode = ({
 
   // Load the challenge on component mount
   useEffect(() => {
-    // Only use the daily challenge if not in endless mode or survival mode
-    if (!isEndlessMode && !isSurvivalMode) {
+    // Load challenge for all modes except when explicitly in survival mode with a brawlerId
+    if (!isSurvivalMode || brawlerId === undefined) {
       loadChallenge();
     }
-    // If in survival mode, the challenge will be loaded by the brawlerId effect
+    // If in survival mode with brawlerId, the challenge will be loaded by the brawlerId effect
   }, [isEndlessMode, isSurvivalMode]);
 
   const loadChallenge = async () => {
@@ -219,19 +219,13 @@ const GadgetMode = ({
             
             if (!selectedBrawler) {
               // Create a fallback brawler if nothing else works
-              selectedBrawler = brawlers[0] || { 
-                id: 1, 
-                name: 'Shelly',
-                rarity: 'Starter',
-                class: 'Damage Dealer',
-                movement: 'Fast',
-                range: 'Long',
-                reload: 'Normal',
-                wallbreak: 'No', // must be string
-                starPowers: [], // correct property name
-                gadgets: []
-              };
-              console.warn('No valid brawlers found in data, using hardcoded Shelly');
+              selectedBrawler = brawlers[0] || brawlers.find(b => b.name === 'Shelly') || brawlers.find(b => b.id === 1);
+              
+              if (!selectedBrawler && brawlers.length > 0) {
+                selectedBrawler = brawlers[0];
+              }
+              
+              console.warn('No valid brawlers found in data, using fallback');
             }
           }
           
@@ -275,11 +269,74 @@ const GadgetMode = ({
         } finally {
           setIsLoading(false);
         }
+        return; // Exit early for survival mode
+      }
+      
+      // For daily/endless mode, fetch the daily challenge
+      if (!isEndlessMode) {
+        console.log('Loading daily gadget challenge');
+        
+        try {
+          const challengeData = await fetchDailyChallenge('gadget');
+          if (challengeData && typeof challengeData === 'object' && challengeData.brawler) {
+            console.log('Daily challenge data:', challengeData);
+            
+            const gadgetChallenge: GadgetChallenge = {
+              brawler: challengeData.brawler,
+              gadgetName: challengeData.gadgetName || 'Mystery Gadget',
+              tip: challengeData.tip || 'This gadget has special powers.',
+              image: challengeData.image || getGadgetImage(challengeData.brawler, challengeData.gadgetName)
+            };
+            
+            setDailyChallenge(gadgetChallenge);
+            setCorrectBrawlerName(challengeData.brawler);
+            setVictoryBrawler(challengeData.brawler);
+            setGadgetImage(gadgetChallenge.image);
+            
+            // Find the actual brawler object
+            const actualBrawler = brawlers.find(b => b.name === challengeData.brawler);
+            setActualBrawlerForGadget(actualBrawler || null);
+          } else {
+            throw new Error('Invalid challenge data received');
+          }
+        } catch (error) {
+          console.error('Error fetching daily gadget challenge:', error);
+          toast.error('Error loading daily challenge');
+        }
+      } else {
+        // For endless mode, pick a random brawler
+        console.log('Loading random gadget for endless mode');
+        
+        // Filter out recently used brawlers
+        const availableBrawlers = brawlers.filter(b => !recentlyUsedBrawlers.includes(b.name));
+        const selectedBrawler = availableBrawlers.length > 0 
+          ? availableBrawlers[Math.floor(Math.random() * availableBrawlers.length)]
+          : brawlers[Math.floor(Math.random() * brawlers.length)];
+          
+        if (selectedBrawler && selectedBrawler.gadgets && selectedBrawler.gadgets.length > 0) {
+          const selectedGadget = selectedBrawler.gadgets[Math.floor(Math.random() * selectedBrawler.gadgets.length)];
+          const gadgetImage = getGadgetImage(selectedBrawler.name, selectedGadget.name);
+          
+          const gadgetChallenge: GadgetChallenge = {
+            brawler: selectedBrawler.name,
+            gadgetName: selectedGadget.name,
+            tip: selectedGadget.tip || 'This gadget has special powers.',
+            image: gadgetImage
+          };
+          
+          setDailyChallenge(gadgetChallenge);
+          setCorrectBrawlerName(selectedBrawler.name);
+          setVictoryBrawler(selectedBrawler.name);
+          setGadgetImage(gadgetImage);
+          setActualBrawlerForGadget(selectedBrawler);
+          setSelectedGadget(selectedGadget);
+        }
       }
     } catch (error) {
       console.error('Error loading gadget challenge:', error);
-      setIsLoading(false);
       toast.error('Error loading challenge');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -569,15 +626,19 @@ const GadgetMode = ({
             )}
 
             {/* Victory Section - only show if not in survival mode or if skipVictoryScreen is false */}
-            {!isSurvivalMode && !skipVictoryScreen && (
+            {!isSurvivalMode && !skipVictoryScreen && isCorrect && (
               <div ref={victoryRef}>
                 <VictorySection
-                  isCorrect={isCorrect}
-                  correctBrawler={victoryBrawler}
-                  attempts={attempts}
-                  maxAttempts={maxGuesses}
+                  brawlerName={victoryBrawler}
+                  brawlerPortrait={getPortrait(victoryBrawler)}
+                  tries={attempts}
+                  mode="gadget"
                   nextModeKey={getNextModeKey('gadget')}
-                  gameMode="gadget"
+                  onNextMode={() => navigate(`/${getNextModeKey('gadget')}`)}
+                  nextBrawlerIn={timeUntilNext}
+                  yesterdayBrawlerName={yesterdayGadget?.brawler}
+                  yesterdayBrawlerPortrait={yesterdayGadget?.brawler ? getPortrait(yesterdayGadget.brawler) : undefined}
+                  yesterdayLabel="Yesterday's Gadget"
                 />
               </div>
             )}

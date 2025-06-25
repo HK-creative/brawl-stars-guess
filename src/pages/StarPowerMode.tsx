@@ -170,7 +170,7 @@ const StarPowerMode = ({
     return {
       brawler: brawler.name,
       starPowerName: starPower.name,
-      tip: starPower.tip || "No tip available",
+                tip: starPower.tip || t('no.tip.available'),
       image: imageFileName
     };
   };
@@ -363,14 +363,13 @@ const StarPowerMode = ({
       
       // For standard mode, try to fetch from backend
       try {
-        const response = await fetchDailyChallenge('starpower');
-        if (response?.success) {
-          const starpower = response.starpower;
+        const challengeData = await fetchDailyChallenge('starpower');
+        if (challengeData && typeof challengeData === 'object') {
           const challenge: StarPowerChallenge = {
-            brawler: starpower.brawler,
-            starPowerName: starpower.name,
-            tip: starpower.tip || "No tip available",
-            image: `/${starpower.image || 'default_starpower.png'}`
+            brawler: challengeData.brawler,
+            starPowerName: challengeData.starPowerName,
+            tip: challengeData.tip || t('no.tip.available'),
+            image: challengeData.image || `/${challengeData.brawler.toLowerCase()}_starpower_01.png`
           };
           setDailyChallenge(challenge);
           
@@ -382,7 +381,7 @@ const StarPowerMode = ({
       } catch (error) {
         console.error("Error fetching star power challenge:", error);
         setDailyChallenge(fallbackChallenge);
-        toast("Offline Mode", {
+        toast(t('offline.mode'), {
           description: "Using local fallback data as server could not be reached."
         });
       }
@@ -390,7 +389,7 @@ const StarPowerMode = ({
       loadChallengeDetails();
     } catch (error) {
       console.error("Error loading challenge:", error);
-      toast("Error", {
+      toast(t('error'), {
         description: "Something went wrong loading the challenge."
       });
     } finally {
@@ -413,10 +412,10 @@ const StarPowerMode = ({
   const fetchYesterday = async () => {
     try {
       const yesterdayData = await fetchYesterdayChallenge('starpower');
-      if (yesterdayData?.success) {
+      if (yesterdayData && typeof yesterdayData === 'object' && yesterdayData.brawler) {
         setYesterdayStarPower({
-          brawler: yesterdayData.starpower.brawler,
-          image: getPortrait(yesterdayData.starpower.brawler)
+          brawler: yesterdayData.brawler,
+          image: getPortrait(yesterdayData.brawler)
         });
       }
     } catch (error) {
@@ -545,9 +544,9 @@ const StarPowerMode = ({
   if (!dailyChallenge) {
     return (
       <div className="text-center p-8">
-        <h2 className="text-2xl font-bold text-white mb-4">Error Loading Challenge</h2>
+        <h2 className="text-2xl font-bold text-white mb-4">{t('error.loading.challenge')}</h2>
         <p className="text-gray-300 mb-6">There was a problem loading today's star power challenge.</p>
-        <Button onClick={loadChallengeForCurrentMode}>Try Again</Button>
+                  <Button onClick={loadChallengeForCurrentMode}>{t('button.try.again')}</Button>
       </div>
     );
   }
@@ -609,7 +608,7 @@ const StarPowerMode = ({
               {starPowerImage && (
               <img
                 src={starPowerImage}
-                alt="Brawler Star Power"
+                alt={t('brawler.star.power')}
                 className={cn(
                   "w-full h-full object-contain transform transition-all duration-300 hover:scale-105",
                   isGrayscale && "grayscale",
@@ -715,7 +714,7 @@ const StarPowerMode = ({
                   </div>
                 ) : (
                   <div className="survival-mode-guess-counter">
-                    <span className="text-base font-semibold">Number of Guesses</span>
+                    <span className="text-base font-semibold">{t('number.of.guesses')}</span>
                     <span className="text-base font-bold">{guessCount}</span>
                   </div>
                 )}

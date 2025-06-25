@@ -24,13 +24,13 @@ import { brawlers } from '@/data/brawlers';
 // A simple error fallback component to show when challenge loading fails
 const FallbackErrorUI = ({ onRetry }: { onRetry: () => void }) => (
   <div className="flex flex-col items-center justify-center p-8 text-center">
-    <h3 className="text-xl font-bold mb-4">Error Loading Challenge</h3>
+    <h3 className="text-xl font-bold mb-4">{t('error.loading.challenge')}</h3>
     <p className="mb-6">There was a problem loading today's gadget challenge.</p>
     <Button 
       onClick={onRetry}
-      className="bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-2 px-4 rounded"
-    >
-      Try Again
+                          className="bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-2 px-4 rounded"
+                  >
+                    {t('retry')}
     </Button>
   </div>
 );
@@ -361,7 +361,7 @@ const SurvivalModePage: React.FC = () => {
           <div className="flex items-center justify-center min-h-[400px]">
             <div className="survival-mode-game-card max-w-md">
               <div className="survival-mode-card-content text-center">
-                <h3 className="text-xl font-bold mb-3 text-red-400">Error Loading Challenge</h3>
+                                  <h3 className="text-xl font-bold mb-3 text-red-400">{t('error.loading.challenge')}</h3>
                 <p className="mb-4 text-white/80">There was a problem loading today's challenge.</p>
                 <Button 
                   onClick={() => {
@@ -380,9 +380,9 @@ const SurvivalModePage: React.FC = () => {
                       }
                     }, 500);
                   }}
-                  className="bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-2 px-4 rounded"
-                >
-                  Try Again
+                          className="bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-2 px-4 rounded"
+                  >
+                    {t('retry')}
                 </Button>
               </div>
             </div>

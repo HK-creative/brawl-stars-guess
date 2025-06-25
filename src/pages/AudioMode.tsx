@@ -648,8 +648,8 @@ const AudioMode = ({
   const fetchYesterday = async () => {
     try {
       const yesterdayData = await fetchYesterdayChallenge('audio');
-      if (yesterdayData?.success) {
-        const yesterdayBrawler = yesterdayData.audio.brawler;
+      if (yesterdayData && typeof yesterdayData === 'object' && yesterdayData.brawler) {
+        const yesterdayBrawler = yesterdayData.brawler;
         const audioFile = getRandomAudioFile(yesterdayBrawler, audioFiles);
         setYesterdayAudio({
           brawler: yesterdayBrawler,
