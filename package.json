@@ -9,6 +9,7 @@
     "build:dev": "bunx vite build --mode development",
     "lint": "bunx eslint .",
     "preview": "bunx vite preview",
+    "start": "bun run preview --port $PORT",
     "test": "bunx vitest run",
     "coverage": "bunx vitest run --coverage"
   },
