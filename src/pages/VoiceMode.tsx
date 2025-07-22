@@ -106,9 +106,9 @@ const VoiceMode = () => {
     } else if (newGuessCount >= maxAttempts) {
       setCorrectBrawlerNameForVictory(dailyChallenge.brawler);
       setIsGameOver(true);
-      toast.error(`Out of attempts! The correct answer was ${dailyChallenge.brawler}.`);
+      toast.error(`${t('message.out.of.attempts')} ${dailyChallenge.brawler}.`);
     } else {
-      toast.error(`Wrong guess! ${maxAttempts - newGuessCount} attempts left.`);
+      toast.error(`${t('message.wrong.guess')} ${maxAttempts - newGuessCount} ${t('message.attempts.left')}`);
     }
     setGuess('');
     setSelectedBrawler(null);
@@ -210,7 +210,7 @@ const VoiceMode = () => {
           onClick={handlePlayVoice}
         >
           <Volume2 className="w-4 h-4" />
-          <span>Play Voice Line</span>
+          <span>{t('voice.play_line')}</span>
         </Button>
         
         <div className="mt-4 px-4 py-2 bg-white/10 rounded-lg">
@@ -220,7 +220,9 @@ const VoiceMode = () => {
         </div>
         
         <div className="mt-6 text-sm text-white/60">
-          Next challenge in: {timeUntilNext.hours}h {timeUntilNext.minutes}m {timeUntilNext.seconds}s
+          {t('timer.next_in')
+              .replace('{hours}', String(timeUntilNext.hours))
+              .replace('{minutes}', String(timeUntilNext.minutes))} {timeUntilNext.seconds}s
         </div>
       </Card>
       

@@ -26,7 +26,7 @@ const TopBar: React.FC = () => {
       "bg-background/80 backdrop-blur-sm"
     )}>
       <div className={cn(
-        "max-w-7xl mx-auto",
+        "w-[48rem] mx-auto",
         "px-4 sm:px-6 lg:px-8",
         "h-16",
         "flex items-center justify-between"
@@ -64,7 +64,9 @@ const TopBar: React.FC = () => {
             <h1 className={cn(
               "text-xl font-bold",
               "text-gradient-primary"
-            )}>
+            )}
+            style={{ fontFamily: language === 'he' ? "'Abraham', sans-serif" : "'Lilita One', cursive" }}
+            >
               Brawldle
             </h1>
             {/* Streak Badge */}

@@ -1,17 +1,117 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* Custom Fonts */
+@font-face {
+  font-family: 'Nougat';
+  src: url('/EnglishFont/nougat-extrablack-webfont (2).ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Lilita One';
+  src: url('/EnglishFont/lilitaone-regular-webfont (2).ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* Abraham Font Definition for Hebrew Headlines and Labels */
 @font-face {
   font-family: 'Abraham';
-  src: url('/HebrewFont/Abraham-Regular.eot'); /* IE9 Compat Modes */
-  src: url('/HebrewFont/Abraham-Regular.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
-       url('/HebrewFont/Abraham-Regular.woff') format('woff'), /* Modern Browsers */
-       url('/HebrewFont/Abraham-Regular.ttf') format('truetype'); /* Safari, Android, iOS */
-  font-weight: normal;
+  src: url('/HebrewFont/Abraham (1)/Abraham/Abraham-Regular.eot'); /* IE9 Compat Modes */
+  src: url('/HebrewFont/Abraham (1)/Abraham/Abraham-Regular.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+       url('/HebrewFont/Abraham (1)/Abraham/Abraham-Regular.woff') format('woff'), /* Modern Browsers */
+       url('/HebrewFont/Abraham (1)/Abraham/Abraham-Regular.ttf') format('truetype'); /* Safari, Android, iOS */
+  font-weight: 100 900;
   font-style: normal;
   font-display: swap; /* Improves loading performance */
+}
+
+/* RTL Hebrew font usage across app */
+/* Fix Hebrew CTA button text centering */
+html[dir="rtl"] button {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+html[dir="rtl"] button span {
+  /* fine-tune for span-based labels */
+  transform: translateY(-12%);
+}
+
+/* fine-tune for h3-based labels like Survival button */
+html[dir="rtl"] button h3 {
+  transform: translateY(-12%);
+
+  /* fine-tune visual centering for Abraham glyph metrics */
+  transform: translateY(-12%);
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  line-height: 1 !important;
+  vertical-align: middle !important;
+}
+
+html[dir="rtl"] button > div {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  height: 100% !important;
+  width: 100% !important;
+}
+
+html[dir="rtl"] .brawldle-title {
+  font-family: 'Abraham', sans-serif !important;
+  font-variation-settings: 'wght' 900, 'wdth' 100 !important;
+  font-weight: 900 !important;
+  font-size: 10rem !important; /* Larger and bolder */
+  line-height: 0.9 !important;
+  letter-spacing: 0.02em !important;
+}
+
+/* Apply Abraham font only to text elements, not icons/images */
+html[dir="rtl"] *:not(img):not(svg):not(path):not(circle):not(rect):not(polygon):not(ellipse):not(line):not(polyline) {
+  font-family: 'Abraham', sans-serif !important;
+}
+
+html[dir="rtl"] body {
+  font-family: 'Abraham', sans-serif;
+  font-weight: 400;
+  font-variation-settings: 'wght' 400, 'wdth' 100;
+}
+
+html[dir="rtl"] h1 {
+  font-family: 'Abraham', sans-serif;
+  font-weight: 900;
+  font-variation-settings: 'wght' 900, 'wdth' 100;
+}
+html[dir="rtl"] h2 {
+  font-family: 'Abraham', sans-serif;
+  font-weight: 700;
+  font-variation-settings: 'wght' 700, 'wdth' 100;
+}
+html[dir="rtl"] h3, html[dir="rtl"] h4, html[dir="rtl"] h5, html[dir="rtl"] h6 {
+  font-family: 'Abraham', sans-serif;
+  font-weight: 600;
+  font-variation-settings: 'wght' 600, 'wdth' 100;
+}
+
+/* Existing RTL Hebrew title override retained for .brawldle-title */
+html[dir="rtl"] .brawldle-title {
+  font-family: 'Abraham', sans-serif !important;
+  font-variation-settings: 'wght' 900, 'wdth' 100;
+}
+
+html[dir="rtl"] .brawldle-title {
+  font-family: 'Abraham', sans-serif !important;
+  font-variation-settings: 'wght' 900, 'wdth' 100;
 }
 
 /* Performance optimizations to prevent flickering */
@@ -113,6 +213,28 @@ body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
     font-family: 'Inter', system-ui, sans-serif;
+  }
+  
+  /* Apply Lilita One font to all headlines */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Lilita One', cursive !important;
+  }
+  
+  /* Specifically for the brawldle title */
+  .brawldle-title {
+    font-family: 'Nougat', cursive !important;
+  }
+  
+  /* Apply to all game mode titles */
+  .survival-mode-title,
+  .daily-mode-victory-title,
+  .survival-mode-guess-counter {
+    font-family: 'Lilita One', cursive !important;
+  }
+  
+  /* Apply to Card titles */
+  .card-title {
+    font-family: 'Nougat', cursive !important;
   }
   
   /* Better font rendering */
@@ -1089,6 +1211,96 @@ html[dir="rtl"] h2 {
   html[dir="rtl"] h2 {
     font-size: 2rem !important; /* Larger on mobile */
     line-height: 1.2 !important;
+  }
+}
+
+/* ENGLISH HOME SCREEN HEADLINES - FLAT CARTOON STYLE */
+/* Ensure Hebrew main title uses Abraham */
+html[dir="rtl"] .brawldle-title {
+  font-family: 'Abraham', sans-serif !important;
+}
+/* Main title "Brawldle" on home screen for English */
+/* Hebrew main title font */
+html[dir="rtl"] .brawldle-title {
+  font-family: 'Abraham', sans-serif !important;
+}
+html[dir="ltr"] .brawldle-title {
+  font-size: 5rem !important; /* Increased by 30% from previous baseline */
+  line-height: 1 !important;
+  font-weight: 900 !important;
+  font-family: 'Nougat', cursive !important;
+  color: #FFFFFF !important;
+  text-shadow: 0 12px 0 #000000 !important;
+  -webkit-text-stroke: 5px #000000 !important; /* Reduced outline */
+  letter-spacing: 0.05em !important;
+  text-transform: uppercase !important;
+}
+
+/* Top bar scaling for desktop */
+/* Top bar scaling for desktop with horizontal compensation */
+@media (min-width: 1024px) {
+  html[dir="ltr"] .top-bar {
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+    transform: scale(1.4);
+    transform-origin: top center;
+  }
+  html[dir="rtl"] .top-bar {
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+    transform: scale(1.4);
+    transform-origin: top center;
+  }
+}
+
+/* Subtle dark overlay over background */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.3); /* subtle black */
+  pointer-events: none;
+  z-index: 0;
+}
+/* Ensure main app content sits above overlay */
+#root {
+  position: relative;
+  z-index: 1;
+}
+
+/* Mobile main title for English - mobile-first design */
+@media (max-width: 768px) {
+  html[dir="ltr"] .brawldle-title {
+    font-size: 5rem !important; /* Bigger for mobile */
+    line-height: 1 !important;
+    font-family: 'Nougat', cursive !important;
+    -webkit-text-stroke: 5px #000000 !important;
+    text-shadow: 0 8px 0 #000000 !important;
+  }
+  
+  /* Mobile-first layout adjustments */
+  .mobile-first-container {
+    min-height: 100vh !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    padding: 1rem !important;
+  }
+  
+  /* Ensure buttons use full width on mobile */
+  .mobile-full-width {
+    width: 100% !important;
+    max-width: none !important;
+  }
+}
+
+/* Extra small mobile devices */
+@media (max-width: 480px) {
+  html[dir="ltr"] .brawldle-title {
+    font-size: 4rem !important;
+    text-shadow: 0 6px 0 #000000 !important;
   }
 }
 

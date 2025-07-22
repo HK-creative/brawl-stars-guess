@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSurvivalStore, defaultSurvivalSettings, GameMode, SurvivalSettings } from '@/stores/useSurvivalStore';
 import { Button } from '@/components/ui/button';
+import { t } from '@/lib/i18n';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
@@ -208,8 +209,8 @@ const SurvivalSetupPage: React.FC = () => {
                 <Timer className="h-5 w-5 text-indigo-300" />
               </div>
               <div>
-                <h3 className="text-sm font-medium text-white">Fixed Timer: 150 seconds</h3>
-                <p className="text-xs text-white/70">Each round has the same time limit regardless of difficulty.</p>
+                <h3 className="text-sm font-medium text-white">{t('survival.fixed_timer')}</h3>
+                <p className="text-xs text-white/70">{t('survival.same_time_limit')}</p>
               </div>
             </div>
           </div>

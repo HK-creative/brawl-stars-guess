@@ -14,6 +14,8 @@ import { useAuthModal } from '@/contexts/AuthModalContext';
 const Index = () => {
   const { isLoggedIn, user, logout, streak, completedModes } = useStreak();
   const { language, changeLanguage } = useLanguage();
+  // Determine if the viewport is mobile-sized (client-side only)
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 640;
   const { openAuthModal } = useAuthModal();
   const navigate = useNavigate();
   const [showDailyCard, setShowDailyCard] = useState(false);
@@ -81,27 +83,26 @@ const Index = () => {
   };
 
   return (
-    <div className="h-screen bg-gradient-to-b from-slate-900 via-blue-900 to-black text-white overflow-hidden flex flex-col relative">
-      {/* Subtle parallax stars background pattern */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-16 left-8 w-1 h-1 bg-white/20 rounded-full animate-pulse opacity-40" />
-        <div className="absolute top-40 right-12 w-0.5 h-0.5 bg-blue-200/30 rounded-full animate-pulse opacity-30" style={{ animationDelay: '2s' }} />
-        <div className="absolute top-80 left-16 w-0.5 h-0.5 bg-purple-200/25 rounded-full animate-pulse opacity-25" style={{ animationDelay: '4s' }} />
-        <div className="absolute bottom-32 right-20 w-1 h-1 bg-white/15 rounded-full animate-pulse opacity-35" style={{ animationDelay: '1s' }} />
-        <div className="absolute bottom-64 left-24 w-0.5 h-0.5 bg-yellow-200/20 rounded-full animate-pulse opacity-30" style={{ animationDelay: '3s' }} />
-        </div>
-
+    <div 
+      className="h-screen text-white overflow-hidden flex flex-col relative"
+      style={{
+        backgroundImage: 'url(/BRAWLDLE-HOME-BACKGROUND-MOBILE.png)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat'
+      }}
+    >
       <div className="px-4 flex flex-col h-full relative z-10">
         
         {/* Header utilities - fixed top bar flush to top edge */}
-        <div className="flex items-center justify-between pt-2 pb-2 flex-shrink-0">
+        <div className="flex items-center justify-between pt-2 pb-2 flex-shrink-0 w-full lg:w-[42rem] mx-auto lg:px-0 top-bar">
           {/* Left - Feedback pill */}
           <button
             onClick={() => navigate('/feedback')}
             className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-slate-800/80 to-slate-700/80 hover:from-slate-700/80 hover:to-slate-600/80 rounded-full border border-slate-500/30 transition-all duration-300 backdrop-blur-sm shadow-lg hover:shadow-xl transform hover:scale-105"
           >
             <MessageSquare className="w-4 h-4 text-slate-300" />
-            <span className="text-sm font-semibold text-slate-200">Feedback</span>
+            <span className="text-sm font-semibold text-slate-200">{t('home.feedback')}</span>
           </button>
 
           {/* Right - Language + Auth with balanced flag halo */}
@@ -168,413 +169,218 @@ const Index = () => {
           </div>
             </div>
             
-        {/* Brand block - removed spacing below underline */}
-        <div className="text-center mt-1 flex-shrink-0">
-          {/* Brawldle wordmark */}
-          <div className="relative">
-            <h1 
-              className="text-2xl font-black mb-2 relative z-10 brawldle-title" 
-              style={{ 
-                background: 'linear-gradient(135deg, #FF9900 0%, #FFB800 50%, #FFA500 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                filter: 'drop-shadow(0 0 20px rgba(255, 153, 0, 0.5))',
-                fontSize: '1.5rem !important'
-              }}
-            >
-              Brawldle
-            </h1>
-            {/* Glow effect behind text */}
-            <div 
-              className="absolute inset-0 text-2xl font-black blur-lg opacity-50 brawldle-title"
-              style={{ 
-                background: 'linear-gradient(135deg, #FF9900 0%, #FFB800 50%, #FFA500 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                fontSize: '1.5rem !important'
-              }}
-            >
-              Brawldle
-            </div>
-          </div>
-
-          {/* Underline - removed bottom margin */}
-          <div className="relative flex justify-center">
-            <div 
-              className="w-24 h-1 rounded-full bg-gradient-to-r from-orange-500 via-yellow-400 to-orange-500 shadow-lg"
-              style={{ boxShadow: '0 0 20px rgba(255, 153, 0, 0.6)' }}
-            />
-          </div>
+        {/* Brand block - simplified flat design */}
+        <div className="text-center mb-12 md:mb-16 lg:mb-12 flex-shrink-0">
+          {/* Brawldle wordmark - flat cartoon style */}
+          <h1  
+            className="relative z-10 brawldle-title mt-12 lg:mt-8" 
+            style={{ 
+              fontSize: isMobile
+                ? (language === 'he' ? '320px' : '200px')
+                : (language === 'he' ? '48px' : '40px'),
+              fontFamily: language === 'he' ? "'Abraham', sans-serif" : "'Lilita One', cursive",
+              fontVariationSettings: "'wght' 900, 'wdth' 100",
+              letterSpacing: language === 'he' ? '0.02em' : '0.05em',
+              color: '#FFFFFF',
+              ...(language === 'he'
+                ? {
+                    WebkitTextStroke: '5px #000000',
+                    textShadow: '0 4px 0 #000000, 0 5px 0 #000000, 0 6px 0 #000000',
+                  }
+                : {
+                    textShadow: '0 12px 0 #000000',
+                    WebkitTextStroke: '6px #000000',
+                  }),
+              textTransform: 'uppercase',
+              lineHeight: '1'
+            }}
+          >
+            {t('app.title')}
+          </h1>
         </div>
 
-        {/* Main content area - removed flex-1 and justify-center that was causing the spacing */}
-        <div className="flex flex-col items-center pt-8 pb-0" style={{ gap: '24px' }}>
+        {/* Main content area - mobile-first layout */}
+        <div className="flex flex-col items-center w-full max-w-md mx-auto px-4 gap-12 lg:gap-10">
           
-          {/* DAILY CHALLENGE CARD - increased width */}
-          <div className="flex justify-center relative" style={{ width: '90vw', maxWidth: '380px' }}>
-            {/* Subtle streak indicator with fire icon */}
-            {streak > 0 && (
-              <div 
-                ref={streakBadgeRef}
-                className="absolute z-30 flex items-center justify-center rounded-full group/streak transition-all duration-300"
-                style={{ 
-                  padding: '5px 9px',
-                  top: '16px',
-                  right: '16px',
-                  background: 'rgba(255, 255, 255, 0.15)',
-                  backdropFilter: 'blur(12px)',
-                  boxShadow: `
-                    0 2px 6px rgba(0, 0, 0, 0.1),
-                    inset 0 1px 0 rgba(255, 255, 255, 0.2)
-                  `,
-                  border: '1px solid rgba(255, 255, 255, 0.2)',
-                  transform: 'scale(1) rotate(0deg)',
-                  filter: 'brightness(1)'
-                }}
-                title="Daily challenge streak!"
-              >
-                <Flame className="w-3.5 h-3.5 text-orange-200 mr-1 transition-all duration-300" style={{ opacity: 0.8 }} />
-                <span className="text-white text-sm font-medium">{streak}</span>
-              </div>
-            )}
-
-            <div className="relative w-full">
-              {/* Enhanced glow with deeper shadow */}
-              <div 
-                className="absolute -inset-3 rounded-3xl blur-lg opacity-80"
-                style={{
-                  background: 'linear-gradient(135deg, rgba(255, 215, 0, 0.4), rgba(255, 140, 0, 0.4), rgba(255, 107, 107, 0.4))',
-                  filter: 'blur(12px)'
-                }}
-              />
-
-              {/* Always 3D Daily Challenge card with layered depth */}
-              <div className="relative w-full">
-                {/* 3D Shadow layers for permanent depth */}
-                <div 
-                  className="absolute inset-0 rounded-3xl transition-all duration-300"
-                  style={{
-                    background: 'linear-gradient(135deg, #FFD700 0%, #FF8C00 25%, #FF6B6B 50%, #FF1493 75%, #8A2BE2 100%)',
-                    transform: 'translateY(8px) translateX(4px)',
-                    opacity: 0.3,
-                    filter: 'blur(2px)'
-                  }}
-                />
-                <div 
-                  className="absolute inset-0 rounded-3xl transition-all duration-300"
-                  style={{
-                    background: 'linear-gradient(135deg, #FFD700 0%, #FF8C00 25%, #FF6B6B 50%, #FF1493 75%, #8A2BE2 100%)',
-                    transform: 'translateY(4px) translateX(2px)',
-                    opacity: 0.5,
-                    filter: 'blur(1px)'
-                  }}
-                />
-                
-                {/* Main card - always 3D positioned */}
-                <button
-                  onClick={() => navigate('/daily/classic')}
-                  className="relative overflow-hidden transition-all duration-300 hover:scale-[1.02] w-full group"
-                  style={{
-                    height: '343px', // Increased by ~10%
-                    borderRadius: '24px',
-                    background: 'linear-gradient(135deg, #FFD700 0%, #FF8C00 25%, #FF6B6B 50%, #FF1493 75%, #8A2BE2 100%)',
-                    boxShadow: `
-                      0 12px 40px rgba(0, 0, 0, 0.4),
-                      0 6px 20px rgba(0, 0, 0, 0.3),
-                      inset 0 2px 0 rgba(255, 255, 255, 0.3),
-                      inset 0 -2px 0 rgba(0, 0, 0, 0.2),
-                      0 0 25px rgba(255, 215, 0, 0.3)
-                    `,
-                    border: '3px solid rgba(255, 255, 255, 0.3)',
-                    // Always positioned with 3D effect
-                    transform: showDailyCard ? 'translateY(-2px) translateX(-1px)' : 'translateY(-2px) translateX(-1px) scale(1.01)',
-                    opacity: showDailyCard ? 1 : 0,
-                    transition: 'transform 300ms ease-out, opacity 300ms ease-out, box-shadow 300ms ease-out'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'translateY(-8px) translateX(-4px) scale(1.02)';
-                    e.currentTarget.style.boxShadow = `
-                      0 20px 60px rgba(0, 0, 0, 0.5),
-                      0 10px 30px rgba(0, 0, 0, 0.4),
-                      inset 0 3px 0 rgba(255, 255, 255, 0.4),
-                      inset 0 -3px 0 rgba(0, 0, 0, 0.3),
-                      0 0 35px rgba(255, 215, 0, 0.4)
-                    `;
-                    // Sync streak badge animation
-                    if (streakBadgeRef.current) {
-                      streakBadgeRef.current.style.transform = 'scale(1.15) rotate(5deg)';
-                      streakBadgeRef.current.style.filter = 'brightness(1.3)';
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'translateY(-2px) translateX(-1px)';
-                    e.currentTarget.style.boxShadow = `
-                      0 12px 40px rgba(0, 0, 0, 0.4),
-                      0 6px 20px rgba(0, 0, 0, 0.3),
-                      inset 0 2px 0 rgba(255, 255, 255, 0.3),
-                      inset 0 -2px 0 rgba(0, 0, 0, 0.2),
-                      0 0 25px rgba(255, 215, 0, 0.3)
-                    `;
-                    // Reset streak badge animation
-                    if (streakBadgeRef.current) {
-                      streakBadgeRef.current.style.transform = 'scale(1) rotate(0deg)';
-                      streakBadgeRef.current.style.filter = 'brightness(1)';
-                    }
-                  }}
-                >
-                {/* Inner content with proper spacing */}
-                <div className="relative z-10 flex flex-col items-center justify-center h-full px-6 py-8">
-                  {/* Clean text styling - solid white with light dark outline */}
-                  <div className="text-center mb-12">
-                    <h2 
-                      className="font-black text-white leading-tight"
-                      style={{ 
-                        fontSize: '28px',
-                        letterSpacing: '0.5px',
-                        color: '#FFFFFF',
-                        textShadow: '1px 1px 2px rgba(0, 0, 0, 0.3)'
-                      }}
-                    >
-                      Daily Challenge
-                    </h2>
-                  </div>
-                  
-                  {/* Challenge icons with gentle warm glow on hover and full-color when completed */}
-                  <div className="flex justify-center items-center" style={{ gap: '16px', paddingLeft: '16px', paddingRight: '16px' }}>
-                    {dailyModeIcons.map((mode) => {
-                      const isCompleted = isModeCompleted(mode.name);
-                      
-                      return (
-                        <div
-                          key={mode.name}
-                          className="relative rounded-full flex items-center justify-center transition-all duration-200 group-hover:shadow-lg"
-                          style={{ 
-                            width: '48px', 
-                            height: '48px',
-                            background: 'rgba(255, 255, 255, 0.25)',
-                            boxShadow: `
-                              0 2px 8px rgba(0, 0, 0, 0.2),
-                              inset 0 1px 0 rgba(255, 255, 255, 0.4),
-                              inset 0 -1px 0 rgba(0, 0, 0, 0.2)
-                            `,
-                            border: isCompleted 
-                              ? `2px solid ${mode.color}`
-                              : '2px solid rgba(128, 128, 128, 0.4)',
-                            backdropFilter: 'blur(10px)',
-                            // Gentle warm glow on hover for untouched rings
-                            filter: !isCompleted ? 'drop-shadow(0 0 0 rgba(255, 153, 0, 0))' : 'none',
-                            transition: 'all 0.3s ease'
-                          }}
-                          onMouseEnter={(e) => {
-                            if (!isCompleted) {
-                              e.currentTarget.style.filter = 'drop-shadow(0 0 8px rgba(255, 153, 0, 0.6))';
-                            }
-                          }}
-                          onMouseLeave={(e) => {
-                            if (!isCompleted) {
-                              e.currentTarget.style.filter = 'drop-shadow(0 0 0 rgba(255, 153, 0, 0))';
-                            }
-                          }}
-                        >
-                          {isCompleted ? (
-                            <Image
-                              src={mode.icon}
-                              alt={mode.name}
-                              width={24}
-                              height={24}
-                              className="w-6 h-6 object-contain"
-                              style={{ 
-                                filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3))'
-                              }}
-                            />
-                          ) : (
-                            <Image
-                              src={mode.icon}
-                              alt={mode.name}
-                              width={24}
-                              height={24}
-                              className="w-6 h-6 object-contain"
-                              style={{ 
-                                filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3))',
-                                opacity: 0.6 // Lightened incomplete mode overlay
-                              }}
-                            />
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-
-                  {/* Premium countdown timer */}
-                  <div className="absolute bottom-6 left-0 right-0 flex items-center justify-center">
-                    <div 
-                      className="px-4 py-2 rounded-full backdrop-blur-md transition-all duration-300"
-                      style={{
-                        background: 'rgba(0, 0, 0, 0.3)',
-                        border: '1px solid rgba(255, 255, 255, 0.2)',
-                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
-                      }}
-                    >
-                      <span 
-                        className="text-white text-sm font-semibold tracking-wide"
-                        style={{ 
-                          textShadow: '0 1px 3px rgba(0, 0, 0, 0.8)',
-                          letterSpacing: '0.02em'
-                        }}
-                      >
-                        Next puzzle in {timeUntilNextPuzzle}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </button>
-              </div>
-            </div>
-          </div>
-
-          {/* SURVIVAL CARD - increased width with subtle glow */}
-          <div className="flex justify-center" style={{ width: '90vw', maxWidth: '380px' }}>
-            <div className="relative w-full">
-              {/* Premium outer glow effect */}
-              <div className="absolute inset-0 -z-10">
-                {/* Enhanced outer glow */}
-                <div 
-                  className="absolute -inset-4 rounded-3xl blur-xl opacity-30 transition-opacity duration-500 hover:opacity-50"
+          {/* {t('home.daily.challenges')} BUTTON */}
+          <div className="w-full max-w-[22rem] lg:max-w-[20.16rem] mx-auto">
+            <button
+              onClick={() => navigate('/daily/classic')}
+              className="w-full transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+              style={{
+                height: isMobile ? '180px' : '224px',
+                borderRadius: '20px',
+                background: 'linear-gradient(#fcb410 0%, #d9960d 100%)',
+                border: 'none',
+                boxShadow: '0 0 0 1px #000, inset 0 6px 0 rgba(255,255,255,0.6), inset 0 -10px 0 rgba(0,0,0,0.45)',
+                cursor: 'pointer',
+                position: 'relative'
+              }}
+            >
+              <div className="flex flex-col items-center justify-center h-full px-6 py-8" style={!isMobile ? { transform: 'scale(0.9)' } : undefined} >
+                {/* Title */}
+                <h2 
+                  className="text-3xl md:text-4xl lg:text-5xl mb-6"
                   style={{ 
-                    background: 'radial-gradient(ellipse, rgba(245, 158, 11, 0.4) 0%, rgba(251, 146, 60, 0.3) 40%, rgba(245, 158, 11, 0.2) 70%, transparent 90%)'
-                  }}
-                />
-              </div>
-
-              {/* Minimal floating sparkles */}
-              <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute top-4 left-8 w-0.5 h-0.5 bg-amber-400 rounded-full animate-ping opacity-30" style={{ animationDelay: '0s' }}></div>
-                <div className="absolute bottom-6 right-8 w-0.5 h-0.5 bg-orange-400 rounded-full animate-ping opacity-25" style={{ animationDelay: '2s' }}></div>
-              </div>
-
-              {/* Modern sleek survival card with premium design */}
-              <button
-                onClick={() => navigate('/survival')}
-                className="relative w-full transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl overflow-hidden group"
-                style={{
-                  height: '141px', // Increased by ~10%
-                  borderRadius: '20px',
-                  background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 25%, #334155 50%, #1e293b 75%, #0f172a 100%)',
-                  border: '3px solid transparent',
-                  backgroundImage: `
-                    linear-gradient(135deg, #0f172a 0%, #1e293b 25%, #334155 50%, #1e293b 75%, #0f172a 100%),
-                    linear-gradient(135deg, rgba(245, 158, 11, 0.8) 0%, rgba(251, 146, 60, 0.9) 50%, rgba(245, 158, 11, 0.8) 100%)
-                  `,
-                  backgroundOrigin: 'border-box',
-                  backgroundClip: 'padding-box, border-box',
-                  boxShadow: `
-                    0 8px 32px rgba(245, 158, 11, 0.2),
-                    0 4px 16px rgba(0, 0, 0, 0.4),
-                    inset 0 2px 0 rgba(255, 255, 255, 0.1),
-                    inset 0 -2px 0 rgba(0, 0, 0, 0.3),
-                    0 0 20px rgba(245, 158, 11, 0.15)
-                  `
-                }}
-              >
-                {/* Premium inner glow effect */}
-                <div 
-                  className="absolute inset-2 opacity-20 transition-opacity duration-500 group-hover:opacity-30"
-                  style={{
-                    background: 'radial-gradient(ellipse at center, rgba(245, 158, 11, 0.3) 0%, rgba(251, 146, 60, 0.2) 30%, rgba(245, 158, 11, 0.1) 60%, transparent 80%)',
-                    borderRadius: '17px',
-                    filter: 'blur(4px)'
-                  }}
-                />
-
-                {/* Background Image with modern rounded corners */}
-                <div 
-                  className="absolute inset-0 overflow-hidden"
-                  style={{
-                    borderRadius: '17px'
+                    fontFamily: language === 'he' ? "'Abraham', sans-serif" : "'Lilita One', cursive",
+                    fontWeight: '900',
+                    color: '#FFFFFF',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.02em',
+                    lineHeight: '1',
+                    textShadow: '0 -1px 0 #000, 1px 0 0 #000, -1px 0 0 #000, 0 2px 0 #000, 0 4px 4px rgba(0,0,0,0.25)'
                   }}
                 >
-                  <img 
-                    src="/Survival_card_background.png" 
-                    alt="Survival Background" 
-                    className="w-full h-full object-cover opacity-70" 
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/20 to-black/50" />
+                  {t('home.daily.challenges')}
+                </h2>
+                
+                {/* Challenge icons - with colors */}
+                <div className="flex items-center justify-center gap-4 md:gap-5">
+                  {dailyModeIcons.map((mode) => {
+                    const isCompleted = isModeCompleted(mode.name);
+                    return (
+                      <div key={mode.name} className="relative">
+                        <img 
+                          src={mode.icon}
+                          alt={`${mode.name} Icon`}
+                          className="w-10 h-10 md:w-12 md:h-12"
+                          style={{
+                            filter: 'none'
+                          }}
+                        />
+                        {isCompleted && (
+                          <div 
+                            className="absolute -top-1 -right-1 w-5 h-5 rounded-full border-2 border-black flex items-center justify-center"
+                            style={{ backgroundColor: '#00FF00' }}
+                          >
+                            <span style={{ fontSize: '12px', color: '#000000', fontWeight: 'bold' }}>✓</span>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
-
-                {/* Premium content styling */}
-                <div className="relative z-10 h-full flex flex-col items-center justify-center text-center px-6">
-                  <h3 
-                    className="text-3xl font-black uppercase tracking-wider mb-2 transition-all duration-500 group-hover:scale-105"
-                    style={{
-                      background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 25%, #d97706 50%, #f59e0b 75%, #fbbf24 100%)',
-                      WebkitBackgroundClip: 'text',
-                      WebkitTextFillColor: 'transparent',
-                      textShadow: '0 2px 8px rgba(245, 158, 11, 0.5)',
-                      filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3))'
-                    }}
-                  >
-                    SURVIVAL
-                  </h3>
-                  <p 
-                    className="text-amber-200/90 text-sm font-semibold tracking-wide transition-all duration-500 group-hover:text-amber-100"
-                    style={{
-                      textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)'
-                    }}
-                  >
-                    Ultimate Challenge Mode
-                  </p>
-                </div>
-              </button>
+              </div>
+            </button>
+            
+            {/* Next puzzle countdown - outside button */}
+            <div className="text-center mt-4">
+              <span 
+                className="text-lg md:text-xl"
+                style={{ 
+                  color: '#FFFFFF',
+                  fontFamily: language === 'he' ? "'Abraham', sans-serif" : "'Lilita One', cursive",
+                  textShadow: '0 -1px 0 #000, 1px 0 0 #000, -1px 0 0 #000, 0 2px 0 #000, 0 4px 4px rgba(0,0,0,0.25)'
+                }}
+              >
+                {t('home.next.puzzle.in')} {timeUntilNextPuzzle}
+              </span>
             </div>
           </div>
 
-          {/* Premium action buttons */}
-          <div className="flex items-center justify-center" style={{ gap: '16px', width: '90vw', maxWidth: '380px' }}>
-            {/* JOIN COMMUNITY - premium design */}
+          {/* {t('home.survival.title')} BUTTON */}
+          <div className="w-full max-w-[11.5rem] lg:max-w-[12.5rem] mx-auto mb-16 lg:mb-12">
             <button
-              onClick={() => navigate('/join-us')}
-              className="flex items-center gap-3 px-6 py-3.5 rounded-2xl border transition-all duration-400 hover:scale-105 backdrop-blur-md flex-1 group"
+              onClick={() => navigate('/survival')}
+              className="w-full transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
               style={{
-                background: 'linear-gradient(135deg, rgba(255, 107, 53, 0.15), rgba(255, 107, 53, 0.08))',
-                borderColor: 'rgba(255, 107, 53, 0.4)',
-                boxShadow: '0 4px 16px rgba(255, 107, 53, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.1), inset 0 -1px 0 rgba(0, 0, 0, 0.1)'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = 'linear-gradient(135deg, rgba(255, 107, 53, 0.25), rgba(255, 107, 53, 0.15))';
-                e.currentTarget.style.boxShadow = '0 6px 24px rgba(255, 107, 53, 0.25), inset 0 2px 0 rgba(255, 255, 255, 0.15), inset 0 -2px 0 rgba(0, 0, 0, 0.15)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'linear-gradient(135deg, rgba(255, 107, 53, 0.15), rgba(255, 107, 53, 0.08))';
-                e.currentTarget.style.boxShadow = '0 4px 16px rgba(255, 107, 53, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.1), inset 0 -1px 0 rgba(0, 0, 0, 0.1)';
+                height: isMobile ? '100px' : '75px',
+                borderRadius: '20px',
+                background: 'linear-gradient(#4d37ca 0%, #392599 100%)',
+                border: 'none',
+                boxShadow: '0 0 0 1px #000, inset 0 4px 0 rgba(255,255,255,0.6), inset 0 -8px 0 rgba(0,0,0,0.45)',
+                cursor: 'pointer'
               }}
             >
-              <Users className="w-5 h-5 text-orange-300 transition-transform duration-300 group-hover:scale-110" />
-              <span className="text-orange-200 font-semibold text-sm tracking-wide">Join Community</span>
-            </button>
-
-            {/* TIER LIST - premium design */}
-            <button
-              onClick={() => navigate('/tier-list')}
-              className="flex items-center gap-3 px-6 py-3.5 rounded-2xl border transition-all duration-400 hover:scale-105 backdrop-blur-md flex-1 group"
-              style={{
-                background: 'linear-gradient(135deg, rgba(148, 163, 184, 0.15), rgba(148, 163, 184, 0.08))',
-                borderColor: 'rgba(148, 163, 184, 0.4)',
-                boxShadow: '0 4px 16px rgba(148, 163, 184, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.1), inset 0 -1px 0 rgba(0, 0, 0, 0.1)'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = 'linear-gradient(135deg, rgba(148, 163, 184, 0.25), rgba(148, 163, 184, 0.15))';
-                e.currentTarget.style.boxShadow = '0 6px 24px rgba(148, 163, 184, 0.25), inset 0 2px 0 rgba(255, 255, 255, 0.15), inset 0 -2px 0 rgba(0, 0, 0, 0.15)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'linear-gradient(135deg, rgba(148, 163, 184, 0.15), rgba(148, 163, 184, 0.08))';
-                e.currentTarget.style.boxShadow = '0 4px 16px rgba(148, 163, 184, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.1), inset 0 -1px 0 rgba(0, 0, 0, 0.1)';
-              }}
-            >
-              <Trophy className="w-5 h-5 text-slate-300 transition-transform duration-300 group-hover:scale-110" />
-              <span className="text-slate-300 font-semibold text-sm tracking-wide">Tier List</span>
+              <div className="flex items-center justify-center h-full">
+                <h3 
+                  className="text-2xl md:text-3xl lg:text-4xl"
+                  style={{
+                    fontFamily: language === 'he' ? "'Abraham', sans-serif" : "'Lilita One', cursive",
+                    fontWeight: '900',
+                    color: '#FFFFFF',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.02em',
+                    lineHeight: '1',
+                    textShadow: '0 -1px 0 #000, 1px 0 0 #000, -1px 0 0 #000, 0 2px 0 #000, 0 4px 4px rgba(0,0,0,0.25)'
+                  }}
+                >
+                  {t('home.survival.title')}
+                </h3>
+              </div>
             </button>
           </div>
         </div>
+
+        {/* Footer - SECONDARY BUTTONS ROW - positioned at bottom */}
+        <div className="w-full flex justify-center mt-4 lg:mt-8 mb-8">
+          <div className="w-full max-w-md bg-[#003d63]/30 backdrop-blur-lg rounded-2xl p-4 flex gap-4 backdrop-blur-sm shadow-none border-b border-b-[#000000]/20">
+            <div className="flex w-full max-w-md mx-auto gap-4">
+              {/* {t('home.join.community')} */}
+              <button
+                onClick={() => navigate('/join-us')}
+                className="flex-1 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                style={{
+                  height: '60px',
+                  borderRadius: '16px',
+                  background: 'linear-gradient(#e92a7a 0%, #b71f5c 100%)',
+                  border: 'none',
+                  boxShadow: '0 0 0 1px #000, inset 0 4px 0 rgba(255,255,255,0.6), inset 0 -8px 0 rgba(0,0,0,0.45)',
+                  cursor: 'pointer'
+                }}
+              >
+                <div className="flex items-center justify-center h-full px-2">
+                  <span 
+                    className="text-xl md:text-2xl lg:text-xl"
+                    style={{
+                      fontFamily: language === 'he' ? "'Abraham', sans-serif" : "'Lilita One', cursive",
+                      fontWeight: '900',
+                      color: '#FFFFFF',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.02em',
+                      textShadow: '0 -1px 0 #000, 1px 0 0 #000, -1px 0 0 #000, 0 2px 0 #000, 0 4px 4px rgba(0,0,0,0.25)'
+                    }}
+                  >
+                    {t('home.join.community')}
+                  </span>
+                </div>
+              </button>
+
+              {/* {t('home.tier.list')} */}
+              <button
+                onClick={() => navigate('/tier-list')}
+                className="flex-1 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                style={{
+                  height: '60px',
+                  borderRadius: '16px',
+                  background: 'linear-gradient(#01abc2 0%, #018599 100%)',
+                  border: 'none',
+                  boxShadow: '0 0 0 1px #000, inset 0 4px 0 rgba(255,255,255,0.6), inset 0 -8px 0 rgba(0,0,0,0.45)',
+                  cursor: 'pointer'
+                }}
+              >
+                <div className="flex items-center justify-center h-full px-2">
+                  <span 
+                    className="text-xl md:text-2xl lg:text-xl"
+                    style={{
+                      fontFamily: language === 'he' ? "'Abraham', sans-serif" : "'Lilita One', cursive",
+                      fontWeight: '900',
+                      color: '#FFFFFF',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.02em',
+                      textShadow: '0 -1px 0 #000, 1px 0 0 #000, -1px 0 0 #000, 0 2px 0 #000, 0 4px 4px rgba(0,0,0,0.25)'
+                    }}
+                  >
+                    {t('home.tier.list')}
+                  </span>
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom padding to account for fixed footer */}
+        <div className="h-20 md:h-24 lg:h-16"></div>
 
         {/* Premium CSS animations */}
         <style>

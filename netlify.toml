@@ -1,0 +1,9 @@
+# Netlify deployment configuration for Brawl Stars Guess (Vite + React)
+[build]
+  command = "npx vite build"
+  publish = "dist"
+
+[dev]
+  command = "npm run dev"
+  port = 5173
+  targetPort = 5173

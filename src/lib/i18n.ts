@@ -32,6 +32,66 @@ const translations: Translations = {
     he: "האתגר האולטימטיבי"
   },
   
+    "home.feedback": {
+    en: "Feedback",
+    he: "חוות דעת"
+  },
+  "home.daily.challenges": {
+    en: "Daily Challenges",
+    he: "המשחק היומי"
+  },
+  "home.tier.list": {
+    en: "Tier List",
+    he: "דירוג בראולרים"
+  },
+  "home.join.community": {
+    en: "Join Us",
+    he: "הצטרף לקהילה"
+  },
+  "home.next.puzzle.in": {
+    en: "Next puzzle in",
+    he: "הפאזל הבא בעוד"
+  },
+    "voice.play_line": { en: "Play Voice Line", he: "נגן קול" },
+  "survival.fixed_timer": { en: "Fixed Timer: 150 seconds", he: "טיימר קבוע: ‎150‎ שניות" },
+  "survival.same_time_limit": { en: "Each round has the same time limit regardless of difficulty.", he: "כל סיבוב עם הגבלת זמן זהה" },
+  "error.gadget_load": { en: "There was a problem loading today's gadget challenge.", he: "קרתה בעיה בטעינת אתגר הגאדג'ט." },
+  "error.challenge_load": { en: "There was a problem loading today's challenge.", he: "קרתה בעיה בטעינת האתגר." },
+  "error.starpower_load": { en: "There was a problem loading today's star power challenge.", he: "קרתה בעיה בטעינת אתגר כוח הכוכב." },
+  "generic.victory": { en: "Victory!", he: "ניצחון!" },
+  "victory.guessed_brawler": { en: "You guessed the brawler: {brawler}", he: "ניחשת את הבראולר: {brawler}" },
+  "victory.number_of_tries": { en: "Number of tries: {count}", he: "מספר ניסיונות: {count}" },
+  "stats.streak": { en: "Streak: {days} days", he: "רצף: {days} ימים" },
+  "challenge.none_available": { en: "No Challenge Available", he: "האתגר לא  זמין" },
+  "challenge.check_back_later": { en: "Check back later for today's challenge.", he: "חזור מאוחר יותר לאתגר היום." },
+  "mode.endless": { en: "Endless Mode", he: "מצב אין-סופי" },
+  "ui.previous_guesses": { en: "Previous Guesses", he: "ניחושים קודמים" },
+  "status.under_construction": { en: "Under Construction", he: "בתהליך בנייה" },
+  "action.return_home": { en: "Return Home", he: "חזור לדף הבית" },
+  "error.page_not_found": { en: "Oops! Page not found", he: "אופס! הדף לא נמצא" },
+  "status.loading_challenge": { en: "Loading challenge…", he: "טוען אתגר…" },
+  "label.daily_challenge": { en: "Daily Challenge", he: "אתגר יומי" },
+  "stats.brawlers_guessed": { en: "Brawlers guessed:", he: "בראולרים שניחשת:" },
+  "timer.next_in": { en: "Next in: {hours}h {minutes}m", he: "אתגר הבא בעוד: {hours}ש {minutes}דק" },
+  "status.processing": { en: "Processing…", he: "טוען…" },
+  "auth.error": { en: "Authentication Error", he: "שגיאת אימות" },
+  "auth.reset_password": { en: "Reset Your Password", he: "איפוס סיסמה" },
+  "auth.new_password": { en: "New Password", he: "סיסמה חדשה" },
+  "auth.confirm_password": { en: "Confirm Password", he: "אישור סיסמה" },
+  "error.loading_challenge": { en: "Error Loading Challenge", he: "שגיאה בטעינת האתגר" },
+  "action.try_again": { en: "Try Again", he: "נסה שוב" },
+  "ui.need_hint": { en: "Need a hint?", he: "צריך רמז?" },
+  "stats.number_of_guesses": { en: "Number of Guesses", he: "מספר ניחושים" },
+  "audio.yesterday_attack": { en: "Yesterday's Attack Sound", he: "קול הבראולר  של אתמול" },
+  "status.password_email_sent": { en: "Password reset email sent!", he: "מייל לאיפוס הסיסמה נשלח בהצלחה." },
+  "status.loading": { en: "Loading…", he: "טוען…" },
+  "pixels.mystery": { en: "Mystery Pixels", he: "פיקסלים מסתוריים" },
+  "generic.correct": { en: "Correct!", he: "נכון!" },
+  "generic.game_over": { en: "Game Over!", he: "המשחק נגמר!" },
+  "generic.correct_answer_was": { en: "The correct answer was:", he: "התשובה הנכונה הייתה:" },
+  "victory.guessed_brawler_attempts": { en: "You guessed {brawler} in {attempts} {attempt/attempts}!", he: "ניחשת את {brawler} ב-{attempts} {attempt/attempts}!" },
+  "victory.correct_brawler": { en: "The correct brawler was {brawler}.", he: "הבראולר הנכון היה {brawler}." },
+  "feedback.submitted": { en: "Feedback submitted", he: "המשוב התקבל" },
   // Game Mode Names
   "mode.classic": {
     en: "Classic",
@@ -60,10 +120,6 @@ const translations: Translations = {
   "mode.survival": {
     en: "Survival Mode",
     he: "מצב הישרדות"
-  },
-  "mode.endless": {
-    en: "Endless Mode",
-    he: "מצב אינסופי"
   },
   
   // Page Titles & Headers
