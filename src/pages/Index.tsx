@@ -173,7 +173,7 @@ const Index = () => {
         <div className="text-center mb-12 md:mb-16 lg:mb-12 flex-shrink-0">
           {/* Brawldle wordmark - flat cartoon style */}
           <h1  
-            className="relative z-10 brawldle-title mt-12 lg:mt-8" 
+            className="relative z-10 brawldle-title mt-16 lg:mt-12 mb-4 lg:mb-6" 
             style={{ 
               fontSize: isMobile
                 ? (language === 'he' ? '320px' : '200px')
@@ -208,7 +208,7 @@ const Index = () => {
               onClick={() => navigate('/daily/classic')}
               className="w-full transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
               style={{
-                height: isMobile ? '180px' : '224px',
+                height: isMobile ? '180px' : '179px',
                 borderRadius: '20px',
                 background: 'linear-gradient(#fcb410 0%, #d9960d 100%)',
                 border: 'none',
@@ -220,7 +220,7 @@ const Index = () => {
               <div className="flex flex-col items-center justify-center h-full px-6 py-8" style={!isMobile ? { transform: 'scale(0.9)' } : undefined} >
                 {/* Title */}
                 <h2 
-                  className="text-3xl md:text-4xl lg:text-5xl mb-6"
+                  className="text-3xl md:text-4xl lg:text-4xl mb-6 whitespace-nowrap"
                   style={{ 
                     fontFamily: language === 'he' ? "'Abraham', sans-serif" : "'Lilita One', cursive",
                     fontWeight: '900',
@@ -284,7 +284,7 @@ const Index = () => {
               onClick={() => navigate('/survival')}
               className="w-full transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
               style={{
-                height: isMobile ? '100px' : '75px',
+                height: isMobile ? '100px' : '68px',
                 borderRadius: '20px',
                 background: 'linear-gradient(#4d37ca 0%, #392599 100%)',
                 border: 'none',
@@ -294,7 +294,7 @@ const Index = () => {
             >
               <div className="flex items-center justify-center h-full">
                 <h3 
-                  className="text-2xl md:text-3xl lg:text-4xl"
+                  className="text-2xl md:text-3xl lg:text-3xl"
                   style={{
                     fontFamily: language === 'he' ? "'Abraham', sans-serif" : "'Lilita One', cursive",
                     fontWeight: '900',
@@ -313,7 +313,7 @@ const Index = () => {
         </div>
 
         {/* Footer - SECONDARY BUTTONS ROW - positioned at bottom */}
-        <div className="w-full flex justify-center mt-4 lg:mt-8 mb-8">
+        <div className="w-full flex justify-center mt-6 lg:mt-20 mb-8">
           <div className="w-full max-w-md bg-[#003d63]/30 backdrop-blur-lg rounded-2xl p-4 flex gap-4 backdrop-blur-sm shadow-none border-b border-b-[#000000]/20">
             <div className="flex w-full max-w-md mx-auto gap-4">
               {/* {t('home.join.community')} */}
@@ -331,7 +331,7 @@ const Index = () => {
               >
                 <div className="flex items-center justify-center h-full px-2">
                   <span 
-                    className="text-xl md:text-2xl lg:text-xl"
+                    className="text-xl md:text-2xl lg:text-2xl"
                     style={{
                       fontFamily: language === 'he' ? "'Abraham', sans-serif" : "'Lilita One', cursive",
                       fontWeight: '900',
@@ -361,7 +361,7 @@ const Index = () => {
               >
                 <div className="flex items-center justify-center h-full px-2">
                   <span 
-                    className="text-xl md:text-2xl lg:text-xl"
+                    className="text-xl md:text-2xl lg:text-2xl"
                     style={{
                       fontFamily: language === 'he' ? "'Abraham', sans-serif" : "'Lilita One', cursive",
                       fontWeight: '900',
