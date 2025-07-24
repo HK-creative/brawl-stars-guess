@@ -10,14 +10,21 @@ import { getPortrait } from '@/lib/image-helpers';
 import BrawlerAutocomplete from '@/components/BrawlerAutocomplete';
 import ReactConfetti from 'react-confetti';
 import { fetchDailyChallenge, fetchYesterdayChallenge } from '@/lib/daily-challenges';
+import { getGadgetImagePath } from '@/lib/image-helpers';
 import { t, getLanguage } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 import { useStreak } from '@/contexts/StreakContext';
+import Image from '@/components/ui/image';
 
 const DEFAULT_PORTRAIT = '/portraits/shelly.png';
 
-// Helper to get gadget image path with fallback variants
+// Helper to get gadget image path (canonical + fallback without padded zero)
 const getGadgetImageVariants = (brawler: string, gadgetName?: string): string[] => {
+  if (!brawler) return [];
+  const canonical = getGadgetImagePath(brawler, gadgetName);
+  // Fallback without leading zero (e.g. _gadget_1.png)
+  const fallback = canonical.replace(/_0(\d)\.png$/, '_$1.png');
+  return [canonical, fallback];
   if (!brawler) {
     return [];
   }
@@ -468,13 +475,13 @@ const DailyGadgetMode: React.FC = () => {
                 {/* Gadget Image */}
                 <div className="flex justify-center mb-6">
                   <div className="w-64 h-64 md:w-72 md:h-72 rounded-3xl border-4 border-green-500/60 bg-black/20 backdrop-blur-sm flex items-center justify-center overflow-hidden shadow-2xl">
-                    {gadgetImage && imageLoaded ? (
-                      <img
+                    {gadgetImage ? (
+                      <Image
                         src={gadgetImage}
+                        fallbackSrc={imageVariants.length > 1 ? imageVariants[1] : '/GadgetImages/shelly_gadget_01.png'}
                         alt="Mystery Gadget"
                         className="w-full h-full object-contain"
-                        onLoad={() => setImageLoaded(true)}
-                        onError={() => setImageLoaded(false)}
+                        priority
                       />
                     ) : (
                       <div className="text-center">

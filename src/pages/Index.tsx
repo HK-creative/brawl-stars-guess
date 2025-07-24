@@ -203,12 +203,12 @@ const Index = () => {
         <div className="flex flex-col items-center w-full max-w-md mx-auto px-4 gap-12 lg:gap-10">
           
           {/* {t('home.daily.challenges')} BUTTON */}
-          <div className="w-full max-w-[22rem] lg:max-w-[20.16rem] mx-auto">
+          <div className="w-full max-w-[21rem] lg:max-w-[24.1rem] mx-auto">
             <button
               onClick={() => navigate('/daily/classic')}
               className="w-full transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
               style={{
-                height: isMobile ? '180px' : '179px',
+                height: isMobile ? '220px' : '248px',
                 borderRadius: '20px',
                 background: 'linear-gradient(#fcb410 0%, #d9960d 100%)',
                 border: 'none',
@@ -217,7 +217,7 @@ const Index = () => {
                 position: 'relative'
               }}
             >
-              <div className="flex flex-col items-center justify-center h-full px-6 py-8" style={!isMobile ? { transform: 'scale(0.9)' } : undefined} >
+              <div className="flex flex-col items-center justify-center h-full px-6 py-8" style={{ transform: isMobile ? 'scale(1)' : 'scale(1.125)' }} >
                 {/* Title */}
                 <h2 
                   className="text-3xl md:text-4xl lg:text-4xl mb-6 whitespace-nowrap"
@@ -243,7 +243,7 @@ const Index = () => {
                         <img 
                           src={mode.icon}
                           alt={`${mode.name} Icon`}
-                          className="w-10 h-10 md:w-12 md:h-12"
+                          className="w-max h-10 md:w-18 md:h-18"
                           style={{
                             filter: 'none'
                           }}
@@ -315,7 +315,7 @@ const Index = () => {
         {/* Footer - SECONDARY BUTTONS ROW - positioned at bottom */}
         <div className="w-full flex justify-center mt-6 lg:mt-20 mb-8">
           <div className="w-full max-w-md bg-[#003d63]/30 backdrop-blur-lg rounded-2xl p-4 flex gap-4 backdrop-blur-sm shadow-none border-b border-b-[#000000]/20">
-            <div className="flex w-full max-w-md mx-auto gap-4">
+            <div className="flex w-full max-w-[26rem] mx-auto gap-6">
               {/* {t('home.join.community')} */}
               <button
                 onClick={() => navigate('/join-us')}

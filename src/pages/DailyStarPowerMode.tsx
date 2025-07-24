@@ -13,6 +13,7 @@ import { fetchDailyChallenge, fetchYesterdayChallenge } from '@/lib/daily-challe
 import { t, getLanguage } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 import { useStreak } from '@/contexts/StreakContext';
+import Image from '@/components/ui/image';
 
 // Helper to get star power image path with fallback variants
 const getStarPowerImageVariants = (brawler: string, starPowerName?: string): string[] => {
@@ -24,16 +25,16 @@ const getStarPowerImageVariants = (brawler: string, starPowerName?: string): str
   const normalizedBrawler = brawler.toLowerCase().replace(/ /g, '_');
   
   // Handle special cases
-  if (normalizedBrawler === 'mr.p') return [`/StarPowerImages/mrp_starpower_01.png`];
-  if (normalizedBrawler === 'el primo') return [`/StarPowerImages/elprimo_starpower_01.png`];
-  if (normalizedBrawler === 'colonel ruffs') return [`/StarPowerImages/colonel_ruffs_starpower_01.png`];
+  if (normalizedBrawler === 'mr.p') return [`/mrp_starpower_01.png`];
+  if (normalizedBrawler === 'el primo') return [`/elprimo_starpower_01.png`];
+  if (normalizedBrawler === 'colonel ruffs') return [`/colonel_ruffs_starpower_01.png`];
   
   // Special case for R-T
   if (brawler.toLowerCase().replace(/[-_ ]/g, '') === 'rt') {
     if (starPowerName && starPowerName.match(/2|second/i)) {
-      return ['/StarPowerImages/rt_starpower_02.png'];
+      return ['/rt_starpower_02.png'];
     }
-    return ['/StarPowerImages/rt_starpower_01.png'];
+    return ['/rt_starpower_01.png'];
   }
   
   // First, try to determine the base star power number from the name
@@ -50,8 +51,8 @@ const getStarPowerImageVariants = (brawler: string, starPowerName?: string): str
   }
   
   // Generate both possible variants
-  const variant1 = `/StarPowerImages/${normalizedBrawler}_starpower_${baseNum}.png`;
-  const variant2 = `/StarPowerImages/${normalizedBrawler}_starpower_${baseNum.replace(/^0+/, '')}.png`;
+  const variant1 = `/${normalizedBrawler}_starpower_${baseNum}.png`;
+  const variant2 = `/${normalizedBrawler}_starpower_${baseNum.replace(/^0+/, '')}.png`;
   
   // Return both variants to try
   return [variant1, variant2];
@@ -458,23 +459,22 @@ const DailyStarPowerMode: React.FC = () => {
                 {/* Star Power Image */}
                 <div className="flex justify-center mb-6">
                   <div className="w-64 h-64 md:w-72 md:h-72 rounded-3xl border-4 border-orange-500/60 bg-black/20 backdrop-blur-sm flex items-center justify-center overflow-hidden shadow-2xl">
-                    {starPowerImage && imageLoaded ? (
-                      <img
-                        src={starPowerImage}
-                        alt="Mystery Star Power"
-                        className="w-full h-full object-contain"
-                        onLoad={() => setImageLoaded(true)}
-                        onError={() => setImageLoaded(false)}
-                      />
-                    ) : (
+                    {starPowerImage ? (
+                       <Image
+                         src={starPowerImage}
+                         fallbackSrc={imageVariants.length > 1 ? imageVariants[1] : '/shelly_starpower_01.png'}
+                         alt="Mystery Star Power"
+                         className="w-full h-full object-contain"
+                         priority
+                       />
+                     ) : (
                       <div className="text-center">
                         <div className="animate-spin h-12 w-12 border-4 border-white/20 border-t-white rounded-full mx-auto mb-4"></div>
                         <div className="text-white/50 text-sm">Loading...</div>
-                  </div>
-                )}
+                      </div>
+                    )}
                   </div>
                 </div>
-
                 {/* Search Bar */}
                 <div className="daily-mode-input-section mb-8">
                   <BrawlerAutocomplete

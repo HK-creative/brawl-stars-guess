@@ -278,5 +278,46 @@ export function loadImageWithCache(src: string): Promise<HTMLImageElement> {
   });
 }
 
+// Gadget image helper (shared by Daily/Survival modes)
+export function getGadgetImagePath(brawler: string, gadgetName?: string): string {
+  if (!brawler) {
+    return "/GadgetImages/shelly_gadget_01.png";
+  }
+
+  const normalized = brawler.toLowerCase().replace(/ /g, '_');
+
+  // Hard-coded special cases whose filenames break the rule
+  const specialMap: Record<string, string> = {
+    "mr.p": "/GadgetImages/mrp_gadget_01.png",
+    "el primo": "/GadgetImages/elprimo_gadget_01.png",
+    "colonel ruffs": "/GadgetImages/colonel_ruffs_gadget_01.png",
+  };
+  const specialKey = brawler.toLowerCase();
+  if (specialMap[specialKey]) return specialMap[specialKey];
+
+  // Special short names (e.g. R-T, Jae-Yong) that need custom logic
+  const cleaned = brawler.toLowerCase().replace(/[-_ ]/g, "");
+  if (cleaned === "rt") {
+    return gadgetName && /2|second/i.test(gadgetName)
+      ? "/GadgetImages/rt_gadget_02.png"
+      : "/GadgetImages/rt_gadget_01.png";
+  }
+  if (cleaned === "jaeyong") {
+    return gadgetName && /2|second/i.test(gadgetName)
+      ? "/GadgetImages/Jae-Yong_gadget_2.png"
+      : "/GadgetImages/Jae-Yong_gadget_1.png";
+  }
+
+  // Determine index suffix
+  let idx = "01";
+  if (gadgetName) {
+    const m = gadgetName.match(/(\d+)/);
+    if (m) idx = m[1].padStart(2, "0");
+    else if (/second/i.test(gadgetName)) idx = "02";
+  }
+
+  return `/GadgetImages/${normalized}_gadget_${idx}.png`;
+}
+
 // Legacy exports for backward compatibility
 export { setupAdvancedImageLazyLoading as setupImageLazyLoading };

@@ -69,8 +69,8 @@ const getGadgetImage = (brawler: string, gadgetName?: string): string => {
     return `/GadgetImages/shelly_gadget_01.png`;
   }
   
-  // Randomly choose between the two variants
-  return Math.random() < 0.5 ? variant1 : variant2;
+  // Always return the canonical variant (with leading zeros)
+  return variant1;
 };
 
 interface GadgetChallenge {
@@ -497,28 +497,13 @@ const GadgetMode = ({
           {/* Gadget Image */}
           <div className="flex flex-col items-center mb-6">
             <div className="relative w-32 h-32 md:w-40 md:h-40 mx-auto mb-4">
-              {gadgetImage ? (
-                <img
+              {dailyChallenge?.image ? (
+                <Image
                   src={dailyChallenge?.image || '/GadgetImages/shelly_gadget_01.png'}
+                  fallbackSrc="/GadgetImages/colt_gadget_01.png"
                   alt="Brawler Gadget"
                   className="w-full h-full object-contain transform transition-all duration-300 hover:scale-105"
-                  onError={(e) => {
-                    console.log('Image load failed. Using fallback gadget image.');
-                    // Use a specific brawler's gadget image instead of generic GadgetIcon
-                    e.currentTarget.src = '/GadgetImages/shelly_gadget_01.png';
-                    
-                    // If that fails too, try another specific brawler's gadget
-                    e.currentTarget.onerror = () => {
-                      console.log('First fallback failed, trying another brawler gadget');
-                      e.currentTarget.src = '/GadgetImages/colt_gadget_01.png';
-                      
-                      // If all fallbacks fail, hide the image
-                      e.currentTarget.onerror = () => {
-                        console.log('All fallback images failed, hiding image');
-                        e.currentTarget.style.display = 'none';
-                      };
-                    };
-                  }}
+                  priority
                 />
               ) : null}
             </div>
