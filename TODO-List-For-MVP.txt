@@ -2,6 +2,7 @@ Fix Games Funcionality
 Adapt Games UI to home page
 Set up missing pages
 Set up Log-ins & accounts
-Onboarding
+Onboarding - (pop up)
 Translations 
 Hebrew numbers - switch font
+Analytics Tracking

@@ -9,6 +9,12 @@ interface PixelatedImageProps {
   className?: string;
   onLoad?: () => void;
   onError?: () => void;
+  /**
+   * Draw a dynamic outline/border that adapts to the real portrait size (without transparent padding).
+   * Useful for Pixel game modes so the outline always hugs the visible image instead of the 256×256 canvas.
+   * Default: false
+   */
+  withOutline?: boolean;
 }
 
 const PixelatedImage: React.FC<PixelatedImageProps> = ({
@@ -18,7 +24,8 @@ const PixelatedImage: React.FC<PixelatedImageProps> = ({
   fallbackSrc,
   className,
   onLoad,
-  onError
+  onError,
+  withOutline = false
 }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [pixelatedSrc, setPixelatedSrc] = useState<string>('');
@@ -27,7 +34,8 @@ const PixelatedImage: React.FC<PixelatedImageProps> = ({
   const imageRef = useRef<HTMLImageElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  // Fast pixelation using simple downscale-upscale technique with blur
+  // Pixelate by drawing to a much smaller canvas and up-scaling back without any blur.
+  // Uses discrete block sizes per level to create crisp, blocky mosaic identical to the reference image.
   const pixelateImage = useCallback((image: HTMLImageElement, level: number): string => {
     try {
       const canvas = document.createElement('canvas');
@@ -38,11 +46,26 @@ const PixelatedImage: React.FC<PixelatedImageProps> = ({
         return image.src;
       }
 
-      const width = image.naturalWidth || image.width;
-      const height = image.naturalHeight || image.height;
-      
-      canvas.width = width;
-      canvas.height = height;
+      // Always normalise portrait to a fixed canvas so pixel sizes stay identical no matter original resolution.
+      const targetSize = 256;
+      canvas.width = targetSize;
+      canvas.height = targetSize;
+
+            // Draw the original image fitted inside the square while preserving aspect ratio (letter-box with transparency).
+      const iw = image.naturalWidth || image.width;
+      const ih = image.naturalHeight || image.height;
+      let dw = targetSize;
+      let dh = targetSize;
+      let dx = 0;
+      let dy = 0;
+      if (iw > ih) {
+        dh = Math.round((ih / iw) * targetSize);
+        dy = Math.floor((targetSize - dh) / 2);
+      } else if (ih > iw) {
+        dw = Math.round((iw / ih) * targetSize);
+        dx = Math.floor((targetSize - dw) / 2);
+      }
+      ctx.drawImage(image, dx, dy, dw, dh);
 
       // Disable image smoothing for pixelated effect
       ctx.imageSmoothingEnabled = false;
@@ -50,42 +73,41 @@ const PixelatedImage: React.FC<PixelatedImageProps> = ({
       (ctx as any).mozImageSmoothingEnabled = false;
       (ctx as any).msImageSmoothingEnabled = false;
 
-      // Calculate pixelation and blur factors
-      // Starting intensity: 20x pixelation (reduced from 25)
-      // Only reduce by 30% over 6 guesses, then stop
-      const startingPixelationFactor = 20; // Reduced from 25 for more moderate pixelation
-      const maxReduction = 0.3; // 30% reduction
-      const reductionPerLevel = maxReduction / 6; // Very small reduction per guess
-      
-      // Calculate current reduction (caps at 30% after 6 guesses)
-      const currentReduction = Math.min(level * reductionPerLevel, maxReduction);
-      const pixelationFactor = startingPixelationFactor * (1 - currentReduction);
-      
-      // Blur effect that also reduces gradually
-      const startingBlur = 2.5; // Keep blur the same as before
-      const blurReduction = startingBlur * currentReduction; // Blur reduces proportionally
-      const currentBlur = Math.max(0, startingBlur - blurReduction);
-      
-      console.log(`Level: ${level}, Pixelation: ${pixelationFactor.toFixed(1)}, Blur: ${currentBlur.toFixed(1)}, Reduction: ${(currentReduction * 100).toFixed(1)}%`);
-      
-      const smallWidth = Math.max(1, Math.floor(width / pixelationFactor));
-      const smallHeight = Math.max(1, Math.floor(height / pixelationFactor));
+      // Map each pixelation level (0–6) to a block size in original pixels.
+      // Uniform list gives consistent large squares across all portraits.
+      // Level 0 = 32-px squares (hardest) → Level 6 = 14-px squares (still fairly difficult).
+      const blockSizes = [32, 28, 24, 20, 18, 16, 14];
+      const blockSize = blockSizes[Math.min(level, blockSizes.length - 1)];
 
-      // Apply blur filter if needed
-      if (currentBlur > 0) {
-        ctx.filter = `blur(${currentBlur}px)`;
+      const smallDim = Math.max(1, Math.floor(targetSize / blockSize));
+
+      // Use an off-screen canvas to avoid progressive sampling artefacts and keep alpha intact
+      const tmp = document.createElement('canvas');
+      tmp.width = smallDim;
+      tmp.height = smallDim;
+      const tctx = tmp.getContext('2d');
+      if (!tctx) return image.src;
+      tctx.imageSmoothingEnabled = false;
+      // Downscale full image into tiny canvas
+      tctx.drawImage(canvas, 0, 0, targetSize, targetSize, 0, 0, smallDim, smallDim);
+
+      // Clear main canvas before up-scaling
+      ctx.clearRect(0, 0, targetSize, targetSize);
+
+      // Draw back without smoothing (crisp)
+      ctx.drawImage(tmp, 0, 0, smallDim, smallDim, 0, 0, targetSize, targetSize);
+
+      // Optionally draw outline that hugs the visible portrait, using the original draw region.
+      if (withOutline) {
+        ctx.strokeStyle = 'rgba(59, 130, 246, 0.6)'; // Tailwind border-blue-500/60 colour
+        ctx.lineWidth = 4;
+        ctx.strokeRect(dx + 2, dy + 2, dw - 4, dh - 4); // inset by 2 for neat look
       }
 
-      // Step 1: Draw image at small size (downscale)
-      ctx.drawImage(image, 0, 0, smallWidth, smallHeight);
+      console.log(`Level: ${level}, Block size: ${blockSize}x${blockSize}`);
 
-      // Reset filter for upscale
-      ctx.filter = 'none';
-
-      // Step 2: Draw the small image back at full size (upscale)
-      ctx.drawImage(canvas, 0, 0, smallWidth, smallHeight, 0, 0, width, height);
-
-      return canvas.toDataURL('image/jpeg', 0.9);
+      // Export as PNG to preserve transparency (JPEG would replace alpha with white)
+      return canvas.toDataURL('image/png');
     } catch (error) {
       console.error('Error pixelating image:', error);
       return image.src;

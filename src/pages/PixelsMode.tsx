@@ -421,11 +421,12 @@ const PixelsMode = ({
                 {/* Clear Portrait Image */}
                 {portraitImage && (
                   <div className="flex justify-center mb-6">
-                    <div className="w-48 h-48 rounded-xl overflow-hidden border-4 border-indigo-400 animate-award-card">
+                    <div className="w-48 h-48 rounded-xl overflow-hidden animate-award-card">
                       <PixelatedImage
                         src={portraitImage}
                         alt={correctBrawler || 'Brawler'}
                         pixelationLevel={6}
+                         
                         fallbackSrc={DEFAULT_PORTRAIT}
                         className="w-full h-full"
                       />
@@ -473,12 +474,13 @@ const PixelsMode = ({
 
                 {/* Pixelated Portrait Display */}
                 <div className="flex justify-center mb-2">
-                  <div className="w-40 h-40 md:w-48 md:h-48 rounded-xl overflow-hidden border-4 border-white/20 bg-slate-800/50">
+                  <div className="w-40 h-40 md:w-48 md:h-48 rounded-xl overflow-hidden">
                     {portraitImage ? (
                       <PixelatedImage
                         src={portraitImage}
                         alt="Pixelated Brawler Portrait"
                         pixelationLevel={getPixelationLevel()}
+                         
                         fallbackSrc={DEFAULT_PORTRAIT}
                         className="w-full h-full"
                       />

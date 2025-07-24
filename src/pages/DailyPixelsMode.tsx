@@ -373,7 +373,7 @@ const DailyPixelsMode: React.FC = () => {
               <div className="daily-mode-game-area">
                           {/* Pixelated Image */}
           <div className="flex justify-center mb-6">
-            <div className="w-64 h-64 md:w-72 md:h-72 rounded-3xl border-4 border-blue-500/60 bg-black/20 backdrop-blur-sm flex items-center justify-center overflow-hidden shadow-2xl">
+            <div className="w-64 h-64 md:w-72 md:h-72 rounded-3xl flex items-center justify-center overflow-hidden shadow-2xl">
                     {portraitImage && pixelsData ? (
                       <PixelatedImage
                         src={portraitImage}
