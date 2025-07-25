@@ -1,4 +1,3 @@
-
 import * as React from "react"
 import type { ToastActionElement, ToastProps } from "@/components/ui/toast"
 
@@ -186,5 +185,5 @@ function useToast() {
 export { useToast, toast }
 
 export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  return <>{children}</>
+  return children
 }
