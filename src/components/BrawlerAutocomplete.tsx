@@ -132,6 +132,7 @@ const BrawlerAutocomplete: React.FC<BrawlerAutocompleteProps> = ({
       const matchedBrawler = getBrawlerByDisplayName(currentInputText);
       if (matchedBrawler && disabledBrawlers.includes(matchedBrawler.name)) {
         toast({
+          id: String(Date.now()),
           title: "Already Guessed",
           description: `You've already guessed this brawler!`,
           variant: "destructive"

@@ -203,6 +203,7 @@ const ClassicMode = ({
         setCorrectBrawlerName(fallbackBrawlerName);
         setIsBackendConnected(false);
         toast({
+          id: String(Date.now()),
           title: 'Offline Mode',
           description: 'Could not connect to server. Using offline mode.',
         });
@@ -214,6 +215,7 @@ const ClassicMode = ({
     } catch (error) {
       console.error('Error in loadChallenge:', error);
       toast({
+        id: String(Date.now()),
         title: 'Error',
         description: 'An error occurred while loading the challenge.',
         variant: 'destructive',
@@ -276,6 +278,7 @@ const ClassicMode = ({
     
     if (!selectedBrawler) {
       toast({
+        id: String(Date.now()),
         title: 'No brawler selected',
         description: 'Please select a brawler to make a guess.',
         variant: 'destructive',
@@ -286,6 +289,7 @@ const ClassicMode = ({
     // Check if this brawler has already been guessed
     if (guessedBrawlerNames.includes(selectedBrawler.name)) {
       toast({
+        id: String(Date.now()),
         title: 'Already guessed',
         description: `You've already guessed ${selectedBrawler.name}.`,
         variant: 'destructive',
@@ -325,6 +329,7 @@ const ClassicMode = ({
       
       // Standard victory handling
       toast({
+        id: String(Date.now()),
         title: 'Correct!',
         description: `You guessed ${correctBrawlerName} in ${guessCount + 1} tries.`,
         variant: 'default',
@@ -352,6 +357,7 @@ const ClassicMode = ({
         
         // Standard game over handling
         toast({
+          id: String(Date.now()),
           title: 'Game Over',
           description: `The correct answer was ${correctBrawlerName}.`,
           variant: 'destructive',

@@ -1,7 +1,7 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { ToastProvider } from "@/hooks/use-toast";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { LanguageProvider } from "@/contexts/LanguageContext";
@@ -76,52 +76,54 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <StreakProvider>
-        <LanguageProvider>
+      <LanguageProvider>
           <AuthModalProvider>
-            <TooltipProvider>
-              <Sonner />
+            <ToastProvider>
+        <TooltipProvider>
+          <Sonner />
               <AuthModal />
-              <BrowserRouter>
-                <Suspense fallback={<LoadingSpinner />}>
-                  <Routes>
-                    <Route path="/auth" element={<AuthPage />} />
-                    <Route path="/auth/callback" element={<AuthCallback />} />
-                    
-                    {/* Daily Mode Routes - Outside Layout to remove language selection */}
-                    <Route path="/daily/classic" element={<DailyClassicMode />} />
-                    <Route path="/daily/gadget" element={<DailyGadgetMode />} />
-                    <Route path="/daily/starpower" element={<DailyStarPowerMode />} />
-                    <Route path="/daily/audio" element={<DailyAudioMode />} />
-                    <Route path="/daily/pixels" element={<DailyPixelsMode />} />
-                    
-                    {/* New standalone pages - Outside Layout */}
-                    <Route path="/feedback" element={<FeedbackPage />} />
-                    <Route path="/join-us" element={<JoinUsPage />} />
-                    <Route path="/tier-list" element={<TierListPage />} />
-                    
-                    <Route element={<Layout />}>
-                      <Route index element={<Index />} />
-                      <Route path="/classic" element={<ClassicMode />} />
-                      <Route path="/starpower" element={<StarPowerMode />} />
-                      <Route path="/gadget" element={<GadgetMode />} />
-                      <Route path="/audio" element={<AudioMode />} />
-                      <Route path="/pixels" element={<PixelsMode />} />
-                      <Route path="/endless" element={<EndlessMode />} />
-                      <Route path="/survival" element={<SurvivalModePage />} />
-                      <Route path="/survival/setup" element={<SurvivalSetupPage />} />
-                      <Route path="/survival/game" element={<SurvivalModePage />} />
-                      
-                      <Route path="/score" element={<ScorePage />} />
-                      <Route path="/settings" element={<SettingsPage />} />
-                      <Route path="*" element={<NotFound />} />
-                    </Route>
-                  </Routes>
-                </Suspense>
-              </BrowserRouter>
-              <Toaster />
-            </TooltipProvider>
+          <BrowserRouter>
+            <Suspense fallback={<LoadingSpinner />}>
+              <Routes>
+                  <Route path="/auth" element={<AuthPage />} />
+                  <Route path="/auth/callback" element={<AuthCallback />} />
+                  
+                  {/* Daily Mode Routes - Outside Layout to remove language selection */}
+                  <Route path="/daily/classic" element={<DailyClassicMode />} />
+                  <Route path="/daily/gadget" element={<DailyGadgetMode />} />
+                  <Route path="/daily/starpower" element={<DailyStarPowerMode />} />
+                  <Route path="/daily/audio" element={<DailyAudioMode />} />
+                  <Route path="/daily/pixels" element={<DailyPixelsMode />} />
+                  
+                  {/* New standalone pages - Outside Layout */}
+                  <Route path="/feedback" element={<FeedbackPage />} />
+                  <Route path="/join-us" element={<JoinUsPage />} />
+                  <Route path="/tier-list" element={<TierListPage />} />
+                  
+                  <Route element={<Layout />}>
+                    <Route index element={<Index />} />
+                <Route path="/classic" element={<ClassicMode />} />
+                <Route path="/starpower" element={<StarPowerMode />} />
+                <Route path="/gadget" element={<GadgetMode />} />
+                <Route path="/audio" element={<AudioMode />} />
+                <Route path="/pixels" element={<PixelsMode />} />
+                <Route path="/endless" element={<EndlessMode />} />
+                <Route path="/survival" element={<SurvivalModePage />} />
+                <Route path="/survival/setup" element={<SurvivalSetupPage />} />
+                <Route path="/survival/game" element={<SurvivalModePage />} />
+                
+                <Route path="/score" element={<ScorePage />} />
+                <Route path="/settings" element={<SettingsPage />} />
+                <Route path="*" element={<NotFound />} />
+                  </Route>
+              </Routes>
+            </Suspense>
+          </BrowserRouter>
+          <Toaster />
+        </TooltipProvider>
+            </ToastProvider>
           </AuthModalProvider>
-        </LanguageProvider>
+      </LanguageProvider>
       </StreakProvider>
     </QueryClientProvider>
   );
