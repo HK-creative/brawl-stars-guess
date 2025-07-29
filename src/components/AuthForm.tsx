@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
-import { Mail, Lock, Loader2 } from 'lucide-react';
+import { Mail, Lock, Loader2, LogIn } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { t } from '@/lib/i18n';
 
@@ -80,6 +80,20 @@ export const AuthForm: React.FC<AuthFormProps> = ({ mode, onModeChange, onSucces
       setLoading(false);
     }
   }, [mode, email, password, onModeChange, onSuccess, navigate]);
+
+  const handleGoogleSignIn = useCallback(async () => {
+    try {
+      await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+    } catch (err: any) {
+      console.error('Google sign-in error:', err);
+      toast.error('Google sign-in failed');
+    }
+  }, []);
 
   const handlePasswordResetOp = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
@@ -183,6 +197,19 @@ export const AuthForm: React.FC<AuthFormProps> = ({ mode, onModeChange, onSucces
           }
         </Button>
       </form>
+
+      {/* OAuth divider */}
+      <div className="mt-4">
+        <Button
+          type="button"
+          variant="outline"
+          className="w-full flex items-center justify-center gap-2 bg-white text-black border border-gray-300 hover:bg-gray-100"
+          onClick={handleGoogleSignIn}
+        >
+          Continue with Google
+            <img src="/GoogleIcon.png" alt="Google" className="h-5 w-5 ml-2" />
+        </Button>
+      </div>
 
       {/* Footer links for switching modes */}
       <div className="mt-6 text-center text-sm">

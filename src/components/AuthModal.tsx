@@ -27,6 +27,20 @@ const AuthModal: React.FC = () => {
   const [resetSent, setResetSent] = useState(false);
   const currentLanguage = getLanguage();
 
+  const handleGoogleSignIn = async () => {
+    try {
+      await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+    } catch (err: any) {
+      console.error('Google sign-in error:', err);
+      toast.error('Google sign-in failed');
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -238,6 +252,17 @@ const AuthModal: React.FC = () => {
             >
               {loading ? <Loader2 className="mx-auto h-5 w-5 animate-spin" /> : currentButtonText}
             </Button>
+
+          {/* Google OAuth */}
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full mt-3 flex items-center justify-center gap-2 bg-white text-black border border-gray-300 hover:bg-gray-100"
+            onClick={handleGoogleSignIn}
+          >
+            Continue with Google
+            <img src="/GoogleIcon.png" alt="Google" className="h-5 w-5 ml-2" />
+          </Button>
           </form>
         )}
 

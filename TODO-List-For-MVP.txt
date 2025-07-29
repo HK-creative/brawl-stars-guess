@@ -1,11 +1,9 @@
-Fix Games Funcionality YES
 Ensure daily reset works
 Adapt Games UI to home page
-Set up missing pages
 Set up Log-ins & accounts
+Set up missing pages
+Complete Translations 
+Hebrew numbers - switch number's font
 Onboarding - (pop up)
-Translations 
-Hebrew numbers - switch font
 Analytics Tracking
-
-I want to ensure the auth & log in / sign up system works 100% properly. i want you to make a comperhansive list of everything u neeed to check and if any additional information is needed, Incluse any questions for me that u need answers about and ill provide it.plan it carefully.
+micro animations 
