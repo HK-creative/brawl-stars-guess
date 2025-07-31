@@ -22,6 +22,16 @@
 
 
 
+/* Huninn digits override for Abraham font (digits 0-9 and colon) */
+@font-face {
+  font-family: 'Abraham';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('https://fonts.gstatic.com/s/huninn/v2/OpNNnoINg9bQ4xkpjg.woff2') format('woff2');
+  unicode-range: U+0030-0039, U+003A;
+}
+
 /* Abraham Font Definition for Hebrew Headlines and Labels */
 @font-face {
   font-family: 'Abraham';
@@ -32,17 +42,8 @@
   font-weight: 100 900;
   font-style: normal;
   font-display: swap; /* Improves loading performance */
-}
-
-/* Huninn digits override for Abraham font (must be defined AFTER the base Abraham face so it takes precedence for digits) */
-@font-face {
-  font-family: 'Abraham';
-  font-style: normal;
-  font-weight: 100 900;
-  font-display: swap;
-  src: url('https://fonts.gstatic.com/s/huninn/v2/OpNNnoINg9bQ4xkpjg.woff2') format('woff2');
-  /* Apply only to ASCII digits 0-9 and colon */
-  unicode-range: U+0030-0039, U+003A;
+  /* Restrict to Hebrew characters so digits can use Huninn */
+  unicode-range: U+0590-05FF, U+FB1D-FB4F;
 }
 
 
