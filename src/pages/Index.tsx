@@ -16,6 +16,24 @@ const Index = () => {
   const { language, changeLanguage } = useLanguage();
   // Determine if the viewport is mobile-sized (client-side only)
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 640;
+  const [topBarScale, setTopBarScale] = useState(1);
+  // Dynamically shrink top bar items up to 20% on very small phones
+  useEffect(() => {
+    const calcScale = () => {
+      if (typeof window === 'undefined') return;
+      const w = window.innerWidth;
+      if (w >= 410) {
+        setTopBarScale(1);
+      } else {
+        // Linear map 320px->0.8  to 410px->1
+        const ratio = Math.max(0.8, (w - 320) / (410 - 320));
+        setTopBarScale(ratio);
+      }
+    };
+    calcScale();
+    window.addEventListener('resize', calcScale);
+    return () => window.removeEventListener('resize', calcScale);
+  }, []);
   const { openAuthModal } = useAuthModal();
   const navigate = useNavigate();
   const [showDailyCard, setShowDailyCard] = useState(false);
@@ -92,11 +110,16 @@ const Index = () => {
         backgroundRepeat: 'no-repeat'
       }}
     >
-      <div className="px-4 flex flex-col h-full relative z-10">
+      <div className="px-4 flex flex-col min-h-screen overflow-x-hidden overflow-y-hidden relative z-10">
         
         {/* Header utilities - fixed top bar flush to top edge */}
         <div className="flex items-center justify-between pt-2 pb-2 flex-shrink-0 w-full lg:w-[42rem] mx-auto lg:px-0 top-bar"
-            style={{ transform: isMobile ? 'scale(1.15)' : undefined, transformOrigin: 'top center' }}>
+            style={{
+              /* keep item size scaling only */
+              transformOrigin: 'top center',
+              paddingLeft: isMobile ? '2px' : undefined,
+              paddingRight: isMobile ? '2px' : undefined
+            }}>
           {/* Left - Feedback pill */}
           <button
             onClick={() => navigate('/feedback')}
@@ -171,37 +194,21 @@ const Index = () => {
             </div>
             
         {/* Brand block - simplified flat design */}
-        <div className="text-center mb-12 md:mb-16 lg:mb-12 flex-shrink-0">
-          {/* Brawldle wordmark - flat cartoon style */}
-          <h1  
-            className="relative z-10 brawldle-title mt-16 lg:mt-12 mb-4 lg:mb-6" 
-            style={{ 
-              fontSize: language === 'he' && isMobile ? undefined : (
-                isMobile ? (language === 'he' ? '368px' : '200px') : (language === 'he' ? '48px' : '40px')
-              ),
-              fontFamily: language === 'he' ? "'Abraham', sans-serif" : "'Lilita One', cursive",
-              fontVariationSettings: "'wght' 900, 'wdth' 100",
-              letterSpacing: language === 'he' ? '0.02em' : '0.05em',
-              color: '#FFFFFF',
-              ...(language === 'he'
-                ? {
-                    WebkitTextStroke: '5px #000000',
-                    textShadow: '0 4px 0 #000000, 0 5px 0 #000000, 0 6px 0 #000000',
-                  }
-                : {
-                    textShadow: '0 12px 0 #000000',
-                    WebkitTextStroke: '6px #000000',
-                  }),
-              textTransform: 'uppercase',
-              lineHeight: '1'
-            }}
-          >
-            {t('app.title')}
-          </h1>
+        <div className="text-center mb-2 lg:mb-4 flex-shrink-0">
+          {/* Brawldle logo image */}
+          <Image
+            src={language === 'he' ? '/Brawldle%20Hebrew%20Logo.png' : '/Brawldle%20Logo.png'}
+            alt="Brawldle Logo"
+            className={cn(
+              "relative z-10 -mt-4 lg:-mt-12 mb-0 lg:mb-0 select-none block mx-auto",
+              isMobile ? 'w-[270px]' : 'w-[355px]'
+            )}
+            priority
+          />
         </div>
 
         {/* Main content area - mobile-first layout */}
-        <div className="flex flex-col items-center w-full max-w-md mx-auto px-4 gap-12 lg:gap-10">
+        <div className="flex flex-col items-center w-full max-w-md mx-auto px-4 gap-8 md:gap-12 lg:gap-8">
           
           {/* {t('home.daily.challenges')} BUTTON */}
           <div className="w-full max-w-[21rem] lg:max-w-[24.1rem] mx-auto">
@@ -209,7 +216,7 @@ const Index = () => {
               onClick={() => navigate('/daily/classic')}
               className="w-full transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
               style={{
-                height: isMobile ? '220px' : '248px',
+                height: isMobile ? '150px' : '185px',
                 borderRadius: '20px',
                 background: 'linear-gradient(#fcb410 0%, #d9960d 100%)',
                 border: 'none',
@@ -218,7 +225,7 @@ const Index = () => {
                 position: 'relative'
               }}
             >
-              <div className="flex flex-col items-center justify-center h-full px-6 py-8" style={{ transform: isMobile ? 'scale(1)' : 'scale(1.125)' }} >
+              <div className="flex flex-col items-center justify-center h-full px-6 py-8" style={{ transform: isMobile ? 'scale(0.75)' : 'scale(1.05)' }} >
                 {/* Title */}
                 <h2 
                   className="text-3xl md:text-4xl lg:text-4xl mb-6 whitespace-nowrap"
@@ -244,7 +251,7 @@ const Index = () => {
                         <img 
                           src={mode.icon}
                           alt={`${mode.name} Icon`}
-                          className="w-max h-10 md:w-18 md:h-18"
+                          className="h-10 w-auto md:h-18 md:w-auto"
                           style={{
                             filter: 'none'
                           }}
@@ -267,7 +274,7 @@ const Index = () => {
             {/* Next puzzle countdown - outside button */}
             <div className="text-center mt-4">
               <span 
-                className="text-lg md:text-xl"
+                className="text-base md:text-lg"
                 style={{ 
                   color: '#FFFFFF',
                   fontFamily: language === 'he' ? "'Abraham', sans-serif" : "'Lilita One', cursive",
@@ -280,7 +287,7 @@ const Index = () => {
           </div>
 
           {/* {t('home.survival.title')} BUTTON */}
-          <div className="w-full max-w-[11.5rem] lg:max-w-[12.5rem] mx-auto mb-16 lg:mb-12">
+          <div className="w-full max-w-[11.5rem] lg:max-w-[12.5rem] mx-auto mb-12 lg:mb-10">
             <button
               onClick={() => navigate('/survival')}
               className="w-full transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
@@ -314,9 +321,9 @@ const Index = () => {
         </div>
 
         {/* Footer - SECONDARY BUTTONS ROW - positioned at bottom */}
-        <div className="w-full flex justify-center mt-6 lg:mt-20 mb-8">
+        <div className="w-full flex justify-center mt-auto mb-4 lg:mb-6">
           <div className="w-full max-w-md bg-[#003d63]/30 backdrop-blur-lg rounded-2xl p-4 flex gap-4 backdrop-blur-sm shadow-none border-b border-b-[#000000]/20">
-            <div className="flex w-full max-w-[26rem] mx-auto gap-6">
+            <div className="flex w-full max-w-[26rem] mx-auto gap-6 lg:gap-8">
               {/* {t('home.join.community')} */}
               <button
                 onClick={() => navigate('/join-us')}
@@ -332,7 +339,7 @@ const Index = () => {
               >
                 <div className="flex items-center justify-center h-full px-2">
                   <span 
-                    className="text-xl md:text-2xl lg:text-2xl"
+                    className="text-lg md:text-xl lg:text-2xl"
                     style={{
                       fontFamily: language === 'he' ? "'Abraham', sans-serif" : "'Lilita One', cursive",
                       fontWeight: '900',
@@ -362,7 +369,7 @@ const Index = () => {
               >
                 <div className="flex items-center justify-center h-full px-2">
                   <span 
-                    className="text-xl md:text-2xl lg:text-2xl"
+                    className="text-lg md:text-xl lg:text-2xl"
                     style={{
                       fontFamily: language === 'he' ? "'Abraham', sans-serif" : "'Lilita One', cursive",
                       fontWeight: '900',
@@ -381,7 +388,7 @@ const Index = () => {
         </div>
 
         {/* Bottom padding to account for fixed footer */}
-        <div className="h-20 md:h-24 lg:h-16"></div>
+        <div className="hidden"></div>
 
         {/* Premium CSS animations */}
         <style>

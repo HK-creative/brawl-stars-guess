@@ -1,13 +1,12 @@
-Ensure daily reset works
+Adapt Games UI to home page
+Set up missing pages - join & community
+Prize-giveaway feature for engaged users
+Onboarding pop-up flow
+Check Log-ins & accounts
 True single-page mobile layout
 Final home-screen polish
-Adapt Games UI to home page
-Set up Log-ins & accounts
-Set up missing pages - join & community
 Complete Translations 
-Onboarding pop-up flow
-Analytics Tracking
 Micro-animations throughout the UI
-Prize-giveaway feature for engaged users
+Analytics Tracking
 Responsive desktop and mobile
 Improve Speed
