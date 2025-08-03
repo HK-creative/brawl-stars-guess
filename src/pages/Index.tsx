@@ -95,14 +95,15 @@ const Index = () => {
       <div className="px-4 flex flex-col h-full relative z-10">
         
         {/* Header utilities - fixed top bar flush to top edge */}
-        <div className="flex items-center justify-between pt-2 pb-2 flex-shrink-0 w-full lg:w-[42rem] mx-auto lg:px-0 top-bar">
+        <div className="flex items-center justify-between pt-2 pb-2 flex-shrink-0 w-full lg:w-[42rem] mx-auto lg:px-0 top-bar"
+            style={{ transform: isMobile ? 'scale(1.15)' : undefined, transformOrigin: 'top center' }}>
           {/* Left - Feedback pill */}
           <button
             onClick={() => navigate('/feedback')}
             className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-slate-800/80 to-slate-700/80 hover:from-slate-700/80 hover:to-slate-600/80 rounded-full border border-slate-500/30 transition-all duration-300 backdrop-blur-sm shadow-lg hover:shadow-xl transform hover:scale-105"
           >
-            <MessageSquare className="w-4 h-4 text-slate-300" />
-            <span className="text-sm font-semibold text-slate-200">{t('home.feedback')}</span>
+            <MessageSquare className={cn(isMobile ? 'w-5 h-5' : 'w-4 h-4', 'text-slate-300')} />
+            <span className={cn(isMobile ? 'text-base' : 'text-sm', 'font-semibold text-slate-200')}>{t('home.feedback')}</span>
           </button>
 
           {/* Right - Language + Auth with balanced flag halo */}
@@ -117,7 +118,7 @@ const Index = () => {
                     ? 'bg-gradient-to-r from-orange-500 to-orange-400 border-orange-300 shadow-lg shadow-orange-500/20 scale-110' 
                     : 'border-transparent hover:bg-slate-600/50 hover:scale-105'
                 )}
-                style={{ width: '28px', height: '28px' }}
+                style={{ width: isMobile ? '32px' : '28px', height: isMobile ? '32px' : '28px' }}
               >
                 <Image
                   src="/USAIcon.png"
@@ -135,7 +136,7 @@ const Index = () => {
                     ? 'bg-gradient-to-r from-orange-500 to-orange-400 border-orange-300 shadow-lg shadow-orange-500/20 scale-110' 
                     : 'border-transparent hover:bg-slate-600/50 hover:scale-105'
                 )}
-                style={{ width: '28px', height: '28px' }}
+                style={{ width: isMobile ? '32px' : '28px', height: isMobile ? '32px' : '28px' }}
               >
                 <Image
                   src="/IsraelIcon.png"
@@ -175,9 +176,9 @@ const Index = () => {
           <h1  
             className="relative z-10 brawldle-title mt-16 lg:mt-12 mb-4 lg:mb-6" 
             style={{ 
-              fontSize: isMobile
-                ? (language === 'he' ? '368px' : '200px')
-                : (language === 'he' ? '48px' : '40px'),
+              fontSize: language === 'he' && isMobile ? undefined : (
+                isMobile ? (language === 'he' ? '368px' : '200px') : (language === 'he' ? '48px' : '40px')
+              ),
               fontFamily: language === 'he' ? "'Abraham', sans-serif" : "'Lilita One', cursive",
               fontVariationSettings: "'wght' 900, 'wdth' 100",
               letterSpacing: language === 'he' ? '0.02em' : '0.05em',

@@ -23,14 +23,15 @@ const TopBar: React.FC = () => {
 
   return (
     <header className={cn(
+      "top-bar",
       "relative z-20",
       "border-b border-primary/30",
       "bg-background/80 backdrop-blur-sm"
     )}>
       <div
-        style={isMobile ? { transform: 'scale(1.15)' } : undefined}
+        
         className={cn(
-        "w-[48rem] mx-auto",
+        "w-full sm:w-[48rem] mx-auto",
         "px-4 sm:px-6 lg:px-8",
         "h-16",
         "flex items-center justify-between"
@@ -51,7 +52,7 @@ const TopBar: React.FC = () => {
                 <img 
                   src="/bs_home_icon.png"
                   alt="Home"
-                  className="h-8 w-8"
+                  className={isMobile ? 'h-9 w-9' : 'h-8 w-8'}
                 />
               </Button>
             </Link>
@@ -59,14 +60,14 @@ const TopBar: React.FC = () => {
           
           <Link to="/" className="flex items-center space-x-2">
             <span className={cn(
-              "text-2xl",
+              isMobile ? "text-3xl" : "text-2xl",
               "animate-bounce",
               "transition-transform duration-300 hover:scale-110"
             )}>
               🔥
             </span>
             <h1 className={cn(
-              "text-xl font-bold",
+              isMobile ? "text-2xl font-bold" : "text-xl font-bold",
               "text-gradient-primary"
             )}
             style={{ fontFamily: language === 'he' ? "'Abraham', sans-serif" : "'Lilita One', cursive" }}
@@ -80,7 +81,7 @@ const TopBar: React.FC = () => {
                   "ml-3 flex items-center px-2 py-1 rounded-full bg-yellow-100/80 border border-yellow-400 text-yellow-900 font-semibold text-sm shadow-sm",
                   streak >= 2 ? "animate-pulse" : ""
                 )}>
-                  {streak >= 2 && <Flame className="w-4 h-4 mr-1 text-orange-500" />}
+                  {streak >= 2 && <Flame className={cn(isMobile ? 'w-5 h-5' : 'w-4 h-4', 'mr-1 text-orange-500')} />}
                   {loading ? '...' : streak}
                 </span>
               </TooltipTrigger>
@@ -103,7 +104,7 @@ const TopBar: React.FC = () => {
             className={cn(
               "font-semibold",
               language === 'en' ? "text-primary border-primary/50" : "text-foreground/70 hover:text-primary hover:bg-primary/10",
-              "border transition-all duration-300 px-3 py-1 h-auto"
+              "border transition-all duration-300 px-4 py-2 h-auto"
             )}
             aria-label="Switch to English"
           >
@@ -116,7 +117,7 @@ const TopBar: React.FC = () => {
             className={cn(
               "font-semibold",
               language === 'he' ? "text-primary border-primary/50" : "text-foreground/70 hover:text-primary hover:bg-primary/10",
-              "border transition-all duration-300 px-3 py-1 h-auto"
+              "border transition-all duration-300 px-4 py-2 h-auto"
             )}
             aria-label="Switch to Hebrew"
           >
