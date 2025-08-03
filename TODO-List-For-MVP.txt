@@ -1,9 +1,12 @@
 Ensure daily reset works
+True single-page mobile layout
+Final home-screen polish
 Adapt Games UI to home page
 Set up Log-ins & accounts
-Set up missing pages
+Set up missing pages - join & community
 Complete Translations 
-Hebrew numbers - switch number's font
-Onboarding - (pop up)
+Onboarding pop-up flow
 Analytics Tracking
-micro animations 
+Micro-animations throughout the UI
+Prize-giveaway feature for engaged users
+Responsive desktop and mobile

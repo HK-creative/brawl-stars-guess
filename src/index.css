@@ -1773,4 +1773,25 @@ html[dir="rtl"] .app-title-main {
   animation: slide-in-from-top 0.5s ease-out;
 }
 
+/* Hebrew Survival button title override */
+html[dir="rtl"] .survival-home-button-title {
+  font-size: 2rem !important; /* text-xl equivalent for mobile */
+  line-height: 1 !important;
+  font-weight: 900 !important;
+}
+@media (min-width: 768px) {
+  html[dir="rtl"] .survival-home-button-title {
+    font-size: 2rem !important; /* increase size to fill ~80% of button on desktop */
+  }
+}
+
+/* Hebrew Survival card title override (desktop) */
+html[dir="rtl"] .survival-card-title {
+  font-size: 2.25rem !important; /* Tailwind text-4xl */
+  line-height: 1 !important;
+  font-weight: 900 !important;
+}
+
+
+
 

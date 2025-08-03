@@ -176,7 +176,7 @@ const Index = () => {
             className="relative z-10 brawldle-title mt-16 lg:mt-12 mb-4 lg:mb-6" 
             style={{ 
               fontSize: isMobile
-                ? (language === 'he' ? '320px' : '200px')
+                ? (language === 'he' ? '368px' : '200px')
                 : (language === 'he' ? '48px' : '40px'),
               fontFamily: language === 'he' ? "'Abraham', sans-serif" : "'Lilita One', cursive",
               fontVariationSettings: "'wght' 900, 'wdth' 100",
@@ -284,7 +284,7 @@ const Index = () => {
               onClick={() => navigate('/survival')}
               className="w-full transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
               style={{
-                height: isMobile ? '100px' : '68px',
+                height: isMobile ? '72px' : '68px',
                 borderRadius: '20px',
                 background: 'linear-gradient(#4d37ca 0%, #392599 100%)',
                 border: 'none',
@@ -294,7 +294,7 @@ const Index = () => {
             >
               <div className="flex items-center justify-center h-full">
                 <h3 
-                  className="text-2xl md:text-3xl lg:text-3xl"
+                  className={language === 'he' ? 'survival-home-button-title text-xl md:text-base lg:text-base' : 'text-2xl md:text-3xl lg:text-3xl'}
                   style={{
                     fontFamily: language === 'he' ? "'Abraham', sans-serif" : "'Lilita One', cursive",
                     fontWeight: '900',

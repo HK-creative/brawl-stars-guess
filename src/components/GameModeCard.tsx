@@ -587,7 +587,10 @@ const GameModeCard: React.FC<GameModeCardProps> = ({
                 {/* DRAMATICALLY enhanced content with much larger text */}
                 <div className="relative z-10 h-full flex items-center justify-center">
                     <div className="text-center">
-                    <h3 className="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-100 to-orange-200 uppercase tracking-wider mb-3 drop-shadow-2xl animate-pulse" 
+                    <h3 className={cn(
+                          getLanguage() === 'he' ? 'survival-card-title text-4xl' : 'text-6xl',
+                          'font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-100 to-orange-200 uppercase tracking-wider mb-3 drop-shadow-2xl animate-pulse'
+                        )} 
                         style={{ 
                           animationDuration: '3s',
                           textShadow: '0 0 30px rgba(245, 158, 11, 0.8), 0 0 60px rgba(245, 158, 11, 0.4)'

@@ -10,6 +10,8 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { Flame } from 'lucide-react';
 
 const TopBar: React.FC = () => {
+  // Determine if viewport is mobile
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 640;
   const location = useLocation();
   const isHome = location.pathname === '/';
   const { language, changeLanguage } = useLanguage();
@@ -25,7 +27,9 @@ const TopBar: React.FC = () => {
       "border-b border-primary/30",
       "bg-background/80 backdrop-blur-sm"
     )}>
-      <div className={cn(
+      <div
+        style={isMobile ? { transform: 'scale(1.15)' } : undefined}
+        className={cn(
         "w-[48rem] mx-auto",
         "px-4 sm:px-6 lg:px-8",
         "h-16",
