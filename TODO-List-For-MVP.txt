@@ -10,3 +10,4 @@ Analytics Tracking
 Micro-animations throughout the UI
 Prize-giveaway feature for engaged users
 Responsive desktop and mobile
+Improve Speed

@@ -73,7 +73,14 @@ class SeededRandom {
   }
 }
 
-// Get deterministic daily brawler for a specific mode and date
+// Helper to pick a seeded brawler without cross-day exclusions
+const getSeededBrawler = (mode: string, date: string): Brawler => {
+  const seed = `${mode}-${date}`;
+  const rnd = new SeededRandom(seed);
+  return brawlers[rnd.nextInt(brawlers.length)];
+};
+
+// Get deterministic daily brawler for a specific mode and date with 2-day exclusion
 const getDailyBrawler = (mode: string, date: string): Brawler => {
   // Get all modes for cross-mode checking
   const allModes = ['classic', 'gadget', 'starpower', 'audio', 'pixels'];
@@ -114,7 +121,7 @@ const getDailyBrawler = (mode: string, date: string): Brawler => {
     selectedBrawler = brawlers[newBrawlerIndex];
   } while (selectedBrawlers.includes(selectedBrawler.name) && attempts < 10);
   
-  return selectedBrawler;
+    return selectedBrawler;
 };
 
 // Get available audio files for a specific brawler

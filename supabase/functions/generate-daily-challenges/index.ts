@@ -78,6 +78,26 @@ serve(async (req) => {
 
     console.log(`Generating challenges for date: ${todayDate}`);
 
+    // Build exclusion list from brawlers that appeared in the last 2 days
+    const pastDates: string[] = [];
+    for (let offset = 1; offset <= 2; offset++) {
+      const past = new Date(utc2Date);
+      past.setDate(past.getDate() - offset);
+      pastDates.push(past.toISOString().split("T")[0]);
+    }
+
+    const { data: pastRows, error: pastErr } = await supabaseClient
+      .from("daily_challenges")
+      .select("challenge_data")
+      .in("date", pastDates);
+
+    const exclusionSet = new Set<string>();
+    if (pastErr) {
+      console.error("Error fetching past challenges:", pastErr);
+    } else if (pastRows) {
+      pastRows.forEach((row) => exclusionSet.add((row as any).challenge_data));
+    }
+
     // Check if we already have challenges for today
     const { data: existingChallenges, error: checkError } = await supabaseClient
       .from("daily_challenges")
@@ -104,31 +124,42 @@ serve(async (req) => {
       );
     }
 
-    // Select a random brawler for the classic mode
-    const classicBrawler = getRandomItem(brawlers);
-    
-    // Insert the classic mode challenge
-    const { data: classicResult, error: classicError } = await supabaseClient
-      .from("daily_challenges")
-      .insert({
-        mode: "classic",
-        challenge_data: classicBrawler.name,
-        date: todayDate,
-      });
+    // Generate challenges for all modes while respecting exclusion rules
+    const modes = ["classic", "gadget", "starpower", "audio", "pixels"] as const;
+    const todaysSelected = new Set<string>();
+    const inserted: { mode: string; brawler: string }[] = [];
 
-    if (classicError) {
-      console.error("Error inserting classic challenge:", classicError);
-    } else {
-      console.log("Successfully inserted classic challenge");
+    for (const mode of modes) {
+      // Build pool excluding past two days and already chosen today
+      const pool = brawlers.filter(
+        (b) => !exclusionSet.has(b.name) && !todaysSelected.has(b.name),
+      );
+
+      // Fallback if pool empty (unlikely)
+      const pickPool = pool.length > 0 ? pool : brawlers.filter((b) => !todaysSelected.has(b.name));
+      const selected = getRandomItem(pickPool);
+      todaysSelected.add(selected.name);
+
+      const { error: insertErr } = await supabaseClient
+        .from("daily_challenges")
+        .insert({
+          mode,
+          challenge_data: selected.name,
+          date: todayDate,
+        });
+
+      if (insertErr) {
+        console.error(`Error inserting ${mode} challenge:`, insertErr);
+      } else {
+        inserted.push({ mode, brawler: selected.name });
+        console.log(`Inserted ${mode} challenge with ${selected.name}`);
+      }
     }
-
-    // Generate other mode challenges as needed
-    // For this example, let's just handle classic mode
 
     return new Response(
       JSON.stringify({
         message: "Successfully generated daily challenges",
-        classic: classicBrawler.name,
+        challenges: inserted,
       }),
       { headers: { "Content-Type": "application/json" } }
     );
