@@ -115,7 +115,7 @@ const Index = () => {
         {/* Header utilities - fixed top bar flush to top edge */}
         <div className="flex items-center justify-between pt-2 pb-2 flex-shrink-0 w-full lg:w-[42rem] mx-auto lg:px-0 top-bar"
             style={{
-              /* keep item size scaling only */
+              transform: isMobile ? `scale(${topBarScale})` : undefined,
               transformOrigin: 'top center',
               paddingLeft: isMobile ? '2px' : undefined,
               paddingRight: isMobile ? '2px' : undefined
@@ -211,12 +211,12 @@ const Index = () => {
         <div className="flex flex-col items-center w-full max-w-md mx-auto px-4 gap-8 md:gap-12 lg:gap-8">
           
           {/* {t('home.daily.challenges')} BUTTON */}
-          <div className="w-full max-w-[21rem] lg:max-w-[24.1rem] mx-auto">
+          <div className="w-full max-w-[18.4rem] lg:max-w-[21.2rem] mx-auto">
             <button
               onClick={() => navigate('/daily/classic')}
               className="w-full transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
               style={{
-                height: isMobile ? '150px' : '185px',
+                height: isMobile ? '162px' : '167px',
                 borderRadius: '20px',
                 background: 'linear-gradient(#fcb410 0%, #d9960d 100%)',
                 border: 'none',
@@ -225,10 +225,10 @@ const Index = () => {
                 position: 'relative'
               }}
             >
-              <div className="flex flex-col items-center justify-center h-full px-6 py-8" style={{ transform: isMobile ? 'scale(0.75)' : 'scale(1.05)' }} >
+              <div className="flex flex-col items-center justify-center h-full px-6 py-8">
                 {/* Title */}
                 <h2 
-                  className="text-3xl md:text-4xl lg:text-4xl mb-6 whitespace-nowrap"
+                  className="text-[27px] md:text-[32px] lg:text-[32px] mb-6 whitespace-nowrap"
                   style={{ 
                     fontFamily: language === 'he' ? "'Abraham', sans-serif" : "'Lilita One', cursive",
                     fontWeight: '900',
