@@ -11,6 +11,10 @@ import BrawlerAutocomplete from '@/components/BrawlerAutocomplete';
 import ReactConfetti from 'react-confetti';
 import { fetchDailyChallenge, fetchYesterdayChallenge } from '@/lib/daily-challenges';
 import { cn } from '@/lib/utils';
+import PrimaryButton from '@/components/ui/primary-button';
+import SecondaryButton from '@/components/ui/secondary-button';
+import DailyModeProgress from '@/components/DailyModeProgress';
+import RotatingBackground from '@/components/layout/RotatingBackground';
 import { t, getLanguage } from '@/lib/i18n';
 import { useStreak } from '@/contexts/StreakContext';
 
@@ -312,6 +316,7 @@ const DailyAudioMode: React.FC = () => {
   if (isLoading) {
     return (
       <div className="daily-mode-container daily-audio-theme">
+        <RotatingBackground />
         <div className="flex items-center justify-center min-h-screen">
           <div className="animate-spin h-12 w-12 border-4 border-white/20 border-t-white rounded-full"></div>
         </div>
@@ -321,6 +326,7 @@ const DailyAudioMode: React.FC = () => {
 
   return (
     <div className="daily-mode-container daily-audio-theme">
+        <RotatingBackground />
       {/* Confetti Animation */}
       {showConfetti && (
         <ReactConfetti
@@ -355,15 +361,17 @@ const DailyAudioMode: React.FC = () => {
             {/* Daily Streak - moved to the right */}
             <div className="flex flex-col items-center">
               <div className="flex items-center gap-1">
-                <span className="text-3xl font-bold leading-none text-yellow-500">{streak}</span>
+                <span className="text-3xl font-bold leading-none text-[hsl(var(--daily-mode-primary))]">{streak}</span>
                 <div className="text-3xl">🔥</div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Mode Navigation Pills */}
-        <div className="flex items-center justify-center gap-2.5 mb-4 mt-3">
+        {/* Mode Navigation */}
+        <DailyModeProgress currentMode="audio" className="mb-6 mt-1" />
+        {/* Legacy pills hidden below */}
+        <div className="hidden">
           {modes.map((mode) => {
             const isCurrent = mode.key === 'audio';
             
@@ -388,7 +396,7 @@ const DailyAudioMode: React.FC = () => {
                 
                 {/* Current mode indicator dot */}
                 {isCurrent && (
-                  <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2 w-3 h-3 bg-white rounded-full border-2 border-gray-800"></div>
+                  <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2 w-1.5 h-1.5 bg-white rounded-full border-2 border-gray-800"></div>
                 )}
               </button>
             );
@@ -397,8 +405,8 @@ const DailyAudioMode: React.FC = () => {
 
         {/* Title */}
         <div className="text-center mb-6 mt-2">
-          <h1 className="text-4xl md:text-5xl font-black mb-2 tracking-tight bg-gradient-to-r from-purple-400 via-purple-500 to-purple-600 bg-clip-text text-transparent">
-            {t('daily.today.audio')}
+          <h1 className="daily-mode-title">
+            {t('mode.audio')}
           </h1>
         </div>
       </div>
@@ -418,7 +426,7 @@ const DailyAudioMode: React.FC = () => {
                 </p>
                 
                 <div className="flex flex-col gap-6 items-center">
-                  <Button
+                  <PrimaryButton
                     onClick={handleNextMode}
                     className="daily-mode-next-button"
                   >
@@ -431,15 +439,13 @@ const DailyAudioMode: React.FC = () => {
                       )}
                     />
                     {t('daily.next.mode')}
-                  </Button>
+                  </PrimaryButton>
                   
-                  <Button
+                  <SecondaryButton
                     onClick={() => navigate('/')}
-                    variant="ghost"
-                    className="text-white/60 hover:text-white/80 hover:bg-white/5 py-3 px-8 text-base border border-white/20 hover:border-white/30 transition-all duration-200 rounded-xl"
                   >
                     {t('daily.go.home')}
-                  </Button>
+                  </SecondaryButton>
                 </div>
               </div>
             ) : (
@@ -505,7 +511,7 @@ const DailyAudioMode: React.FC = () => {
                 </div>
 
                 {/* Search Bar */}
-                <div className="daily-mode-input-section mb-8">
+                <div className="daily-mode-input-section mb-8 w-full max-w-md mx-auto">
                   <BrawlerAutocomplete
                     brawlers={brawlers}
                     value={inputValue}
@@ -521,7 +527,7 @@ const DailyAudioMode: React.FC = () => {
                 <div className="flex justify-center mb-4">
                   <div className="daily-mode-guess-counter">
                     <span className="font-bold text-lg">#{audio.guessCount}</span>
-                    <span className="text-white/80 ml-1">{t('guesses.count')}</span>
+                    <span className="text-white/90 ml-1">{t('guesses.count')}</span>
                   </div>
                 </div>
 
@@ -560,7 +566,7 @@ const DailyAudioMode: React.FC = () => {
                 {yesterdayData && (
                   <div className="flex justify-center mt-4">
                     <span className="text-sm text-white/50">
-                      {t('daily.yesterday.audio')} <span className="text-yellow-500 font-medium">{yesterdayData.brawler || 'Mico'}</span>
+                      {t('daily.yesterday.audio')} <span className="text-[hsl(var(--daily-mode-primary))] font-medium">{yesterdayData.brawler || 'Mico'}</span>
                     </span>
                   </div>
                 )}

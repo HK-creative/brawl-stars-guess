@@ -181,6 +181,31 @@ const translations: Translations = {
     en: "Pixels Daily",
     he: "הפיקסלים היומי"
   },
+
+  // Daily Challenge Dynamic Labels
+  "daily.today.classic": { en: "Classic Daily", he: "קלאסי יומי" },
+  "daily.today.gadget": { en: "Gadget Daily", he: "הגאדג'ט היומי" },
+  "daily.today.starpower": { en: "Star Power Daily", he: "הכוח כוכב היומי" },
+  "daily.today.audio": { en: "Audio Daily", he: "הקול היומי" },
+  "daily.today.pixels": { en: "Pixels Daily", he: "הפיקסלים היומי" },
+
+  "daily.yesterday.classic": { en: "Yesterday:", he: "אתמול:" },
+  "daily.yesterday.gadget": { en: "Yesterday:", he: "אתמול:" },
+  "daily.yesterday.starpower": { en: "Yesterday:", he: "אתמול:" },
+  "daily.yesterday.audio": { en: "Yesterday:", he: "אתמול:" },
+  "daily.yesterday.pixels": { en: "Yesterday:", he: "אתמול:" },
+
+
+  "daily.next.brawler.in": { en: "Next Brawler In", he: "הבראולר הבא בעוד" },
+  "daily.next.mode": { en: "Next Mode", he: "מצב הבא" },
+
+  "daily.you.found": { en: "You found", he: "מצאת" },
+  "daily.in.guesses": { en: "in", he: "ב" },
+  "guesses.left": { en: "Guesses Left", he: "ניסיונות שנותרו" },
+  "daily.guesses.count": { en: "Guesses", he: "ניחושים" },
+
+
+  "daily.congratulations": { en: "Congratulations!", he: "ברכות!" },
   "daily.classic.headline": {
     en: "Guess Today's Brawler!",
     he: "נחשו את הבראולר היומי!"
@@ -224,13 +249,10 @@ const translations: Translations = {
     he: "חפש בראולרים..."
   },
   "guesses.count": {
-    en: "guesses",
+    en: "Guesses",
     he: "ניסיונות"
   },
-  "guesses.left": {
-    en: "Guesses Left",
-    he: "ניחושים שנשארו"
-  },
+
   "next.brawler.in": {
     en: "Next Brawler In",
     he: "הבראולר הבא בעוד"
@@ -1029,6 +1051,18 @@ const translations: Translations = {
   "attribute.label.release.year": {
     en: "Release Year",
     he: "שנת יציאה"
+  },
+  "attribute.label.year": {
+    en: "Year",
+    he: "שנה"
+  },
+  "audio.hint.available.in": {
+    en: "Hint available in",
+    he: "רמז זמין בעוד"
+  },
+  "audio.hint.guesses": {
+    en: "guesses",
+    he: "ניחושים"
   }
 };
 

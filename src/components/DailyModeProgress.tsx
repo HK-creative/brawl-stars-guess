@@ -77,18 +77,18 @@ const DailyModeProgress: React.FC<DailyModeProgressProps> = ({
   };
 
   return (
-    <div className={cn("flex items-center justify-center gap-3 md:gap-4", className)}>
+    <div className={cn("flex items-center justify-center gap-3 md:gap-4 px-4", className)}>
       {/* Enhanced Mode Icons */}
       {modes.map((mode, index) => {
         const isCompleted = mode.state.isCompleted;
         const isCurrent = mode.key === currentMode;
         
         return (
-          <div key={mode.key} className="flex flex-col items-center gap-2">
+          <div key={mode.key} className="flex flex-col items-center">
             <button
               onClick={() => handleModeClick(mode)}
               className={cn(
-                "relative w-14 h-14 md:w-16 md:h-16 rounded-2xl flex items-center justify-center transition-all duration-300 transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-white/30 shadow-lg",
+                "relative w-[3.25rem] h-[3.25rem] md:w-[3.6rem] md:h-[3.6rem] rounded-full flex items-center justify-center transition-all duration-300 transform hover:scale-110 hover:animate-wiggle focus:outline-none focus:ring-2 focus:ring-white/30 shadow-lg",
                 isCompleted
                   ? "bg-gradient-to-br from-green-500 to-emerald-600 text-white shadow-green-500/30 hover:shadow-green-500/50"
                   : isCurrent
@@ -111,7 +111,7 @@ const DailyModeProgress: React.FC<DailyModeProgressProps> = ({
               
               {/* Current mode indicator */}
               {isCurrent && (
-                <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-white rounded-full shadow-lg animate-pulse"></div>
+                <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-1.5 h-1.5 bg-white rounded-full shadow-lg animate-pulse"></div>
               )}
               
               {/* Completion indicator */}
@@ -120,15 +120,8 @@ const DailyModeProgress: React.FC<DailyModeProgressProps> = ({
                   <Check className="h-2.5 w-2.5 text-slate-900" />
                 </div>
               )}
+              <span className="sr-only">{mode.name}</span>
             </button>
-            
-            {/* Mode label */}
-            <span className={cn(
-              "text-xs font-medium text-center leading-tight transition-colors duration-200",
-              isCurrent ? "text-white" : "text-white/60"
-            )}>
-              {mode.name}
-            </span>
             
             {/* Connection line to next mode */}
             {index < modes.length - 1 && (
