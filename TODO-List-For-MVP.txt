@@ -1,5 +1,6 @@
-Adapt Games UI to home page
-Set up missing pages - join & community
+Adapt Games UI to home page - ✅
+build join us page 
+build community page 
 Prize-giveaway feature for engaged users
 Onboarding pop-up flow
 Check Log-ins & accounts
@@ -10,3 +11,4 @@ Micro-animations throughout the UI
 Analytics Tracking
 Responsive desktop and mobile
 Improve Speed
+Connect streak count to Supabase database

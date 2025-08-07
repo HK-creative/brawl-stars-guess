@@ -196,7 +196,7 @@ const translations: Translations = {
   "daily.yesterday.pixels": { en: "Yesterday:", he: "אתמול:" },
 
 
-  "daily.next.brawler.in": { en: "Next Brawler In", he: "הבראולר הבא בעוד" },
+  "daily.next.brawler.in": { en: "Next In", he: "הבא בעוד" },
   "daily.next.mode": { en: "Next Mode", he: "מצב הבא" },
 
   "daily.you.found": { en: "You found", he: "מצאת" },
@@ -245,7 +245,7 @@ const translations: Translations = {
   
   // Search and Input
   "search.brawlers": {
-    en: "Search brawlers...",
+    en: "Search Brawlers...",
     he: "חפש בראולרים..."
   },
   "guesses.count": {
@@ -1063,6 +1063,22 @@ const translations: Translations = {
   "audio.hint.guesses": {
     en: "guesses",
     he: "ניחושים"
+  },
+  "daily.audio.loading": {
+    en: "Loading audio...",
+    he: "טוען אודיו..."
+  },
+  "daily.audio.error": {
+    en: "Audio failed to load",
+    he: "נכשל בטעינת האודיו"
+  },
+  "daily.audio.ready": {
+    en: "Audio ready",
+    he: "האודיו מוכן"
+  },
+  "button.go.home": {
+    en: "Go Home",
+    he: "חזור הביתה"
   }
 };
 

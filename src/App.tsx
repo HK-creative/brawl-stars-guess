@@ -43,12 +43,8 @@ const FeedbackPage = lazy(() => import('./pages/FeedbackPage'));
 const JoinUsPage = lazy(() => import('./pages/JoinUsPage'));
 const TierListPage = lazy(() => import('./pages/TierListPage'));
 
-// Daily Mode Pages
-const DailyClassicMode = lazy(() => import("./pages/DailyClassicMode"));
-const DailyGadgetMode = lazy(() => import("./pages/DailyGadgetMode"));
-const DailyStarPowerMode = lazy(() => import("./pages/DailyStarPowerMode"));
-const DailyAudioMode = lazy(() => import("./pages/DailyAudioMode"));
-const DailyPixelsMode = lazy(() => import("./pages/DailyPixelsMode"));
+// Unified Daily Modes Page
+const DailyModesPage = lazy(() => import("./pages/DailyModesPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -88,12 +84,14 @@ const App = () => {
                   <Route path="/auth" element={<AuthPage />} />
                   <Route path="/auth/callback" element={<AuthCallback />} />
                   
-                  {/* Daily Mode Routes - Outside Layout to remove language selection */}
-                  <Route path="/daily/classic" element={<DailyClassicMode />} />
-                  <Route path="/daily/gadget" element={<DailyGadgetMode />} />
-                  <Route path="/daily/starpower" element={<DailyStarPowerMode />} />
-                  <Route path="/daily/audio" element={<DailyAudioMode />} />
-                  <Route path="/daily/pixels" element={<DailyPixelsMode />} />
+                  {/* Unified Daily Modes Page - Outside Layout to remove language selection */}
+                  <Route path="/daily" element={<DailyModesPage />} />
+                  {/* Backward compatibility redirects */}
+                  <Route path="/daily/classic" element={<DailyModesPage />} />
+                  <Route path="/daily/gadget" element={<DailyModesPage />} />
+                  <Route path="/daily/starpower" element={<DailyModesPage />} />
+                  <Route path="/daily/audio" element={<DailyModesPage />} />
+                  <Route path="/daily/pixels" element={<DailyModesPage />} />
                   
                   {/* New standalone pages - Outside Layout */}
                   <Route path="/feedback" element={<FeedbackPage />} />

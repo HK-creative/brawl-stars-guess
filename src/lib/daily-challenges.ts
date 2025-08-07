@@ -20,7 +20,7 @@ export const getCurrentDateUTC2 = (): string => {
 };
 
 // Get time remaining until next challenge (midnight UTC+2)
-export const getTimeUntilNextChallenge = (): { hours: number; minutes: number } => {
+export const getTimeUntilNextChallenge = (): { hours: number; minutes: number; seconds: number } => {
   const now = new Date();
   const utc2Now = new Date(now.getTime() + (2 * 60 * 60 * 1000)); // Current time in UTC+2
   
@@ -33,8 +33,9 @@ export const getTimeUntilNextChallenge = (): { hours: number; minutes: number } 
   const diffMs = tomorrow.getTime() - utc2Now.getTime();
   const diffHrs = Math.floor(diffMs / (1000 * 60 * 60));
   const diffMins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+  const diffSecs = Math.floor((diffMs % (1000 * 60)) / 1000);
   
-  return { hours: diffHrs, minutes: diffMins };
+  return { hours: diffHrs, minutes: diffMins, seconds: diffSecs };
 };
 
 // Helper to get yesterday's date in UTC+2 (CEST) timezone

@@ -1,20 +1,21 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import { Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useDailyStore, DailyGameMode } from '@/stores/useDailyStore';
-import { useNavigate } from 'react-router-dom';
 import { t } from '@/lib/i18n';
 
 interface DailyModeProgressProps {
   currentMode?: DailyGameMode;
   className?: string;
+  onModeChange?: (mode: DailyGameMode) => void;
 }
 
 const DailyModeProgress: React.FC<DailyModeProgressProps> = ({ 
   currentMode, 
-  className 
+  className,
+  onModeChange
 }) => {
-  const navigate = useNavigate();
   const { classic, gadget, starpower, audio, pixels } = useDailyStore();
   
   const modes = [
@@ -71,10 +72,12 @@ const DailyModeProgress: React.FC<DailyModeProgressProps> = ({
   ];
 
   const handleModeClick = (mode: typeof modes[0]) => {
-    if (mode.key !== currentMode) {
-      navigate(mode.path);
+    if (mode.key !== currentMode && onModeChange) {
+      onModeChange(mode.key);
     }
   };
+
+  const MotionButton = motion.button;
 
   return (
     <div className={cn("flex items-center justify-center gap-3 md:gap-4 px-4", className)}>
@@ -85,8 +88,11 @@ const DailyModeProgress: React.FC<DailyModeProgressProps> = ({
         
         return (
           <div key={mode.key} className="flex flex-col items-center">
-            <button
+            <MotionButton
               onClick={() => handleModeClick(mode)}
+               initial={false}
+               animate={isCurrent ? { scale: 1.25, y: -4 } : { scale: 1, y: 0 }}
+               transition={{ type: 'spring', stiffness: 260, damping: 20 }}
               className={cn(
                 "relative w-[3.25rem] h-[3.25rem] md:w-[3.6rem] md:h-[3.6rem] rounded-full flex items-center justify-center transition-all duration-300 transform hover:scale-110 hover:animate-wiggle focus:outline-none focus:ring-2 focus:ring-white/30 shadow-lg",
                 isCompleted
@@ -121,7 +127,7 @@ const DailyModeProgress: React.FC<DailyModeProgressProps> = ({
                 </div>
               )}
               <span className="sr-only">{mode.name}</span>
-            </button>
+            </MotionButton>
             
             {/* Connection line to next mode */}
             {index < modes.length - 1 && (

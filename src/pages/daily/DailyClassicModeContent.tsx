@@ -1,27 +1,27 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Clock, Hash, Flame, Home } from 'lucide-react';
-import { toast } from '@/components/ui/use-toast';
-import { useDailyStore } from '@/stores/useDailyStore';
+import { Clock, Hash } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
+import { useDailyStore, DailyGameMode } from '@/stores/useDailyStore';
+import { useStreak } from '@/contexts/StreakContext';
 import { brawlers, getBrawlerDisplayName } from '@/data/brawlers';
-import { getPortrait } from '@/lib/image-helpers';
 import BrawlerAutocomplete from '@/components/BrawlerAutocomplete';
 import BrawlerGuessRow from '@/components/BrawlerGuessRow';
 import ReactConfetti from 'react-confetti';
 import { fetchDailyChallenge, fetchYesterdayChallenge } from '@/lib/daily-challenges';
 import { t, getLanguage } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
-import RotatingBackground from '@/components/layout/RotatingBackground';
 import PrimaryButton from '@/components/ui/primary-button';
 import SecondaryButton from '@/components/ui/secondary-button';
+import ModeTitle from '@/components/ModeTitle';
 import DailyModeProgress from '@/components/DailyModeProgress';
-import { useStreak } from '@/contexts/StreakContext';
 
-const DEFAULT_PORTRAIT = '/portraits/shelly.png';
 
-const DailyClassicMode: React.FC = () => {
+interface DailyClassicModeContentProps {
+  onModeChange: (mode: DailyGameMode) => void;
+}
+
+const DailyClassicModeContent: React.FC<DailyClassicModeContentProps> = ({ onModeChange }) => {
   const navigate = useNavigate();
   const currentLanguage = getLanguage();
   const { streak } = useStreak();
@@ -29,69 +29,62 @@ const DailyClassicMode: React.FC = () => {
   const {
     classic,
     timeUntilNext,
-    isLoading,
-    initializeDailyModes,
-    incrementGuessCount,
     completeMode,
     resetGuessCount,
     updateTimeUntilNext,
-    saveGuess,
+    submitGuess,
     getGuesses,
+    initializeDailyModes,
   } = useDailyStore();
 
   // Local game state
   const [inputValue, setInputValue] = useState('');
   const [selectedBrawler, setSelectedBrawler] = useState<any>(null);
-  const [guesses, setGuesses] = useState<any[]>([]);
-  const [guessedBrawlerNames, setGuessedBrawlerNames] = useState<string[]>([]);
+  // Use store state directly instead of local state
+  const guesses = classic.guesses;
+  const guessedBrawlerNames = guesses.map((g: any) => g.name);
   const [isGameOver, setIsGameOver] = useState(false);
   const [showVictoryScreen, setShowVictoryScreen] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [yesterdayData, setYesterdayData] = useState<any>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   // New state for discovered attributes
   const [discoveredAttributes, setDiscoveredAttributes] = useState<{
     rarity?: string;
     class?: string;
     range?: string;
-    wallbreak?: string;
+    wallbreak?: string | null;
     releaseYear?: number;
   }>({});
 
-  // Initialize daily modes on component mount
+  // Update timer immediately and then every minute
   useEffect(() => {
-    initializeDailyModes();
-    
-    // Update timer immediately and then every minute
     updateTimeUntilNext();
     const interval = setInterval(() => {
       updateTimeUntilNext();
-    }, 60000);
+    }, 1000);
     
     return () => clearInterval(interval);
-  }, [initializeDailyModes]);
+  }, [updateTimeUntilNext]);
 
   // Load yesterday's challenge
+  const loadYesterdayData = async () => {
+    try {
+      const yesterdayChallenge = await fetchYesterdayChallenge('classic');
+      setYesterdayData(yesterdayChallenge);
+    } catch (error) {
+      console.error('Error loading yesterday data:', error);
+    }
+  };
+
   useEffect(() => {
-    const loadYesterdayData = async () => {
-      try {
-        const yesterdayChallenge = await fetchYesterdayChallenge('classic');
-        setYesterdayData(yesterdayChallenge);
-      } catch (error) {
-        console.error('Error loading yesterday data:', error);
-      }
-    };
-    
     loadYesterdayData();
   }, []);
 
   // Load saved guesses when component mounts or classic data changes
   useEffect(() => {
     const savedGuesses = getGuesses('classic');
-    setGuesses(savedGuesses);
-    // Extract brawler names from saved guesses to prevent duplicates
-    const brawlerNames = savedGuesses.map(guess => guess.name);
-    setGuessedBrawlerNames(brawlerNames);
     
     // Update discovered attributes based on saved guesses
     if (savedGuesses.length > 0) {
@@ -118,66 +111,38 @@ const DailyClassicMode: React.FC = () => {
       
       setDiscoveredAttributes(newDiscovered);
     }
-  }, [classic.brawlerName, getGuesses]);
-
-  // Reset game when already completed
-  useEffect(() => {
+    
+    // Check if already completed
     if (classic.isCompleted) {
-      setShowVictoryScreen(true);
       setIsGameOver(true);
+      setShowVictoryScreen(true);
     }
-  }, [classic.isCompleted]);
+  }, [classic]);
 
   const getCorrectBrawler = () => {
     return brawlers.find(b => b.name.toLowerCase() === classic.brawlerName.toLowerCase()) || brawlers[0];
   };
 
-  // Function to check and update discovered attributes
-  const updateDiscoveredAttributes = useCallback((guessedBrawler: any) => {
-    const correctBrawler = getCorrectBrawler();
-    const newDiscovered = { ...discoveredAttributes };
-    
-    // Check each attribute
-    if (guessedBrawler.rarity === correctBrawler.rarity && !newDiscovered.rarity) {
-      newDiscovered.rarity = correctBrawler.rarity;
-    }
-    if (guessedBrawler.class === correctBrawler.class && !newDiscovered.class) {
-      newDiscovered.class = correctBrawler.class;
-    }
-    if (guessedBrawler.range === correctBrawler.range && !newDiscovered.range) {
-      newDiscovered.range = correctBrawler.range;
-    }
-    if (guessedBrawler.wallbreak === correctBrawler.wallbreak && !newDiscovered.wallbreak) {
-      newDiscovered.wallbreak = correctBrawler.wallbreak;
-    }
-    if (guessedBrawler.releaseYear === correctBrawler.releaseYear && !newDiscovered.releaseYear) {
-      newDiscovered.releaseYear = correctBrawler.releaseYear;
-    }
-    
-    setDiscoveredAttributes(newDiscovered);
-  }, [discoveredAttributes, getCorrectBrawler]);
+  // Handle brawler selection
+  const handleSelectBrawler = (brawler: any) => {
+    setSelectedBrawler(brawler);
+    setInputValue(getBrawlerDisplayName(brawler, currentLanguage));
+  };
 
   // Handle guess submission
-  const handleSubmit = useCallback((brawler?: any) => {
-    const brawlerToSubmit = brawler || selectedBrawler;
+  const handleSubmit = useCallback(() => {
+    if (!selectedBrawler || isSubmitting || classic.guesses.some(g => g.name === selectedBrawler.name)) {
+      return;
+    }
     
-    if (!brawlerToSubmit || classic.isCompleted) return;
-
-    // Increment guess count in store
-    incrementGuessCount('classic');
-    
-    // Add guess to store and local state
-    const newGuess = brawlerToSubmit;
-    saveGuess('classic', newGuess);
-    setGuesses(prev => [...prev, newGuess]);
-    setGuessedBrawlerNames(prev => [...prev, brawlerToSubmit.name]);
-    
-    // Update discovered attributes
-    updateDiscoveredAttributes(brawlerToSubmit);
+    setIsSubmitting(true);
+    // Atomic submit to avoid extra renders and duplicate increments
+    const newGuess = selectedBrawler;
+    submitGuess('classic', newGuess);
     
     // Check if correct
     const correctBrawler = getCorrectBrawler();
-    const isCorrect = brawlerToSubmit.name.toLowerCase() === correctBrawler.name.toLowerCase();
+    const isCorrect = selectedBrawler.name.toLowerCase() === correctBrawler.name.toLowerCase();
     
     if (isCorrect) {
       // Mark mode as completed
@@ -188,35 +153,25 @@ const DailyClassicMode: React.FC = () => {
       
       const displayName = getBrawlerDisplayName(correctBrawler, currentLanguage);
       toast({
-        title: "Congratulations! 🎉",
-        description: `You found ${displayName}!`,
+        title: t('daily.congratulations'),
+        description: `${t('daily.you.found')} ${displayName}!`,
+        duration: 3000,
       });
     }
     
-    // Reset input
+    // Clear input
     setInputValue('');
     setSelectedBrawler(null);
-  }, [selectedBrawler, classic.isCompleted, incrementGuessCount, saveGuess, getCorrectBrawler, completeMode]);
-
-  // Handle brawler selection and immediate submission
-  const handleSelectBrawler = useCallback((brawler: any) => {
-    setSelectedBrawler(brawler);
-    const displayName = getBrawlerDisplayName(brawler, currentLanguage);
-    setInputValue(displayName);
-    
-    // Immediately submit the guess
-    handleSubmit(brawler);
-  }, [handleSubmit, currentLanguage]);
+    setIsSubmitting(false);
+  }, [selectedBrawler, classic.guesses, submitGuess, completeMode, currentLanguage, getCorrectBrawler]);
 
   // Handle next mode navigation
   const handleNextMode = () => {
-    navigate('/daily/gadget');
+    onModeChange('gadget');
   };
 
   // Handle play again
   const handlePlayAgain = () => {
-    setGuesses([]);
-    setGuessedBrawlerNames([]);
     setIsGameOver(false);
     setShowVictoryScreen(false);
     setShowConfetti(false);
@@ -225,80 +180,12 @@ const DailyClassicMode: React.FC = () => {
     resetGuessCount('classic');
   };
 
-  const formatTime = (time: { hours: number; minutes: number }) => {
-    return `${time.hours.toString().padStart(2, '0')}:${time.minutes.toString().padStart(2, '0')}:00`;
+  const formatTime = (time: { hours: number; minutes: number; seconds: number }) => {
+    return `${time.hours.toString().padStart(2, '0')}:${time.minutes.toString().padStart(2, '0')}:${time.seconds.toString().padStart(2, '0')}`;
   };
-
-  // Mode navigation data
-  const modes = [
-    { 
-      key: 'classic', 
-      name: 'Classic', 
-      path: '/daily/classic',
-      icon: '/ClassicIcon.png',
-      color: 'from-amber-800 to-yellow-900',
-      bgColor: 'bg-amber-800/30',
-      borderColor: 'border-amber-600'
-    },
-    { 
-      key: 'gadget', 
-      name: 'Gadget', 
-      path: '/daily/gadget',
-      icon: '/GadgetIcon.png',
-      color: 'from-green-500 to-emerald-600',
-      bgColor: 'bg-green-600/30',
-      borderColor: 'border-green-500'
-    },
-    { 
-      key: 'starpower', 
-      name: 'Star Power', 
-      path: '/daily/starpower',
-      icon: '/StarpowerIcon.png',
-      color: 'from-orange-500 to-yellow-600',
-      bgColor: 'bg-orange-600/30',
-      borderColor: 'border-orange-500'
-    },
-    { 
-      key: 'audio', 
-      name: 'Audio', 
-      path: '/daily/audio',
-      icon: '/AudioIcon.png',
-      color: 'from-purple-500 to-violet-600',
-      bgColor: 'bg-purple-600/30',
-      borderColor: 'border-purple-500'
-    },
-    { 
-      key: 'pixels', 
-      name: 'Pixels', 
-      path: '/daily/pixels',
-      icon: '/PixelsIcon.png',
-      color: 'from-blue-500 to-indigo-600',
-      bgColor: 'bg-blue-600/30',
-      borderColor: 'border-blue-500'
-    },
-  ];
-
-  const handleModeClick = (mode: typeof modes[0]) => {
-    if (mode.key !== 'classic') {
-      navigate(mode.path);
-    }
-  };
-
-  // Loading state
-  if (isLoading) {
-    return (
-      <div className="daily-mode-container daily-classic-theme">
-        <RotatingBackground />
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="animate-spin h-12 w-12 border-4 border-white/20 border-t-white rounded-full"></div>
-        </div>
-      </div>
-    );
-  }
 
   return (
-    <div className="daily-mode-container daily-classic-theme">
-        <RotatingBackground />
+    <div className="daily-classic-theme">
       {/* Confetti Animation */}
       {showConfetti && (
         <ReactConfetti
@@ -341,45 +228,11 @@ const DailyClassicMode: React.FC = () => {
         </div>
 
         {/* Mode Navigation */}
-        <DailyModeProgress currentMode="classic" className="mb-6 mt-1" />
-        {/* Legacy pills hidden below */}
-        <div className="hidden">
-          {modes.map((mode) => {
-            const isCurrent = mode.key === 'classic';
-            
-            return (
-              <button
-                key={mode.key}
-                onClick={() => handleModeClick(mode)}
-                className={cn(
-                  "relative flex flex-col items-center justify-center w-14 h-14 rounded-full transition-all duration-300",
-                  isCurrent
-                    ? `bg-gradient-to-r ${mode.color} text-white shadow-lg shadow-${mode.color.split(' ')[1]}/30`
-                    : `${mode.bgColor} ${mode.borderColor} text-white/80 hover:text-white border-2 opacity-40 hover:opacity-70`,
-                  !isCurrent && "cursor-pointer"
-                )}
-                disabled={isCurrent}
-              >
-                <img 
-                  src={mode.icon}
-                  alt={`${mode.name} Icon`}
-                  className="w-7 h-7"
-                />
-                
-                {/* Current mode indicator dot */}
-                {isCurrent && (
-                  <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2 w-3 h-3 bg-white rounded-full border-2 border-gray-800"></div>
-                )}
-              </button>
-            );
-          })}
-        </div>
+        <DailyModeProgress currentMode="classic" className="mb-6 mt-1" onModeChange={onModeChange} />
 
         {/* Title */}
         <div className="text-center mb-6 mt-2">
-          <h1 className="daily-mode-title">
-            {t('mode.classic')}
-          </h1>
+          <ModeTitle title={t('mode.classic')} />
         </div>
       </div>
 
@@ -580,7 +433,7 @@ const DailyClassicMode: React.FC = () => {
                           correctAnswer={getCorrectBrawler()}
                           isMobile={window.innerWidth < 768}
                           gridTemplateClass="grid-cols-6"
-                          isNew={index === guesses.length - 1} // Only animate the newest guess
+                          isNew={index === guesses.length - 1}
                         />
                       ))}
                     </div>
@@ -590,7 +443,7 @@ const DailyClassicMode: React.FC = () => {
                 {/* Yesterday's Brawler */}
                 {yesterdayData && (
                   <div className="flex justify-center mt-4">
-                    <span className="text-sm text-white/50">
+                    <span className="text-sm text-white/80">
                       {t('daily.yesterday.classic')} <span className="text-[hsl(var(--daily-mode-primary))] font-medium">{yesterdayData.brawler || 'Mico'}</span>
                     </span>
                   </div>
@@ -599,7 +452,7 @@ const DailyClassicMode: React.FC = () => {
                 {/* Next Brawler In Timer - moved below yesterday's */}
                 <div className="flex justify-center mt-3">
                   <div className="flex flex-col items-center text-white/90 px-3">
-                    <span className="text-xs text-white/60 font-medium uppercase tracking-wide">{t('daily.next.brawler.in')}</span>
+                    <span className="text-xs text-white/90 font-medium uppercase tracking-wide">{t('daily.next.brawler.in')}</span>
                     <span className="font-mono text-white font-bold text-xl">
                       {formatTime(timeUntilNext)}
                     </span>
@@ -614,4 +467,4 @@ const DailyClassicMode: React.FC = () => {
   );
 };
 
-export default DailyClassicMode; 
+export default DailyClassicModeContent;

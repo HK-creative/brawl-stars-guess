@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Clock, Hash, Flame, Home } from 'lucide-react';
-import { toast } from '@/components/ui/use-toast';
-import { useDailyStore } from '@/stores/useDailyStore';
+import { Clock, Hash } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
+import { useDailyStore, DailyGameMode } from '@/stores/useDailyStore';
+import { useStreak } from '@/contexts/StreakContext';
 import { brawlers, getBrawlerDisplayName } from '@/data/brawlers';
-import { getPortrait, DEFAULT_PORTRAIT } from '@/lib/image-helpers';
+import { getPortrait } from '@/lib/image-helpers';
 import BrawlerAutocomplete from '@/components/BrawlerAutocomplete';
 import ReactConfetti from 'react-confetti';
 import { fetchDailyChallenge, fetchYesterdayChallenge } from '@/lib/daily-challenges';
@@ -14,10 +13,14 @@ import { t, getLanguage } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 import PrimaryButton from '@/components/ui/primary-button';
 import SecondaryButton from '@/components/ui/secondary-button';
+import ModeTitle from '@/components/ModeTitle';
 import DailyModeProgress from '@/components/DailyModeProgress';
-import RotatingBackground from '@/components/layout/RotatingBackground';
-import { useStreak } from '@/contexts/StreakContext';
+
 import Image from '@/components/ui/image';
+import usePageTitle from '@/hooks/usePageTitle';
+
+
+const DEFAULT_PORTRAIT = '/portraits/shelly.png';
 
 // Helper to get star power image path with fallback variants
 const getStarPowerImageVariants = (brawler: string, starPowerName?: string): string[] => {
@@ -29,19 +32,15 @@ const getStarPowerImageVariants = (brawler: string, starPowerName?: string): str
   const normalizedBrawler = brawler.toLowerCase().replace(/ /g, '_');
   
   // Handle special cases
-  if (normalizedBrawler === 'mr.p') return [`/mrp_starpower_01.png`];
-  if (normalizedBrawler === 'el primo') return [`/elprimo_starpower_01.png`];
-  if (normalizedBrawler === 'colonel ruffs') return [`/colonel_ruffs_starpower_01.png`];
+  const specialCases: { [key: string]: string } = {
+    'el_primo': 'el_primo',
+    '8-bit': '8_bit',
+    'mr._p': 'mr_p'
+  };
   
-  // Special case for R-T
-  if (brawler.toLowerCase().replace(/[-_ ]/g, '') === 'rt') {
-    if (starPowerName && starPowerName.match(/2|second/i)) {
-      return ['/rt_starpower_02.png'];
-    }
-    return ['/rt_starpower_01.png'];
-  }
+  const finalBrawlerName = specialCases[normalizedBrawler] || normalizedBrawler;
   
-  // First, try to determine the base star power number from the name
+  // Default to star power 01 if no specific star power name provided
   let baseNum = '01';
   if (starPowerName) {
     const match = starPowerName.match(/(\d+)/);
@@ -54,15 +53,19 @@ const getStarPowerImageVariants = (brawler: string, starPowerName?: string): str
     }
   }
   
-  // Generate both possible variants
-  const variant1 = `/${normalizedBrawler}_starpower_${baseNum}.png`;
-  const variant2 = `/${normalizedBrawler}_starpower_${baseNum.replace(/^0+/, '')}.png`;
+  // Generate both possible variants (files are in public root, not subdirectories)
+  const variant1 = `/${finalBrawlerName}_starpower_${baseNum}.png`;
+  const variant2 = `/${finalBrawlerName}_starpower_${baseNum.replace(/^0+/, '')}.png`;
   
   // Return both variants to try
   return [variant1, variant2];
 };
 
-const DailyStarPowerMode: React.FC = () => {
+interface DailyStarPowerModeContentProps {
+  onModeChange: (mode: DailyGameMode) => void;
+}
+
+const DailyStarPowerModeContent: React.FC<DailyStarPowerModeContentProps> = ({ onModeChange }) => {
   const navigate = useNavigate();
   const currentLanguage = getLanguage();
   const { streak } = useStreak();
@@ -70,48 +73,46 @@ const DailyStarPowerMode: React.FC = () => {
   const {
     starpower,
     timeUntilNext,
-    isLoading,
-    initializeDailyModes,
-    incrementGuessCount,
     completeMode,
     resetGuessCount,
     updateTimeUntilNext,
-    saveGuess,
+    submitGuess,
     getGuesses,
   } = useDailyStore();
 
   // Local game state
   const [inputValue, setInputValue] = useState('');
   const [selectedBrawler, setSelectedBrawler] = useState<any>(null);
-  const [guesses, setGuesses] = useState<any[]>([]);
-  const [guessedBrawlerNames, setGuessedBrawlerNames] = useState<string[]>([]);
+  // Use store state directly instead of local state
+  const guesses = starpower.guesses;
+  const guessedBrawlerNames = guesses.map((g: any) => g.name);
   const [isGameOver, setIsGameOver] = useState(false);
   const [showVictoryScreen, setShowVictoryScreen] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [starPowerData, setStarPowerData] = useState<any>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [starPowerImage, setStarPowerImage] = useState<string>('');
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageVariants, setImageVariants] = useState<string[]>([]);
   const [currentVariantIndex, setCurrentVariantIndex] = useState(0);
   const [yesterdayData, setYesterdayData] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Initialize daily modes on component mount
+  // Update timer immediately and then every minute
   useEffect(() => {
-    initializeDailyModes();
-    
-    // Update timer immediately and then every minute
     updateTimeUntilNext();
     const interval = setInterval(() => {
       updateTimeUntilNext();
-    }, 60000);
+    }, 1000);
     
     return () => clearInterval(interval);
-  }, [initializeDailyModes]);
+  }, [updateTimeUntilNext]);
 
   // Load star power data and generate image
   useEffect(() => {
     const loadStarPowerData = async () => {
       try {
+        setIsLoading(true);
         const [data, yesterdayChallenge] = await Promise.all([
           fetchDailyChallenge('starpower'),
           fetchYesterdayChallenge('starpower')
@@ -129,11 +130,10 @@ const DailyStarPowerMode: React.FC = () => {
           setCurrentVariantIndex(0);
           if (variants.length > 0) {
             setStarPowerImage(variants[0]);
-            console.log('Trying first variant:', variants[0]);
           } else {
             setStarPowerImage('');
           }
-          setImageLoaded(false);
+          setImageLoaded(false); // Reset image loaded state
         } else {
           console.warn('No brawler data found in star power challenge');
           setStarPowerImage('');
@@ -149,26 +149,19 @@ const DailyStarPowerMode: React.FC = () => {
         setCurrentVariantIndex(0);
         setImageLoaded(false);
         setStarPowerData(null);
+      } finally {
+        setIsLoading(false);
       }
     };
-    
+
     loadStarPowerData();
   }, []);
 
-  // Load saved guesses when component mounts or star power data changes
-  useEffect(() => {
-    const savedGuesses = getGuesses('starpower');
-    setGuesses(savedGuesses);
-    // Extract brawler names from saved guesses to prevent duplicates
-    const brawlerNames = savedGuesses.map(guess => guess.name);
-    setGuessedBrawlerNames(brawlerNames);
-  }, [starpower.brawlerName, getGuesses]);
-
-  // Reset game when already completed
+  // Check completion status
   useEffect(() => {
     if (starpower.isCompleted) {
-      setShowVictoryScreen(true);
       setIsGameOver(true);
+      setShowVictoryScreen(true);
     }
   }, [starpower.isCompleted]);
 
@@ -177,71 +170,6 @@ const DailyStarPowerMode: React.FC = () => {
       return brawlers.find(b => b.name.toLowerCase() === starPowerData.brawler.toLowerCase()) || brawlers[0];
     }
     return brawlers.find(b => b.name.toLowerCase() === starpower.brawlerName.toLowerCase()) || brawlers[0];
-  };
-
-  // Handle guess submission
-  const handleSubmit = useCallback((brawler?: any) => {
-    const brawlerToSubmit = brawler || selectedBrawler;
-    
-    if (!brawlerToSubmit || starpower.isCompleted) return;
-
-    // Increment guess count in store
-    incrementGuessCount('starpower');
-    
-    // Add guess to store and local state
-    const newGuess = brawlerToSubmit;
-    saveGuess('starpower', newGuess);
-    setGuesses(prev => [...prev, newGuess]);
-    setGuessedBrawlerNames(prev => [...prev, brawlerToSubmit.name]);
-    
-    // Check if correct
-    const correctBrawler = getCorrectBrawler();
-    const isCorrect = brawlerToSubmit.name.toLowerCase() === correctBrawler.name.toLowerCase();
-    
-    if (isCorrect) {
-      // Mark mode as completed
-      completeMode('starpower');
-      setIsGameOver(true);
-      setShowVictoryScreen(true);
-      setShowConfetti(true);
-      
-      const displayName = getBrawlerDisplayName(correctBrawler, currentLanguage);
-      toast({
-        title: "Congratulations! 🎉",
-        description: `You found ${displayName}!`,
-      });
-    }
-    
-    // Reset input
-    setInputValue('');
-    setSelectedBrawler(null);
-  }, [selectedBrawler, starpower.isCompleted, incrementGuessCount, saveGuess, getCorrectBrawler, completeMode]);
-
-  // Handle brawler selection and immediate submission
-  const handleSelectBrawler = useCallback((brawler: any) => {
-    setSelectedBrawler(brawler);
-    const displayName = getBrawlerDisplayName(brawler, currentLanguage);
-    setInputValue(displayName);
-    
-    // Immediately submit the guess
-    handleSubmit(brawler);
-  }, [handleSubmit, currentLanguage]);
-
-  // Handle next mode navigation
-  const handleNextMode = () => {
-    navigate('/daily/audio');
-  };
-
-  // Handle play again
-  const handlePlayAgain = () => {
-    setGuesses([]);
-    setGuessedBrawlerNames([]);
-    setIsGameOver(false);
-    setShowVictoryScreen(false);
-    setShowConfetti(false);
-    setInputValue('');
-    setSelectedBrawler(null);
-    resetGuessCount('starpower');
   };
 
   const handleImageError = () => {
@@ -264,80 +192,78 @@ const DailyStarPowerMode: React.FC = () => {
     setImageLoaded(true);
   };
 
-  const formatTime = (time: { hours: number; minutes: number }) => {
-    return `${time.hours.toString().padStart(2, '0')}:${time.minutes.toString().padStart(2, '0')}:00`;
+  // Handle brawler selection
+  const handleSelectBrawler = (brawler: any) => {
+    setSelectedBrawler(brawler);
+    setInputValue(getBrawlerDisplayName(brawler, currentLanguage));
   };
 
-  // Mode navigation data
-  const modes = [
-    { 
-      key: 'classic', 
-      name: 'Classic', 
-      path: '/daily/classic',
-      icon: '/ClassicIcon.png',
-      color: 'from-amber-800 to-yellow-900',
-      bgColor: 'bg-amber-800/30',
-      borderColor: 'border-amber-600'
-    },
-    { 
-      key: 'gadget', 
-      name: 'Gadget', 
-      path: '/daily/gadget',
-      icon: '/GadgetIcon.png',
-      color: 'from-green-500 to-emerald-600',
-      bgColor: 'bg-green-600/30',
-      borderColor: 'border-green-500'
-    },
-    { 
-      key: 'starpower', 
-      name: 'Star Power', 
-      path: '/daily/starpower',
-      icon: '/StarpowerIcon.png',
-      color: 'from-orange-500 to-yellow-600',
-      bgColor: 'bg-orange-600/30',
-      borderColor: 'border-orange-500'
-    },
-    { 
-      key: 'audio', 
-      name: 'Audio', 
-      path: '/daily/audio',
-      icon: '/AudioIcon.png',
-      color: 'from-purple-500 to-violet-600',
-      bgColor: 'bg-purple-600/30',
-      borderColor: 'border-purple-500'
-    },
-    { 
-      key: 'pixels', 
-      name: 'Pixels', 
-      path: '/daily/pixels',
-      icon: '/PixelsIcon.png',
-      color: 'from-blue-500 to-indigo-600',
-      bgColor: 'bg-blue-600/30',
-      borderColor: 'border-blue-500'
-    },
-  ];
-
-  const handleModeClick = (mode: typeof modes[0]) => {
-    if (mode.key !== 'starpower') {
-      navigate(mode.path);
+  // Handle guess submission
+  const handleSubmit = useCallback(() => {
+    if (!selectedBrawler || !starPowerData || isSubmitting || guessedBrawlerNames.includes(selectedBrawler.name)) {
+      return;
     }
+    
+    setIsSubmitting(true);
+    // Atomic submit to reduce renders and avoid double increments
+    const newGuess = selectedBrawler;
+    submitGuess('starpower', newGuess);
+    
+    // Check if correct
+    const correctBrawler = getCorrectBrawler();
+    const isCorrect = selectedBrawler.name.toLowerCase() === correctBrawler.name.toLowerCase();
+    
+    if (isCorrect) {
+      // Mark mode as completed
+      completeMode('starpower');
+      setIsGameOver(true);
+      setShowVictoryScreen(true);
+      setShowConfetti(true);
+      
+      const displayName = getBrawlerDisplayName(correctBrawler, currentLanguage);
+      toast({
+        title: t('daily.congratulations'),
+        description: `${t('daily.you.found')} ${displayName}!`,
+        duration: 3000,
+      });
+    }
+    
+    // Clear input
+    setInputValue('');
+    setSelectedBrawler(null);
+    setIsSubmitting(false);
+  }, [selectedBrawler, starPowerData, guessedBrawlerNames, submitGuess, completeMode, currentLanguage, getCorrectBrawler]);
+
+  // Handle next mode navigation
+  const handleNextMode = () => {
+    onModeChange('audio');
+  };
+
+  // Handle play again
+  const handlePlayAgain = () => {
+    setIsGameOver(false);
+    setShowVictoryScreen(false);
+    setShowConfetti(false);
+    setInputValue('');
+    setSelectedBrawler(null);
+    resetGuessCount('starpower');
+  };
+
+  const formatTime = (time: { hours: number; minutes: number; seconds: number }) => {
+    return `${time.hours.toString().padStart(2, '0')}:${time.minutes.toString().padStart(2, '0')}:${time.seconds.toString().padStart(2, '0')}`;
   };
 
   // Loading state
   if (isLoading) {
     return (
-      <div className="daily-mode-container daily-starpower-theme">
-        <RotatingBackground />
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="animate-spin h-12 w-12 border-4 border-white/20 border-t-white rounded-full"></div>
-        </div>
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin h-12 w-12 border-4 border-white/20 border-t-white rounded-full"></div>
       </div>
     );
   }
 
   return (
-    <div className="daily-mode-container daily-starpower-theme">
-        <RotatingBackground />
+    <div className="daily-starpower-theme">
       {/* Confetti Animation */}
       {showConfetti && (
         <ReactConfetti
@@ -349,7 +275,7 @@ const DailyStarPowerMode: React.FC = () => {
           className="fixed top-0 left-0 w-full h-full z-50 pointer-events-none"
         />
       )}
-
+      
       {/* Header Section */}
       <div className="w-full max-w-4xl mx-auto px-4 py-2 relative">
         {/* Top Row: Home Icon, Streak, Timer */}
@@ -380,45 +306,11 @@ const DailyStarPowerMode: React.FC = () => {
         </div>
 
         {/* Mode Navigation */}
-        <DailyModeProgress currentMode="starpower" className="mb-6 mt-1" />
-        {/* Legacy pills hidden below */}
-        <div className="hidden">
-          {modes.map((mode) => {
-            const isCurrent = mode.key === 'starpower';
-            
-            return (
-              <button
-                key={mode.key}
-                onClick={() => handleModeClick(mode)}
-                className={cn(
-                  "relative flex flex-col items-center justify-center w-14 h-14 rounded-full transition-all duration-300",
-                  isCurrent
-                    ? `bg-gradient-to-r ${mode.color} text-white shadow-lg shadow-${mode.color.split(' ')[1]}/30`
-                    : `${mode.bgColor} ${mode.borderColor} text-white/70 hover:text-white/90 border-2 opacity-40 hover:opacity-70`,
-                  !isCurrent && "cursor-pointer"
-                )}
-                disabled={isCurrent}
-              >
-                <img 
-                  src={mode.icon}
-                  alt={`${mode.name} Icon`}
-                  className="w-7 h-7"
-                />
-                
-                {/* Current mode indicator dot */}
-                {isCurrent && (
-                  <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2 w-1.5 h-1.5 bg-white rounded-full border-2 border-gray-800"></div>
-                )}
-              </button>
-            );
-          })}
-        </div>
+        <DailyModeProgress currentMode="starpower" className="mb-6 mt-1" onModeChange={onModeChange} />
 
         {/* Title */}
         <div className="text-center mb-6 mt-2">
-          <h1 className="daily-mode-title">
-            {t('mode.starpower')}
-          </h1>
+          <ModeTitle title={t('mode.starpower')} />
         </div>
       </div>
 
@@ -439,18 +331,16 @@ const DailyStarPowerMode: React.FC = () => {
                 <div className="flex flex-col gap-6 items-center">
                   <SecondaryButton
                     onClick={() => navigate('/')}
-                    
-                    
                   >
                     {t('daily.go.home')}
                   </SecondaryButton>
                   <PrimaryButton
                     onClick={handleNextMode}
-                    className="daily-mode-next-button"
+                    className="px-8 py-3"
                   >
                     <img 
-                      src="/StarpowerIcon.png" 
-                      alt="Star Power Mode" 
+                      src="/AudioIcon.png" 
+                      alt="Audio Mode" 
                       className={cn(
                         "h-6 w-6",
                         currentLanguage === 'he' ? "ml-2" : "mr-2"
@@ -458,14 +348,6 @@ const DailyStarPowerMode: React.FC = () => {
                     />
                     {t('daily.next.mode')}
                   </PrimaryButton>
-                  
-                  <SecondaryButton
-                    onClick={() => navigate('/')}
-                    
-                    
-                  >
-                    {t('daily.go.home')}
-                  </SecondaryButton>
                 </div>
               </div>
             ) : (
@@ -473,16 +355,16 @@ const DailyStarPowerMode: React.FC = () => {
               <div className="daily-mode-game-area">
                 {/* Star Power Image */}
                 <div className="flex justify-center mb-6">
-                  <div className="w-64 h-64 md:w-72 md:h-72 rounded-3xl border-4 border-orange-500/60 bg-black/20 backdrop-blur-sm flex items-center justify-center overflow-hidden shadow-2xl">
+                  <div className="w-64 h-64 md:w-72 md:h-72 rounded-3xl border-4 border-purple-500/60 bg-black/20 backdrop-blur-sm flex items-center justify-center overflow-hidden shadow-2xl">
                     {starPowerImage ? (
-                       <Image
-                         src={starPowerImage}
-                         fallbackSrc={imageVariants.length > 1 ? imageVariants[1] : '/shelly_starpower_01.png'}
-                         alt="Mystery Star Power"
-                         className="w-full h-full object-contain"
-                         priority
-                       />
-                     ) : (
+                      <Image
+                        src={starPowerImage}
+                        fallbackSrc={imageVariants.length > 1 ? imageVariants[1] : '/StarPowerImages/shelly_starpower_01.png'}
+                        alt="Mystery Star Power"
+                        className="w-full h-full object-contain"
+                        priority
+                      />
+                    ) : (
                       <div className="text-center">
                         <div className="animate-spin h-12 w-12 border-4 border-white/20 border-t-white rounded-full mx-auto mb-4"></div>
                         <div className="text-white/50 text-sm">Loading...</div>
@@ -490,6 +372,7 @@ const DailyStarPowerMode: React.FC = () => {
                     )}
                   </div>
                 </div>
+
                 {/* Search Bar */}
                 <div className="daily-mode-input-section mb-8 w-full max-w-md mx-auto">
                   <BrawlerAutocomplete
@@ -542,10 +425,10 @@ const DailyStarPowerMode: React.FC = () => {
                   </div>
                 )}
 
-                {/* Yesterday's Star Power */}
+                {/* Yesterday's Brawler */}
                 {yesterdayData && (
                   <div className="flex justify-center mt-4">
-                    <span className="text-sm text-white/50">
+                    <span className="text-sm text-white/80">
                       {t('daily.yesterday.starpower')} <span className="text-[hsl(var(--daily-mode-primary))] font-medium">{yesterdayData.brawler || 'Mico'}</span>
                     </span>
                   </div>
@@ -554,7 +437,7 @@ const DailyStarPowerMode: React.FC = () => {
                 {/* Next Brawler In Timer - moved below yesterday's */}
                 <div className="flex justify-center mt-3">
                   <div className="flex flex-col items-center text-white/90 px-3">
-                    <span className="text-xs text-white/60 font-medium uppercase tracking-wide">{t('daily.next.brawler.in')}</span>
+                    <span className="text-xs text-white/90 font-medium uppercase tracking-wide">{t('daily.next.brawler.in')}</span>
                     <span className="font-mono text-white font-bold text-xl">
                       {formatTime(timeUntilNext)}
                     </span>
@@ -569,4 +452,4 @@ const DailyStarPowerMode: React.FC = () => {
   );
 };
 
-export default DailyStarPowerMode; 
+export default DailyStarPowerModeContent;

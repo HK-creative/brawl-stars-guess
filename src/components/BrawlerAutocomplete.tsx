@@ -47,11 +47,15 @@ const BrawlerAutocomplete: React.FC<BrawlerAutocompleteProps> = ({
   
   const handleSelectBrawlerWithSubmit = useCallback((brawler: Brawler) => {
     if (disabledBrawlers.includes(brawler.name)) return;
+
     handleSelectBrawler(brawler);
     if (onSubmit) {
-      setTimeout(() => {
-        onSubmit();
-      }, 10);
+      // Schedule submit on a microtask for zero-frame latency while still after selection state
+      if (typeof queueMicrotask === 'function') {
+        queueMicrotask(() => onSubmit());
+      } else {
+        Promise.resolve().then(() => onSubmit());
+      }
     }
   }, [disabledBrawlers, handleSelectBrawler, onSubmit]);
   
@@ -78,10 +82,8 @@ const BrawlerAutocomplete: React.FC<BrawlerAutocompleteProps> = ({
       );
       
       if (exactMatchBrawler && !disabledBrawlers.includes(exactMatchBrawler.name)) {
-        // Auto-submit after a short delay to allow for UI updates
-        setTimeout(() => {
-          handleSelectBrawlerWithSubmit(exactMatchBrawler);
-        }, 100);
+        // Submit immediately for snappy UX
+        handleSelectBrawlerWithSubmit(exactMatchBrawler);
       }
     }
   }, [value, brawlers, disabledBrawlers, currentLanguage, onSubmit, handleSelectBrawlerWithSubmit]);

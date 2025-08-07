@@ -24,7 +24,7 @@ export interface DailyGameState {
   pixels: DailyModeState;
   
   // Time until next brawler reset
-  timeUntilNext: { hours: number; minutes: number };
+  timeUntilNext: { hours: number; minutes: number; seconds: number };
   
   // Loading states
   isLoading: boolean;
@@ -44,6 +44,9 @@ interface DailyActions {
   // Reset guess count for a mode (when starting a new attempt)
   resetGuessCount: (mode: DailyGameMode) => void;
   
+  // Submit a guess (batched): increments guessCount and saves non-duplicate guess atomically
+  submitGuess: (mode: DailyGameMode, guess: any) => void;
+
   // Save a guess for a specific mode
   saveGuess: (mode: DailyGameMode, guess: any) => void;
   
@@ -78,7 +81,7 @@ const initialState: DailyGameState = {
   starpower: { ...initialModeState },
   audio: { ...initialModeState },
   pixels: { ...initialModeState },
-  timeUntilNext: { hours: 0, minutes: 0 },
+  timeUntilNext: { hours: 0, minutes: 0, seconds: 0 },
   isLoading: false,
   lastFetchDate: null,
 };
@@ -187,13 +190,56 @@ export const useDailyStore = create<DailyGameState & DailyActions>()(
         }));
       },
 
+      submitGuess: (mode, guess) => {
+        set((state) => {
+          const current = state[mode];
+          const existing = current.guesses;
+          const incomingName = (guess?.name ?? '').toString().toLowerCase();
+          const isDup = incomingName
+            ? existing.some((g: any) => (g?.name ?? '').toString().toLowerCase() === incomingName)
+            : false;
+
+          if (isDup) {
+            if (process.env.NODE_ENV !== 'production') {
+              console.warn(`[daily-store] Duplicate guess ignored for ${mode}:`, incomingName);
+            }
+            // No state change on duplicates
+            return { [mode]: current } as any;
+          }
+
+          return {
+            [mode]: {
+              ...current,
+              guessCount: current.guessCount + 1,
+              guesses: [...existing, guess],
+            },
+          } as any;
+        });
+      },
+
       saveGuess: (mode, guess) => {
-        set((state) => ({
-          [mode]: {
-            ...state[mode],
-            guesses: [...state[mode].guesses, guess],
-          },
-        }));
+        set((state) => {
+          const existing = state[mode].guesses;
+          const incomingName = (guess?.name ?? '').toString().toLowerCase();
+          const isDup = incomingName
+            ? existing.some((g: any) => (g?.name ?? '').toString().toLowerCase() === incomingName)
+            : false;
+
+        	if (isDup) {
+            // Guard against duplicate guess entries
+            if (process.env.NODE_ENV !== 'production') {
+              console.warn(`[daily-store] Duplicate guess ignored for ${mode}:`, incomingName);
+            }
+            return { [mode]: state[mode] } as any;
+          }
+
+          return {
+            [mode]: {
+              ...state[mode],
+              guesses: [...existing, guess],
+            },
+          } as any;
+        });
       },
 
       getGuesses: (mode) => {

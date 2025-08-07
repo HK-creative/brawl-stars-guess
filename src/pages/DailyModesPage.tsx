@@ -1,0 +1,130 @@
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useDailyStore, DailyGameMode } from '@/stores/useDailyStore';
+import usePageTitle from '@/hooks/usePageTitle';
+import { t, getLanguage } from '@/lib/i18n';
+import RotatingBackground from '@/components/layout/RotatingBackground';
+import DailyModeProgress from '@/components/DailyModeProgress';
+import PageTransition from '@/components/layout/PageTransition';
+
+// Import all mode content components
+import DailyClassicModeContent from './daily/DailyClassicModeContent';
+import DailyGadgetModeContent from './daily/DailyGadgetModeContent';
+import DailyStarPowerModeContent from './daily/DailyStarPowerModeContent';
+import DailyAudioModeContent from './daily/DailyAudioModeContent';
+import DailyPixelsModeContent from './daily/DailyPixelsModeContent';
+
+const DailyModesPage: React.FC = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { initializeDailyModes } = useDailyStore();
+  
+  // Determine current mode from URL
+  const getCurrentModeFromUrl = (): DailyGameMode => {
+    // Check query parameter first (?mode=classic)
+    const modeParam = searchParams.get('mode') as DailyGameMode;
+    if (modeParam && ['classic', 'gadget', 'starpower', 'audio', 'pixels'].includes(modeParam)) {
+      return modeParam;
+    }
+    
+    // Check path-based routing for backward compatibility (/daily/classic)
+    const pathSegments = location.pathname.split('/');
+    const pathMode = pathSegments[2] as DailyGameMode;
+    if (pathMode && ['classic', 'gadget', 'starpower', 'audio', 'pixels'].includes(pathMode)) {
+      return pathMode;
+    }
+    
+    // Default to classic
+    return 'classic';
+  };
+  
+  const [currentMode, setCurrentMode] = useState<DailyGameMode>(getCurrentModeFromUrl);
+  
+  // Set browser tab title based on current mode
+  usePageTitle(`${t(`mode.${currentMode}`)} | ${t('daily.challenge')}`);
+  
+  // Initialize daily modes on component mount
+  useEffect(() => {
+    initializeDailyModes();
+  }, [initializeDailyModes]);
+  
+  // Update mode when URL changes
+  useEffect(() => {
+    const newMode = getCurrentModeFromUrl();
+    if (newMode !== currentMode) {
+      setCurrentMode(newMode);
+    }
+  }, [location.pathname, searchParams, currentMode]);
+  
+  // Handle mode changes
+  const handleModeChange = (mode: DailyGameMode) => {
+    if (mode !== currentMode) {
+      setCurrentMode(mode);
+      
+      // Update URL with query parameter
+      setSearchParams({ mode });
+      
+      // Update browser history for proper back/forward navigation
+      window.history.pushState(
+        { mode },
+        `${t(`mode.${mode}`)} | ${t('daily.challenge')}`,
+        `/daily?mode=${mode}`
+      );
+    }
+  };
+  
+  // Handle browser back/forward navigation
+  useEffect(() => {
+    const handlePopState = (event: PopStateEvent) => {
+      const newMode = getCurrentModeFromUrl();
+      setCurrentMode(newMode);
+    };
+    
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+  
+  // Render the appropriate mode content
+  const renderModeContent = () => {
+    switch (currentMode) {
+      case 'classic':
+        return <DailyClassicModeContent onModeChange={handleModeChange} />;
+      case 'gadget':
+        return <DailyGadgetModeContent onModeChange={handleModeChange} />;
+      case 'starpower':
+        return <DailyStarPowerModeContent onModeChange={handleModeChange} />;
+      case 'audio':
+        return <DailyAudioModeContent onModeChange={handleModeChange} />;
+      case 'pixels':
+        return <DailyPixelsModeContent onModeChange={handleModeChange} />;
+      default:
+        return <DailyClassicModeContent onModeChange={handleModeChange} />;
+    }
+  };
+  
+  return (
+    <PageTransition>
+      <div className="daily-mode-container">
+        <RotatingBackground />
+        
+        {/* Mode Content with Animation */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentMode}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3 }}
+            className="daily-mode-content-container"
+          >
+            {renderModeContent()}
+          </motion.div>
+        </AnimatePresence>
+      </div>
+    </PageTransition>
+  );
+};
+
+export default DailyModesPage;

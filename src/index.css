@@ -369,7 +369,7 @@ body {
 
   .daily-mode-title {
     @apply text-3xl md:text-4xl font-black text-center leading-tight tracking-tight;
-    background: linear-gradient(135deg, var(--daily-mode-primary, #fbbf24) 0%, var(--daily-mode-secondary, #f59e0b) 50%, var(--daily-mode-accent, #fcd34d) 100%);
+    background: linear-gradient(135deg, hsl(var(--daily-mode-primary, 45 100% 55%)) 0%, hsl(var(--daily-mode-secondary, 35 100% 45%)) 50%, hsl(var(--daily-mode-accent, 50 100% 65%)) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -386,6 +386,9 @@ body {
   }
 
   .daily-mode-game-card {
+    @apply mt-2 md:mt-4 mb-8;
+    transition: border-color 0.4s ease, box-shadow 0.4s ease;
+
     @apply w-full max-w-4xl mx-auto rounded-3xl overflow-hidden relative;
     background: linear-gradient(135deg, 
       hsla(var(--daily-mode-primary, 45 100% 55%), 0.15) 0%, 
