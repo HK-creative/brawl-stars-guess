@@ -15,6 +15,9 @@ import PrimaryButton from '@/components/ui/primary-button';
 import SecondaryButton from '@/components/ui/secondary-button';
 import ModeTitle from '@/components/ModeTitle';
 import DailyModeProgress from '@/components/DailyModeProgress';
+import { motion, AnimatePresence } from 'framer-motion';
+import { SlidingNumber } from '@/components/ui/sliding-number';
+import { useMotionPrefs } from '@/hooks/useMotionPrefs';
 
 
 interface DailyClassicModeContentProps {
@@ -25,6 +28,8 @@ const DailyClassicModeContent: React.FC<DailyClassicModeContentProps> = ({ onMod
   const navigate = useNavigate();
   const currentLanguage = getLanguage();
   const { streak } = useStreak();
+  const { motionOK, transition } = useMotionPrefs();
+  const isRTL = currentLanguage === 'he';
 
   const {
     classic,
@@ -238,7 +243,12 @@ const DailyClassicModeContent: React.FC<DailyClassicModeContentProps> = ({ onMod
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col px-4 pb-4">
-        <div className="daily-mode-game-card daily-mode-animate-pulse">
+        <motion.div
+          className="daily-mode-game-card daily-mode-animate-pulse"
+          initial={motionOK ? { opacity: 0, scale: 0.98 } : { opacity: 0 }}
+          animate={{ opacity: 1, scale: 1, transition }}
+          layout
+        >
           <div className="daily-mode-card-content">
             {showVictoryScreen ? (
               // Victory Screen
@@ -405,8 +415,11 @@ const DailyClassicModeContent: React.FC<DailyClassicModeContentProps> = ({ onMod
 
                 {/* Guesses Counter */}
                 <div className="flex justify-center mb-4">
-                  <div className="daily-mode-guess-counter">
-                    <span className="font-bold text-lg">#{classic.guessCount}</span>
+                  <div className="daily-mode-guess-counter flex items-center">
+                    <span className="font-bold text-lg mr-1">#</span>
+                    <div className="font-bold text-lg">
+                      <SlidingNumber value={classic.guessCount} />
+                    </div>
                     <span className="text-white/90 ml-1">{t('guesses.count')}</span>
                   </div>
                 </div>
@@ -426,16 +439,30 @@ const DailyClassicModeContent: React.FC<DailyClassicModeContentProps> = ({ onMod
                       </div>
                       
                       {/* Guess Rows */}
-                      {guesses.map((guess, index) => (
-                        <BrawlerGuessRow
-                          key={`${guess.name}-${index}`}
-                          guess={guess}
-                          correctAnswer={getCorrectBrawler()}
-                          isMobile={window.innerWidth < 768}
-                          gridTemplateClass="grid-cols-6"
-                          isNew={index === guesses.length - 1}
-                        />
-                      ))}
+                      <AnimatePresence initial={false}>
+                        {guesses.map((guess, index) => (
+                          <motion.div
+                            key={`${guess.name}-${index}`}
+                            initial={motionOK ? { opacity: 0, y: 8, x: isRTL ? 8 : -8 } : { opacity: 0 }}
+                            animate={{
+                              opacity: 1,
+                              y: 0,
+                              x: 0,
+                              transition: { ...transition, delay: motionOK ? Math.min(index * 0.04, 0.3) : 0 },
+                            }}
+                            exit={{ opacity: 0, y: -4, x: 0, transition }}
+                            layout
+                          >
+                            <BrawlerGuessRow
+                              guess={guess}
+                              correctAnswer={getCorrectBrawler()}
+                              isMobile={window.innerWidth < 768}
+                              gridTemplateClass="grid-cols-6"
+                              isNew={index === guesses.length - 1}
+                            />
+                          </motion.div>
+                        ))}
+                      </AnimatePresence>
                     </div>
                   </div>
                 )}
@@ -444,7 +471,18 @@ const DailyClassicModeContent: React.FC<DailyClassicModeContentProps> = ({ onMod
                 {yesterdayData && (
                   <div className="flex justify-center mt-4">
                     <span className="text-sm text-white/80">
-                      {t('daily.yesterday.classic')} <span className="text-[hsl(var(--daily-mode-primary))] font-medium">{yesterdayData.brawler || 'Mico'}</span>
+                      {t('daily.yesterday.classic')}{' '}
+                      <AnimatePresence mode="wait" initial={false}>
+                        <motion.span
+                          key={yesterdayData.brawler}
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1, transition }}
+                          exit={{ opacity: 0, transition }}
+                          className="text-[hsl(var(--daily-mode-primary))] font-medium"
+                        >
+                          {yesterdayData.brawler || 'Mico'}
+                        </motion.span>
+                      </AnimatePresence>
                     </span>
                   </div>
                 )}
@@ -461,7 +499,7 @@ const DailyClassicModeContent: React.FC<DailyClassicModeContentProps> = ({ onMod
               </div>
             )}
           </div>
-        </div>
+        </motion.div>
       </div>
     </div>
   );

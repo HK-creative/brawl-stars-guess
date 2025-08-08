@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useLocation, useSearchParams } from 'react-router-dom';
 import { useDailyStore, DailyGameMode } from '@/stores/useDailyStore';
 import usePageTitle from '@/hooks/usePageTitle';
-import { t, getLanguage } from '@/lib/i18n';
+import { t } from '@/lib/i18n';
 import RotatingBackground from '@/components/layout/RotatingBackground';
-import DailyModeProgress from '@/components/DailyModeProgress';
-import PageTransition from '@/components/layout/PageTransition';
+import DailyModeTransitionOrchestrator from '@/components/layout/DailyModeTransitionOrchestrator';
 
 // Import all mode content components
 import DailyClassicModeContent from './daily/DailyClassicModeContent';
@@ -16,7 +14,6 @@ import DailyAudioModeContent from './daily/DailyAudioModeContent';
 import DailyPixelsModeContent from './daily/DailyPixelsModeContent';
 
 const DailyModesPage: React.FC = () => {
-  const navigate = useNavigate();
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
   const { initializeDailyModes } = useDailyStore();
@@ -105,25 +102,13 @@ const DailyModesPage: React.FC = () => {
   };
   
   return (
-    <PageTransition>
-      <div className="daily-mode-container">
-        <RotatingBackground />
-        
-        {/* Mode Content with Animation */}
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={currentMode}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.3 }}
-            className="daily-mode-content-container"
-          >
-            {renderModeContent()}
-          </motion.div>
-        </AnimatePresence>
-      </div>
-    </PageTransition>
+    <div className="daily-mode-container">
+      <RotatingBackground />
+
+      <DailyModeTransitionOrchestrator modeKey={currentMode} className="daily-mode-content-container" axis="x" disabled>
+        {renderModeContent()}
+      </DailyModeTransitionOrchestrator>
+    </div>
   );
 };
 

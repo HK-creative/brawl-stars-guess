@@ -18,6 +18,9 @@ import DailyModeProgress from '@/components/DailyModeProgress';
 
 import Image from '@/components/ui/image';
 import usePageTitle from '@/hooks/usePageTitle';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useMotionPrefs } from '@/hooks/useMotionPrefs';
+import { SlidingNumber } from '@/components/ui/sliding-number';
 
 
 const DEFAULT_PORTRAIT = '/portraits/shelly.png';
@@ -69,6 +72,8 @@ const DailyStarPowerModeContent: React.FC<DailyStarPowerModeContentProps> = ({ o
   const navigate = useNavigate();
   const currentLanguage = getLanguage();
   const { streak } = useStreak();
+  const { motionOK, transition } = useMotionPrefs();
+  const isRTL = currentLanguage === 'he';
 
   const {
     starpower,
@@ -316,7 +321,12 @@ const DailyStarPowerModeContent: React.FC<DailyStarPowerModeContentProps> = ({ o
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col px-4 pb-4">
-        <div className="daily-mode-game-card daily-mode-animate-pulse">
+        <motion.div
+          className="daily-mode-game-card daily-mode-animate-pulse"
+          initial={motionOK ? { opacity: 0, scale: 0.98 } : { opacity: 0 }}
+          animate={{ opacity: 1, scale: 1, transition }}
+          layout
+        >
           <div className="daily-mode-card-content">
             {showVictoryScreen ? (
               // Victory Screen
@@ -388,8 +398,11 @@ const DailyStarPowerModeContent: React.FC<DailyStarPowerModeContentProps> = ({ o
 
                 {/* Guesses Counter */}
                 <div className="flex justify-center mb-4">
-                  <div className="daily-mode-guess-counter">
-                    <span className="font-bold text-lg">#{starpower.guessCount}</span>
+                  <div className="daily-mode-guess-counter flex items-center">
+                    <span className="font-bold text-lg mr-1">#</span>
+                    <div className="font-bold text-lg">
+                      <SlidingNumber value={starpower.guessCount} />
+                    </div>
                     <span className="text-white/90 ml-1">{t('guesses.count')}</span>
                   </div>
                 </div>
@@ -398,29 +411,40 @@ const DailyStarPowerModeContent: React.FC<DailyStarPowerModeContentProps> = ({ o
                 {guesses.length > 0 && (
                   <div className="daily-mode-guesses-section">
                     <div className="daily-mode-guesses-grid">
-                      {guesses.map((guess, index) => {
-                        const isCorrect = guess.name.toLowerCase() === getCorrectBrawler().name.toLowerCase();
-                        const portraitSrc = getPortrait(guess.name) || DEFAULT_PORTRAIT;
-                        
-                        return (
-                          <div
-                            key={index}
-                            className={cn(
-                              "daily-mode-guess-item",
-                              isCorrect ? "daily-mode-guess-correct" : "daily-mode-guess-incorrect"
-                            )}
-                          >
-                            <img
-                              src={portraitSrc}
-                              alt={guess.name}
-                              className="daily-mode-guess-portrait"
-                            />
-                            <span className="daily-mode-guess-name">
-                              {getBrawlerDisplayName(guess, currentLanguage)}
-                            </span>
-                          </div>
-                        );
-                      })}
+                      <AnimatePresence initial={false}>
+                        {guesses.map((guess, index) => {
+                          const isCorrect = guess.name.toLowerCase() === getCorrectBrawler().name.toLowerCase();
+                          const portraitSrc = getPortrait(guess.name) || DEFAULT_PORTRAIT;
+                          
+                          return (
+                            <motion.div
+                              key={`${guess.name}-${index}`}
+                              initial={motionOK ? { opacity: 0, y: 8, x: isRTL ? 8 : -8 } : { opacity: 0 }}
+                              animate={{
+                                opacity: 1,
+                                y: 0,
+                                x: 0,
+                                transition: { ...transition, delay: motionOK ? Math.min(index * 0.04, 0.3) : 0 },
+                              }}
+                              exit={{ opacity: 0, y: -4, x: 0, transition }}
+                              layout
+                              className={cn(
+                                "daily-mode-guess-item",
+                                isCorrect ? "daily-mode-guess-correct" : "daily-mode-guess-incorrect"
+                              )}
+                            >
+                              <img
+                                src={portraitSrc}
+                                alt={guess.name}
+                                className="daily-mode-guess-portrait"
+                              />
+                              <span className="daily-mode-guess-name">
+                                {getBrawlerDisplayName(guess, currentLanguage)}
+                              </span>
+                            </motion.div>
+                          );
+                        })}
+                      </AnimatePresence>
                     </div>
                   </div>
                 )}
@@ -429,7 +453,18 @@ const DailyStarPowerModeContent: React.FC<DailyStarPowerModeContentProps> = ({ o
                 {yesterdayData && (
                   <div className="flex justify-center mt-4">
                     <span className="text-sm text-white/80">
-                      {t('daily.yesterday.starpower')} <span className="text-[hsl(var(--daily-mode-primary))] font-medium">{yesterdayData.brawler || 'Mico'}</span>
+                      {t('daily.yesterday.starpower')}{' '}
+                      <AnimatePresence mode="wait" initial={false}>
+                        <motion.span
+                          key={yesterdayData.brawler}
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1, transition }}
+                          exit={{ opacity: 0, transition }}
+                          className="text-[hsl(var(--daily-mode-primary))] font-medium"
+                        >
+                          {yesterdayData.brawler || 'Mico'}
+                        </motion.span>
+                      </AnimatePresence>
                     </span>
                   </div>
                 )}
@@ -446,7 +481,7 @@ const DailyStarPowerModeContent: React.FC<DailyStarPowerModeContentProps> = ({ o
               </div>
             )}
           </div>
-        </div>
+        </motion.div>
       </div>
     </div>
   );

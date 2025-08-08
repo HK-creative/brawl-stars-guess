@@ -10,6 +10,10 @@ export default defineConfig(({ mode }) => ({
     host: "::",
     port: 8080,
   },
+  // Esbuild settings (applied in both dev transforms and build minify)
+  esbuild: {
+    drop: mode === 'production' ? ['console', 'debugger'] : [],
+  },
   plugins: [
     react(),
     mode === 'development' &&
@@ -38,14 +42,8 @@ export default defineConfig(({ mode }) => ({
     },
     // Optimize chunk size warnings
     chunkSizeWarningLimit: 1000,
-    // Enable minification
-    minify: 'terser',
-    terserOptions: {
-      compress: {
-        drop_console: mode === 'production',
-        drop_debugger: mode === 'production',
-      },
-    },
+    // Enable minification (use esbuild to avoid external terser dependency)
+    minify: 'esbuild',
     // Enable CSS code splitting
     cssCodeSplit: true,
     // Optimize assets - reduce inline limit for better caching
