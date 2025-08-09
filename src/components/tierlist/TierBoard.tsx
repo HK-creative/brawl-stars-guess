@@ -40,15 +40,18 @@ const TierBoard: React.FC<TierBoardProps> = ({ searchTerm = '', selectedClasses 
     return res;
   }, [allNames]);
 
+  const visible = TIER_ORDER
+    .map((tier: TierKey) => ({ tier, items: filterNames(mockTiers[tier] || []) }))
+    .filter((r) => r.items.length > 0);
+
   return (
-    <div className="w-full flex flex-col gap-6">
-      {TIER_ORDER.map((tier: TierKey) => {
-        const filtered = filterNames(mockTiers[tier] || []);
-        if (filtered.length === 0) return null;
-        return (
-          <TierRow key={tier} tier={tier} brawlers={filtered} />
-        );
-      })}
+    <div className="w-full flex flex-col">
+      {visible.map((r, idx) => (
+        <React.Fragment key={r.tier}>
+          {idx > 0 && <div className="my-4 border-t border-white/10" />}
+          <TierRow tier={r.tier} brawlers={r.items} />
+        </React.Fragment>
+      ))}
     </div>
   );
 };

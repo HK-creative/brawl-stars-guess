@@ -33,6 +33,42 @@ export type Database = {
         }
         Relationships: []
       },
+      join_applications: {
+        Row: {
+          id: string
+          created_at: string | null
+          role: string
+          name: string
+          contact: string
+          trophies: number
+          age: number | null
+          locale: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          id?: string
+          created_at?: string | null
+          role: string
+          name: string
+          contact: string
+          trophies: number
+          age?: number | null
+          locale?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          id?: string
+          created_at?: string | null
+          role?: string
+          name?: string
+          contact?: string
+          trophies?: number
+          age?: number | null
+          locale?: string | null
+          user_agent?: string | null
+        }
+        Relationships: []
+      },
       profiles: {
         Row: {
           id: string;

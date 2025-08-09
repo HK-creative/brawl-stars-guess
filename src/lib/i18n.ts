@@ -1096,6 +1096,10 @@ const translations: Translations = {
     en: "Hint available in",
     he: "רמז זמין בעוד"
   },
+  "audio.hint.guess": {
+    en: "guess",
+    he: "ניחוש"
+  },
   "audio.hint.guesses": {
     en: "guesses",
     he: "ניחושים"
@@ -1112,6 +1116,46 @@ const translations: Translations = {
     en: "Audio ready",
     he: "האודיו מוכן"
   },
+  
+  // Join Us page
+  "join.title": { en: "Join Us", he: "הצטרפו אלינו" },
+  "join.subtitle": { en: "Apply in under 30s", he: "הגש בקשה בפחות מ־30 שניות" },
+  "join.role.label": { en: "Role", he: "תפקיד" },
+  "join.role.community": { en: "Community", he: "קהילה" },
+  "join.role.club_owner": { en: "Club Owner", he: "בעל מועדון" },
+  "join.role.instructor": { en: "Instructor", he: "מדריך" },
+  "join.name.label": { en: "Name", he: "שם" },
+  "join.name.placeholder": { en: "Your name", he: "השם שלך" },
+  "join.contact.label": { en: "Contact", he: "אמצעי קשר" },
+  "join.contact.placeholder": { en: "email@example.com or +12345678901", he: "email@example.com או ‎+12345678901‎" },
+  "join.contact.helper": { en: "We’ll reach out via email or phone", he: "ניצור קשר באימייל או בטלפון" },
+  "join.trophies.label": { en: "Trophy Count", he: "מספר גביעים" },
+  "join.age.label": { en: "Age (optional)", he: "גיל (אופציונלי)" },
+  "join.age.placeholder": { en: "Optional", he: "אופציונלי" },
+  "join.submit": { en: "Send Application", he: "שלח בקשה" },
+  "join.sending": { en: "Sending...", he: "שולח..." },
+  "join.cooldown.prefix": { en: "Please wait", he: "אנא המתן" },
+  "join.cooldown.suffix": { en: "s before submitting again.", he: "שניות לפני שליחה נוספת." },
+  "join.privacy.copy": { en: "We respect your privacy. Your info is used only to contact you about your application.", he: "אנחנו מכבדים את פרטיותך. המידע ישמש רק ליצירת קשר לגבי הבקשה." },
+  "join.social.connect": { en: "Connect with us", he: "התחברו איתנו" },
+  
+  // Join Us toasts and errors
+  "join.toast.thanks": { en: "Thanks!", he: "תודה!" },
+  "join.toast.rate_limit": { en: "Please wait a bit before submitting again.", he: "אנא המתן מעט לפני שליחה נוספת." },
+  "join.toast.sent": { en: "Application sent!", he: "הבקשה נשלחה!" },
+  "join.toast.error": { en: "Could not send. Please check fields and try again.", he: "לא ניתן לשלוח. בדוק את השדות ונסה שוב." },
+  
+  // Join Us validation
+  "join.error.select_role": { en: "Select a role", he: "בחר תפקיד" },
+  "join.error.name_short": { en: "Name is too short", he: "השם קצר מדי" },
+  "join.error.name_long": { en: "Name is too long", he: "השם ארוך מדי" },
+  "join.error.enter_contact": { en: "Enter email or phone", he: "הכנס אימייל או טלפון" },
+  "join.error.invalid_contact": { en: "Enter a valid email or international phone (+123...)", he: "הכנס אימייל תקין או מספר בינלאומי (‎+123...‎)" },
+  "join.error.age_range": { en: "Age must be 5-120", he: "הגיל חייב להיות בין 5 ל־120" },
+  
+  // Join Us aria labels
+  "join.aria.select_role": { en: "Select role", he: "בחר תפקיד" },
+  "join.aria.trophy_count": { en: "Trophy count", he: "מספר גביעים" },
   "button.go.home": {
     en: "Go Home",
     he: "חזור הביתה"

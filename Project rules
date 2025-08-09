@@ -18,9 +18,17 @@ Filtering & Selection
 UI & Layout
 - Implement layouts exactly per specification; remove non‑essential UI when minimalism is requested.
 - Ensure responsive grids and compact spacing when a dense layout is desired.
+ - Prefer intrinsic CSS solutions (grid/flex, relative parent + absolute child, self-stretch) to achieve full-height or spanning elements over JS measurement.
+ - When introducing a fixed/absolute label column, offset content with padding/margins to avoid overlap and keep alignment consistent across breakpoints.
 
 Metrics & Counts
 - Derive counts and summaries from the currently filtered dataset, not from static totals.
 
 Change Safety & Reporting
 - Make minimal, reversible changes and provide a brief summary of modifications after each change.
+
+Grouping & Separation
+- Use subtle, non-intrusive separators (e.g., hairline borders or spacing) between grouped sections to improve scannability in minimal UIs.
+
+Localization
+- Prefer composing labels from i18n keys rather than hardcoding strings; keep label text concise and translatable.

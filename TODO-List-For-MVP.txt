@@ -1,6 +1,6 @@
 Adapt Games UI to home page - ✅
-build tier list page 
-build join us page 
+build tier list page  - ✅
+build join us page - ✅
 Prize-giveaway feature for engaged users
 Onboarding pop-up flow
 Check Log-ins & accounts

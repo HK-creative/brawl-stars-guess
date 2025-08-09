@@ -18,16 +18,18 @@ const tierBg: Record<TierKey, string> = {
 const TierRow: React.FC<TierRowProps> = ({ tier, brawlers }) => {
   return (
     <section id={`tier-${tier}`} className="w-full">
-      <div className="flex items-start gap-3">
-        {/* Left tier label */}
-        <div className={`w-10 sm:w-12 shrink-0 rounded-md text-white font-bold text-center py-3 bg-gradient-to-b ${tierBg[tier]}`}>
-          <span className="text-lg sm:text-xl leading-none">{tier}</span>
+      <div className="relative">
+        {/* Absolute full-height label */}
+        <div className={`absolute left-0 top-0 bottom-0 w-16 sm:w-20 rounded-md text-white font-bold bg-gradient-to-b ${tierBg[tier]} flex items-center justify-center`}>
+          <span className="text-sm sm:text-base md:text-lg leading-none select-none">{tier} Tier</span>
         </div>
-        {/* Brawlers grid */}
-        <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-2">
-          {brawlers.map((name) => (
-            <BrawlerCard key={`${tier}-${name}`} name={name} />
-          ))}
+        {/* Brawlers grid with left padding to clear label + gap */}
+        <div className="pl-20 sm:pl-24">
+          <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-2">
+            {brawlers.map((name) => (
+              <BrawlerCard key={`${tier}-${name}`} name={name} />
+            ))}
+          </div>
         </div>
       </div>
     </section>

@@ -4,7 +4,7 @@ import { Clock, Hash } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useDailyStore, DailyGameMode } from '@/stores/useDailyStore';
 import { useStreak } from '@/contexts/StreakContext';
-import { brawlers, getBrawlerDisplayName } from '@/data/brawlers';
+import { brawlers, getBrawlerDisplayName, getBrawlerLocalizedName } from '@/data/brawlers';
 import { getPortrait } from '@/lib/image-helpers';
 import BrawlerAutocomplete from '@/components/BrawlerAutocomplete';
 import ReactConfetti from 'react-confetti';
@@ -27,41 +27,51 @@ const DEFAULT_PORTRAIT = '/portraits/shelly.png';
 
 // Helper to get star power image path with fallback variants
 const getStarPowerImageVariants = (brawler: string, starPowerName?: string): string[] => {
-  if (!brawler) {
-    return [];
-  }
-  
-  // Clean up brawler name for file path
-  const normalizedBrawler = brawler.toLowerCase().replace(/ /g, '_');
-  
-  // Handle special cases
-  const specialCases: { [key: string]: string } = {
-    'el_primo': 'el_primo',
-    '8-bit': '8_bit',
-    'mr._p': 'mr_p'
-  };
-  
-  const finalBrawlerName = specialCases[normalizedBrawler] || normalizedBrawler;
-  
-  // Default to star power 01 if no specific star power name provided
+  if (!brawler) return [];
+
+  // Determine index: support both padded (01/02) and unpadded (1/2)
   let baseNum = '01';
   if (starPowerName) {
     const match = starPowerName.match(/(\d+)/);
-    if (match) {
-      baseNum = match[1].padStart(2, '0');
-    } else if (starPowerName.includes('First')) {
-      baseNum = '01';
-    } else if (starPowerName.includes('Second')) {
-      baseNum = '02';
-    }
+    if (match) baseNum = match[1].padStart(2, '0');
+    else if (/second/i.test(starPowerName)) baseNum = '02';
   }
-  
-  // Generate both possible variants (files are in public root, not subdirectories)
-  const variant1 = `/${finalBrawlerName}_starpower_${baseNum}.png`;
-  const variant2 = `/${finalBrawlerName}_starpower_${baseNum.replace(/^0+/, '')}.png`;
-  
-  // Return both variants to try
-  return [variant1, variant2];
+  const unpadded = baseNum.replace(/^0+/, '');
+
+  const lower = brawler.toLowerCase();
+
+  // Candidate base names to try, ordered from most specific to generic
+  const bases: string[] = [];
+
+  // 1) Known tricky names -> explicit mappings to actual filenames in /public
+  if (lower.includes('mr') && lower.includes('p')) bases.push('mrp');
+  if (lower.includes('8-bit') || lower.includes('8 bit')) bases.push('8bit');
+  if (lower.includes('el primo')) bases.push('elprimo');
+  if (lower.includes('larry') && lower.includes('lawrie')) bases.push('larry_lawrie_'); // double underscore before _starpower_
+  if (lower === 'r-t' || lower === 'r t' || lower === 'rt') bases.push('rt');
+  if (lower.includes('jae-yong')) {
+    // Preserve exact case variant used by assets and a lowercase hyphenated variant
+    bases.push('Jae-Yong');
+    bases.push('jae-yong');
+  }
+
+  // 2) Generic transforms
+  const underscore = lower.replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+  const compact = lower.replace(/[^a-z0-9]/g, '');
+  if (underscore) bases.push(underscore);
+  if (compact && compact !== underscore.replace(/_/g, '')) bases.push(compact);
+
+  // Deduplicate while preserving order
+  const uniqueBases = Array.from(new Set(bases));
+
+  // Build variants for each base
+  const variants: string[] = [];
+  uniqueBases.forEach((base) => {
+    variants.push(`/${base}_starpower_${baseNum}.png`);
+    variants.push(`/${base}_starpower_${unpadded}.png`);
+  });
+
+  return variants;
 };
 
 interface DailyStarPowerModeContentProps {
@@ -130,7 +140,11 @@ const DailyStarPowerModeContent: React.FC<DailyStarPowerModeContentProps> = ({ o
         
         // Generate star power image variants
         if (data?.brawler) {
-          const variants = getStarPowerImageVariants(data.brawler, data.starPowerName);
+          // Start with any server-provided image, then add computed variants
+          const computed = getStarPowerImageVariants(data.brawler, data.starPowerName);
+          const prefixed: string[] = [];
+          if (data.image) prefixed.push(data.image);
+          const variants = Array.from(new Set([...prefixed, ...computed]));
           console.log('Generated star power image variants:', variants);
           setImageVariants(variants);
           setCurrentVariantIndex(0);
@@ -372,9 +386,11 @@ const DailyStarPowerModeContent: React.FC<DailyStarPowerModeContentProps> = ({ o
                     {starPowerImage ? (
                       <Image
                         src={starPowerImage}
-                        fallbackSrc={imageVariants.length > 1 ? imageVariants[1] : '/StarPowerImages/shelly_starpower_01.png'}
+                        fallbackSrc={imageVariants[currentVariantIndex + 1] || '/shelly_starpower_01.png'}
                         alt="Mystery Star Power"
                         className="w-full h-full object-contain"
+                        onLoadComplete={handleImageLoad}
+                        onLoadError={() => handleImageError()}
                         priority
                       />
                     ) : (
@@ -465,7 +481,7 @@ const DailyStarPowerModeContent: React.FC<DailyStarPowerModeContentProps> = ({ o
                           exit={{ opacity: 0, transition }}
                           className="text-[hsl(var(--daily-mode-primary))] font-medium"
                         >
-                          {yesterdayData.brawler || 'Mico'}
+                          {getBrawlerLocalizedName(yesterdayData.brawler || 'Mico', currentLanguage)}
                         </motion.span>
                       </AnimatePresence>
                     </span>

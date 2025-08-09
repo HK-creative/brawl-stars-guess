@@ -1,22 +1,19 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Card } from '@/components/ui/card';
-import { t } from '@/lib/i18n';
+// removed unused Card import
+import { t, getLanguage } from '@/lib/i18n';
 import BrawlerAutocomplete from '@/components/BrawlerAutocomplete';
-import { brawlers, Brawler } from '@/data/brawlers';
+import { brawlers, Brawler, getBrawlerLocalizedName } from '@/data/brawlers';
 import { toast } from 'sonner';
 import { fetchDailyChallenge, getTimeUntilNextChallenge, fetchYesterdayChallenge } from '@/lib/daily-challenges';
-import Image from '@/components/ui/image';
+// removed unused Image import
 import { cn } from '@/lib/utils';
-import Confetti from 'react-confetti';
 import { Play, Volume2 } from 'lucide-react';
 import { getPortrait } from '@/lib/image-helpers';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import VictoryPopup from '@/components/VictoryPopup';
 import ReactConfetti from 'react-confetti';
 import VictorySection from '../components/VictoryPopup';
-import GameModeTracker from '@/components/GameModeTracker';
-import HomeButton from '@/components/ui/home-button';
+// removed unused GameModeTracker and HomeButton imports
 
 // Helper to get a hardcoded list of available audio files
 const getAvailableAudioFiles = (): string[] => {
@@ -863,11 +860,6 @@ const AudioMode = ({
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    handleGuess();
-  };
-
   const handleBrawlerSelect = (brawler: Brawler) => {
     setSelectedBrawler(brawler);
     setGuess(brawler.name);
@@ -987,74 +979,37 @@ const AudioMode = ({
                         : t('survival.click.play.sound')
                     }
                   </p>
-                  
-                  {/* Show brawler name if game is over */}
-                  {showResult && (
+                  {/* Guess Input */}
+                  <div className="mt-4 w-full max-w-xs mx-auto">
+                    <BrawlerAutocomplete
+                      brawlers={brawlers}
+                      value={guess}
+                      onChange={setGuess}
+                      onSelect={handleBrawlerSelect}
+                      onSubmit={handleGuess}
+                      disabled={showResult || isGameOver}
+                      disabledBrawlers={guesses}
+                    />
+                  </div>
+                {/* Show brawler name if game is over */}
+                {showResult ? (
+                  <>
                     <h2 className="text-xl md:text-2xl font-extrabold text-brawl-yellow mt-4">
                       {dailyChallenge.brawler}
                     </h2>
-                  )}
-                </div>
-              </div>
-
-              {/* Hint Indicator - Show before 4 guesses */}
-              {!showHint && hintAudioFile && attempts < 4 && attempts > 0 && !showResult && (
-                <div className="flex items-center justify-center space-x-2 px-3 py-2 rounded-full bg-yellow-500/10 border border-yellow-400/20 mb-4 max-w-md mx-auto">
-                  <span className="text-yellow-400/70 text-xs">💡</span>
-                  <span className="text-yellow-400/70 text-xs font-medium">
-                    Hint in {4 - attempts} {4 - attempts === 1 ? 'guess' : 'guesses'}
-                  </span>
-                </div>
-              )}
-
-              {/* Hint System - Show after 4 guesses */}
-              {showHint && hintAudioFile && !showResult && (
-                <div className="flex items-center justify-center gap-3 px-4 py-2 bg-yellow-500/20 rounded-full border border-yellow-400/50 mb-4 max-w-md mx-auto animate-in slide-in-from-top-2 duration-500">
-                  <span className="text-yellow-300 text-sm font-medium">Need a hint?</span>
-                  <button
-                    onClick={playHintAudio}
-                    disabled={isHintPlaying || hintAudioError}
-                    className={cn(
-                      "flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium transition-all",
-                      isHintPlaying ? "bg-yellow-500/30 text-yellow-200" : "bg-yellow-500/50 hover:bg-yellow-500/70 text-yellow-100"
-                    )}
-                  >
-                    <Play size={14} className={isHintPlaying ? "animate-pulse" : ""} />
-                    {isHintPlaying ? "Playing..." : "Play Hint"}
-                  </button>
-                </div>
-              )}
-              
-              {/* Input Form */}
-              <form onSubmit={handleSubmit} className="mb-4 max-w-md mx-auto px-2">
-                <BrawlerAutocomplete
-                  brawlers={brawlers} // Use the imported brawlers array
-                  value={guess}
-                  onChange={setGuess}
-                  onSelect={handleBrawlerSelect}
-                  onSubmit={handleGuess}
-                  disabled={showResult}
-                  disabledBrawlers={guesses}
-                />
-              </form>
-              
-              {/* Guess Counter */}
-              <div className="w-full flex justify-center gap-4 mt-2">
-                {isSurvivalMode ? (
-                  <div className="survival-mode-guess-counter">
-                    <span className="text-lg font-bold tracking-wide">{t('guesses.left')}</span>
                     <span className={`text-2xl font-extrabold ${(maxGuesses - attempts) <= 3 ? 'text-red-400 animate-bounce' : 'text-white'}`}>{maxGuesses - attempts}</span>
-                  </div>
+                  </>
                 ) : (
                   <div className="survival-mode-guess-counter">
                     <span className="text-base font-semibold">Number of Guesses</span>
                     <span className="text-base font-bold">{attempts}</span>
                   </div>
                 )}
+                </div>
+              </div>
               </div>
             </div>
           </div>
-        </div>
 
         {/* Previous Guesses */}
         <div className="survival-mode-guesses-section">
@@ -1140,7 +1095,7 @@ const AudioMode = ({
                 <Play size={24} className="text-brawl-yellow" />
               </button>
               <span className="text-brawl-green text-lg md:text-2xl font-extrabold drop-shadow-sm" style={{textShadow: '2px 2px 0 #222'}}>
-                {yesterdayAudio.brawler}
+                {getBrawlerLocalizedName(yesterdayAudio.brawler, getLanguage())}
               </span>
             </div>
           </div>

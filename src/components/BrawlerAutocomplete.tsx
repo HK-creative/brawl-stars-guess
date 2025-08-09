@@ -211,7 +211,7 @@ const BrawlerAutocomplete: React.FC<BrawlerAutocompleteProps> = ({
   }, [highlightedIndex]);
 
   return (
-    <div ref={wrapperRef} className="relative group w-full">
+    <div ref={wrapperRef} className="relative group w-full max-w-[320px] mx-auto sm:max-w-full">
       <div className="relative w-full">
         <div 
           className="absolute left-0 top-0 bottom-0 flex items-center justify-center w-12 bg-[#FFC107] rounded-l-2xl z-10 cursor-pointer hover:bg-[#FFD700] transition-colors duration-200"

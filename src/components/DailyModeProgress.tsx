@@ -1,9 +1,10 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useDailyStore, DailyGameMode } from '@/stores/useDailyStore';
 import { t } from '@/lib/i18n';
+import { useMotionPrefs } from '@/hooks/useMotionPrefs';
 
 interface DailyModeProgressProps {
   currentMode?: DailyGameMode;
@@ -17,6 +18,7 @@ const DailyModeProgress: React.FC<DailyModeProgressProps> = ({
   onModeChange
 }) => {
   const { classic, gadget, starpower, audio, pixels } = useDailyStore();
+  const { motionOK, transition } = useMotionPrefs();
   
   const modes = [
     { 
@@ -90,11 +92,10 @@ const DailyModeProgress: React.FC<DailyModeProgressProps> = ({
           <div key={mode.key} className="flex flex-col items-center">
             <MotionButton
               onClick={() => handleModeClick(mode)}
-               initial={false}
-               animate={isCurrent ? { scale: 1.25, y: -4 } : { scale: 1, y: 0 }}
-               transition={{ type: 'spring', stiffness: 260, damping: 20 }}
+              whileTap={motionOK ? { scale: 0.96 } : undefined}
+              whileHover={motionOK ? { scale: 1.03 } : undefined}
               className={cn(
-                "relative w-[3.25rem] h-[3.25rem] md:w-[3.6rem] md:h-[3.6rem] rounded-full flex items-center justify-center transition-all duration-300 transform hover:scale-110 hover:animate-wiggle focus:outline-none focus:ring-2 focus:ring-white/30 shadow-lg",
+                "relative w-[3.25rem] h-[3.25rem] md:w-[3.6rem] md:h-[3.6rem] rounded-full flex items-center justify-center transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-white/30 shadow-lg",
                 isCompleted
                   ? "bg-gradient-to-br from-green-500 to-emerald-600 text-white shadow-green-500/30 hover:shadow-green-500/50"
                   : isCurrent
@@ -104,7 +105,24 @@ const DailyModeProgress: React.FC<DailyModeProgressProps> = ({
               )}
               disabled={isCurrent}
               title={mode.name}
+              aria-current={isCurrent ? 'page' : undefined}
             >
+              {/* Active halo using shared layout for smooth slide between items */}
+              {isCurrent && (
+                motionOK ? (
+                  <motion.span
+                    layoutId="modeActiveHalo"
+                    className="absolute inset-0 rounded-full ring-2 ring-white/30 shadow-[0_0_24px_rgba(255,255,255,0.25)]"
+                    transition={transition}
+                    aria-hidden="true"
+                  />
+                ) : (
+                  <span
+                    className="absolute inset-0 rounded-full ring-2 ring-white/30"
+                    aria-hidden="true"
+                  />
+                )
+              )}
               {isCompleted ? (
                 <Check className="h-7 w-7 md:h-8 md:w-8 drop-shadow-sm" />
               ) : (
@@ -115,10 +133,24 @@ const DailyModeProgress: React.FC<DailyModeProgressProps> = ({
                 />
               )}
               
-              {/* Current mode indicator */}
-              {isCurrent && (
-                <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-1.5 h-1.5 bg-white rounded-full shadow-lg animate-pulse"></div>
-              )}
+              {/* Current mode indicator (bottom dot) using shared layout for slide */}
+              <AnimatePresence initial={false}>
+                {isCurrent && (
+                  motionOK ? (
+                    <motion.span
+                      layoutId="modeActiveDot"
+                      className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-white shadow-lg"
+                      transition={transition}
+                      aria-hidden="true"
+                    />
+                  ) : (
+                    <span
+                      className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-white"
+                      aria-hidden="true"
+                    />
+                  )
+                )}
+              </AnimatePresence>
               
               {/* Completion indicator */}
               {isCompleted && !isCurrent && (

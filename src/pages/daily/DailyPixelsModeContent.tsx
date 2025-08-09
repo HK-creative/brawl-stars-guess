@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
 import { useDailyStore, DailyGameMode } from '@/stores/useDailyStore';
 import { useStreak } from '@/contexts/StreakContext';
-import { brawlers, getBrawlerDisplayName } from '@/data/brawlers';
+import { brawlers, getBrawlerDisplayName, getBrawlerLocalizedName } from '@/data/brawlers';
 import { getPortrait } from '@/lib/image-helpers';
 import BrawlerAutocomplete from '@/components/BrawlerAutocomplete';
 import ReactConfetti from 'react-confetti';
@@ -456,7 +456,7 @@ const DailyPixelsModeContent: React.FC<DailyPixelsModeContentProps> = ({ onModeC
                         exit={{ opacity: 0, transition }}
                         className="text-[hsl(var(--daily-mode-primary))] font-medium"
                       >
-                        {yesterdayData.brawler || 'Mico'}
+                        {getBrawlerLocalizedName(yesterdayData.brawler || 'Mico', currentLanguage)}
                       </motion.span>
                     </AnimatePresence>
                   </span>

@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
 import { useDailyStore, DailyGameMode } from '@/stores/useDailyStore';
 import { useStreak } from '@/contexts/StreakContext';
-import { brawlers, getBrawlerDisplayName } from '@/data/brawlers';
+import { brawlers, getBrawlerDisplayName, getBrawlerLocalizedName } from '@/data/brawlers';
 import { getPortrait } from '@/lib/image-helpers';
 import BrawlerAutocomplete from '@/components/BrawlerAutocomplete';
 import ReactConfetti from 'react-confetti';
@@ -482,7 +482,7 @@ const DailyAudioModeContent: React.FC<DailyAudioModeContentProps> = ({ onModeCha
                 <div className="flex items-center justify-center space-x-2 px-3 py-2 rounded-full bg-yellow-500/10 border border-yellow-400/20 mb-4 max-w-md mx-auto">
                   <span className="text-yellow-400/70 text-xs">💡</span>
                   <span className="text-yellow-400/70 text-xs font-medium">
-                    Hint in {4 - audio.guessCount} {4 - audio.guessCount === 1 ? 'guess' : 'guesses'}
+                    {t('audio.hint.available.in')} {4 - audio.guessCount} {(4 - audio.guessCount) === 1 ? t('audio.hint.guess') : t('audio.hint.guesses')}
                   </span>
                 </div>
               )}
@@ -490,7 +490,7 @@ const DailyAudioModeContent: React.FC<DailyAudioModeContentProps> = ({ onModeCha
               {/* Hint System - Show after 4 guesses */}
               {showHint && hintAudioFile && !audio.isCompleted && (
                 <div className="flex items-center justify-center gap-3 px-4 py-2 bg-yellow-500/20 rounded-full border border-yellow-400/50 mb-4 max-w-md mx-auto animate-in slide-in-from-top-2 duration-500">
-                  <span className="text-yellow-300 text-sm font-medium">Need a hint?</span>
+                  <span className="text-yellow-300 text-sm font-medium">{t('ui.need_hint')}</span>
                   <button
                     onClick={playHintAudio}
                     disabled={isHintPlaying || hintAudioError}
@@ -500,7 +500,7 @@ const DailyAudioModeContent: React.FC<DailyAudioModeContentProps> = ({ onModeCha
                     )}
                   >
                     <Play size={14} className={isHintPlaying ? "animate-pulse" : ""} />
-                    {isHintPlaying ? "Playing..." : "Play Hint"}
+                    {isHintPlaying ? t('button.playing') : t('button.play.hint')}
                   </button>
                 </div>
               )}
@@ -584,7 +584,7 @@ const DailyAudioModeContent: React.FC<DailyAudioModeContentProps> = ({ onModeCha
                         exit={{ opacity: 0, transition }}
                         className="text-[hsl(var(--daily-mode-primary))] font-medium"
                       >
-                        {yesterdayData.brawler || 'Mico'}
+                        {getBrawlerLocalizedName(yesterdayData.brawler || 'Mico', currentLanguage)}
                       </motion.span>
                     </AnimatePresence>
                   </span>
