@@ -1,6 +1,6 @@
 Adapt Games UI to home page - ✅
+build tier list page 
 build join us page 
-build community page 
 Prize-giveaway feature for engaged users
 Onboarding pop-up flow
 Check Log-ins & accounts
@@ -12,3 +12,6 @@ Analytics Tracking
 Responsive desktop and mobile
 Improve Speed
 Connect streak count to Supabase database
+replace tier list data with real data 
+
+leaderboards (?)

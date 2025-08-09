@@ -5,6 +5,7 @@ import usePageTitle from '@/hooks/usePageTitle';
 import { t } from '@/lib/i18n';
 import RotatingBackground from '@/components/layout/RotatingBackground';
 import DailyModeTransitionOrchestrator from '@/components/layout/DailyModeTransitionOrchestrator';
+import DailySharedHeader from '@/components/layout/DailySharedHeader';
 
 // Import all mode content components
 import DailyClassicModeContent from './daily/DailyClassicModeContent';
@@ -87,23 +88,26 @@ const DailyModesPage: React.FC = () => {
   const renderModeContent = () => {
     switch (currentMode) {
       case 'classic':
-        return <DailyClassicModeContent onModeChange={handleModeChange} />;
+        return <DailyClassicModeContent onModeChange={handleModeChange} suppressHeader />;
       case 'gadget':
-        return <DailyGadgetModeContent onModeChange={handleModeChange} />;
+        return <DailyGadgetModeContent onModeChange={handleModeChange} suppressHeader />;
       case 'starpower':
-        return <DailyStarPowerModeContent onModeChange={handleModeChange} />;
+        return <DailyStarPowerModeContent onModeChange={handleModeChange} suppressHeader />;
       case 'audio':
-        return <DailyAudioModeContent onModeChange={handleModeChange} />;
+        return <DailyAudioModeContent onModeChange={handleModeChange} suppressHeader />;
       case 'pixels':
-        return <DailyPixelsModeContent onModeChange={handleModeChange} />;
+        return <DailyPixelsModeContent onModeChange={handleModeChange} suppressHeader />;
       default:
-        return <DailyClassicModeContent onModeChange={handleModeChange} />;
+        return <DailyClassicModeContent onModeChange={handleModeChange} suppressHeader />;
     }
   };
   
   return (
     <div className="daily-mode-container">
       <RotatingBackground />
+
+      {/* Shared header stays mounted and static across mode switches */}
+      <DailySharedHeader currentMode={currentMode} onModeChange={handleModeChange} />
 
       <DailyModeTransitionOrchestrator modeKey={currentMode} className="daily-mode-content-container" axis="x" disabled>
         {renderModeContent()}

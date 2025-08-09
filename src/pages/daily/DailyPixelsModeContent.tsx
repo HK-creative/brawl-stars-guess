@@ -52,9 +52,10 @@ const getPixelatedPortrait = (brawler: string): string => {
 
 interface DailyPixelsModeContentProps {
   onModeChange: (mode: DailyGameMode) => void;
+  suppressHeader?: boolean;
 }
 
-const DailyPixelsModeContent: React.FC<DailyPixelsModeContentProps> = ({ onModeChange }) => {
+const DailyPixelsModeContent: React.FC<DailyPixelsModeContentProps> = ({ onModeChange, suppressHeader = false }) => {
   const navigate = useNavigate();
   const currentLanguage = getLanguage();
   const { streak } = useStreak();
@@ -285,43 +286,45 @@ const DailyPixelsModeContent: React.FC<DailyPixelsModeContentProps> = ({ onModeC
         />
       )}
       
-      {/* Header Section */}
-      <div className="w-full max-w-4xl mx-auto px-4 py-2 relative">
-        {/* Top Row: Home Icon, Streak, Timer */}
-        <div className="flex items-center justify-between mb-4">
-          {/* Home Icon */}
-          <button
-            onClick={() => navigate('/')}
-            className="flex items-center justify-center w-14 h-14 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 text-white hover:bg-white/20 transition-all duration-200"
-            aria-label={t('button.go.home')}
-          >
-            <img 
-              src="/bs_home_icon.png"
-              alt={t('button.go.home')}
-              className="w-11 h-11"
-            />
-          </button>
+      {/* Header Section (suppressed when shared header is used) */}
+      {!suppressHeader && (
+        <div className="w-full max-w-4xl mx-auto px-4 py-2 relative">
+          {/* Top Row: Home Icon, Streak, Timer */}
+          <div className="flex items-center justify-between mb-4">
+            {/* Home Icon */}
+            <button
+              onClick={() => navigate('/')}
+              className="flex items-center justify-center w-14 h-14 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 text-white hover:bg-white/20 transition-all duration-200"
+              aria-label={t('button.go.home')}
+            >
+              <img 
+                src="/bs_home_icon.png"
+                alt={t('button.go.home')}
+                className="w-11 h-11"
+              />
+            </button>
 
-          {/* Right side: Streak and Timer */}
-          <div className="flex items-center gap-3">
-            {/* Daily Streak - moved to the right */}
-            <div className="flex flex-col items-center">
-              <div className="flex items-center gap-1">
-                <span className="text-3xl font-bold leading-none text-[hsl(var(--daily-mode-primary))]">{streak}</span>
-                <div className="text-3xl">🔥</div>
+            {/* Right side: Streak and Timer */}
+            <div className="flex items-center gap-3">
+              {/* Daily Streak - moved to the right */}
+              <div className="flex flex-col items-center">
+                <div className="flex items-center gap-1">
+                  <span className="text-3xl font-bold leading-none text-[hsl(var(--daily-mode-primary))]">{streak}</span>
+                  <div className="text-3xl">🔥</div>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Mode Navigation */}
-        <DailyModeProgress currentMode="pixels" className="mb-6 mt-1" onModeChange={onModeChange} />
+          {/* Mode Navigation */}
+          <DailyModeProgress currentMode="pixels" className="mb-6 mt-1" onModeChange={onModeChange} />
 
-        {/* Title */}
-        <div className="text-center mb-6 mt-2">
-          <ModeTitle title={t('mode.pixels')} />
+          {/* Title */}
+          <div className="text-center mb-6 mt-2">
+            <ModeTitle title={t('mode.pixels')} />
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col px-4 pb-4">

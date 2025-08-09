@@ -1,1 +1,26 @@
-You are assisting a non-coder. Every answer must be easy to understand for non-coders
+Project Rules
+
+Audience & Clarity
+- Always communicate in simple, accessible language suitable for non‑technical readers.
+- Prefer brevity; use concise explanations and avoid unnecessary jargon.
+
+Context & Reconnaissance
+- Always read relevant files and data structures before making changes (read before write).
+- Verify assumptions empirically via code or configuration inspection.
+
+Data & Types
+- Keep mock or placeholder data generation isolated and easily replaceable.
+- Update type definitions/models promptly when feature scope or categories expand.
+
+Filtering & Selection
+- Implement deterministic filter behavior: if single‑select is required, selecting one option deselects others; re‑selecting the same option should clear selection only if specified.
+
+UI & Layout
+- Implement layouts exactly per specification; remove non‑essential UI when minimalism is requested.
+- Ensure responsive grids and compact spacing when a dense layout is desired.
+
+Metrics & Counts
+- Derive counts and summaries from the currently filtered dataset, not from static totals.
+
+Change Safety & Reporting
+- Make minimal, reversible changes and provide a brief summary of modifications after each change.

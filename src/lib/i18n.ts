@@ -1024,6 +1024,42 @@ const translations: Translations = {
     en: "We're working on an awesome tier list feature where you can rank all the brawlers!",
     he: "אנחנו עובדים על תכונת דירוג מדהימה שבה תוכל לדרג את כל הבראולרים!"
   },
+  "tier.label.s": {
+    en: "S Tier",
+    he: "רמה S"
+  },
+  "tier.label.a": {
+    en: "A Tier",
+    he: "רמה A"
+  },
+  "tier.label.b": {
+    en: "B Tier",
+    he: "רמה B"
+  },
+  "tier.label.c": {
+    en: "C Tier",
+    he: "רמה C"
+  },
+  "tier.search.placeholder": {
+    en: "Search brawlers…",
+    he: "חפש בראולרים…"
+  },
+  "tier.search.clear": {
+    en: "Clear search",
+    he: "נקה חיפוש"
+  },
+  "tier.search.results": {
+    en: "Results",
+    he: "תוצאות"
+  },
+  "tier.quickjump": {
+    en: "Quick jump",
+    he: "קפיצה מהירה"
+  },
+  "tier.no.results": {
+    en: "No brawlers match your search",
+    he: "אין תוצאות תואמות לחיפוש"
+  },
   "back.to.home": {
     en: "Back to Home",
     he: "חזור לעמוד הבית"
