@@ -11,5 +11,3 @@ when user guesses new brawler, he should appear on top, not on bottom. that mean
 fix audio mode's player. currently, when user press play it plays the sound and stuck on the pause button. i want that when it finished play the audio it will go back to the play button, and no puase button should be in there.  
 
 lets work on the victory screen now
-
-this page is complete on mobile and shouldnbt changed at all for mobile, but can you adapy it for Tablets and computers as well please? again i remind you that mobile should NOT change at all 

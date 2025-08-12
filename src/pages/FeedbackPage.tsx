@@ -18,10 +18,10 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 
-import { ArrowLeft, MessageSquare, Loader2, X } from 'lucide-react';
+import { ArrowLeft, MessageSquare, Loader2, X, Plus, Star } from 'lucide-react';
 import { t } from '@/lib/i18n';
 import { supabase } from '@/integrations/supabase/client';
-import type { TablesInsert } from '@/integrations/supabase/types';
+// import type { TablesInsert } from '@/integrations/supabase/types'; // TODO: Fix Supabase types generation
 import { useLanguage } from '@/contexts/LanguageContext';
 
 type Category = 'bug' | 'idea' | 'request' | 'other';
@@ -30,6 +30,7 @@ const contactRegex = /@|\+?\d{8,}/;
 
 const Schema = z
   .object({
+    rating: z.number().min(1, t('feedback.error.rating_required')).max(5),
     category: z.enum(['bug', 'idea', 'request', 'other'], {
       required_error: t('feedback.error.select_category'),
     }),
@@ -88,10 +89,20 @@ const FeedbackPage = () => {
     }
   }, [fromHome, navigate]);
 
+  useEffect(() => {
+    // Prevent scrolling on this page
+    document.body.style.overflow = 'hidden';
+    // Re-enable scrolling when the component unmounts
+    return () => {
+      document.body.style.overflow = 'auto';
+    };
+  }, []);
+
   const form = useForm<FormValues>({
     resolver: zodResolver(Schema),
     mode: 'onChange',
     defaultValues: {
+      rating: 0,
       category: undefined as unknown as Category,
       message: '',
       contact: '',
@@ -152,7 +163,8 @@ const FeedbackPage = () => {
         }
       }
       // Prepare payload (typed)
-      const payload: TablesInsert<'feedback'> = {
+      const payload: any = { // TODO: Use TablesInsert<'feedback'>
+        rating: values.rating,
         category: values.category,
         message: values.message.trim(),
         contact: values.contact?.trim() || null,
@@ -231,58 +243,67 @@ const FeedbackPage = () => {
   return (
     <div className="relative min-h-screen flex flex-col">
       {/* Content */}
-      <div className="relative z-10 flex-1 px-4 pb-8">
-        <div className="max-w-md mx-auto">
-          {/* Back inside container */}
-          <div className="mb-4">
-            <Button
-              variant="ghost"
-              onClick={() => navigate('/')}
-              className="brawl-nav-button"
-            >
-              <ArrowLeft size={20} aria-hidden="true" />
-              <span className="sr-only">{t('action.return_home')}</span>
-            </Button>
-          </div>
-          {/* Title */}
-          <div className="flex items-center justify-center gap-3 sm:gap-3 mb-6 sm:mb-4">
-            {language === 'he' ? (
-              <>
-                <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-orange-500 rounded-full flex items-center justify-center">
-                  <MessageSquare size={24} className="text-white" />
-                </div>
-                <div>
-                  <h1 className="text-4xl font-extrabold text-brawl-yellow text-center drop-shadow-glow tracking-wide">
-                    {t('feedback.title')}
-                  </h1>
-                  <p className="mt-4 sm:mt-6 text-sm text-white/80 leading-tight text-center">{t('feedback.subtitle')}</p>
-                </div>
-              </>
-            ) : (
-              <>
-                <div>
-                  <h1 className="text-4xl font-extrabold text-brawl-yellow text-center drop-shadow-glow tracking-wide">
-                    {t('feedback.title')}
-                  </h1>
-                  <p className="mt-4 sm:mt-6 text-sm text-white/80 leading-tight text-center">{t('feedback.subtitle')}</p>
-                </div>
-                <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-orange-500 rounded-full flex items-center justify-center">
-                  <MessageSquare size={24} className="text-white" />
-                </div>
-              </>
-            )}
-          </div>
+      <div className="relative z-10 flex-1 px-4 pb-8 pt-8">
+        <div className="max-w-md md:max-w-xl lg:max-w-2xl mx-auto">
+          {/* Title row with inline back button and icon */}
+          <div className="mb-6 sm:mb-4">
+            <div className="relative flex items-center justify-center">
+              {/* Back button with Y-axis adjustment */}
+              <div className={`absolute ${language === 'he' ? 'right-0 translate-y-2' : 'left-0 translate-y-1'}`}>
+                <Button variant="ghost" onClick={() => navigate('/')}>
+                  <ArrowLeft size={20} aria-hidden="true" />
+                  <span className="sr-only">{t('action.return_home')}</span>
+                </Button>
+              </div>
 
-          {/* Form */}
-          <div className="brawl-card">
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit, onInvalid)} className="space-y-6 sm:space-y-4">
-                {/* Honeypot */}
-                <div className="absolute -z-10 opacity-0 pointer-events-none h-0 w-0 overflow-hidden">
-                  <label htmlFor="website">Website</label>
-                  <input id="website" type="text" tabIndex={-1} aria-hidden="true" {...form.register('website')} />
-                </div>
+              {/* Centered Title and Icon */}
+              <div className="flex items-center justify-center gap-2">
+                <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tighter text-amber-400 text-center drop-shadow-glow">
+                  {t('feedback.title')}
+                </h1>
+                <MessageSquare
+                  className={`text-amber-400 ${language === 'he' ? 'translate-y-2' : 'translate-y-1'} w-9 h-9 md:w-11 md:h-11`}
+                />
+              </div>
+            </div>
+            <p className="mt-4 sm:mt-6 text-sm md:text-base lg:text-lg text-white/80 leading-tight text-center">{t('feedback.subtitle')}</p>
+          </div>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit, onInvalid)} className="w-full space-y-6 sm:space-y-4">
+              {/* Honeypot */}
+              <div className="absolute -z-10 opacity-0 pointer-events-none h-0 w-0 overflow-hidden">
+                <label htmlFor="website">Website</label>
+                <input id="website" type="text" tabIndex={-1} aria-hidden="true" {...form.register('website')} />
+              </div>
 
+              {/* Star Rating (required) */}
+              <FormField
+                control={form.control}
+                name="rating"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <div className="flex items-center justify-center gap-3" dir="ltr">
+                        <span className="text-sm font-medium text-gray-400 translate-y-1">1</span>
+                        <div className="flex items-center gap-2">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <Star
+                              key={star}
+                              className={`w-8 h-8 sm:w-9 sm:h-9 md:w-11 md:h-11 cursor-pointer transition-colors ${field.value >= star ? 'text-amber-400 fill-amber-400' : 'text-gray-500 hover:text-amber-300'}`}
+                              onClick={() => field.onChange(star)}
+                            />
+                          ))}
+                        </div>
+                        <span className="text-sm font-medium text-gray-400 translate-y-1">5</span>
+                      </div>
+                    </FormControl>
+                    <FormMessage className="text-center" />
+                  </FormItem>
+                )}
+              />
+
+              {/* Main Form Content Container */}
+              <div className="w-[94%] sm:w-full mx-auto p-4 sm:p-6 md:p-8 bg-black/60 rounded-2xl border border-amber-400/80 space-y-6 sm:space-y-5 md:space-y-6">
                 {/* Category chips (required) */}
                 <FormField
                   control={form.control}
@@ -290,32 +311,19 @@ const FeedbackPage = () => {
                   render={({ field }) => (
                     <FormItem>
                       <FormControl>
-                        <div className="w-full">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span aria-hidden="true" className="text-amber-400 text-sm">*</span>
-                            <div className="flex-1">
-                              <ToggleGroup
-                                type="single"
-                                value={field.value}
-                                onValueChange={(v) => v && field.onChange(v)}
-                                className="w-full grid grid-cols-4 gap-1.5 sm:gap-2"
-                                aria-label={t('feedback.aria.select_category')}
-                                aria-required="true"
-                              >
-                                {(['bug','idea','request','other'] as Category[]).map((c) => (
-                                  <ToggleGroupItem
-                                    key={c}
-                                    value={c}
-                                    className="w-full aspect-square p-2 rounded-xl border-2 bg-black/60 text-white border-white/20 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 data-[state=on]:bg-black/70 data-[state=on]:text-brawl-yellow data-[state=on]:border-brawl-yellow flex items-center justify-center text-sm"
-                                    aria-label={t(`feedback.category.${c}`)}
-                                  >
-                                    <span>{t(`feedback.category.${c}`)}</span>
-                                  </ToggleGroupItem>
-                                ))}
-                              </ToggleGroup>
-                            </div>
-                          </div>
-                        </div>
+                        <ToggleGroup
+                          type="single"
+                          value={field.value}
+                          onValueChange={(v) => v && field.onChange(v)}
+                          className="w-full grid grid-cols-4 gap-1.5 sm:gap-2"
+                          aria-label={t('feedback.aria.select_category')}
+                          aria-required="true"
+                        >
+                          <ToggleGroupItem value="bug" className="text-xs sm:text-sm md:text-base h-10 md:h-12 bg-gray-800/80 border-gray-700 hover:bg-gray-700/80 text-white data-[state=on]:bg-amber-400 data-[state=on]:text-black data-[state=on]:border-amber-500 font-semibold">{t('feedback.category.bug')}</ToggleGroupItem>
+                          <ToggleGroupItem value="idea" className="text-xs sm:text-sm md:text-base h-10 md:h-12 bg-gray-800/80 border-gray-700 hover:bg-gray-700/80 text-white data-[state=on]:bg-amber-400 data-[state=on]:text-black data-[state=on]:border-amber-500 font-semibold">{t('feedback.category.idea')}</ToggleGroupItem>
+                          <ToggleGroupItem value="request" className="text-xs sm:text-sm md:text-base h-10 md:h-12 bg-gray-800/80 border-gray-700 hover:bg-gray-700/80 text-white data-[state=on]:bg-amber-400 data-[state=on]:text-black data-[state=on]:border-amber-500 font-semibold">{t('feedback.category.request')}</ToggleGroupItem>
+                          <ToggleGroupItem value="other" className="text-xs sm:text-sm md:text-base h-10 md:h-12 bg-gray-800/80 border-gray-700 hover:bg-gray-700/80 text-white data-[state=on]:bg-amber-400 data-[state=on]:text-black data-[state=on]:border-amber-500 font-semibold">{t('feedback.category.other')}</ToggleGroupItem>
+                        </ToggleGroup>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -330,13 +338,12 @@ const FeedbackPage = () => {
                     <FormItem>
                       <FormControl>
                         <div className="relative">
-                          <span aria-hidden="true" className="absolute top-2 left-2 text-amber-400 text-sm">*</span>
                           <Textarea
                             {...field}
-                            rows={6}
+                            rows={3}
                             maxLength={2000}
                             placeholder={t('feedback.message.placeholder')}
-                            className="focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                            className="focus:outline-none focus:ring-2 focus:ring-yellow-400 min-h-[72px]"
                           />
                           <span className="pointer-events-none select-none absolute bottom-2 right-2 text-xs text-white/60">{messageLen}/2000</span>
                         </div>
@@ -348,9 +355,7 @@ const FeedbackPage = () => {
 
                 {/* Images */}
                 <div>
-                  <div className="flex items-center gap-2">
-                    <FormLabel>{t('feedback.images.label')}</FormLabel>
-                  </div>
+                  <FormLabel className="text-base font-semibold">{t('feedback.images.label')}</FormLabel>
                   <input
                     ref={fileInputRef}
                     type="file"
@@ -359,9 +364,9 @@ const FeedbackPage = () => {
                     className="hidden"
                     onChange={(e) => onPickFiles(e.target.files)}
                   />
-                  <div className={`mt-3 sm:mt-2 flex flex-wrap gap-2 ${language === 'he' ? 'flex-row-reverse justify-end' : 'justify-start'}`}>
+                  <div className="mt-3 sm:mt-2 grid grid-cols-3 md:grid-cols-5 gap-2" dir={language === 'he' ? 'rtl' : 'ltr'}>
                     {previews.map((src, idx) => (
-                      <div key={idx} className="relative w-36 h-36 min-w-[120px] min-h-[120px] rounded-lg overflow-hidden border border-white/10">
+                      <div key={idx} className="relative aspect-square rounded-lg overflow-hidden border border-white/10">
                         <img src={src} alt={t('feedback.images.preview')} className="w-full h-full object-cover" />
                         <button
                           type="button"
@@ -374,9 +379,10 @@ const FeedbackPage = () => {
                       </div>
                     ))}
                     {files.length < MAX_FILES && (
-                      <Button
-                        type="button"
-                        variant="secondary"
+                      <div
+                        role="button"
+                        tabIndex={0}
+                        aria-label={t('feedback.images.pick')}
                         onClick={() => {
                           if (files.length >= MAX_FILES) {
                             setImageRuleError(true);
@@ -384,11 +390,19 @@ const FeedbackPage = () => {
                           }
                           fileInputRef.current?.click();
                         }}
-                        aria-label="Add image"
-                        className="aspect-square w-36 h-36 min-w-[120px] min-h-[120px] rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            fileInputRef.current?.click();
+                          }
+                        }}
+                        className="relative aspect-square rounded-lg overflow-hidden border border-white/20 bg-gray-800/80 hover:bg-gray-700/80 flex items-center justify-center cursor-pointer focus:outline-none focus:ring-2 focus:ring-yellow-400"
                       >
-                        {language === 'he' ? '+ תמונה' : '+ image'}
-                      </Button>
+                        <div className="flex flex-col items-center justify-center gap-1 text-white">
+                          <Plus size={71} strokeWidth={1} />
+                          <span className="text-xs">{t('feedback.images.pick')}</span>
+                        </div>
+                      </div>
                     )}
                   </div>
                   {imageRuleError && (
@@ -413,26 +427,26 @@ const FeedbackPage = () => {
                     </FormItem>
                   )}
                 />
+              </div>
 
-                {/* Submit */}
-                <div className="pt-4 sm:pt-2 flex flex-col items-center gap-4 sm:gap-3">
-                  <Button type="submit" className="w-2/5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white" disabled={!form.formState.isValid || submitting || isRateLimited}>
-                    {submitting ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        {t('feedback.sending')}
-                      </>
-                    ) : (
-                      t('feedback.submit')
-                    )}
-                  </Button>
-                  {isRateLimited && (
-                    <span className="text-sm text-red-300">{t('feedback.toast.rate_limit')}</span>
+              {/* Submit Button */}
+              <div className="pt-4 sm:pt-2 flex flex-col items-center gap-4 sm:gap-3">
+                <Button type="submit" className="w-2/5 md:w-1/3 lg:w-1/4 h-11 md:h-12 text-base md:text-lg bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-500 hover:to-amber-600 text-black font-bold" disabled={!form.formState.isValid || submitting || isRateLimited}>
+                  {submitting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      {t('feedback.sending')}
+                    </>
+                  ) : (
+                    t('feedback.submit')
                   )}
-                </div>
-              </form>
-            </Form>
-          </div>
+                </Button>
+                {isRateLimited && (
+                  <span className="text-sm text-red-300">{t('feedback.toast.rate_limit')}</span>
+                )}
+              </div>
+            </form>
+          </Form>
         </div>
       </div>
     </div>
