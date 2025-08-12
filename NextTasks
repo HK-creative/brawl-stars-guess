@@ -1,5 +1,3 @@
-in both the daily game modes and the survival game modes, every mode has the main square which features content based on the specific mode, in gadget it presents the gadget image, in star power it presents the star power image, in audio it presents the play audio button, in classic it presents the brawler attributes, in pixels it presents the pixels image. i call this square "main content square". i want you to add spacing below the main content square and reduce spacing above the main content square. the goal is that the main content square will be lifted higher, and everything else (including the search bar) will stay same location. this change is only talking about the position which the main content square is located, not anything else.
-
 Make sure the daily challenges button in the home page navigates to the the new daily challenges URL , and not the old one.
 
 remove old daily challenges pages (/classic, /gadget, /starpower, /audio, /pixels)
@@ -11,3 +9,14 @@ when user guesses new brawler, he should appear on top, not on bottom. that mean
 fix audio mode's player. currently, when user press play it plays the sound and stuck on the pause button. i want that when it finished play the audio it will go back to the play button, and no puase button should be in there.  
 
 lets work on the victory screen now
+
+ 
+
+
+I decided I want to do a complete remake of the survival front end
+
+1. I want to keep all the current elements but completely change their looks. I want to 
+
+
+2. Currently In survival mode, when user wins a round it goes to a (pop-up like a new page), and I don’t like it. I decided I want to reduce user friction by changing it to not be a pop-up or separate page but to make it in the same page. I want it to work like this - when user wins a round, all the elements that are not in the header like the home button will fade out in transition animation, and then there victory section will appear there in the same place (same page).  I want it to be displayed for 3 second and after that it will fade out and all the content of the next round [either same game mode or different (it’s randomly selected based on user choices, it’s already working like that and you shouldn’t change or mind that.)] fade in and so on. The elements of this new victory screen is - the same gif, the victory headline, the score section, text that is a timer of 3 seconds that start instantly when won and when the timer is over it continues to the next round. That is all and the only elements. 
+Make the transition animations very cool and various animations for different elements both of the victory section and the game mode elements (please create a new text file that you’ll write there  a reminder to make it for the game mode’s elements, because I don’t want to do that now I want to do that later on after we will finish completely the redo of the front end, for now I don’t want to do this or any change to the animations of the game mode elements? I will only want that later on in the road. I do want us to do it for victory section. Please note that I mean that you shouldn’t animate the game mode elements because we will maybe change them later so there is no point in investing time on it right now, but obviously doesn’t mean that you cannot have an animation or something like that. I only want you to not focus on that because there is no reason, but for example you take an element and copy it and it is an animation you don’t need to specifically come and remove the animation after copying it, what I’m saying is you? Don’t need to put any effort into this right now.)
