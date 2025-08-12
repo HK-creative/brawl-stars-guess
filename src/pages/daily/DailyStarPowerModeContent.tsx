@@ -330,7 +330,7 @@ const DailyStarPowerModeContent: React.FC<DailyStarPowerModeContentProps> = ({ o
           <DailyModeProgress currentMode="starpower" className="mb-6 mt-1" onModeChange={onModeChange} />
 
           {/* Title */}
-          <div className="text-center mb-6 mt-2">
+          <div className="text-center mb-2 mt-2">
             <ModeTitle title={t('mode.starpower')} />
           </div>
         </div>
@@ -339,7 +339,7 @@ const DailyStarPowerModeContent: React.FC<DailyStarPowerModeContentProps> = ({ o
       {/* Main Content */}
       <div className="flex-1 flex flex-col px-4 pb-4">
         <motion.div
-          className="daily-mode-game-card daily-mode-animate-pulse"
+          className="daily-mode-game-card daily-mode-animate-pulse mb-6"
           initial={motionOK ? { opacity: 0, scale: 0.98 } : { opacity: 0 }}
           animate={{ opacity: 1, scale: 1, transition }}
           layout

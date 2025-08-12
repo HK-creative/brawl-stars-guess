@@ -283,18 +283,24 @@ const FeedbackPage = () => {
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
-                      <div className="flex items-center justify-center gap-3" dir="ltr">
-                        <span className="text-sm font-medium text-gray-400 translate-y-1">1</span>
-                        <div className="flex items-center gap-2">
-                          {[1, 2, 3, 4, 5].map((star) => (
+                      <div className="flex items-center justify-center gap-2" dir="ltr">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <div
+                            key={star}
+                            onClick={() => field.onChange(star)}
+                            className="relative flex items-center justify-center cursor-pointer"
+                            aria-label={`Rate ${star} out of 5 stars`}
+                          >
                             <Star
-                              key={star}
-                              className={`w-8 h-8 sm:w-9 sm:h-9 md:w-11 md:h-11 cursor-pointer transition-colors ${field.value >= star ? 'text-amber-400 fill-amber-400' : 'text-gray-500 hover:text-amber-300'}`}
-                              onClick={() => field.onChange(star)}
+                              className={`w-8 h-8 sm:w-9 sm:h-9 md:w-11 md:h-11 transition-colors ${field.value >= star ? 'text-amber-400 fill-amber-400' : 'text-gray-500 hover:text-amber-300'}`}
                             />
-                          ))}
-                        </div>
-                        <span className="text-sm font-medium text-gray-400 translate-y-1">5</span>
+                            <span
+                              className={`absolute text-sm font-bold transition-colors select-none ${field.value >= star ? 'text-black' : 'text-white'}`}
+                            >
+                              {star}
+                            </span>
+                          </div>
+                        ))}
                       </div>
                     </FormControl>
                     <FormMessage className="text-center" />
