@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { t, getLanguage } from '@/lib/i18n';
 import { Switch } from '@/components/ui/switch';
-import { Check, X, Infinity as InfinityIcon, Share2, Clock, Hash } from 'lucide-react';
+import { Check, X, Infinity as InfinityIcon, Share2, Clock } from 'lucide-react';
 import BrawlerAutocomplete from '@/components/BrawlerAutocomplete';
 import { brawlers, Brawler, getBrawlerDisplayName } from '@/data/brawlers';
 import { toast } from 'sonner';
@@ -20,6 +20,9 @@ import GameModeTracker from '@/components/GameModeTracker';
 import HomeButton from '@/components/ui/home-button';
 import ShareResultModal from '@/components/ShareResultModal';
 import PixelatedImage from '@/components/PixelatedImage';
+import { motion } from 'framer-motion';
+import { useMotionPrefs } from '@/hooks/useMotionPrefs';
+import { SlidingNumber } from '@/components/ui/sliding-number';
 
 // Helper function to get the next mode key for the VictorySection
 const getNextModeKey = (currentMode: string) => {
@@ -86,6 +89,8 @@ const PixelsMode = ({
   const [windowSize, setWindowSize] = useState({ width: window.innerWidth, height: window.innerHeight });
 
   const currentLanguage = getLanguage();
+  // Motion preferences for consistent, reduced-motion-aware animations
+  const { motionOK, transition } = useMotionPrefs();
 
   // Function to update countdown
   const updateCountdown = () => {
@@ -396,7 +401,13 @@ const PixelsMode = ({
       {/* Main Content */}
       <div className="survival-mode-content">
         {/* Game Card */}
-        <div className="survival-mode-game-card survival-mode-animate-pulse">
+        <motion.div
+          className="survival-mode-game-card survival-mode-animate-pulse"
+          layout
+          initial={motionOK ? { opacity: 0, scale: 0.98, y: 8 } : { opacity: 0 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={transition}
+        >
           <div className="survival-mode-card-content">
             {/* Victory/Game Over Screen */}
             {showResult && !skipVictoryScreen && (
@@ -508,22 +519,33 @@ const PixelsMode = ({
 
                 {/* Guess Counter */}
                 <div className="w-full flex justify-center gap-4 mt-2">
-                  {isSurvivalMode ? (
-                    <div className="survival-mode-guess-counter">
-                      <span className="text-lg font-bold tracking-wide">{t('guesses.left')}</span>
-                      <span className={`text-2xl font-extrabold ${(maxGuesses - guessCount) <= 3 ? 'text-red-400 animate-bounce' : 'text-white'}`}>{maxGuesses - guessCount}</span>
-                    </div>
-                  ) : (
-                    <div className="survival-mode-guess-counter">
-                      <Hash className="h-5 w-5" />
-                      <span>{guessCount}/{maxGuesses} {t('guesses.count')}</span>
-                    </div>
-                  )}
+                  <motion.div
+                    className="contents"
+                    initial={motionOK ? { opacity: 0, y: 8 } : { opacity: 0 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={transition}
+                  >
+                    {isSurvivalMode ? (
+                      <div className="survival-mode-guess-counter">
+                        <span className="text-lg font-bold tracking-wide">{t('guesses.left')}</span>
+                        <span className={`text-2xl font-extrabold ${guessesLeft <= 3 ? 'text-red-400' : 'text-white'}`}>
+                          <SlidingNumber value={Math.max(0, guessesLeft)} padStart />
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="survival-mode-guess-counter">
+                        <span className="text-base font-semibold mr-2">{t('number.of.guesses')}</span>
+                        <span className="text-base font-bold">
+                          <SlidingNumber value={guessCount} padStart />
+                        </span>
+                      </div>
+                    )}
+                  </motion.div>
                 </div>
               </div>
             )}
           </div>
-        </div>
+        </motion.div>
 
         {/* Previous Guesses */}
         {guesses.length > 0 && (

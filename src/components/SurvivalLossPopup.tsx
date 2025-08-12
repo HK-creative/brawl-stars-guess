@@ -1,10 +1,14 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
+import PrimaryButton from '@/components/ui/primary-button';
 import Image from '@/components/ui/image';
 import { getPortrait } from '@/lib/image-helpers';
 import { Trophy, RotateCcw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { t } from '@/lib/i18n';
+import { motion } from 'framer-motion';
+import { useMotionPrefs } from '@/hooks/useMotionPrefs';
+import { SlidingNumber } from '@/components/ui/sliding-number';
 
 interface SurvivalLossPopupProps {
   correctBrawlerName: string;
@@ -21,9 +25,16 @@ const SurvivalLossPopup: React.FC<SurvivalLossPopupProps> = ({
   onRetry,
   onHome
 }) => {
+  const { motionOK, transition, spring } = useMotionPrefs();
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-in">
-      <div className="bg-gradient-to-b from-slate-800/90 to-slate-900/90 rounded-2xl border border-white/10 p-6 max-w-md w-full shadow-2xl flex flex-col items-center animate-slide-up">
+      <motion.div
+        className="bg-gradient-to-b from-slate-800/90 to-slate-900/90 rounded-2xl border border-white/10 p-6 max-w-md w-full shadow-2xl flex flex-col items-center"
+        initial={motionOK ? { opacity: 0, y: 16, scale: 0.98 } : { opacity: 1 }}
+        animate={motionOK ? { opacity: 1, y: 0, scale: 1, transition } : { opacity: 1 }}
+        exit={motionOK ? { opacity: 0, y: -8, transition } : { opacity: 0 }}
+        transition={spring as any}
+      >
         {/* Game Over header */}
         <h1 className="text-4xl md:text-5xl font-extrabold text-center text-red-500 drop-shadow-glow mb-4 tracking-wide">
           {t('game.over')}
@@ -56,29 +67,34 @@ const SurvivalLossPopup: React.FC<SurvivalLossPopupProps> = ({
         </div>
         
         {/* Score information */}
-        <div className="bg-black/30 rounded-lg p-4 w-full mb-6">
+        <motion.div
+          className="bg-black/30 rounded-lg p-4 w-full mb-6"
+          initial={motionOK ? { opacity: 0, y: 8 } : { opacity: 1 }}
+          animate={motionOK ? { opacity: 1, y: 0, transition } : { opacity: 1 }}
+        >
           <div className="flex justify-between items-center mb-2">
             <div className="text-white/80">{t('game.over.final.score')}</div>
-            <div className="text-xl font-bold text-yellow-400">{totalScore}</div>
+            <div className="text-xl font-bold text-yellow-400">
+              <SlidingNumber value={totalScore} />
+            </div>
           </div>
           <div className="flex justify-between items-center">
             <div className="text-white/80">{t('game.over.rounds.completed')}</div>
-            <div className="text-xl font-bold text-white">{totalRounds}</div>
+            <div className="text-xl font-bold text-white">
+              <SlidingNumber value={totalRounds} />
+            </div>
           </div>
-        </div>
+        </motion.div>
 
         {/* Action buttons */}
         <div className="flex flex-col md:flex-row gap-3 w-full">
-          <Button 
+          <PrimaryButton 
             onClick={onRetry}
-            className={cn(
-              "flex-1 py-6 text-lg font-bold",
-              "bg-gradient-to-r from-amber-500 to-pink-500 hover:from-amber-600 hover:to-pink-600"
-            )}
+            className={cn("flex-1 py-6 text-lg font-bold")}
           >
             <RotateCcw className="mr-2 h-5 w-5" />
             {t('game.over.try.again')}
-          </Button>
+          </PrimaryButton>
           <Button 
             onClick={onHome}
             className={cn(
@@ -94,7 +110,7 @@ const SurvivalLossPopup: React.FC<SurvivalLossPopupProps> = ({
             {t('game.over.home')}
           </Button>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };

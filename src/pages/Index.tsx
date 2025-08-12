@@ -122,7 +122,7 @@ const Index = () => {
             }}>
           {/* Left - Feedback pill */}
           <button
-            onClick={() => navigate('/feedback')}
+            onClick={() => navigate('/feedback', { state: { fromHome: true } })}
             className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-slate-800/80 to-slate-700/80 hover:from-slate-700/80 hover:to-slate-600/80 rounded-full border border-slate-500/30 transition-all duration-300 backdrop-blur-sm shadow-lg hover:shadow-xl transform hover:scale-105"
           >
             <MessageSquare className={cn(isMobile ? 'w-5 h-5' : 'w-4 h-4', 'text-slate-300')} />

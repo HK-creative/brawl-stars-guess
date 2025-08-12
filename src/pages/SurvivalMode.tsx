@@ -1,41 +1,37 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
+import PrimaryButton from '@/components/ui/primary-button';
 import { Timer, Circle, Trophy } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
-import { useSurvivalStore, GameMode, SurvivalSettings } from '@/stores/useSurvivalStore';
-import { calculateNextGuessesQuota, selectNextBrawlerAndMode, resetModeSelectionState } from '@/lib/survival-logic';
+import { useSurvivalStore } from '@/stores/useSurvivalStore';
+import { resetModeSelectionState } from '@/lib/survival-logic';
 import ClassicMode from './ClassicMode';
 import GadgetMode from './GadgetMode';
 import StarPowerMode from './StarPowerMode';
 import AudioMode from './AudioMode';
 import PixelsMode from './PixelsMode';
-import HomeButton from '@/components/ui/home-button';
 import { cn } from '@/lib/utils';
 import SurvivalVictoryPopup from '@/components/SurvivalVictoryPopup';
 import SurvivalLossPopup from '@/components/SurvivalLossPopup';
 import SurvivalSetupPopup from '@/components/SurvivalSetupPopup';
 import { t } from '@/lib/i18n';
+import { motion } from 'framer-motion';
+import { useMotionPrefs } from '@/hooks/useMotionPrefs';
 
 // Import brawler data
 import { brawlers } from '@/data/brawlers';
 
-// A simple error fallback component to show when challenge loading fails
-const FallbackErrorUI = ({ onRetry }: { onRetry: () => void }) => (
-  <div className="flex flex-col items-center justify-center p-8 text-center">
-    <h3 className="text-xl font-bold mb-4">{t('error.loading.challenge')}</h3>
-    <p className="mb-6">There was a problem loading today's gadget challenge.</p>
-    <Button 
-      onClick={onRetry}
-                          className="bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-2 px-4 rounded"
-                  >
-                    {t('retry')}
-    </Button>
-  </div>
-);
+import RotatingBackground from '@/components/layout/RotatingBackground';
+import DailyModeTransitionOrchestrator from '@/components/layout/DailyModeTransitionOrchestrator';
+import SurvivalSharedHeader from '@/components/layout/SurvivalSharedHeader';
+import { SlidingNumber } from '@/components/ui/sliding-number';
+import type { GameModeName } from '@/types/gameModes';
+
+// (FallbackErrorUI removed; inline error UI is used below)
 
 const SurvivalModePage: React.FC = () => {
+  const { motionOK, transition, spring } = useMotionPrefs();
   // Inject custom award styles into the document head
   useEffect(() => {
     const style = document.createElement('style');
@@ -316,21 +312,12 @@ const SurvivalModePage: React.FC = () => {
 
   // Render the component
   return (
-    <div className="survival-mode-container survival-classic-theme">
-      {/* Header Section */}
-      <div className="survival-mode-header">
-        {/* Home Button - Top Left */}
-        <div className="survival-mode-home-btn">
-          <HomeButton />
-        </div>
-
-        {/* Title Section */}
-        <div className="survival-mode-title-section">
-          <h1 className="survival-mode-title">
-            {t('survival.mode.title')}
-          </h1>
-        </div>
-      </div>
+    <div className="survival-mode-container survival-classic-theme relative">
+      <RotatingBackground />
+      <SurvivalSharedHeader
+        currentRound={currentRound}
+        currentMode={activeRoundState?.currentMode as GameModeName | null}
+      />
       
       {/* Loading state */}
       {isLoading && (
@@ -345,12 +332,12 @@ const SurvivalModePage: React.FC = () => {
       {!isLoading && !showSetupPopup && (!activeRoundState || !activeRoundState.isRoundActive) && gameStatus !== 'gameover' && (
         <div className="survival-mode-content">
           <div className="flex items-center justify-center min-h-[400px]">
-            <Button
+            <PrimaryButton
               onClick={() => setShowSetupPopup(true)}
-              className="survival-mode-guess-counter text-xl py-4 px-8 hover:scale-105 transition-transform"
+              className="survival-mode-guess-counter text-xl py-4 px-8"
             >
               Start Survival Mode
-            </Button>
+            </PrimaryButton>
           </div>
         </div>
       )}
@@ -363,7 +350,7 @@ const SurvivalModePage: React.FC = () => {
               <div className="survival-mode-card-content text-center">
                                   <h3 className="text-xl font-bold mb-3 text-red-400">{t('error.loading.challenge')}</h3>
                 <p className="mb-4 text-white/80">There was a problem loading today's challenge.</p>
-                <Button 
+                <PrimaryButton 
                   onClick={() => {
                     setChallengeError(false);
                     setIsLoading(true);
@@ -380,10 +367,10 @@ const SurvivalModePage: React.FC = () => {
                       }
                     }, 500);
                   }}
-                          className="bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-2 px-4 rounded"
+                          className="font-bold py-2 px-4"
                   >
                     {t('retry')}
-                </Button>
+                </PrimaryButton>
               </div>
             </div>
           </div>
@@ -394,91 +381,119 @@ const SurvivalModePage: React.FC = () => {
       {!isLoading && !showSetupPopup && !challengeError && activeRoundState && activeRoundState.isRoundActive && (
         <div className="survival-mode-content">
           {/* Game Stats Header */}
-          <div className="mb-1 flex flex-col items-center space-y-1">
+          <motion.div
+            className="mb-1 flex flex-col items-center space-y-1"
+            initial={motionOK ? { opacity: 0, y: 8 } : { opacity: 1 }}
+            animate={motionOK ? { opacity: 1, y: 0, transition } : { opacity: 1 }}
+          >
             <div className="flex flex-wrap items-center justify-center gap-4">
-              <div className="survival-mode-guess-counter">
+              <motion.div
+                className="survival-mode-guess-counter"
+                initial={motionOK ? { opacity: 0, y: 6 } : { opacity: 1 }}
+                animate={motionOK ? { opacity: 1, y: 0, transition } : { opacity: 1 }}
+              >
                 <Trophy className="h-5 w-5" />
-                <span>{t('survival.round')} {currentRound}</span>
-              </div>
+                <span className="flex items-baseline gap-1">
+                  <span>{t('survival.round')}</span>
+                  <span className="font-bold">
+                    <SlidingNumber value={currentRound} />
+                  </span>
+                </span>
+              </motion.div>
               
-              <div className="survival-mode-guess-counter">
+              <motion.div
+                className="survival-mode-guess-counter"
+                initial={motionOK ? { opacity: 0, y: 6 } : { opacity: 1 }}
+                animate={motionOK ? { opacity: 1, y: 0, transition } : { opacity: 1 }}
+              >
                 <Circle className="h-5 w-5 fill-current" />
-                <span>{totalScore} {t('survival.pts')}</span>
-              </div>
+                <span className="flex items-baseline gap-1">
+                  <span className="font-bold">
+                    <SlidingNumber value={totalScore} />
+                  </span>
+                  <span>{t('survival.pts')}</span>
+                </span>
+              </motion.div>
               
               {settings?.timer && (
-                <div className={cn(
-                  "survival-mode-guess-counter transition-all duration-300",
-                  (currentTimerValue ?? activeRoundState.timerLeft) <= 30 && "animate-pulse"
-                )}>
+                <motion.div
+                  className={cn(
+                    "survival-mode-guess-counter transition-all duration-300",
+                    (currentTimerValue ?? activeRoundState.timerLeft) <= 30 && "animate-pulse"
+                  )}
+                  initial={motionOK ? { opacity: 0, y: 6 } : { opacity: 1 }}
+                  animate={motionOK ? { opacity: 1, y: 0, transition } : { opacity: 1 }}
+                >
                   <Timer className={cn(
                     "h-5 w-5",
                     (currentTimerValue ?? activeRoundState.timerLeft) <= 30 && "animate-bounce"
                   )} />
-                  <span className="font-mono">
+                  <motion.span className="font-mono" layout transition={spring as any}>
                     {Math.floor((currentTimerValue ?? activeRoundState.timerLeft) / 60)}:
                     {String((currentTimerValue ?? activeRoundState.timerLeft) % 60).padStart(2, '0')}
-                  </span>
-                </div>
+                  </motion.span>
+                </motion.div>
               )}
             </div>
-          </div>
+          </motion.div>
 
           {/* Game Card */}
-          <div className="survival-mode-game-card survival-mode-animate-pulse">
-            <div className="survival-mode-card-content">
-              {currentModeName === 'classic' && (
-                <ClassicMode 
-                  key={`${modeKey}-classic`}
-                  brawlerId={activeRoundState.currentBrawlerId || 1}
-                  onRoundEnd={handleRoundEnd}
-                  maxGuesses={activeRoundState.guessesQuota}
-                  isSurvivalMode={true}
-                  skipVictoryScreen={true}
-                />
-              )}
-              {currentModeName === 'gadget' && (
-                <GadgetMode 
-                  key={`${modeKey}-gadget`}
-                  brawlerId={activeRoundState.currentBrawlerId || 1}
-                  onRoundEnd={handleRoundEnd}
-                  maxGuesses={activeRoundState.guessesQuota}
-                  isSurvivalMode={true}
-                  skipVictoryScreen={true}
-                />
-              )}
-              {currentModeName === 'starpower' && (
-                <StarPowerMode 
-                  key={`${modeKey}-starpower`}
-                  brawlerId={activeRoundState.currentBrawlerId || 1}
-                  onRoundEnd={handleRoundEnd}
-                  maxGuesses={activeRoundState.guessesQuota}
-                  isSurvivalMode={true}
-                  skipVictoryScreen={true}
-                />
-              )}
-              {currentModeName === 'audio' && (
-                <AudioMode 
-                  key={`${modeKey}-audio`}
-                  brawlerId={activeRoundState.currentBrawlerId || 1}
-                  onRoundEnd={handleRoundEnd}
-                  maxGuesses={activeRoundState.guessesQuota}
-                  isSurvivalMode={true}
-                  skipVictoryScreen={true}
-                />
-              )}
-              {currentModeName === 'pixels' && (
-                <PixelsMode 
-                  key={`${modeKey}-pixels`}
-                  brawlerId={activeRoundState.currentBrawlerId || 1}
-                  onRoundEnd={handleRoundEnd}
-                  maxGuesses={activeRoundState.guessesQuota}
-                  isSurvivalMode={true}
-                  skipVictoryScreen={true}
-                />
-              )}
+          <DailyModeTransitionOrchestrator modeKey={`${currentModeName ?? 'none'}-${modeKey}`} className="w-full">
+            <div className="survival-mode-game-card survival-mode-animate-pulse">
+              <div className="survival-mode-card-content">
+                {currentModeName === 'classic' && (
+                  <ClassicMode 
+                    key={`${modeKey}-classic`}
+                    brawlerId={activeRoundState.currentBrawlerId || 1}
+                    onRoundEnd={handleRoundEnd}
+                    maxGuesses={activeRoundState.guessesQuota}
+                    isSurvivalMode={true}
+                    skipVictoryScreen={true}
+                  />
+                )}
+                {currentModeName === 'gadget' && (
+                  <GadgetMode 
+                    key={`${modeKey}-gadget`}
+                    brawlerId={activeRoundState.currentBrawlerId || 1}
+                    onRoundEnd={handleRoundEnd}
+                    maxGuesses={activeRoundState.guessesQuota}
+                    isSurvivalMode={true}
+                    skipVictoryScreen={true}
+                  />
+                )}
+                {currentModeName === 'starpower' && (
+                  <StarPowerMode 
+                    key={`${modeKey}-starpower`}
+                    brawlerId={activeRoundState.currentBrawlerId || 1}
+                    onRoundEnd={handleRoundEnd}
+                    maxGuesses={activeRoundState.guessesQuota}
+                    isSurvivalMode={true}
+                    skipVictoryScreen={true}
+                  />
+                )}
+                {currentModeName === 'audio' && (
+                  <AudioMode 
+                    key={`${modeKey}-audio`}
+                    brawlerId={activeRoundState.currentBrawlerId || 1}
+                    onRoundEnd={handleRoundEnd}
+                    maxGuesses={activeRoundState.guessesQuota}
+                    isSurvivalMode={true}
+                    skipVictoryScreen={true}
+                  />
+                )}
+                {currentModeName === 'pixels' && (
+                  <PixelsMode 
+                    key={`${modeKey}-pixels`}
+                    brawlerId={activeRoundState.currentBrawlerId || 1}
+                    onRoundEnd={handleRoundEnd}
+                    maxGuesses={activeRoundState.guessesQuota}
+                    isSurvivalMode={true}
+                    skipVictoryScreen={true}
+                  />
+                )}
+              </div>
             </div>
-          </div>
+          </DailyModeTransitionOrchestrator>
         </div>
       )}
       
@@ -523,6 +538,8 @@ const SurvivalModePage: React.FC = () => {
             onNextRound={() => {
               // Hide victory popup and continue to next round
               setShowVictoryPopup(false);
+              // Bump local key to force transition remount
+              setModeKey(`survival-round-${Date.now()}`);
               // Start next round with current settings
               startNextRound();
             }}

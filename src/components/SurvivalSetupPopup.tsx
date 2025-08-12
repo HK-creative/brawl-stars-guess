@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useSurvivalStore, defaultSurvivalSettings, GameMode, SurvivalSettings } from '@/stores/useSurvivalStore';
 import { Button } from '@/components/ui/button';
+import PrimaryButton from '@/components/ui/primary-button';
 import { toast } from 'sonner';
 import { resetModeSelectionState } from '@/lib/survival-logic';
 import { Timer } from 'lucide-react';
 import { t } from '@/lib/i18n';
+import { motion } from 'framer-motion';
+import { useMotionPrefs } from '@/hooks/useMotionPrefs';
 
 // Game mode images mapping
 const gameModeImages = {
@@ -79,6 +82,7 @@ interface SurvivalSetupPopupProps {
 }
 
 const SurvivalSetupPopup: React.FC<SurvivalSetupPopupProps> = ({ onStart, onCancel }) => {
+  const { motionOK, transition, spring } = useMotionPrefs();
   const initializeGame = useSurvivalStore((state) => state.initializeGame);
   const storeSettings = useSurvivalStore((state) => state.settings);
   
@@ -165,7 +169,13 @@ const SurvivalSetupPopup: React.FC<SurvivalSetupPopupProps> = ({ onStart, onCanc
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-in">
-      <div className="relative bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl border-2 border-amber-400/20 max-w-md w-full shadow-2xl flex flex-col animate-slide-up overflow-hidden">
+      <motion.div
+        className="relative bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl border-2 border-amber-400/20 max-w-md w-full shadow-2xl flex flex-col overflow-hidden"
+        initial={motionOK ? { opacity: 0, y: 16, scale: 0.98 } : { opacity: 1 }}
+        animate={motionOK ? { opacity: 1, y: 0, scale: 1, transition } : { opacity: 1 }}
+        exit={motionOK ? { opacity: 0, y: -8, transition } : { opacity: 0 }}
+        transition={spring as any}
+      >
         {/* Decorative elements */}
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute -top-20 -right-20 w-40 h-40 bg-amber-400/5 rounded-full blur-3xl"></div>
@@ -259,24 +269,15 @@ const SurvivalSetupPopup: React.FC<SurvivalSetupPopupProps> = ({ onStart, onCanc
           >
             {t('button.cancel')}
           </Button>
-          <Button 
+          <PrimaryButton 
             onClick={handleStartGame}
             disabled={!isValidationPassed}
-            className={`relative overflow-hidden group px-8 py-2 rounded-lg font-bold transition-all duration-300 ${
-              isValidationPassed 
-                ? 'bg-gradient-to-r from-amber-500 to-pink-500 hover:from-amber-400 hover:to-pink-400 shadow-lg hover:shadow-amber-500/30' 
-                : 'bg-slate-700/50 text-slate-500 cursor-not-allowed'
-            }`}
+            className="px-8 py-2 rounded-lg font-bold"
           >
-            {isValidationPassed ? (
-              <>
-                <span className="relative z-10">{t('button.start.game')}</span>
-                <span className="absolute inset-0 bg-gradient-to-r from-amber-600/0 via-amber-400/30 to-amber-600/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
-              </>
-            ) : t('survival.select.required')}
-          </Button>
+            {isValidationPassed ? t('button.start.game') : t('survival.select.required')}
+          </PrimaryButton>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };

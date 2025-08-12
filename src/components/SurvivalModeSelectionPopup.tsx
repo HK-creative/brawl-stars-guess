@@ -3,6 +3,8 @@ import { Button } from '@/components/ui/button';
 import { GameMode } from '@/stores/useSurvivalStore';
 import { Image, Volume2, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { motion } from 'framer-motion';
+import { useMotionPrefs } from '@/hooks/useMotionPrefs';
 
 interface SurvivalModeSelectionPopupProps {
   availableModes: GameMode[];
@@ -45,32 +47,46 @@ const SurvivalModeSelectionPopup: React.FC<SurvivalModeSelectionPopupProps> = ({
   availableModes,
   onSelectMode
 }) => {
+  const { motionOK, transition, spring } = useMotionPrefs();
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-fade-in">
-      <div className="bg-gradient-to-b from-slate-800/90 to-slate-900/90 rounded-2xl border border-white/10 p-6 max-w-lg w-full shadow-2xl flex flex-col items-center animate-slide-up">
+      <motion.div
+        className="bg-gradient-to-b from-slate-800/90 to-slate-900/90 rounded-2xl border border-white/10 p-6 max-w-lg w-full shadow-2xl flex flex-col items-center"
+        initial={motionOK ? { opacity: 0, y: 16, scale: 0.98 } : { opacity: 1 }}
+        animate={motionOK ? { opacity: 1, y: 0, scale: 1, transition } : { opacity: 1 }}
+        exit={motionOK ? { opacity: 0, y: -8, transition } : { opacity: 0 }}
+        transition={spring as any}
+      >
         <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">Choose Game Mode</h2>
         <p className="text-white/70 text-center mb-6">Select which mode you want to play next</p>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 w-full mb-4">
           {gameModeDetails
             .filter(mode => availableModes.includes(mode.id))
-            .map(mode => (
-              <Button
+            .map((mode, idx) => (
+              <motion.div
                 key={mode.id}
-                onClick={() => onSelectMode(mode.id)}
-                className={cn(
-                  "h-auto py-4 flex flex-col items-center justify-center text-white font-bold",
-                  "bg-gradient-to-r",
-                  mode.color,
-                  "hover:opacity-90 transition-all"
-                )}
+                initial={motionOK ? { opacity: 0, y: 6 } : { opacity: 1 }}
+                animate={motionOK ? { opacity: 1, y: 0, transition } : { opacity: 1 }}
+                transition={{ ...(spring as any), delay: motionOK ? idx * 0.03 : 0 }}
+                whileHover={motionOK ? { scale: 1.02 } : undefined}
               >
-                <div className="flex items-center justify-center h-12 w-12 bg-white/20 rounded-full mb-2">
-                  {mode.icon}
-                </div>
-                <span className="text-lg">{mode.label}</span>
-                <span className="text-xs text-white/80 font-normal mt-1">{mode.description}</span>
-              </Button>
+                <Button
+                  onClick={() => onSelectMode(mode.id)}
+                  className={cn(
+                    "h-auto py-4 flex flex-col items-center justify-center text-white font-bold",
+                    "bg-gradient-to-r",
+                    mode.color,
+                    "hover:opacity-90 transition-all"
+                  )}
+                >
+                  <div className="flex items-center justify-center h-12 w-12 bg-white/20 rounded-full mb-2">
+                    {mode.icon}
+                  </div>
+                  <span className="text-lg">{mode.label}</span>
+                  <span className="text-xs text-white/80 font-normal mt-1">{mode.description}</span>
+                </Button>
+              </motion.div>
             ))}
         </div>
         
@@ -80,7 +96,7 @@ const SurvivalModeSelectionPopup: React.FC<SurvivalModeSelectionPopupProps> = ({
             In Survival Mode, each round lets you choose a different game mode. Use your guesses wisely - they're limited across all rounds!
           </p>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };

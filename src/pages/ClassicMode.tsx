@@ -15,6 +15,11 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 import { Switch } from '@/components/ui/switch';
 
+import { motion } from 'framer-motion';
+import { useMotionPrefs } from '@/hooks/useMotionPrefs';
+import { SlidingNumber } from '@/components/ui/sliding-number';
+import { GuessCounter } from '@/components/ui/guess-counter';
+
 interface ClassicModeProps {
   brawlerId?: number;
   onRoundEnd?: (result: { success: boolean, brawlerName?: string }) => void;
@@ -46,6 +51,7 @@ const ClassicMode = ({
   const [isEndlessMode, setIsEndlessMode] = useState(propIsEndlessMode);
   const isMobile = useIsMobile();
   const { toast } = useToast();
+  const { motionOK, transition } = useMotionPrefs();
   const [guessedBrawlerNames, setGuessedBrawlerNames] = useState<string[]>([]);
   const [availableBrawlers, setAvailableBrawlers] = useState<Brawler[]>([]);
   const [lastGuessIndex, setLastGuessIndex] = useState<number | null>(null); // Track the most recent guess
@@ -451,10 +457,7 @@ const ClassicMode = ({
           {/* Guess Counter - only show in survival mode */}
           {isSurvivalMode && (
             <div className="w-full flex justify-center gap-4 mt-2">
-              <div className="flex items-center gap-2 bg-black/70 border-2 border-brawl-yellow px-6 py-2 rounded-full shadow-xl animate-pulse">
-                <span className="text-brawl-yellow text-lg font-bold tracking-wide">{t('guesses.left')}</span>
-                <span className={`text-2xl font-extrabold ${(maxGuesses - guessCount) <= 3 ? 'text-brawl-red animate-bounce' : 'text-white'}`}>{maxGuesses - guessCount}</span>
-              </div>
+              <GuessCounter isSurvivalMode={true} guessCount={guessCount} maxGuesses={maxGuesses} />
             </div>
           )}
         </div>
@@ -466,7 +469,7 @@ const ClassicMode = ({
               <div className="flex justify-between items-center mb-1 px-1">
                 <div className="flex items-center gap-1.5">
                   <div className="text-white text-sm font-medium">
-                    Guesses: {guessCount}
+                    {t('number.of.guesses')}: <span className="inline-block align-middle"><SlidingNumber value={guessCount} padStart /></span>
                   </div>
                   <div className="text-xs flex items-center text-white/60 gap-0.5">
                     <Clock className="w-3 h-3" />
@@ -474,7 +477,7 @@ const ClassicMode = ({
                   </div>
                 </div>
                 <div className="text-xs text-white/60 bg-white/10 px-1.5 py-0.5 rounded-full">
-                  {guessCount}/6
+                  <span className="inline-block align-middle"><SlidingNumber value={guessCount} /></span>/{maxGuesses}
                 </div>
               </div>
             )}

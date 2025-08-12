@@ -1,7 +1,15 @@
-every mode has the main square which features content based on the specific mode, in gadget it presents the gadget image, in star power it presents the star power image, in audio it presents the play audio button, in classic it presents the brawler attributes, in pixels it presents the pixels image. i call this square "main content square". i want you to add spacing below the main content square and reduce spacing above the main content square. the goal is that the main content square will be lifted higher, and everything else (including the search bar) will stay same location. this change is only talking about the position which the main content square is located, not anything else.
+in both the daily game modes and the survival game modes, every mode has the main square which features content based on the specific mode, in gadget it presents the gadget image, in star power it presents the star power image, in audio it presents the play audio button, in classic it presents the brawler attributes, in pixels it presents the pixels image. i call this square "main content square". i want you to add spacing below the main content square and reduce spacing above the main content square. the goal is that the main content square will be lifted higher, and everything else (including the search bar) will stay same location. this change is only talking about the position which the main content square is located, not anything else.
 
 Make sure the daily challenges button in the home page navigates to the the new daily challenges URL , and not the old one.
 
 remove old daily challenges pages (/classic, /gadget, /starpower, /audio, /pixels)
 
-make sure streaks works correctly. it should work like this - user gains +1 to his streak whenever he completes ALL daily modes in the same day. if a day passed by and user did not complete all daily modes, he loses his streak, which becomes 0, and he can start gaining streaks again. 
+make sure streaks works correctly. it should work like this - user gains +1 to his streak whenever he completes ALL daily modes in the same day. if a day passed by and user did not complete all daily modes, he loses his streak, which becomes 0, and he can start gaining streaks again. connect data to Supabase if needed.
+
+when user guesses new brawler, he should appear on top, not on bottom. that means the most recent guess will always be on top.
+
+fix audio mode's player. currently, when user press play it plays the sound and stuck on the pause button. i want that when it finished play the audio it will go back to the play button, and no puase button should be in there.  
+
+lets work on the victory screen now
+
+this page is complete on mobile and shouldnbt changed at all for mobile, but can you adapy it for Tablets and computers as well please? again i remind you that mobile should NOT change at all 

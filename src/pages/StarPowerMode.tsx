@@ -16,6 +16,9 @@ import { useNavigate } from 'react-router-dom';
 import VictorySection from '../components/VictoryPopup';
 import GameModeTracker from '@/components/GameModeTracker';
 import HomeButton from '@/components/ui/home-button';
+import { motion } from 'framer-motion';
+import { useMotionPrefs } from '@/hooks/useMotionPrefs';
+import { SlidingNumber } from '@/components/ui/sliding-number';
 
 interface StarPowerChallenge {
   brawler: string;
@@ -116,6 +119,7 @@ const StarPowerMode = ({
   const [showConfetti, setShowConfetti] = useState(false);
   const [guessCount, setGuessCount] = useState(0);
   const [isEndlessMode, setIsEndlessMode] = useState(propIsEndlessMode);
+  const { motionOK, transition, spring } = useMotionPrefs();
 
   // Add windowSize state for confetti
   const [windowSize, setWindowSize] = useState({ width: window.innerWidth, height: window.innerHeight });
@@ -597,7 +601,13 @@ const StarPowerMode = ({
       {/* Main Content */}
       <div className="survival-mode-content">
         {/* Game Card */}
-        <div className="survival-mode-game-card survival-mode-animate-pulse">
+        <motion.div
+          className="survival-mode-game-card survival-mode-animate-pulse"
+          layout
+          initial={motionOK ? { opacity: 0, scale: 0.98, y: 8 } : { opacity: 0 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={transition}
+        >
           <div className="survival-mode-card-content">
             {/* Main Challenge Content */}
             <div className="survival-mode-input-section">
@@ -707,21 +717,32 @@ const StarPowerMode = ({
           </form>
               {/* Guess Counter */}
               <div className="w-full flex justify-center gap-4 mt-2">
-                {isSurvivalMode ? (
-                  <div className="survival-mode-guess-counter">
-                    <span className="text-lg font-bold tracking-wide">{t('guesses.left')}</span>
-                    <span className={`text-2xl font-extrabold ${(maxGuesses - attempts) <= 3 ? 'text-red-400 animate-bounce' : 'text-white'}`}>{maxGuesses - attempts}</span>
-                  </div>
-                ) : (
-                  <div className="survival-mode-guess-counter">
-                    <span className="text-base font-semibold">{t('number.of.guesses')}</span>
-                    <span className="text-base font-bold">{guessCount}</span>
-                  </div>
-                )}
+                <motion.div
+                  className="contents"
+                  initial={motionOK ? { opacity: 0, y: 8 } : { opacity: 1, y: 0 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={transition}
+                >
+                  {isSurvivalMode ? (
+                    <div className="survival-mode-guess-counter">
+                      <span className="text-lg font-bold tracking-wide">{t('guesses.left')}</span>
+                      <span className={`text-2xl font-extrabold ${(maxGuesses - attempts) <= 3 ? 'text-red-400' : 'text-white'}`}>
+                        <SlidingNumber value={Math.max(0, maxGuesses - attempts)} padStart />
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="survival-mode-guess-counter">
+                      <span className="text-base font-semibold">{t('number.of.guesses')}</span>
+                      <span className="text-base font-bold">
+                        <SlidingNumber value={guessCount} padStart />
+                      </span>
+                    </div>
+                  )}
+                </motion.div>
               </div>
             </div>
           </div>
-        </div>
+        </motion.div>
         {/* Previous Guesses */}
         <div className="survival-mode-guesses-section">
           <div className="survival-mode-guesses-grid">

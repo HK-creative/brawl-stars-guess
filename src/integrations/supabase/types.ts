@@ -69,6 +69,51 @@ export type Database = {
         }
         Relationships: []
       },
+      feedback: {
+        Row: {
+          id: string
+          created_at: string | null
+          category: string
+          message: string
+          contact: string | null
+          consent: boolean | null
+          locale: string | null
+          user_agent: string | null
+          path: string | null
+          screen: string | null
+          tz: string | null
+          images: string[] | null
+        }
+        Insert: {
+          id?: string
+          created_at?: string | null
+          category: string
+          message: string
+          contact?: string | null
+          consent?: boolean | null
+          locale?: string | null
+          user_agent?: string | null
+          path?: string | null
+          screen?: string | null
+          tz?: string | null
+          images?: string[] | null
+        }
+        Update: {
+          id?: string
+          created_at?: string | null
+          category?: string
+          message?: string
+          contact?: string | null
+          consent?: boolean | null
+          locale?: string | null
+          user_agent?: string | null
+          path?: string | null
+          screen?: string | null
+          tz?: string | null
+          images?: string[] | null
+        }
+        Relationships: []
+      },
       profiles: {
         Row: {
           id: string;

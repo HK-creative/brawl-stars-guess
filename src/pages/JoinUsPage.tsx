@@ -1,15 +1,16 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Slider } from '@/components/ui/slider';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
-import { ArrowLeft, Users, MessageCircle, Twitter, Youtube, Music2, Crown, GraduationCap, Loader2, User as UserIcon, Mail } from 'lucide-react';
+import { ArrowLeft, Users, MessageCircle, Youtube, Instagram, Info, Crown, GraduationCap, Loader2, User as UserIcon, Mail } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { t } from '@/lib/i18n';
@@ -33,18 +34,41 @@ const Schema = z.object({
     if (v === undefined || v === '') return undefined as number | undefined;
     const n = typeof v === 'string' ? parseInt(v, 10) : v;
     return Number.isFinite(n) ? n : undefined;
-  }).refine((v) => v === undefined || (v >= 5 && v <= 120), { message: t('join.error.age_range') }).optional(),
+  }).refine((v) => v === undefined || (v >= 6 && v <= 30), { message: t('join.error.age_range') }).optional(),
+  clubName: z.string().optional(),
+  clubMembers: z.union([z.string(), z.number()]).optional().transform((v) => {
+    if (v === undefined || v === '') return undefined as number | undefined;
+    const n = typeof v === 'string' ? parseInt(v, 10) : v;
+    return Number.isFinite(n) ? n : undefined;
+  }).optional(),
   // Honeypot
   website: z.string().optional(),
+}).superRefine((data, ctx) => {
+  if (data.role === 'Instructor') {
+    if (data.age === undefined || Number.isNaN(data.age)) {
+      ctx.addIssue({ path: ['age'], code: 'custom', message: t('join.error.age_required') });
+    }
+  }
+  if (data.role === 'Club Owner') {
+    if (!data.clubName || data.clubName.trim().length === 0) {
+      ctx.addIssue({ path: ['clubName'], code: 'custom', message: t('join.error.club_name_required') });
+    }
+    const m = typeof data.clubMembers === 'number' ? data.clubMembers : undefined;
+    if (m === undefined || Number.isNaN(m)) {
+      ctx.addIssue({ path: ['clubMembers'], code: 'custom', message: t('join.error.club_members_required') });
+    } else if (m < 1 || m > 30) {
+      ctx.addIssue({ path: ['clubMembers'], code: 'custom', message: t('join.error.club_members_range') });
+    }
+  }
 });
 
 type FormValues = z.infer<typeof Schema>;
 
 const SOCIAL_LINKS: { label: string; href: string; icon: React.ElementType }[] = [
   { label: 'Discord', href: '', icon: MessageCircle },
-  { label: 'X', href: '', icon: Twitter },
   { label: 'YouTube', href: '', icon: Youtube },
-  { label: 'TikTok', href: '', icon: Music2 },
+  { label: 'WhatsApp', href: '', icon: MessageCircle },
+  { label: 'Instagram', href: '', icon: Instagram },
 ];
 
 const formatPhone = (raw: string) => {
@@ -86,6 +110,8 @@ const JoinUsPage = () => {
   const isRTL = language === 'he';
   const [trophies, setTrophies] = useState<number>(0);
   const [cooldown, setCooldown] = useState<number>(0);
+  const [roleTipOpen, setRoleTipOpen] = useState(false);
+  const tipTimerRef = useRef<number | null>(null);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(Schema),
@@ -96,11 +122,29 @@ const JoinUsPage = () => {
       contact: '',
       trophies: 0,
       age: undefined,
+      clubName: '',
+      clubMembers: undefined,
       website: '',
     },
   });
+  const role = form.watch('role');
+  const roleTip = role === 'Instructor'
+    ? t('join.role.tip.instructor')
+    : role === 'Club Owner'
+    ? t('join.role.tip.club_owner')
+    : role === 'Community Member'
+    ? t('join.role.tip.community')
+    : '';
 
-  const nameValue = form.watch('name');
+  const showRoleTip = () => {
+    setRoleTipOpen(true);
+    if (tipTimerRef.current) window.clearTimeout(tipTimerRef.current);
+    tipTimerRef.current = window.setTimeout(() => setRoleTipOpen(false), 2200);
+  };
+
+  useEffect(() => {
+    return () => { if (tipTimerRef.current) window.clearTimeout(tipTimerRef.current); };
+  }, []);
 
   useEffect(() => {
     form.setValue('trophies', trophies, { shouldDirty: true, shouldValidate: true });
@@ -218,6 +262,24 @@ const JoinUsPage = () => {
               <p className="text-sm text-white/80 leading-tight text-center">{t('join.subtitle')}</p>
             </div>
           </div>
+          {/* Social icons moved for visibility */}
+          <div className="mt-2 text-center text-xs text-white/60">{t('join.social.connect')}</div>
+          <div className="mt-2 mb-4 flex items-center justify-center gap-6 text-white/80">
+            {SOCIAL_LINKS.map(({ label, href, icon: Icon }) => (
+              <a
+                key={label}
+                href={href || '#'}
+                target={href ? '_blank' : undefined}
+                rel={href ? 'noopener noreferrer' : undefined}
+                className="hover:text-white transition-colors inline-flex items-center gap-2 hover:scale-110 will-change-transform"
+                aria-label={label}
+                onClick={(e) => { if (!href) { e.preventDefault(); toast.message(t('coming.soon')); } }}
+              >
+                <Icon size={22} />
+                <span className="sr-only">{label}</span>
+              </a>
+            ))}
+          </div>
 
           {/* Form */}
           <div className="brawl-card">
@@ -239,45 +301,56 @@ const JoinUsPage = () => {
                       {t('join.role.label')} <span aria-hidden="true" className="text-amber-400">*</span>
                     </FormLabel>
                     <FormControl>
-                      <ToggleGroup
-                        type="single"
-                        value={field.value}
-                        onValueChange={(v) => v && field.onChange(v)}
-                        aria-label={t('join.aria.select_role')}
-                        aria-required="true"
-                        className="w-full grid grid-cols-3 gap-3"
-                      >
-                        <ToggleGroupItem
-                          value="Community Member"
-                          aria-label={t('join.role.community')}
-                          className={`w-full aspect-square p-2 rounded-xl border-2 bg-black/60 text-white hover:bg-black/50 border-white/20 data-[state=on]:bg-black/70 data-[state=on]:text-brawl-yellow data-[state=on]:border-brawl-yellow flex flex-col items-center justify-center`}
-                        >
-                          <div className="flex flex-col items-center justify-center gap-1 text-xs sm:text-sm">
-                            <Users size={18} />
-                            <span>{t('join.role.community')}</span>
-                          </div>
-                        </ToggleGroupItem>
-                        <ToggleGroupItem
-                          value="Club Owner"
-                          aria-label={t('join.role.club_owner')}
-                          className={`w-full aspect-square p-2 rounded-xl border-2 bg-black/60 text-white hover:bg-black/50 border-white/20 data-[state=on]:bg-black/70 data-[state=on]:text-brawl-yellow data-[state=on]:border-brawl-yellow flex flex-col items-center justify-center`}
-                        >
-                          <div className="flex flex-col items-center justify-center gap-1 text-xs sm:text-sm">
-                            <Crown size={18} />
-                            <span>{t('join.role.club_owner')}</span>
-                          </div>
-                        </ToggleGroupItem>
-                        <ToggleGroupItem
-                          value="Instructor"
-                          aria-label={t('join.role.instructor')}
-                          className={`w-full aspect-square p-2 rounded-xl border-2 bg-black/60 text-white hover:bg-black/50 border-white/20 data-[state=on]:bg-black/70 data-[state=on]:text-brawl-yellow data-[state=on]:border-brawl-yellow flex flex-col items-center justify-center`}
-                        >
-                          <div className="flex flex-col items-center justify-center gap-1 text-xs sm:text-sm">
-                            <GraduationCap size={18} />
-                            <span>{t('join.role.instructor')}</span>
-                          </div>
-                        </ToggleGroupItem>
-                      </ToggleGroup>
+                      <TooltipProvider>
+                        <Tooltip open={roleTipOpen} onOpenChange={setRoleTipOpen}>
+                          <TooltipTrigger asChild>
+                            <ToggleGroup
+                              type="single"
+                              value={field.value}
+                              onValueChange={(v) => { if (v) { field.onChange(v); showRoleTip(); } }}
+                              aria-label={t('join.aria.select_role')}
+                              aria-required="true"
+                              className="w-full grid grid-cols-3 gap-3"
+                            >
+                              <ToggleGroupItem
+                                value="Community Member"
+                                aria-label={t('join.role.community')}
+                                className={`w-full aspect-square p-2 rounded-xl border-2 bg-black/60 text-white hover:bg-black/50 border-white/20 data-[state=on]:bg-black/70 data-[state=on]:text-brawl-yellow data-[state=on]:border-brawl-yellow flex flex-col items-center justify-center`}
+                              >
+                                <div className="flex flex-col items-center justify-center gap-1 text-xs sm:text-sm">
+                                  <Users size={18} />
+                                  <span>{t('join.role.community')}</span>
+                                </div>
+                              </ToggleGroupItem>
+                              <ToggleGroupItem
+                                value="Club Owner"
+                                aria-label={t('join.role.club_owner')}
+                                className={`w-full aspect-square p-2 rounded-xl border-2 bg-black/60 text-white hover:bg-black/50 border-white/20 data-[state=on]:bg-black/70 data-[state=on]:text-brawl-yellow data-[state=on]:border-brawl-yellow flex flex-col items-center justify-center`}
+                              >
+                                <div className="flex flex-col items-center justify-center gap-1 text-xs sm:text-sm">
+                                  <Crown size={18} />
+                                  <span>{t('join.role.club_owner')}</span>
+                                </div>
+                              </ToggleGroupItem>
+                              <ToggleGroupItem
+                                value="Instructor"
+                                aria-label={t('join.role.instructor')}
+                                className={`w-full aspect-square p-2 rounded-xl border-2 bg-black/60 text-white hover:bg-black/50 border-white/20 data-[state=on]:bg-black/70 data-[state=on]:text-brawl-yellow data-[state=on]:border-brawl-yellow flex flex-col items-center justify-center`}
+                              >
+                                <div className="flex flex-col items-center justify-center gap-1 text-xs sm:text-sm">
+                                  <GraduationCap size={18} />
+                                  <span>{t('join.role.instructor')}</span>
+                                </div>
+                              </ToggleGroupItem>
+                            </ToggleGroup>
+                          </TooltipTrigger>
+                          {role && roleTip && (
+                            <TooltipContent side="bottom" align="center" className="max-w-xs text-center">
+                              <span>{roleTip}</span>
+                            </TooltipContent>
+                          )}
+                        </Tooltip>
+                      </TooltipProvider>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -303,7 +376,7 @@ const JoinUsPage = () => {
                         />
                       </div>
                     </FormControl>
-                    <div className={`flex ${isRTL ? 'justify-start' : 'justify-end'} text-[10px] text-white/50 mt-1 tabular-nums`}>{(nameValue?.length ?? 0)}/80</div>
+                    {/* Removed character counter per request */}
                     <FormMessage />
                   </FormItem>
                 )}
@@ -382,20 +455,96 @@ const JoinUsPage = () => {
                 )}
               />
 
-              {/* Age (optional) */}
+              {/* Age */}
               <FormField
                 control={form.control}
                 name="age"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t('join.age.label')}</FormLabel>
+                    <FormLabel>
+                      {t('join.age.label')} {role === 'Instructor' && <span aria-hidden="true" className="text-amber-400">*</span>}
+                    </FormLabel>
                     <FormControl>
-                      <Input className="h-12" inputMode="numeric" placeholder={t('join.age.placeholder')} {...field} dir={isRTL ? 'ltr' : undefined} />
+                      <Input
+                        type="number"
+                        min={6}
+                        max={30}
+                        step={1}
+                        className={`h-12 ${isRTL ? 'pr-3' : 'pl-3'} bg-black/60 text-white border-2 border-white/20 rounded-xl placeholder:text-white/40 focus:ring-2 focus:ring-brawl-yellow/50 focus:border-transparent hover:bg-black/50`}
+                        inputMode="numeric"
+                        placeholder={t('join.age.placeholder')}
+                        dir={isRTL ? 'ltr' : undefined}
+                        value={field.value ?? ''}
+                        onChange={(e) => {
+                          const v = e.target.value;
+                          if (v === '') return field.onChange(undefined);
+                          const n = Math.max(6, Math.min(30, Number(v)));
+                          field.onChange(Number.isFinite(n) ? n : undefined);
+                        }}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+
+              {/* Club Owner extra fields */}
+              {role === 'Club Owner' && (
+                <>
+                  <FormField
+                    control={form.control}
+                    name="clubName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t('join.club.name.label')} <span aria-hidden="true" className="text-amber-400">*</span></FormLabel>
+                        <FormControl>
+                          <div className="relative rounded-xl">
+                            <Crown size={16} className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 text-white/60`} />
+                            <Input
+                              className={`h-12 ${isRTL ? 'pr-9' : 'pl-9'} bg-black/60 text-white border-2 border-white/20 rounded-xl placeholder:text-white/40 focus:ring-2 focus:ring-brawl-yellow/50 focus:border-transparent hover:bg-black/50`}
+                              placeholder={t('join.club.name.placeholder')}
+                              {...field}
+                            />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="clubMembers"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t('join.club.members.label')} <span aria-hidden="true" className="text-amber-400">*</span></FormLabel>
+                        <FormControl>
+                          <div className="relative rounded-xl">
+                            <Users size={16} className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 text-white/60`} />
+                            <Input
+                              type="number"
+                              min={1}
+                              max={30}
+                              step={1}
+                              className={`h-12 ${isRTL ? 'pr-9' : 'pl-9'} bg-black/60 text-white border-2 border-white/20 rounded-xl placeholder:text-white/40 focus:ring-2 focus:ring-brawl-yellow/50 focus:border-transparent hover:bg-black/50`}
+                              inputMode="numeric"
+                              dir={isRTL ? 'ltr' : undefined}
+                              placeholder={t('join.club.members.placeholder')}
+                              value={field.value ?? ''}
+                              onChange={(e) => {
+                                const v = e.target.value;
+                                if (v === '') return field.onChange(undefined);
+                                const n = Math.max(1, Math.min(30, Number(v)));
+                                field.onChange(Number.isFinite(n) ? n : undefined);
+                              }}
+                            />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </>
+              )}
 
               {/* Submit */}
               <Button
@@ -412,6 +561,18 @@ const JoinUsPage = () => {
                   t('join.submit')
                 )}
               </Button>
+              {/* Tiny privacy info icon */}
+              <div className="flex justify-center mt-2">
+                <button
+                  type="button"
+                  className="text-white/40 hover:text-white/70"
+                  aria-label={t('join.privacy.info_label')}
+                  onClick={() => toast.message(t('join.privacy.copy'))}
+                >
+                  <Info size={12} />
+                  <span className="sr-only">{t('join.privacy.info_label')}</span>
+                </button>
+              </div>
               {cooldown > 0 && (
                 <div className="space-y-1" aria-live="polite">
                   <div className="h-1 w-full rounded bg-white/10 overflow-hidden">
@@ -423,28 +584,11 @@ const JoinUsPage = () => {
                   <p className="text-center text-xs text-white/60">{t('join.cooldown.prefix')} {cooldown}{t('join.cooldown.suffix')}</p>
                 </div>
               )}
-              <p className="text-center text-[10px] text-white/40">{t('join.privacy.copy')}</p>
+              {/* privacy copy moved to icon */}
             </form>
           </Form>
           </div>
-
-          <div className="mt-6 text-center text-xs text-white/60">{t('join.social.connect')}</div>
-          <div className="mt-2 flex items-center justify-center gap-5 text-white/70">
-            {SOCIAL_LINKS.map(({ label, href, icon: Icon }) => (
-              <a
-                key={label}
-                href={href || '#'}
-                target={href ? '_blank' : undefined}
-                rel={href ? 'noopener noreferrer' : undefined}
-                className="hover:text-white transition-colors inline-flex items-center gap-2 hover:scale-110 will-change-transform"
-                aria-label={label}
-                onClick={(e) => { if (!href) { e.preventDefault(); toast.message(t('coming.soon')); } }}
-              >
-                <Icon size={20} />
-                <span className="sr-only">{label}</span>
-              </a>
-            ))}
-          </div>
+          
         </div>
       </div>
     </div>

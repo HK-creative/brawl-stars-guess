@@ -1,9 +1,12 @@
-Adapt Games UI to home page - ✅
+Adapt daily Games UI to home page - ✅
+Adapt survival games UI to home page - ✅
 build tier list page  - ✅
 build join us page - ✅
+build feedback page
+Adapt Survival mode design to daily
 Prize-giveaway feature for engaged users
 Onboarding pop-up flow
-Check Log-ins & accounts
+Check Log-ins & accounts (in supabase) - data store, login, register, forgot password.
 True single-page mobile layout
 Final home-screen polish
 Complete Translations 
@@ -15,3 +18,5 @@ Connect streak count to Supabase database
 replace tier list data with real data 
 
 leaderboards (?)
+Either remove social icons from join us page, or create socials and link them.
+ensure Join us page connected correctly to Supabase

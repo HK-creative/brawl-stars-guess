@@ -14,6 +14,9 @@ import { Button } from '@/components/ui/button';
 import ReactConfetti from 'react-confetti';
 import VictorySection from '../components/VictoryPopup';
 // removed unused GameModeTracker and HomeButton imports
+import { motion } from 'framer-motion';
+import { useMotionPrefs } from '@/hooks/useMotionPrefs';
+import { SlidingNumber } from '@/components/ui/sliding-number';
 
 // Helper to get a hardcoded list of available audio files
 const getAvailableAudioFiles = (): string[] => {
@@ -288,6 +291,7 @@ const AudioMode = ({
   const [gameKey, setGameKey] = useState(Date.now().toString()); // Key to force re-render
   const victoryRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+  const { motionOK, transition } = useMotionPrefs();
 
   // Hint system state
   const [showHint, setShowHint] = useState(false);
@@ -926,10 +930,16 @@ const AudioMode = ({
       </div>
 
       {/* Main Content */}
-      <div className="survival-mode-content">
+      <div className={isSurvivalMode ? "daily-mode-content" : "survival-mode-content"}>
         {/* Game Card */}
-        <div className="survival-mode-game-card survival-mode-animate-pulse">
-          <div className="survival-mode-card-content">
+        <motion.div
+          className={isSurvivalMode ? "daily-mode-game-card daily-mode-animate-pulse" : "survival-mode-game-card survival-mode-animate-pulse"}
+          layout
+          initial={motionOK ? { opacity: 0, scale: 0.98, y: 8 } : { opacity: 0 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={transition}
+        >
+          <div className={isSurvivalMode ? "daily-mode-card-content" : "survival-mode-card-content"}>
             {/* Main Challenge Content */}
             <div className="survival-mode-input-section">
               {/* Audio Player */}
@@ -970,7 +980,12 @@ const AudioMode = ({
                 </div>
                 
                 {/* Status Text */}
-                <div className="text-center">
+                <motion.div
+                  className="text-center"
+                  initial={motionOK ? { opacity: 0, y: 8 } : { opacity: 1, y: 0 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={transition}
+                >
                   <p className="text-sm md:text-base text-white/80 max-w-md mx-auto italic">
                     {audioError 
                       ? "Error playing audio. Please try again later." 
@@ -980,7 +995,7 @@ const AudioMode = ({
                     }
                   </p>
                   {/* Guess Input */}
-                  <div className="mt-4 w-full max-w-xs mx-auto">
+                  <div className={isSurvivalMode ? "daily-mode-input-section mb-8 w-full max-w-md mx-auto" : "mt-4 w-full max-w-xs mx-auto"}>
                     <BrawlerAutocomplete
                       brawlers={brawlers}
                       value={guess}
@@ -997,23 +1012,35 @@ const AudioMode = ({
                     <h2 className="text-xl md:text-2xl font-extrabold text-brawl-yellow mt-4">
                       {dailyChallenge.brawler}
                     </h2>
-                    <span className={`text-2xl font-extrabold ${(maxGuesses - attempts) <= 3 ? 'text-red-400 animate-bounce' : 'text-white'}`}>{maxGuesses - attempts}</span>
                   </>
                 ) : (
-                  <div className="survival-mode-guess-counter">
-                    <span className="text-base font-semibold">Number of Guesses</span>
-                    <span className="text-base font-bold">{attempts}</span>
+                  <div className={isSurvivalMode ? "daily-mode-guess-counter flex items-center" : "survival-mode-guess-counter"}>
+                    {isSurvivalMode ? (
+                      <>
+                        <span className="text-lg font-bold tracking-wide">{t('guesses.left')}</span>
+                        <span className={`text-2xl font-extrabold ${(maxGuesses - attempts) <= 3 ? 'text-red-400' : 'text-white'}`}>
+                          <SlidingNumber value={Math.max(0, maxGuesses - attempts)} padStart />
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="text-base font-semibold mr-2">{t('number.of.guesses')}</span>
+                        <span className="text-base font-bold">
+                          <SlidingNumber value={guessCount} padStart />
+                        </span>
+                      </>
+                    )}
                   </div>
                 )}
-                </div>
+                </motion.div>
               </div>
               </div>
             </div>
-          </div>
+        </motion.div>
 
         {/* Previous Guesses */}
-        <div className="survival-mode-guesses-section">
-          <div className="survival-mode-guesses-grid">
+        <div className={isSurvivalMode ? "daily-mode-guesses-section" : "survival-mode-guesses-section"}>
+          <div className={isSurvivalMode ? "daily-mode-guesses-grid" : "survival-mode-guesses-grid"}>
             {guesses.map((pastGuess, idx) => {
               const isCorrect = pastGuess.toLowerCase() === dailyChallenge.brawler.toLowerCase();
               const isLastGuess = idx === guesses.length - 1;
@@ -1021,17 +1048,17 @@ const AudioMode = ({
                 <div
                   key={idx}
                   className={cn(
-                    "survival-mode-guess-item",
-                    isCorrect ? "survival-mode-guess-correct" : "survival-mode-guess-incorrect",
+                    isSurvivalMode ? "daily-mode-guess-item" : "survival-mode-guess-item",
+                    isSurvivalMode ? (isCorrect ? "daily-mode-guess-correct" : "daily-mode-guess-incorrect") : (isCorrect ? "survival-mode-guess-correct" : "survival-mode-guess-incorrect"),
                     !isCorrect && isLastGuess ? "animate-shake" : ""
                   )}
                 >
                   <img
                     src={getPortrait(pastGuess)}
                     alt={pastGuess}
-                    className="survival-mode-guess-portrait"
+                    className={isSurvivalMode ? "daily-mode-guess-portrait" : "survival-mode-guess-portrait"}
                   />
-                  <span className="survival-mode-guess-name">
+                  <span className={isSurvivalMode ? "daily-mode-guess-name" : "survival-mode-guess-name"}>
                     {pastGuess}
                   </span>
                 </div>

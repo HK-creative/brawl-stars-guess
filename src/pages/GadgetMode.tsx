@@ -18,6 +18,9 @@ import ReactConfetti from 'react-confetti';
 import { useIsMobile } from "@/hooks/use-mobile";
 import GameModeTracker from '@/components/GameModeTracker';
 import HomeButton from '@/components/ui/home-button';
+import { motion } from 'framer-motion';
+import { useMotionPrefs } from '@/hooks/useMotionPrefs';
+import { SlidingNumber } from '@/components/ui/sliding-number';
 
 // Helper function to get the next mode key for the VictorySection
 const getNextModeKey = (currentMode: string) => {
@@ -133,6 +136,7 @@ const GadgetMode = ({
   const victoryRef = useRef<HTMLDivElement>(null);
   const [gameKey, setGameKey] = useState(Date.now().toString()); // Key to force re-render
   const navigate = useNavigate();
+  const { motionOK, transition } = useMotionPrefs();
 
   // Confetti window size
   const [windowSize, setWindowSize] = useState({ width: window.innerWidth, height: window.innerHeight });
@@ -537,19 +541,28 @@ const GadgetMode = ({
 
           {/* Guess Counter */}
           <div className="w-full flex justify-center gap-4 mt-4">
-            {isSurvivalMode ? (
-              <div className="flex items-center gap-2 bg-black/70 border-2 border-brawl-yellow px-6 py-2 rounded-full shadow-xl animate-pulse">
-                <span className="text-lg font-bold text-brawl-yellow">
-                  {guessesLeft} {guessesLeft === 1 ? 'Guess' : 'Guesses'} Left
-                </span>
-              </div>
-            ) : (
-              <div className="flex items-center gap-2 bg-black/70 border-2 border-brawl-yellow px-6 py-2 rounded-full shadow-xl">
-                <span className="text-lg font-bold text-brawl-yellow">
-                  {attempts}/{maxGuesses} Guesses
-                </span>
-              </div>
-            )}
+            <motion.div
+              className="contents"
+              initial={motionOK ? { opacity: 0, y: 8 } : { opacity: 1, y: 0 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={transition}
+            >
+              {isSurvivalMode ? (
+                <div className="survival-mode-guess-counter">
+                  <span className="text-lg font-bold tracking-wide">{t('guesses.left')}</span>
+                  <span className={`text-2xl font-extrabold ${Math.max(0, guessesLeft) <= 3 ? 'text-red-400' : 'text-white'}`}>
+                    <SlidingNumber value={Math.max(0, guessesLeft)} padStart />
+                  </span>
+                </div>
+              ) : (
+                <div className="survival-mode-guess-counter">
+                  <span className="text-base font-semibold">{t('number.of.guesses')}</span>
+                  <span className="text-base font-bold">
+                    <SlidingNumber value={attempts} padStart />
+                  </span>
+                </div>
+              )}
+            </motion.div>
           </div>
 
           {/* Previous Guesses */}
