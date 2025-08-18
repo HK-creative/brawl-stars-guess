@@ -17,7 +17,7 @@ lets work on the victory screen now
 
 I decided I want to do a complete remake of the survival front end
 
-1. I want to keep all the current elements but completely change their looks. I want to 
+1. I want to keep all the game mode's current elements but completely re-create their front end. I want to make it look  
 
 
 2. Currently In survival mode, when user wins a round it goes to a (pop-up like a new page), and I don’t like it. I decided I want to reduce user friction by changing it to not be a pop-up or separate page but to make it in the same page. I want it to work like this - when user wins a round, all the elements that are not in the header like the home button will fade out in transition animation, and then there victory section will appear there in the same place (same page).  I want it to be displayed for 3 second and after that it will fade out and all the content of the next round [either same game mode or different (it’s randomly selected based on user choices, it’s already working like that and you shouldn’t change or mind that.)] fade in and so on. The elements of this new victory screen is - the same gif, the victory headline, the score section, text that is a timer of 3 seconds that start instantly when won and when the timer is over it continues to the next round. That is all and the only elements. 
