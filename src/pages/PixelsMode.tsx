@@ -20,7 +20,7 @@ import GameModeTracker from '@/components/GameModeTracker';
 import HomeButton from '@/components/ui/home-button';
 import ShareResultModal from '@/components/ShareResultModal';
 import PixelatedImage from '@/components/PixelatedImage';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useMotionPrefs } from '@/hooks/useMotionPrefs';
 import { SlidingNumber } from '@/components/ui/sliding-number';
 
@@ -485,7 +485,7 @@ const PixelsMode = ({
 
                 {/* Pixelated Portrait Display */}
                 <div className="flex justify-center mb-2">
-                  <div className="w-40 h-40 md:w-48 md:h-48 rounded-xl overflow-hidden">
+                  <div className="w-64 h-64 md:w-72 md:h-72 rounded-3xl border-4 border-pink-500/60 bg-black/20 backdrop-blur-sm flex items-center justify-center overflow-hidden shadow-2xl">
                     {portraitImage ? (
                       <PixelatedImage
                         src={portraitImage}
@@ -505,7 +505,7 @@ const PixelsMode = ({
 
                 {/* Input Form */}
                 {!isGameOver && !isCorrect && (
-                  <div className="space-y-4">
+                  <div className="w-full max-w-md mx-auto">
                     <BrawlerAutocomplete
                       brawlers={brawlers}
                       value={guess}
@@ -529,7 +529,7 @@ const PixelsMode = ({
                       <div className="survival-mode-guess-counter">
                         <span className="text-lg font-bold tracking-wide">{t('guesses.left')}</span>
                         <span className={`text-2xl font-extrabold ${guessesLeft <= 3 ? 'text-red-400' : 'text-white'}`}>
-                          <SlidingNumber value={Math.max(0, guessesLeft)} padStart />
+                          <SlidingNumber value={Math.max(0, guessesLeft)} />
                         </span>
                       </div>
                     ) : (
@@ -552,32 +552,65 @@ const PixelsMode = ({
           <div className="survival-mode-guesses-section">
             <h3 className="text-lg font-semibold text-white text-center mb-4">Previous Guesses</h3>
             <div className="survival-mode-guesses-grid">
-              {guesses.map((pastGuess, idx) => {
-                const isCorrectGuess = dailyChallenge && pastGuess.toLowerCase() === dailyChallenge.brawler.toLowerCase();
-                const isLastGuess = idx === guesses.length - 1;
-                return (
-                  <div
-                    key={idx}
-                    className={cn(
-                      "survival-mode-guess-item",
-                      isCorrectGuess ? "survival-mode-guess-correct" : "survival-mode-guess-incorrect",
-                      !isCorrectGuess && isLastGuess ? "animate-shake" : ""
-                    )}
-                  >
-                    <img
-                      src={getPortrait(pastGuess)}
-                      alt={pastGuess}
-                      className="survival-mode-guess-portrait"
-                      onError={(e) => {
-                        e.currentTarget.src = DEFAULT_PORTRAIT;
+              <AnimatePresence initial={false} mode="popLayout">
+                {guesses.map((pastGuess, idx) => {
+                  const isCorrectGuess = dailyChallenge && pastGuess.toLowerCase() === dailyChallenge.brawler.toLowerCase();
+                  const isNewest = idx === guesses.length - 1;
+                  return (
+                    <motion.div
+                      key={`${pastGuess}-${guesses.length - idx}`}
+                      initial={motionOK && isNewest ? { 
+                        opacity: 0, 
+                        y: 45,
+                        scale: 0.9,
+                        filter: "blur(2px)"
+                      } : { opacity: 0 }}
+                      animate={{
+                        opacity: 1,
+                        y: 0,
+                        scale: 1,
+                        filter: "blur(0px)",
+                        transition: {
+                          type: "spring",
+                          stiffness: 350,
+                          damping: 25,
+                          mass: 0.75,
+                          duration: 0.5
+                        }
                       }}
-                    />
-                    <span className="survival-mode-guess-name">
-                      {pastGuess}
-                    </span>
-                  </div>
-                );
-              })}
+                      exit={{ 
+                        opacity: 0, 
+                        scale: 0.9,
+                        y: -18,
+                        transition: { duration: 0.28, ease: "easeInOut" }
+                      }}
+                      layout
+                      transition={{
+                        layout: {
+                          type: "spring",
+                          stiffness: 350,
+                          damping: 25,
+                          mass: 0.75
+                        }
+                      }}
+                      className={cn(
+                        "survival-mode-guess-item",
+                        isCorrectGuess ? "survival-mode-guess-correct" : "survival-mode-guess-incorrect",
+                        !isCorrectGuess && isNewest ? "animate-shake" : ""
+                      )}
+                    >
+                      <img
+                        src={getPortrait(pastGuess)}
+                        alt={pastGuess}
+                        className="survival-mode-guess-portrait"
+                      />
+                      <span className="survival-mode-guess-name">
+                        {pastGuess}
+                      </span>
+                    </motion.div>
+                  );
+                })}
+              </AnimatePresence>
             </div>
           </div>
         )}

@@ -18,6 +18,8 @@ interface LayoutProps {
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const location = useLocation();
   const isHomePage = location.pathname === '/';
+  // Hide auth buttons on Survival Mode routes
+  const hideAuthButtons = location.pathname.startsWith('/survival');
   const { language, changeLanguage } = useLanguage();
   const { isLoggedIn, user, logout } = useStreak();
   const navigate = useNavigate();
@@ -32,8 +34,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           <RotatingBackground />
         </div>
 
-        {/* Auth buttons - positioned exactly like language selection but on left side - ONLY show on non-homepage */}
-        {!isHomePage && (
+        {/* Auth buttons - ONLY on non-homepage and hidden for Survival Mode routes */}
+        {!isHomePage && !hideAuthButtons && (
           <div className="absolute top-2 left-4 md:top-4 md:left-1/2 md:translate-x-96 z-50">
             {!isLoggedIn ? (
               <div className="md:relative md:bg-black/10 md:backdrop-blur-sm md:rounded-xl md:border md:border-white/10 md:p-3 md:shadow-sm">
@@ -137,8 +139,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           </div>
         )}
 
-        {/* Language selection - ONLY show on non-homepage */}
-        {!isHomePage && (
+        {/* Survival routes now render their own header + home button in-page */}
+
+        {/* Language selection - ONLY show on non-homepage and hidden for Survival Mode routes */}
+        {!isHomePage && !hideAuthButtons && (
           <div className="absolute top-2 right-4 md:top-4 md:right-16 z-50 flex gap-2">
           <button
             onClick={() => changeLanguage('en')}
@@ -182,7 +186,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         
         <main className={cn(
           "relative z-10 min-h-screen",
-          !isHomePage ? "pt-8 px-4" : "",
+          !isHomePage ? (hideAuthButtons ? "px-4" : "pt-8 px-4") : "",
             "overflow-visible"
           )}>
           {children || <Outlet />}

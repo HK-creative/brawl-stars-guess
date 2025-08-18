@@ -11,7 +11,14 @@
     "preview": "bunx vite preview",
     "start": "bun run preview --port $PORT",
     "test": "bunx vitest run",
-    "coverage": "bunx vitest run --coverage"
+    "coverage": "bunx vitest run --coverage",
+    "dev:npm": "vite",
+    "build:npm": "vite build",
+    "build:dev:npm": "vite build --mode development",
+    "lint:npm": "eslint .",
+    "preview:npm": "vite preview",
+    "test:npm": "vitest run",
+    "coverage:npm": "vitest run --coverage"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",

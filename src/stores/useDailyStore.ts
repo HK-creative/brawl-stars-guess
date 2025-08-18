@@ -59,7 +59,7 @@ interface DailyActions {
   // Check if all modes are completed
   areAllModesCompleted: () => boolean;
   
-  // Get completion progress (number of completed modes out of 4)
+  // Get completion progress (number of completed modes out of 5)
   getCompletionProgress: () => { completed: number; total: number };
   
   // Force refresh daily challenges
@@ -257,7 +257,8 @@ export const useDailyStore = create<DailyGameState & DailyActions>()(
         return state.classic.isCompleted && 
                state.gadget.isCompleted && 
                state.starpower.isCompleted && 
-               state.audio.isCompleted;
+               state.audio.isCompleted &&
+               state.pixels.isCompleted;
       },
 
       getCompletionProgress: () => {
@@ -267,9 +268,10 @@ export const useDailyStore = create<DailyGameState & DailyActions>()(
           state.gadget.isCompleted,
           state.starpower.isCompleted,
           state.audio.isCompleted,
+          state.pixels.isCompleted,
         ].filter(Boolean).length;
         
-        return { completed, total: 4 };
+        return { completed, total: 5 };
       },
 
       refreshDailyChallenges: async () => {

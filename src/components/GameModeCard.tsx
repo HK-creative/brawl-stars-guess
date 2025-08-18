@@ -85,7 +85,11 @@ const GameModeCard: React.FC<GameModeCardProps> = ({
 }) => {
   const navigate = useNavigate();
   const displayTitle = title || (mode ? t(`mode.${mode}`) : '');
-  const linkPath = customPath || path || (mode ? `/${mode}` : '#');
+  const linkPath = customPath || path || (mode
+    ? (["classic", "gadget", "starpower", "audio", "pixels"].includes(mode)
+        ? `/daily?mode=${mode}`
+        : `/${mode}`)
+    : '#');
   const isClickable = !comingSoon && enabled;
   const gradientColor = bgColor || (mode && modeColors[mode]) || "from-blue-500 to-blue-600";
 

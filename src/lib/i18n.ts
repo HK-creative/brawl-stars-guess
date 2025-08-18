@@ -187,6 +187,14 @@ const translations: Translations = {
     en: "Pixels Mode",
     he: "מצב פיקסלים"
   },
+  "mode.survival.title": {
+    en: "Survival Mode",
+    he: "מצב הישרדות"
+  },
+  "mode.title.survival": {
+    en: "Survival Mode",
+    he: "מצב הישרדות"
+  },
   "survival.setup.title": {
     en: "Survival Mode Setup",
     he: "הגדרות מצב הישרדות"
@@ -269,6 +277,10 @@ const translations: Translations = {
   "daily.audio.playing": {
     en: "Playing audio...",
     he: "מנגן קול..."
+  },
+  "survival.click.play.sound": {
+    en: "Click to play sound",
+    he: "לחץ כדי לנגן קול"
   },
   "daily.gadget.headline": {
     en: "Guess the Brawler by their Gadget!",
@@ -776,6 +788,40 @@ const translations: Translations = {
   "time.per.round.seconds": {
     en: "seconds per round",
     he: "שניות לסיבוב"
+  },
+  
+  // Survival HUD
+  "survival.round": {
+    en: "Round",
+    he: "סיבוב"
+  },
+  "survival.pts": {
+    en: "Pts",
+    he: "נק'"
+  },
+  "survival.victory.title": {
+    en: "Victory!",
+    he: "ניצחון!"
+  },
+  "survival.points.earned": {
+    en: "Points Earned",
+    he: "נקודות שהושגו"
+  },
+  "survival.total.score": {
+    en: "Total Score",
+    he: "ניקוד כולל"
+  },
+  "survival.next.round.in": {
+    en: "Next round in",
+    he: "הסיבוב הבא בעוד"
+  },
+  "survival.guess.starpower": {
+    en: "Guess the Brawler by their Star Power!",
+    he: "נחשו את הבראולר לפי הכוח כוכב!"
+  },
+  "survival.guess.sound": {
+    en: "Guess the Brawler by their Sound!",
+    he: "נחשו את הבראולר לפי הקול!"
   },
   
   // Attribute Labels

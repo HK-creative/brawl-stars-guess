@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { useDailyStore, DailyGameMode } from '@/stores/useDailyStore';
 import usePageTitle from '@/hooks/usePageTitle';
 import { t } from '@/lib/i18n';
@@ -15,7 +15,6 @@ import DailyAudioModeContent from './daily/DailyAudioModeContent';
 import DailyPixelsModeContent from './daily/DailyPixelsModeContent';
 
 const DailyModesPage: React.FC = () => {
-  const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
   const { initializeDailyModes } = useDailyStore();
   
@@ -27,21 +26,14 @@ const DailyModesPage: React.FC = () => {
       return modeParam;
     }
     
-    // Check path-based routing for backward compatibility (/daily/classic)
-    const pathSegments = location.pathname.split('/');
-    const pathMode = pathSegments[2] as DailyGameMode;
-    if (pathMode && ['classic', 'gadget', 'starpower', 'audio', 'pixels'].includes(pathMode)) {
-      return pathMode;
-    }
-    
     // Default to classic
     return 'classic';
   };
   
   const [currentMode, setCurrentMode] = useState<DailyGameMode>(getCurrentModeFromUrl);
   
-  // Set browser tab title based on current mode
-  usePageTitle(`${t(`mode.${currentMode}`)} | ${t('daily.challenge')}`);
+  // Set browser tab title based on current mode (i18n Option A)
+  usePageTitle(`${t(`mode.${currentMode}.title`)} | ${t('label.daily_challenge')}`);
   
   // Initialize daily modes on component mount
   useEffect(() => {
@@ -54,7 +46,7 @@ const DailyModesPage: React.FC = () => {
     if (newMode !== currentMode) {
       setCurrentMode(newMode);
     }
-  }, [location.pathname, searchParams, currentMode]);
+  }, [searchParams, currentMode]);
   
   // Handle mode changes
   const handleModeChange = (mode: DailyGameMode) => {
@@ -63,26 +55,10 @@ const DailyModesPage: React.FC = () => {
       
       // Update URL with query parameter
       setSearchParams({ mode });
-      
-      // Update browser history for proper back/forward navigation
-      window.history.pushState(
-        { mode },
-        `${t(`mode.${mode}`)} | ${t('daily.challenge')}`,
-        `/daily?mode=${mode}`
-      );
     }
   };
   
-  // Handle browser back/forward navigation
-  useEffect(() => {
-    const handlePopState = (event: PopStateEvent) => {
-      const newMode = getCurrentModeFromUrl();
-      setCurrentMode(newMode);
-    };
-    
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
-  }, []);
+  // React Router will update searchParams on back/forward; no manual popstate handling needed
   
   // Render the appropriate mode content
   const renderModeContent = () => {

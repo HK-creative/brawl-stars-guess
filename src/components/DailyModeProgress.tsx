@@ -26,7 +26,7 @@ const DailyModeProgress: React.FC<DailyModeProgressProps> = ({
       name: t('mode.classic'), 
       state: classic,
       iconSrc: '/ClassicIcon.png',
-      path: '/daily/classic',
+      path: '/daily?mode=classic',
       color: 'from-yellow-500 to-amber-600',
       bgColor: 'bg-yellow-500/20',
       borderColor: 'border-yellow-400/40'
@@ -36,7 +36,7 @@ const DailyModeProgress: React.FC<DailyModeProgressProps> = ({
       name: t('mode.gadget'), 
       state: gadget,
       iconSrc: '/GadgetIcon.png',
-      path: '/daily/gadget',
+      path: '/daily?mode=gadget',
       color: 'from-purple-500 to-violet-600',
       bgColor: 'bg-purple-500/20',
       borderColor: 'border-purple-400/40'
@@ -46,7 +46,7 @@ const DailyModeProgress: React.FC<DailyModeProgressProps> = ({
       name: t('mode.starpower'), 
       state: starpower,
       iconSrc: '/StarpowerIcon.png',
-      path: '/daily/starpower',
+      path: '/daily?mode=starpower',
       color: 'from-orange-500 to-yellow-600',
       bgColor: 'bg-orange-500/20',
       borderColor: 'border-orange-400/40'
@@ -56,7 +56,7 @@ const DailyModeProgress: React.FC<DailyModeProgressProps> = ({
       name: t('mode.audio'), 
       state: audio,
       iconSrc: '/AudioIcon.png',
-      path: '/daily/audio',
+      path: '/daily?mode=audio',
       color: 'from-emerald-500 to-teal-600',
       bgColor: 'bg-emerald-500/20',
       borderColor: 'border-emerald-400/40'
@@ -66,7 +66,7 @@ const DailyModeProgress: React.FC<DailyModeProgressProps> = ({
       name: t('mode.pixels'), 
       state: pixels,
       iconSrc: '/PixelsIcon.png',
-      path: '/daily/pixels',
+      path: '/daily?mode=pixels',
       color: 'from-indigo-500 to-blue-600',
       bgColor: 'bg-indigo-500/20',
       borderColor: 'border-indigo-400/40'

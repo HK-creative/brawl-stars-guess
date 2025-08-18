@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import PrimaryButton from '@/components/ui/primary-button';
-import { Timer, Circle, Trophy } from 'lucide-react';
+import { Timer } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import { useSurvivalStore } from '@/stores/useSurvivalStore';
 import { resetModeSelectionState } from '@/lib/survival-logic';
@@ -12,23 +12,21 @@ import StarPowerMode from './StarPowerMode';
 import AudioMode from './AudioMode';
 import PixelsMode from './PixelsMode';
 import { cn } from '@/lib/utils';
-import SurvivalVictoryPopup from '@/components/SurvivalVictoryPopup';
+// Victory/Loss popups removed - using inline victory flow
 import SurvivalLossPopup from '@/components/SurvivalLossPopup';
 import SurvivalSetupPopup from '@/components/SurvivalSetupPopup';
 import { t } from '@/lib/i18n';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useMotionPrefs } from '@/hooks/useMotionPrefs';
+import ModeTitle from '@/components/ModeTitle';
+import { SlidingNumber } from '@/components/ui/sliding-number';
+import type { GameModeName } from '@/types/gameModes';
 
 // Import brawler data
 import { brawlers } from '@/data/brawlers';
 
 import RotatingBackground from '@/components/layout/RotatingBackground';
 import DailyModeTransitionOrchestrator from '@/components/layout/DailyModeTransitionOrchestrator';
-import SurvivalSharedHeader from '@/components/layout/SurvivalSharedHeader';
-import { SlidingNumber } from '@/components/ui/sliding-number';
-import type { GameModeName } from '@/types/gameModes';
-
-// (FallbackErrorUI removed; inline error UI is used below)
 
 const SurvivalModePage: React.FC = () => {
   const { motionOK, transition, spring } = useMotionPrefs();
@@ -75,6 +73,10 @@ const SurvivalModePage: React.FC = () => {
 
   const navigate = useNavigate();
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  // Guard to avoid duplicate first-round start (e.g., React StrictMode double effects)
+  const initialRoundStartedRef = useRef(false);
+  // Re-entrancy lock to ensure round end is handled only once per round
+  const roundEndLockRef = useRef(false);
   const [brawlerData, setBrawlerData] = useState(() => {
     // Ensure all brawlers have proper ID and required fields for challenge loading
     return brawlers.map((b, index) => ({
@@ -90,9 +92,14 @@ const SurvivalModePage: React.FC = () => {
   // Add state for tracking score and showing popups
   const [totalScore, setTotalScore] = useState(0);
   const [currentRoundPoints, setCurrentRoundPoints] = useState(0);
-  const [showVictoryPopup, setShowVictoryPopup] = useState(false);
+  // Victory popup removed - using inline victory flow
   const [showLossPopup, setShowLossPopup] = useState(false);
-  const [showSetupPopup, setShowSetupPopup] = useState(true); // Start with setup popup
+  const [showSetupPopup, setShowSetupPopup] = useState(true);
+  
+  // New states for inline victory flow
+  const [showInlineVictory, setShowInlineVictory] = useState(false);
+  const [victoryCountdown, setVictoryCountdown] = useState(5);
+  const [isTransitioning, setIsTransitioning] = useState(false); // Start with setup popup
   const [lastCorrectBrawler, setLastCorrectBrawler] = useState("");
   const [correctBrawlerForLoss, setCorrectBrawlerForLoss] = useState("");
   
@@ -105,6 +112,17 @@ const SurvivalModePage: React.FC = () => {
   
   // Add a key to force remount of game mode components
   const [modeKey, setModeKey] = useState<string>("initial");
+
+  // Header scroll state for dynamic opacity/blur
+  const [scrollY, setScrollY] = useState(0);
+  // Minimal end-of-time flash flag
+  const [timeEndedFlash, setTimeEndedFlash] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setScrollY(window.scrollY || window.pageYOffset || 0);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   // Get store state and actions
   const {
@@ -139,15 +157,24 @@ const SurvivalModePage: React.FC = () => {
     return points;
   }, []);
 
-  // Handle round completion
-  const handleRoundEnd = useCallback(({ success, brawlerName }: { success: boolean, brawlerName?: string }) => {
+  // Handler for when a round ends (from game modes)
+  const handleRoundEnd = (result: { success: boolean; brawlerName?: string }) => {
+    console.log('handleRoundEnd invoked', result, { isTransitioning, showInlineVictory, lock: roundEndLockRef.current, round: currentRound });
+    // Re-entrancy guard to prevent duplicate handling per round
+    if (roundEndLockRef.current) {
+      console.warn('handleRoundEnd ignored due to active lock');
+      return;
+    }
+    // Lock immediately; released after next round starts or on retry
+    roundEndLockRef.current = true;
+    const { success: isSuccess, brawlerName } = result;
     // Clear any timers
     if (timerRef.current) {
       clearInterval(timerRef.current);
       timerRef.current = null;
     }
 
-    if (!success) {
+    if (!isSuccess) {
       // Game over - player failed the round
       gameOver();
       
@@ -162,6 +189,10 @@ const SurvivalModePage: React.FC = () => {
       // Show loss popup
       setShowLossPopup(true);
     } else {
+      // Guard against double success handling
+      if (isTransitioning || showInlineVictory) {
+        return;
+      }
       // Success - player completed the round
       // Calculate points earned for this round
       const guessesUsed = activeRoundState ? (activeRoundState.guessesQuota - activeRoundState.guessesLeft) : 0;
@@ -172,29 +203,46 @@ const SurvivalModePage: React.FC = () => {
       setCurrentRoundPoints(points);
       setTotalScore(prev => prev + points);
       
-      // If a specific brawler name was provided in the callback, use that
-      // This will be the actual brawler that was correctly guessed
-      if (brawlerName) {
-        console.log(`Using provided brawler name for victory popup: ${brawlerName}`);
-        setLastCorrectBrawler(brawlerName);
-        setShowVictoryPopup(true);
-        setLastRoundGuessesUsed(guessesUsed);
-        setLastRoundTimeLeft(timeLeft);
-        return;
-      }
+      // Store round data for inline victory display
+      setLastRoundGuessesUsed(guessesUsed);
+      setLastRoundTimeLeft(timeLeft);
       
-      // Fallback: Show victory popup with the correct brawler from the current round state
-      if (activeRoundState?.currentBrawlerId) {
+      // If a specific brawler name was provided in the callback, use that
+      if (brawlerName) {
+        setLastCorrectBrawler(brawlerName);
+      } else if (activeRoundState?.currentBrawlerId) {
         const brawler = brawlerData.find(b => b.id === activeRoundState.currentBrawlerId);
         if (brawler) {
-          console.log(`Using fallback brawler from activeRoundState: ${brawler.name}`);
           setLastCorrectBrawler(brawler.name);
-          setShowVictoryPopup(true);
-          setLastRoundGuessesUsed(guessesUsed);
-          setLastRoundTimeLeft(timeLeft);
-          return; // Don't proceed to next round yet
         }
       }
+      
+      // Show inline victory instead of popup
+      setIsTransitioning(true);
+      setShowInlineVictory(true);
+      setVictoryCountdown(5);
+      
+      // Start countdown timer
+      const countdownInterval = setInterval(() => {
+        setVictoryCountdown(prev => {
+          if (prev <= 1) {
+            clearInterval(countdownInterval);
+            // Transition to next round
+            setTimeout(() => {
+              setShowInlineVictory(false);
+              setModeKey(`survival-round-${Date.now()}`);
+              console.log('Victory transition complete. Starting next round...');
+              startNextRound();
+              // Release the round end lock for the new round
+              roundEndLockRef.current = false;
+              setIsTransitioning(false);
+            }, 500);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+      return;
       
       // Fallback if we couldn't find the brawler
       toast({
@@ -206,37 +254,37 @@ const SurvivalModePage: React.FC = () => {
       setModeKey(`survival-round-${Date.now()}`);
       setTimeout(() => startNextRound(), 1000);
     }
-  }, [gameOver, activeRoundState, brawlerData, calculateRoundPoints, setCorrectBrawlerForLoss, setLastCorrectBrawler, setShowLossPopup, setShowVictoryPopup, setTotalScore, setCurrentRoundPoints, setModeKey, startNextRound]);
+  };
 
-  // Effect to track game status changes and start next round as needed
+  // Effect to start the very first round once after setup
   useEffect(() => {
-    // Don't start a round if we're in setup mode or already have an active round
-    if (gameStatus === 'playing' && !activeRoundState?.isRoundActive && !showSetupPopup) {
-      console.log('No active round detected in playing state. Starting next round...');
+    // Only start the first round when the game is playing, setup popup is closed, and no rounds have started yet
+    if (
+      gameStatus === 'playing' &&
+      !showSetupPopup &&
+      currentRound === 0 &&
+      !activeRoundState?.isRoundActive &&
+      !initialRoundStartedRef.current
+    ) {
+      console.log('Initializing first Survival round...');
+      initialRoundStartedRef.current = true;
       resetModeSelectionState();
       setIsLoading(true);
-      
-      // Use a try-catch block to handle potential errors when starting a new round
+      // Ensure round end lock is released before starting the very first round
+      roundEndLockRef.current = false;
       try {
-        // Add a small delay to ensure the store is updated properly
-        setTimeout(() => {
-          try {
-            startNextRound();
-            setChallengeError(false);
-          } catch (error) {
-            console.error('Failed to start next round:', error);
-            setChallengeError(true);
-          } finally {
-            setIsLoading(false);
-          }
-        }, 300);
+        startNextRound();
+        setChallengeError(false);
       } catch (error) {
-        console.error('Error in round initialization:', error);
+        console.error('Failed to start first round:', error);
         setChallengeError(true);
+        // Allow retry if start failed
+        initialRoundStartedRef.current = false;
+      } finally {
         setIsLoading(false);
       }
     }
-  }, [settings, gameStatus, activeRoundState, startNextRound, showSetupPopup]);
+  }, [settings, gameStatus, currentRound, activeRoundState, startNextRound, showSetupPopup]);
 
   // Update UI when mode changes
   useEffect(() => {
@@ -263,8 +311,9 @@ const SurvivalModePage: React.FC = () => {
 
     // Start the timer
     if (activeRoundState.isRoundActive && activeRoundState.timerLeft !== undefined) {
-      // Initialize local timer state
+      // Initialize local timer state and reset any previous end flash
       setCurrentTimerValue(activeRoundState.timerLeft);
+      setTimeEndedFlash(false);
       
       // Clear any existing interval
       if (timerRef.current) {
@@ -274,29 +323,39 @@ const SurvivalModePage: React.FC = () => {
       // Set up new interval
       timerRef.current = setInterval(() => {
         setCurrentTimerValue(prevTime => {
-          if (prevTime && prevTime > 0) {
+          if (typeof prevTime === 'number' && prevTime > 0) {
             const newTime = prevTime - 1;
             // Update the store as well
             setTimerLeft(newTime);
+            // If this tick reaches zero, end immediately and flash
+            if (newTime === 0) {
+              if (timerRef.current) {
+                clearInterval(timerRef.current);
+                timerRef.current = null;
+              }
+              // Trigger subtle end-of-time flash
+              setTimeEndedFlash(true);
+              setTimeout(() => setTimeEndedFlash(false), 220);
+              
+              gameOver();
+              // Find the correct brawler for the loss popup
+              if (activeRoundState?.currentBrawlerId) {
+                const brawler = brawlerData.find(b => b.id === activeRoundState.currentBrawlerId);
+                if (brawler) {
+                  setCorrectBrawlerForLoss(brawler.name);
+                }
+              }
+              // Show loss popup
+              setShowLossPopup(true);
+              return 0;
+            }
             return newTime;
           } else {
-            // Time's up - game over
+            // Already zero or invalid; ensure cleanup
             if (timerRef.current) {
               clearInterval(timerRef.current);
               timerRef.current = null;
             }
-            gameOver();
-            
-            // Find the correct brawler for the loss popup
-            if (activeRoundState?.currentBrawlerId) {
-              const brawler = brawlerData.find(b => b.id === activeRoundState.currentBrawlerId);
-              if (brawler) {
-                setCorrectBrawlerForLoss(brawler.name);
-              }
-            }
-            
-            // Show loss popup
-            setShowLossPopup(true);
             return 0;
           }
         });
@@ -311,13 +370,128 @@ const SurvivalModePage: React.FC = () => {
   }, [activeRoundState?.isRoundActive, activeRoundState?.timerLeft, settings, gameStatus, gameOver, brawlerData, setTimerLeft]);
 
   // Render the component
+  const uiTimeLeft = currentTimerValue ?? activeRoundState?.timerLeft;
   return (
     <div className="survival-mode-container survival-classic-theme relative">
       <RotatingBackground />
-      <SurvivalSharedHeader
-        currentRound={currentRound}
-        currentMode={activeRoundState?.currentMode as GameModeName | null}
-      />
+      {/* Sticky Header with Timer only (home button reused from Layout, visually within header) */}
+      <div className="sticky top-0 z-40">
+        <motion.div
+          className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen border-b"
+          initial={{ backgroundColor: 'rgba(0,0,0,0)', backdropFilter: 'blur(0px)', borderColor: 'rgba(255,255,255,0)' }}
+          animate={{
+            backgroundColor: `rgba(0,0,0, ${Math.min(1, (scrollY / 120)) * 0.3})`,
+            backdropFilter: `blur(${Math.round(Math.min(1, (scrollY / 120)) * 8)}px)`,
+            borderColor: `rgba(255,255,255, ${Math.min(1, (scrollY / 120)) * 0.10})`
+          }}
+          transition={{ type: 'tween', duration: 0.25, ease: 'easeOut' }}
+        >
+          <div className="w-full max-w-4xl mx-auto px-4 h-16 relative">
+          {/* Subtle red flash when time ends */}
+          <AnimatePresence>
+            {timeEndedFlash && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.18 }}
+                className="absolute inset-0 bg-red-500/20 pointer-events-none"
+              />
+            )}
+          </AnimatePresence>
+          {/* Top progress bar for remaining time */}
+          {settings?.timer && typeof uiTimeLeft === 'number' && (
+            <div
+              className={cn(
+                'absolute top-0 left-0 h-0.5 rounded-r transition-[width] duration-200 ease-linear',
+                uiTimeLeft <= 10 ? 'bg-red-400' : uiTimeLeft <= 30 ? 'bg-amber-400' : 'bg-emerald-400'
+              )}
+              style={{
+                width: `${Math.max(0, Math.min(100, (uiTimeLeft / settings.timer) * 100))}%`
+              }}
+            />
+          )}
+          {/* Home button - left inside header (same design as Layout) */}
+          <div className="absolute left-4 top-1/2 -translate-y-1/2">
+            <button
+              onClick={() => navigate('/')}
+              className="flex items-center justify-center w-14 h-14 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 text-white hover:bg-white/20 transition-all duration-200"
+              aria-label={t('button.go.home')}
+            >
+              <img src="/bs_home_icon.png" alt={t('button.go.home')} className="w-11 h-11" />
+            </button>
+          </div>
+          {/* Timer - top right inside header */}
+          {settings?.timer && gameStatus === 'playing' && !showSetupPopup && !showLossPopup && (
+            <div className="absolute right-4 top-1/2 -translate-y-1/2 select-none">
+              <motion.div
+                initial={motionOK ? { opacity: 0, y: -6 } : { opacity: 1 }}
+                animate={motionOK ? { opacity: 1, y: 0, transition } : { opacity: 1 }}
+                className={cn(
+                  'relative overflow-hidden rounded-full border border-white/10 backdrop-blur-md shadow-xl',
+                  'bg-black/40 text-white'
+                )}
+                aria-label={t('timer')}
+              >
+                {typeof (currentTimerValue ?? activeRoundState?.timerLeft) === 'number' && (
+                  <div
+                    className="absolute inset-0 -z-0"
+                    style={{
+                      background:
+                        `linear-gradient(90deg, rgba(34,197,94,0.25) 0%, rgba(34,197,94,0.25) ${Math.max(0, Math.min(100, (((currentTimerValue ?? (activeRoundState?.timerLeft as number)) / settings.timer) * 100)))}%, transparent ${Math.max(0, Math.min(100, (((currentTimerValue ?? (activeRoundState?.timerLeft as number)) / settings.timer) * 100)))}%)`
+                    }}
+                  />
+                )}
+                <div className="relative z-10 flex items-center gap-2 px-3 py-2">
+                  <Timer
+                    className={cn(
+                      'h-5 w-5',
+                      motionOK &&
+                        typeof (currentTimerValue ?? activeRoundState?.timerLeft) === 'number' &&
+                        ((currentTimerValue ?? (activeRoundState?.timerLeft as number)) <= 30) && 'animate-bounce'
+                    )}
+                  />
+                  <motion.span
+                    className={cn(
+                      'font-mono tabular-nums text-base',
+                      typeof (currentTimerValue ?? activeRoundState?.timerLeft) === 'number' &&
+                      ((currentTimerValue ?? (activeRoundState?.timerLeft as number)) <= 30) ? 'text-red-300' : 'text-white'
+                    )}
+                    layout
+                    transition={spring as any}
+                  >
+                    {typeof (currentTimerValue ?? activeRoundState?.timerLeft) === 'number'
+                      ? (
+                        <>
+                          {Math.floor(((currentTimerValue ?? (activeRoundState?.timerLeft as number)) as number) / 60)}:
+                          {String(((currentTimerValue ?? (activeRoundState?.timerLeft as number)) as number) % 60).padStart(2, '0')}
+                        </>
+                      )
+                      : '--:--'}
+                  </motion.span>
+                </div>
+              </motion.div>
+            </div>
+          )}
+          </div>
+        </motion.div>
+      </div>
+
+      {/* Round title below the header (non-sticky) */}
+      <div className="w-full max-w-4xl mx-auto px-4 pt-2 pb-2 mt-16 md:mt-20 relative z-10">
+        <div className="text-center">
+          <ModeTitle title={`${t('survival.round')} ${Math.max(1, currentRound)}`} />
+        </div>
+      </div>
+      {/* Simple, centered Points line below the round headline */}
+      {!isLoading && !showSetupPopup && !challengeError && (
+        <div className="w-full max-w-4xl mx-auto px-4 relative z-10">
+          <div className="text-center mt-1" aria-live="polite">
+            <span className="text-sm text-white/70">Points: </span>
+            <span className="text-sm text-yellow-400 font-semibold tabular-nums">{totalScore}</span>
+          </div>
+        </div>
+      )}
       
       {/* Loading state */}
       {isLoading && (
@@ -357,6 +531,8 @@ const SurvivalModePage: React.FC = () => {
                     
                     // Small delay before retry to ensure state is reset
                     setTimeout(() => {
+                      // Release any stale lock before retrying
+                      roundEndLockRef.current = false;
                       try {
                         startNextRound();
                         setIsLoading(false);
@@ -380,67 +556,146 @@ const SurvivalModePage: React.FC = () => {
       {/* Main Game Content - Only show if game is active and not loading and no errors */}
       {!isLoading && !showSetupPopup && !challengeError && activeRoundState && activeRoundState.isRoundActive && (
         <div className="survival-mode-content">
-          {/* Game Stats Header */}
-          <motion.div
-            className="mb-1 flex flex-col items-center space-y-1"
-            initial={motionOK ? { opacity: 0, y: 8 } : { opacity: 1 }}
-            animate={motionOK ? { opacity: 1, y: 0, transition } : { opacity: 1 }}
-          >
-            <div className="flex flex-wrap items-center justify-center gap-4">
-              <motion.div
-                className="survival-mode-guess-counter"
-                initial={motionOK ? { opacity: 0, y: 6 } : { opacity: 1 }}
-                animate={motionOK ? { opacity: 1, y: 0, transition } : { opacity: 1 }}
-              >
-                <Trophy className="h-5 w-5" />
-                <span className="flex items-baseline gap-1">
-                  <span>{t('survival.round')}</span>
-                  <span className="font-bold">
-                    <SlidingNumber value={currentRound} />
-                  </span>
-                </span>
-              </motion.div>
-              
-              <motion.div
-                className="survival-mode-guess-counter"
-                initial={motionOK ? { opacity: 0, y: 6 } : { opacity: 1 }}
-                animate={motionOK ? { opacity: 1, y: 0, transition } : { opacity: 1 }}
-              >
-                <Circle className="h-5 w-5 fill-current" />
-                <span className="flex items-baseline gap-1">
-                  <span className="font-bold">
-                    <SlidingNumber value={totalScore} />
-                  </span>
-                  <span>{t('survival.pts')}</span>
-                </span>
-              </motion.div>
-              
-              {settings?.timer && (
-                <motion.div
-                  className={cn(
-                    "survival-mode-guess-counter transition-all duration-300",
-                    (currentTimerValue ?? activeRoundState.timerLeft) <= 30 && "animate-pulse"
-                  )}
-                  initial={motionOK ? { opacity: 0, y: 6 } : { opacity: 1 }}
-                  animate={motionOK ? { opacity: 1, y: 0, transition } : { opacity: 1 }}
-                >
-                  <Timer className={cn(
-                    "h-5 w-5",
-                    (currentTimerValue ?? activeRoundState.timerLeft) <= 30 && "animate-bounce"
-                  )} />
-                  <motion.span className="font-mono" layout transition={spring as any}>
-                    {Math.floor((currentTimerValue ?? activeRoundState.timerLeft) / 60)}:
-                    {String((currentTimerValue ?? activeRoundState.timerLeft) % 60).padStart(2, '0')}
-                  </motion.span>
-                </motion.div>
-              )}
-            </div>
-          </motion.div>
+          {/* Simplified points display is now rendered just below the round headline */}
 
-          {/* Game Card */}
-          <DailyModeTransitionOrchestrator modeKey={`${currentModeName ?? 'none'}-${modeKey}`} className="w-full">
-            <div className="survival-mode-game-card survival-mode-animate-pulse">
-              <div className="survival-mode-card-content">
+          {/* Inline Victory Section */}
+          <AnimatePresence mode="wait">
+            {showInlineVictory && (
+              <motion.div
+                key="victory-section"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ 
+                  opacity: 1, 
+                  scale: 1,
+                  transition: { 
+                    duration: 0.5,
+                    ease: "easeOut"
+                  }
+                }}
+                exit={{ 
+                  opacity: 0,
+                  scale: 0.95,
+                  transition: {
+                    duration: 0.3,
+                    ease: "easeIn"
+                  }
+                }}
+                className="relative z-20 max-w-2xl mx-auto"
+              >
+                <div className="bg-gradient-to-br from-yellow-500/20 via-orange-500/20 to-red-500/20 backdrop-blur-xl rounded-3xl p-8 border-2 border-yellow-400/50 shadow-2xl">
+                  {/* Victory GIF */}
+                  <motion.div
+                    initial={{ y: -20, opacity: 0 }}
+                    animate={{ 
+                      y: 0, 
+                      opacity: 1,
+                      transition: { delay: 0.2, duration: 0.5 }
+                    }}
+                    className="flex justify-center mb-6"
+                  >
+                    <img 
+                      src="/8_bit_victory.gif" 
+                      alt="Victory" 
+                      className="w-32 h-32 object-contain"
+                    />
+                  </motion.div>
+                  
+                  {/* Victory Headline */}
+                  <motion.h2
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ 
+                      y: 0, 
+                      opacity: 1,
+                      transition: { delay: 0.3, duration: 0.5 }
+                    }}
+                    className="text-4xl font-bold text-center text-white mb-4"
+                  >
+                    {t('survival.victory.title')}
+                  </motion.h2>
+                  
+                  {/* Correct Brawler Name */}
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ 
+                      opacity: 1,
+                      transition: { delay: 0.4, duration: 0.5 }
+                    }}
+                    className="text-center text-xl text-yellow-300 font-medium mb-6"
+                  >
+                    {lastCorrectBrawler}
+                  </motion.div>
+                  
+                  {/* Score Section */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ 
+                      opacity: 1,
+                      y: 0,
+                      transition: { delay: 0.5, duration: 0.5 }
+                    }}
+                    className="bg-black/30 rounded-xl p-4 mb-6"
+                  >
+                    <div className="grid grid-cols-2 gap-4 text-white">
+                      <div className="text-center">
+                        <div className="text-sm opacity-70">{t('survival.points.earned')}</div>
+                        <div className="text-2xl font-bold text-green-400">
+                          +<SlidingNumber value={currentRoundPoints} />
+                        </div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-sm opacity-70">{t('survival.total.score')}</div>
+                        <div className="text-2xl font-bold text-yellow-400">
+                          <SlidingNumber value={totalScore} />
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                  
+                  {/* Countdown Timer */}
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ 
+                      scale: 1,
+                      transition: { 
+                        delay: 0.6,
+                        duration: 0.3,
+                        type: "spring",
+                        stiffness: 200
+                      }
+                    }}
+                    className="text-center"
+                  >
+                    <div className="text-sm text-white/70 mb-2">{t('survival.next.round.in')}</div>
+                    <motion.div
+                      key={victoryCountdown}
+                      initial={{ scale: 1.5, opacity: 0 }}
+                      animate={{ 
+                        scale: 1, 
+                        opacity: 1,
+                        transition: { duration: 0.3 }
+                      }}
+                      className="text-5xl font-bold text-white"
+                    >
+                      {victoryCountdown}
+                    </motion.div>
+                  </motion.div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Game Card - Hide during victory */}
+          <AnimatePresence mode="wait">
+            {!showInlineVictory && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1, transition: { duration: 0.5 } }}
+                exit={{ opacity: 0, transition: { duration: 0.3 } }}
+                className="w-full"
+              >
+                <DailyModeTransitionOrchestrator modeKey={`${currentModeName ?? 'none'}-${modeKey}`} className="w-full">
+                  <div className="survival-mode-game-card survival-mode-animate-pulse bg-black/30 border border-white/10 rounded-3xl shadow-2xl backdrop-blur-sm">
+                    <div className="survival-mode-card-content">
                 {currentModeName === 'classic' && (
                   <ClassicMode 
                     key={`${modeKey}-classic`}
@@ -490,10 +745,13 @@ const SurvivalModePage: React.FC = () => {
                     isSurvivalMode={true}
                     skipVictoryScreen={true}
                   />
-                )}
-              </div>
-            </div>
-          </DailyModeTransitionOrchestrator>
+                      )}
+                    </div>
+                  </div>
+                </DailyModeTransitionOrchestrator>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       )}
       
@@ -512,40 +770,23 @@ const SurvivalModePage: React.FC = () => {
               // Reset the game key to force a remount of components
               setModeKey(`survival-start-${Date.now()}`);
               
+              // Allow the first-round effect to run for a fresh session
+              initialRoundStartedRef.current = false;
+              // Ensure round end lock is released for a fresh session
+              roundEndLockRef.current = false;
+
               // Initialize game with settings
               initializeGame(settings);
               resetModeSelectionState();
               
-              // Start first round after a brief delay
-              setTimeout(() => {
-                startNextRound();
-              }, 100);
+              // First round will be started by the effect
             }}
             onCancel={() => navigate('/')}
           />
         </div>
       )}
       
-      {/* Victory Popup */}
-      {showVictoryPopup && (
-        <div className="absolute inset-0 z-50">
-          <SurvivalVictoryPopup
-            brawlerName={lastCorrectBrawler}
-            pointsEarned={currentRoundPoints}
-            totalScore={totalScore}
-            guessesUsed={lastRoundGuessesUsed}
-            timeLeft={lastRoundTimeLeft}
-            onNextRound={() => {
-              // Hide victory popup and continue to next round
-              setShowVictoryPopup(false);
-              // Bump local key to force transition remount
-              setModeKey(`survival-round-${Date.now()}`);
-              // Start next round with current settings
-              startNextRound();
-            }}
-          />
-        </div>
-      )}
+      {/* Victory popup removed - using inline victory flow */}
       
       {/* Game Over Popup */}
       {showLossPopup && (
@@ -560,6 +801,8 @@ const SurvivalModePage: React.FC = () => {
               setTotalScore(0);
               setCurrentRoundPoints(0);
               resetModeSelectionState();
+              // Release any stale lock before a new session
+              roundEndLockRef.current = false;
               // Show setup popup again
               setShowSetupPopup(true);
             }}

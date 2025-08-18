@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/button';
 import ReactConfetti from 'react-confetti';
 import VictorySection from '../components/VictoryPopup';
 // removed unused GameModeTracker and HomeButton imports
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useMotionPrefs } from '@/hooks/useMotionPrefs';
 import { SlidingNumber } from '@/components/ui/sliding-number';
 
@@ -930,21 +930,21 @@ const AudioMode = ({
       </div>
 
       {/* Main Content */}
-      <div className={isSurvivalMode ? "daily-mode-content" : "survival-mode-content"}>
+      <div className="survival-mode-content">
         {/* Game Card */}
         <motion.div
-          className={isSurvivalMode ? "daily-mode-game-card daily-mode-animate-pulse" : "survival-mode-game-card survival-mode-animate-pulse"}
+          className="survival-mode-game-card survival-mode-animate-pulse"
           layout
           initial={motionOK ? { opacity: 0, scale: 0.98, y: 8 } : { opacity: 0 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           transition={transition}
         >
-          <div className={isSurvivalMode ? "daily-mode-card-content" : "survival-mode-card-content"}>
+          <div className="survival-mode-card-content">
             {/* Main Challenge Content */}
             <div className="survival-mode-input-section">
               {/* Audio Player */}
               <div className="flex flex-col items-center mb-1">
-                <div className="relative w-20 h-20 md:w-24 md:h-24 mx-auto mb-1 flex items-center justify-center">
+                <div className="w-64 h-64 md:w-72 md:h-72 rounded-3xl border-4 border-blue-500/60 bg-black/20 backdrop-blur-sm flex items-center justify-center overflow-hidden shadow-2xl mx-auto mb-1">
                   {/* Sound Icon Background */}
                   <div className={cn(
                     "w-full h-full rounded-full flex items-center justify-center transition-all duration-300",
@@ -995,7 +995,7 @@ const AudioMode = ({
                     }
                   </p>
                   {/* Guess Input */}
-                  <div className={isSurvivalMode ? "daily-mode-input-section mb-8 w-full max-w-md mx-auto" : "mt-4 w-full max-w-xs mx-auto"}>
+                  <div className="mt-4 w-full max-w-xs mx-auto">
                     <BrawlerAutocomplete
                       brawlers={brawlers}
                       value={guess}
@@ -1014,12 +1014,12 @@ const AudioMode = ({
                     </h2>
                   </>
                 ) : (
-                  <div className={isSurvivalMode ? "daily-mode-guess-counter flex items-center" : "survival-mode-guess-counter"}>
+                  <div className="survival-mode-guess-counter">
                     {isSurvivalMode ? (
                       <>
                         <span className="text-lg font-bold tracking-wide">{t('guesses.left')}</span>
                         <span className={`text-2xl font-extrabold ${(maxGuesses - attempts) <= 3 ? 'text-red-400' : 'text-white'}`}>
-                          <SlidingNumber value={Math.max(0, maxGuesses - attempts)} padStart />
+                          <SlidingNumber value={Math.max(0, maxGuesses - attempts)} />
                         </span>
                       </>
                     ) : (
@@ -1041,29 +1041,65 @@ const AudioMode = ({
         {/* Previous Guesses */}
         <div className={isSurvivalMode ? "daily-mode-guesses-section" : "survival-mode-guesses-section"}>
           <div className={isSurvivalMode ? "daily-mode-guesses-grid" : "survival-mode-guesses-grid"}>
-            {guesses.map((pastGuess, idx) => {
-              const isCorrect = pastGuess.toLowerCase() === dailyChallenge.brawler.toLowerCase();
-              const isLastGuess = idx === guesses.length - 1;
-              return (
-                <div
-                  key={idx}
-                  className={cn(
-                    isSurvivalMode ? "daily-mode-guess-item" : "survival-mode-guess-item",
-                    isSurvivalMode ? (isCorrect ? "daily-mode-guess-correct" : "daily-mode-guess-incorrect") : (isCorrect ? "survival-mode-guess-correct" : "survival-mode-guess-incorrect"),
-                    !isCorrect && isLastGuess ? "animate-shake" : ""
-                  )}
-                >
-                  <img
-                    src={getPortrait(pastGuess)}
-                    alt={pastGuess}
-                    className={isSurvivalMode ? "daily-mode-guess-portrait" : "survival-mode-guess-portrait"}
-                  />
-                  <span className={isSurvivalMode ? "daily-mode-guess-name" : "survival-mode-guess-name"}>
-                    {pastGuess}
-                  </span>
-                </div>
-              );
-            })}
+            <AnimatePresence initial={false} mode="popLayout">
+              {guesses.map((pastGuess, idx) => {
+                const isCorrect = pastGuess.toLowerCase() === dailyChallenge.brawler.toLowerCase();
+                const isNewest = idx === guesses.length - 1;
+                return (
+                  <motion.div
+                    key={`${pastGuess}-${guesses.length - idx}`}
+                    initial={motionOK && isNewest ? { 
+                      opacity: 0, 
+                      y: 50,
+                      scale: 0.9,
+                      filter: "blur(3px)"
+                    } : { opacity: 0 }}
+                    animate={{
+                      opacity: 1,
+                      y: 0,
+                      scale: 1,
+                      filter: "blur(0px)",
+                      transition: {
+                        type: "spring",
+                        stiffness: 380,
+                        damping: 28,
+                        mass: 0.8,
+                        duration: 0.55
+                      }
+                    }}
+                    exit={{ 
+                      opacity: 0, 
+                      scale: 0.9,
+                      y: -20,
+                      transition: { duration: 0.3, ease: "easeInOut" }
+                    }}
+                    layout
+                    transition={{
+                      layout: {
+                        type: "spring",
+                        stiffness: 380,
+                        damping: 28,
+                        mass: 0.8
+                      }
+                    }}
+                    className={cn(
+                      isSurvivalMode ? "daily-mode-guess-item" : "survival-mode-guess-item",
+                      isSurvivalMode ? (isCorrect ? "daily-mode-guess-correct" : "daily-mode-guess-incorrect") : (isCorrect ? "survival-mode-guess-correct" : "survival-mode-guess-incorrect"),
+                      !isCorrect && isNewest ? "animate-shake" : ""
+                    )}
+                  >
+                    <img
+                      src={getPortrait(pastGuess)}
+                      alt={pastGuess}
+                      className={isSurvivalMode ? "daily-mode-guess-portrait" : "survival-mode-guess-portrait"}
+                    />
+                    <span className={isSurvivalMode ? "daily-mode-guess-name" : "survival-mode-guess-name"}>
+                      {pastGuess}
+                    </span>
+                  </motion.div>
+                );
+              })}
+            </AnimatePresence>
           </div>
         </div>
 

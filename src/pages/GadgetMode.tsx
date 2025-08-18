@@ -18,7 +18,7 @@ import ReactConfetti from 'react-confetti';
 import { useIsMobile } from "@/hooks/use-mobile";
 import GameModeTracker from '@/components/GameModeTracker';
 import HomeButton from '@/components/ui/home-button';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useMotionPrefs } from '@/hooks/useMotionPrefs';
 import { SlidingNumber } from '@/components/ui/sliding-number';
 
@@ -500,7 +500,7 @@ const GadgetMode = ({
           
           {/* Gadget Image */}
           <div className="flex flex-col items-center mb-6">
-            <div className="relative w-32 h-32 md:w-40 md:h-40 mx-auto mb-4">
+            <div className="w-64 h-64 md:w-72 md:h-72 rounded-3xl border-4 border-green-500/60 bg-black/20 backdrop-blur-sm flex items-center justify-center overflow-hidden shadow-2xl mb-4">
               {dailyChallenge?.image ? (
                 <Image
                   src={dailyChallenge?.image || '/GadgetImages/shelly_gadget_01.png'}
@@ -551,7 +551,7 @@ const GadgetMode = ({
                 <div className="survival-mode-guess-counter">
                   <span className="text-lg font-bold tracking-wide">{t('guesses.left')}</span>
                   <span className={`text-2xl font-extrabold ${Math.max(0, guessesLeft) <= 3 ? 'text-red-400' : 'text-white'}`}>
-                    <SlidingNumber value={Math.max(0, guessesLeft)} padStart />
+                    <SlidingNumber value={Math.max(0, guessesLeft)} />
                   </span>
                 </div>
               ) : (
@@ -570,25 +570,67 @@ const GadgetMode = ({
             <div className="mt-6">
               <h3 className="text-lg font-bold text-white mb-3 text-center">Previous Guesses:</h3>
               <div className="flex flex-wrap justify-center gap-2">
-                {guesses.map((prevGuess, index) => (
-                  <div key={index} className="flex items-center gap-2 bg-red-900/50 border border-red-500 px-3 py-1 rounded-lg">
-                    <img
-                      src={getPortrait(prevGuess)}
-                      alt={prevGuess}
-                      className="w-6 h-6 rounded-full"
-                      onError={(e) => {
-                        console.log(`Failed to load portrait for ${prevGuess}, trying fallback`);
-                        e.currentTarget.src = DEFAULT_PORTRAIT;
-                        e.currentTarget.onerror = () => {
-                          console.log(`Failed to load fallback portrait for ${prevGuess}, hiding image`);
-                          e.currentTarget.style.display = 'none';
-                        };
-                      }}
-                    />
-                    <span className="text-sm text-white">{prevGuess}</span>
-                    <X className="w-4 h-4 text-red-400" />
-                  </div>
-                ))}
+                <AnimatePresence initial={false} mode="popLayout">
+                  {guesses.map((prevGuess, index) => {
+                    const isNewest = index === guesses.length - 1; // Newest is last in array for this component
+                    return (
+                      <motion.div 
+                        key={`${prevGuess}-${guesses.length - index}`}
+                        initial={motionOK && isNewest ? { 
+                          opacity: 0, 
+                          y: 40,
+                          scale: 0.8,
+                          filter: "blur(3px)"
+                        } : { opacity: 0 }}
+                        animate={{
+                          opacity: 1,
+                          y: 0,
+                          scale: 1,
+                          filter: "blur(0px)",
+                          transition: {
+                            type: "spring",
+                            stiffness: 400,
+                            damping: 28,
+                            mass: 0.7,
+                            duration: 0.5
+                          }
+                        }}
+                        exit={{ 
+                          opacity: 0, 
+                          scale: 0.8,
+                          y: -15,
+                          transition: { duration: 0.25, ease: "easeInOut" }
+                        }}
+                        layout
+                        transition={{
+                          layout: {
+                            type: "spring",
+                            stiffness: 400,
+                            damping: 28,
+                            mass: 0.7
+                          }
+                        }}
+                        className="flex items-center gap-2 bg-red-900/50 border border-red-500 px-3 py-1 rounded-lg"
+                      >
+                        <img
+                          src={getPortrait(prevGuess)}
+                          alt={prevGuess}
+                          className="w-6 h-6 rounded-full"
+                          onError={(e) => {
+                            console.log(`Failed to load portrait for ${prevGuess}, trying fallback`);
+                            e.currentTarget.src = DEFAULT_PORTRAIT;
+                            e.currentTarget.onerror = () => {
+                              console.log(`Failed to load fallback portrait for ${prevGuess}, hiding image`);
+                              e.currentTarget.style.display = 'none';
+                            };
+                          }}
+                        />
+                        <span className="text-sm text-white">{prevGuess}</span>
+                        <X className="w-4 h-4 text-red-400" />
+                      </motion.div>
+                    );
+                  })}
+                </AnimatePresence>
               </div>
             </div>
           )}

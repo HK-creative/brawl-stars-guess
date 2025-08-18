@@ -26,15 +26,10 @@ const LoadingSpinner = () => (
 
 // Lazy load all pages for better performance
 const Index = lazy(() => import("./pages/Index"));
-const ClassicMode = lazy(() => import("./pages/ClassicMode"));
 const EndlessMode = lazy(() => import("./pages/EndlessMode"));
 const ScorePage = lazy(() => import("./pages/ScorePage"));
 const SettingsPage = lazy(() => import("./pages/SettingsPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
-const StarPowerMode = lazy(() => import("./pages/StarPowerMode"));
-const GadgetMode = lazy(() => import("./pages/GadgetMode"));
-const AudioMode = lazy(() => import("./pages/AudioMode"));
-const PixelsMode = lazy(() => import("./pages/PixelsMode"));
 const AuthPage = lazy(() => import("./pages/AuthPage"));
 const AuthCallback = lazy(() => import("./pages/AuthCallback"));
 const SurvivalSetupPage = lazy(() => import('./pages/SurvivalSetup'));
@@ -86,12 +81,6 @@ const App = () => {
                   
                   {/* Unified Daily Modes Page - Outside Layout to remove language selection */}
                   <Route path="/daily" element={<DailyModesPage />} />
-                  {/* Backward compatibility redirects */}
-                  <Route path="/daily/classic" element={<DailyModesPage />} />
-                  <Route path="/daily/gadget" element={<DailyModesPage />} />
-                  <Route path="/daily/starpower" element={<DailyModesPage />} />
-                  <Route path="/daily/audio" element={<DailyModesPage />} />
-                  <Route path="/daily/pixels" element={<DailyModesPage />} />
                   
                   {/* New standalone pages - Outside Layout */}
                   <Route path="/feedback" element={<FeedbackPage />} />
@@ -100,11 +89,6 @@ const App = () => {
                   
                   <Route element={<Layout />}>
                     <Route index element={<Index />} />
-                <Route path="/classic" element={<ClassicMode />} />
-                <Route path="/starpower" element={<StarPowerMode />} />
-                <Route path="/gadget" element={<GadgetMode />} />
-                <Route path="/audio" element={<AudioMode />} />
-                <Route path="/pixels" element={<PixelsMode />} />
                 <Route path="/endless" element={<EndlessMode />} />
                 <Route path="/survival" element={<SurvivalModePage />} />
                 <Route path="/survival/setup" element={<SurvivalSetupPage />} />

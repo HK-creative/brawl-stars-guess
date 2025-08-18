@@ -45,7 +45,7 @@ export function GuessCounter({
             'text-2xl font-extrabold',
             (computedLeft ?? 0) <= lowThreshold ? 'text-red-400' : 'text-white'
           )}>
-            <SlidingNumber value={computedLeft ?? 0} padStart />
+            <SlidingNumber value={computedLeft ?? 0} />
           </span>
         </>
       ) : (

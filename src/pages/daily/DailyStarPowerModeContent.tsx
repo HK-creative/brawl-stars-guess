@@ -339,7 +339,7 @@ const DailyStarPowerModeContent: React.FC<DailyStarPowerModeContentProps> = ({ o
       {/* Main Content */}
       <div className="flex-1 flex flex-col px-4 pb-4">
         <motion.div
-          className="daily-mode-game-card daily-mode-animate-pulse mb-6"
+          className="daily-mode-game-card daily-mode-animate-pulse mt-0 md:mt-0 mb-10 md:mb-12"
           initial={motionOK ? { opacity: 0, scale: 0.98 } : { opacity: 0 }}
           animate={{ opacity: 1, scale: 1, transition }}
           layout

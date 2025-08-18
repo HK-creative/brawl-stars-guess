@@ -15,10 +15,11 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 import { Switch } from '@/components/ui/switch';
 
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useMotionPrefs } from '@/hooks/useMotionPrefs';
 import { SlidingNumber } from '@/components/ui/sliding-number';
 import { GuessCounter } from '@/components/ui/guess-counter';
+import { getLanguage } from '@/lib/i18n';
 
 interface ClassicModeProps {
   brawlerId?: number;
@@ -57,6 +58,15 @@ const ClassicMode = ({
   const [lastGuessIndex, setLastGuessIndex] = useState<number | null>(null); // Track the most recent guess
   const [gameKey, setGameKey] = useState(Date.now().toString()); // Key to force re-render
   
+  // New state for discovered attributes (survival mode only)
+  const [discoveredAttributes, setDiscoveredAttributes] = useState<{
+    rarity?: string;
+    class?: string;
+    range?: string;
+    wallbreak?: string | null;
+    releaseYear?: number;
+  }>({});
+  
   // Fallback data in case Supabase fetch fails
   const fallbackBrawlerName = "Spike";
   
@@ -90,6 +100,7 @@ const ClassicMode = ({
     setGuessCount(0);
     setGuessesLeft(maxGuesses);
     setGuessedBrawlerNames([]);
+    setDiscoveredAttributes({});
     
     // Reset available brawlers to full set
     setAvailableBrawlers([...brawlers]);
@@ -120,6 +131,7 @@ const ClassicMode = ({
     setLastGuessIndex(null);
     setGuessedBrawlerNames([]);
     setAvailableBrawlers([...brawlers]);
+    setDiscoveredAttributes({});
     
     // Generate a new key to force complete component re-initialization
     setGameKey(Date.now().toString());
@@ -310,6 +322,30 @@ const ClassicMode = ({
     setGuessedBrawlerNames(prev => [...prev, selectedBrawler.name]);
     setGuessCount(prevCount => prevCount + 1);
     
+    // Update discovered attributes for survival mode
+    if (isSurvivalMode) {
+      const correctBrawler = getCorrectBrawler();
+      const newDiscovered = { ...discoveredAttributes };
+      
+      if (selectedBrawler.rarity === correctBrawler.rarity && !newDiscovered.rarity) {
+        newDiscovered.rarity = correctBrawler.rarity;
+      }
+      if (selectedBrawler.class === correctBrawler.class && !newDiscovered.class) {
+        newDiscovered.class = correctBrawler.class;
+      }
+      if (selectedBrawler.range === correctBrawler.range && !newDiscovered.range) {
+        newDiscovered.range = correctBrawler.range;
+      }
+      if (selectedBrawler.wallbreak === correctBrawler.wallbreak && !newDiscovered.wallbreak) {
+        newDiscovered.wallbreak = correctBrawler.wallbreak;
+      }
+      if (selectedBrawler.releaseYear === correctBrawler.releaseYear && !newDiscovered.releaseYear) {
+        newDiscovered.releaseYear = correctBrawler.releaseYear;
+      }
+      
+      setDiscoveredAttributes(newDiscovered);
+    }
+    
     if (isSurvivalMode) {
       // In survival mode, don't manage local guesses - let the parent handle it
       // The parent (SurvivalMode) will track guesses through its own state
@@ -401,6 +437,9 @@ const ClassicMode = ({
     );
   }
 
+  const currentLanguage = getLanguage();
+  const isRTL = currentLanguage === 'he';
+  
   return (
     <div key={gameKey} className="flex flex-col min-h-[70vh] py-1">
       {!isSurvivalMode && (
@@ -427,17 +466,135 @@ const ClassicMode = ({
       )}
       
       <div className="mb-2 flex flex-col">
+        {/* Attribute Discovery Card - only show in survival mode */}
+        {isSurvivalMode && (
+          <div className="flex justify-center mb-6">
+            <div className="w-64 h-64 md:w-72 md:h-72 rounded-3xl border-4 border-amber-500/60 bg-black/20 backdrop-blur-sm flex items-center justify-center overflow-hidden shadow-2xl">
+              <div className="flex flex-col justify-center p-3 w-full h-full">
+                <div className="flex flex-col gap-2 h-full justify-center">
+                  {/* Rarity */}
+                  <div className={cn(
+                    "flex-1 aspect-square flex items-center rounded-lg px-3 py-2 min-h-0",
+                    discoveredAttributes.rarity 
+                      ? "bg-green-500/20 border border-green-500/40" 
+                      : "bg-gray-500/20 border border-gray-500/40"
+                  )}>
+                    <div className={cn(
+                      "flex items-center justify-between w-full",
+                      currentLanguage === 'he' ? "flex-row-reverse" : "flex-row"
+                    )}>
+                      <div className={cn(
+                        "text-xs font-medium",
+                        discoveredAttributes.rarity ? "text-green-400" : "text-gray-400"
+                      )}>{t('attribute.label.rarity')}</div>
+                      <div className="text-white text-sm font-bold">
+                        {discoveredAttributes.rarity ? t(`rarity.${discoveredAttributes.rarity.toLowerCase().replace(' ', '.')}`) : '?'}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Class */}
+                  <div className={cn(
+                    "flex-1 aspect-square flex items-center rounded-lg px-3 py-2 min-h-0",
+                    discoveredAttributes.class 
+                      ? "bg-green-500/20 border border-green-500/40" 
+                      : "bg-gray-500/20 border border-gray-500/40"
+                  )}>
+                    <div className={cn(
+                      "flex items-center justify-between w-full",
+                      currentLanguage === 'he' ? "flex-row-reverse" : "flex-row"
+                    )}>
+                      <div className={cn(
+                        "text-xs font-medium",
+                        discoveredAttributes.class ? "text-green-400" : "text-gray-400"
+                      )}>{t('attribute.label.class')}</div>
+                      <div className="text-white text-sm font-bold">
+                        {discoveredAttributes.class || '?'}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Range */}
+                  <div className={cn(
+                    "flex-1 aspect-square flex items-center rounded-lg px-3 py-2 min-h-0",
+                    discoveredAttributes.range 
+                      ? "bg-green-500/20 border border-green-500/40" 
+                      : "bg-gray-500/20 border border-gray-500/40"
+                  )}>
+                    <div className={cn(
+                      "flex items-center justify-between w-full",
+                      currentLanguage === 'he' ? "flex-row-reverse" : "flex-row"
+                    )}>
+                      <div className={cn(
+                        "text-xs font-medium",
+                        discoveredAttributes.range ? "text-green-400" : "text-gray-400"
+                      )}>{t('attribute.label.range')}</div>
+                      <div className="text-white text-sm font-bold">
+                        {discoveredAttributes.range ? t(`range.${discoveredAttributes.range.toLowerCase().replace(' ', '.')}`) : '?'}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Wall Break */}
+                  <div className={cn(
+                    "flex-1 aspect-square flex items-center rounded-lg px-3 py-2 min-h-0",
+                    discoveredAttributes.wallbreak !== null 
+                      ? "bg-green-500/20 border border-green-500/40" 
+                      : "bg-gray-500/20 border border-gray-500/40"
+                  )}>
+                    <div className={cn(
+                      "flex items-center justify-between w-full",
+                      currentLanguage === 'he' ? "flex-row-reverse" : "flex-row"
+                    )}>
+                      <div className={cn(
+                        "text-[10px] font-medium",
+                        discoveredAttributes.wallbreak !== null ? "text-green-400" : "text-gray-400"
+                      )}>{t('attribute.label.wallbreak')}</div>
+                      <div className="text-white text-sm font-bold">
+                        {discoveredAttributes.wallbreak !== null ? t(`wallbreak.${discoveredAttributes.wallbreak ? 'yes' : 'no'}`) : '?'}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Release Year */}
+                  <div className={cn(
+                    "flex-1 aspect-square flex items-center rounded-lg px-3 py-2 min-h-0",
+                    discoveredAttributes.releaseYear 
+                      ? "bg-green-500/20 border border-green-500/40" 
+                      : "bg-gray-500/20 border border-gray-500/40"
+                  )}>
+                    <div className={cn(
+                      "flex items-center justify-between w-full",
+                      currentLanguage === 'he' ? "flex-row-reverse" : "flex-row"
+                    )}>
+                      <div className={cn(
+                        "text-xs font-medium",
+                        discoveredAttributes.releaseYear ? "text-green-400" : "text-gray-400"
+                      )}>{t('attribute.label.year')}</div>
+                      <div className="text-white text-sm font-bold">
+                        {discoveredAttributes.releaseYear || '?'}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+        
         <div className="mb-2">
-          <form onSubmit={handleSubmit} className="space-y-2">
-            <BrawlerAutocomplete
-              brawlers={availableBrawlers}
-              value={inputValue}
-              onChange={setInputValue}
-              onSelect={handleSelectBrawler}
-              onSubmit={handleSubmit}
-              disabled={isGameOver}
-              disabledBrawlers={guessedBrawlerNames}
-            />
+          <form className="space-y-2">
+            <div className="w-full max-w-md mx-auto">
+              <BrawlerAutocomplete
+                brawlers={availableBrawlers}
+                value={inputValue}
+                onChange={setInputValue}
+                onSelect={handleSelectBrawler}
+                onSubmit={handleSubmit}
+                disabled={isGameOver}
+                disabledBrawlers={guessedBrawlerNames}
+              />
+            </div>
             
             {/* Guess Button - only show when not in survival mode */}
             {!isSurvivalMode && (
@@ -482,52 +639,77 @@ const ClassicMode = ({
               </div>
             )}
             
-            {/* Attribute labels with glass effect and perfect square aspect ratio */}
-            <div className={cn(
-              "grid",
-              gridTemplateClass,
-              isMobile ? "gap-1 mb-1" : "gap-5 mb-2",
-              "w-full px-1"
-            )}>
-              {attributeLabels.map((label, index) => {
-                return (
-                  <div key={label} className={cn(
-                    "w-full relative",
-                    isMobile ? "h-6" : "h-10"
-                  )}>
-                    {/* Yellow accent line */}
-                    <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-brawl-yellow"></div>
-                    
-                    {/* Text with adaptive sizing - positioned near the bottom */}
-                    <div className="w-full flex items-end justify-center pb-1">
-                      <span className={cn(
-                        isMobile ? "text-xs" : "text-sm",
-                        "font-extrabold text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]"
-                      )}>
-                        {label}
-                      </span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
             
-            {/* Guesses display */}
-            <div className="overflow-auto flex-1 min-h-0 max-h-[calc(100vh-250px)]">
-              <div className="space-y-3">
-                {guesses.map((guess, index) => (
-                  <BrawlerGuessRow 
-                    key={`${guess.name}-${index}`} 
-                    guess={guess} 
-                    correctAnswer={correctBrawler} 
-                    isMobile={isMobile}
-                    gridWidthClass={gridWidthClass}
-                    gridTemplateClass={gridTemplateClass}
-                    isNew={index === lastGuessIndex} // Only the newest guess gets the animation
-                  />
-                ))}
+            {/* Detailed Attribute Comparison Grid - Match Daily Style */}
+            {guesses.length > 0 && (
+              <div className="mt-8">
+                <div className="space-y-3">
+                  {/* Header Row */}
+                  <div className="grid grid-cols-6 gap-2 text-center text-white/60 text-sm font-medium mb-2">
+                    <div className="border-b border-white/20 pb-1">{t('attribute.label.brawler')}</div>
+                    <div className="border-b border-white/20 pb-1">{t('attribute.label.rarity')}</div>
+                    <div className="border-b border-white/20 pb-1">{t('attribute.label.class')}</div>
+                    <div className="border-b border-white/20 pb-1">{t('attribute.label.range')}</div>
+                    <div className="border-b border-white/20 pb-1 text-[10px]">{t('attribute.label.wallbreak')}</div>
+                    <div className="border-b border-white/20 pb-1">{t('attribute.label.year')}</div>
+                  </div>
+                  
+                  {/* Guess Rows */}
+                  <AnimatePresence initial={false} mode="popLayout">
+                    {guesses.map((guess, index) => {
+                      const isNewest = index === 0; // Newest is first in array
+                      return (
+                        <motion.div
+                          key={`${guess.name}-${guesses.length - index}`}
+                          initial={motionOK && isNewest ? { 
+                            opacity: 0, 
+                            y: 60,
+                            scale: 0.95,
+                            filter: "blur(4px)"
+                          } : { opacity: 0 }}
+                          animate={{
+                            opacity: 1,
+                            y: 0,
+                            scale: 1,
+                            filter: "blur(0px)",
+                            transition: {
+                              type: "spring",
+                              stiffness: 400,
+                              damping: 30,
+                              mass: 0.8,
+                              duration: 0.6
+                            }
+                          }}
+                          exit={{ 
+                            opacity: 0, 
+                            scale: 0.95,
+                            y: -20,
+                            transition: { duration: 0.3, ease: "easeInOut" }
+                          }}
+                          layout
+                          transition={{
+                            layout: {
+                              type: "spring",
+                              stiffness: 400,
+                              damping: 30,
+                              mass: 0.8
+                            }
+                          }}
+                        >
+                          <BrawlerGuessRow
+                            guess={guess}
+                            correctAnswer={correctBrawler}
+                            isMobile={window.innerWidth < 768}
+                            gridTemplateClass="grid-cols-6"
+                            isNew={index === 0}
+                          />
+                        </motion.div>
+                      );
+                    })}
+                  </AnimatePresence>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </div>

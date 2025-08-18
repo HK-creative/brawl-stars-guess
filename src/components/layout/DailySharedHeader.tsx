@@ -6,7 +6,7 @@ import DailyModeProgress from '@/components/DailyModeProgress';
 import ModeTitle from '@/components/ModeTitle';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useMotionPrefs } from '@/hooks/useMotionPrefs';
-import { DailyGameMode } from '@/stores/useDailyStore';
+import { DailyGameMode, useDailyStore } from '@/stores/useDailyStore';
 
 interface Props {
   currentMode: DailyGameMode;
@@ -18,6 +18,8 @@ const DailySharedHeader: React.FC<Props> = ({ currentMode, onModeChange }) => {
   const { streak } = useStreak();
   const { transition } = useMotionPrefs();
   const lang = getLanguage();
+  const { getCompletionProgress } = useDailyStore();
+  const { completed, total } = getCompletionProgress();
 
   return (
     <div className="w-full max-w-4xl mx-auto px-4 py-2 relative">
@@ -39,6 +41,15 @@ const DailySharedHeader: React.FC<Props> = ({ currentMode, onModeChange }) => {
               <span className="text-3xl font-bold leading-none text-[hsl(var(--daily-mode-primary))]">{streak}</span>
               <div className="text-3xl">🔥</div>
             </div>
+          </div>
+
+          {/* Overall Daily Progress */}
+          <div
+            className="px-3 py-1 rounded-lg bg-white/10 border border-white/20 text-white text-sm font-medium backdrop-blur-sm"
+            aria-label={t('label.daily_challenge') + ' ' + completed + '/' + total}
+            title={`${t('label.daily_challenge')} ${completed}/${total}`}
+          >
+            {completed}/{total}
           </div>
         </div>
       </div>

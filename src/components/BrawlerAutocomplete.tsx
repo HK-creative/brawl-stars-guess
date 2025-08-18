@@ -30,12 +30,37 @@ const BrawlerAutocomplete: React.FC<BrawlerAutocompleteProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const [filteredBrawlers, setFilteredBrawlers] = useState<Brawler[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
+  const submitTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   
   const currentLanguage = getLanguage();
   const { toast } = useToast();
+
+  // Centralized submission handler - prevents all duplicate submissions
+  const handleSubmission = useCallback((brawler: Brawler, source: string) => {
+    if (disabledBrawlers.includes(brawler.name) || isSubmitting || !onSubmit) return;
+    
+    // Clear any pending auto-submit
+    if (submitTimeoutRef.current) {
+      clearTimeout(submitTimeoutRef.current);
+      submitTimeoutRef.current = null;
+    }
+    
+    setIsSubmitting(true);
+    const displayName = getBrawlerDisplayName(brawler, currentLanguage);
+    onChange(displayName);
+    onSelect(brawler);
+    setIsOpen(false);
+    
+    // Submit after state updates
+    setTimeout(() => {
+      onSubmit();
+      setIsSubmitting(false);
+    }, 0);
+  }, [disabledBrawlers, isSubmitting, onSubmit, currentLanguage, onChange, onSelect]);
 
   const handleSelectBrawler = useCallback((brawler: Brawler) => {
     if (disabledBrawlers.includes(brawler.name)) return;
@@ -44,20 +69,6 @@ const BrawlerAutocomplete: React.FC<BrawlerAutocompleteProps> = ({
     onSelect(brawler);
     setIsOpen(false);
   }, [disabledBrawlers, currentLanguage, onChange, onSelect]);
-  
-  const handleSelectBrawlerWithSubmit = useCallback((brawler: Brawler) => {
-    if (disabledBrawlers.includes(brawler.name)) return;
-
-    handleSelectBrawler(brawler);
-    if (onSubmit) {
-      // Schedule submit on a microtask for zero-frame latency while still after selection state
-      if (typeof queueMicrotask === 'function') {
-        queueMicrotask(() => onSubmit());
-      } else {
-        Promise.resolve().then(() => onSubmit());
-      }
-    }
-  }, [disabledBrawlers, handleSelectBrawler, onSubmit]);
   
   useEffect(() => {
     if (value.trim() === '') {
@@ -72,8 +83,8 @@ const BrawlerAutocomplete: React.FC<BrawlerAutocompleteProps> = ({
     setFilteredBrawlers(filtered);
     setHighlightedIndex(-1);
 
-    // Auto-submit on exact match (case insensitive)
-    if (onSubmit && value.trim()) {
+    // Auto-submit on exact match with proper debouncing
+    if (onSubmit && value.trim() && !isSubmitting) {
       const exactMatchBrawler = filtered.find(
         b => {
           const displayName = getBrawlerDisplayName(b, currentLanguage);
@@ -82,11 +93,18 @@ const BrawlerAutocomplete: React.FC<BrawlerAutocompleteProps> = ({
       );
       
       if (exactMatchBrawler && !disabledBrawlers.includes(exactMatchBrawler.name)) {
-        // Submit immediately for snappy UX
-        handleSelectBrawlerWithSubmit(exactMatchBrawler);
+        // Clear any existing timeout
+        if (submitTimeoutRef.current) {
+          clearTimeout(submitTimeoutRef.current);
+        }
+        
+        // Debounced auto-submit to prevent rapid firing
+        submitTimeoutRef.current = setTimeout(() => {
+          handleSubmission(exactMatchBrawler, 'auto-submit');
+        }, 100);
       }
     }
-  }, [value, brawlers, disabledBrawlers, currentLanguage, onSubmit, handleSelectBrawlerWithSubmit]);
+  }, [value, brawlers, disabledBrawlers, currentLanguage, onSubmit, handleSubmission, isSubmitting]);
   
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -148,7 +166,7 @@ const BrawlerAutocomplete: React.FC<BrawlerAutocompleteProps> = ({
       if (highlightedIndex >= 0 && highlightedIndex < filteredBrawlers.length) {
         const selected = filteredBrawlers[highlightedIndex];
         if (!disabledBrawlers.includes(selected.name)) {
-          handleSelectBrawlerWithSubmit(selected);
+          handleSubmission(selected, 'enter-highlighted');
           return;
         }
       }
@@ -161,7 +179,7 @@ const BrawlerAutocomplete: React.FC<BrawlerAutocompleteProps> = ({
         }
       );
       if (exactMatchBrawler) {
-        handleSelectBrawlerWithSubmit(exactMatchBrawler);
+        handleSubmission(exactMatchBrawler, 'enter-exact');
         return;
       }
       
@@ -169,7 +187,7 @@ const BrawlerAutocomplete: React.FC<BrawlerAutocompleteProps> = ({
       if (filteredBrawlers.length > 0 && currentInputText) {
         const firstAvailableBrawler = filteredBrawlers.find(b => !disabledBrawlers.includes(b.name));
         if (firstAvailableBrawler) {
-          handleSelectBrawlerWithSubmit(firstAvailableBrawler);
+          handleSubmission(firstAvailableBrawler, 'enter-first');
           return;
         }
       }
@@ -224,11 +242,11 @@ const BrawlerAutocomplete: React.FC<BrawlerAutocompleteProps> = ({
                 }
               );
               if (exactMatchBrawler) {
-                handleSelectBrawlerWithSubmit(exactMatchBrawler);
+                handleSubmission(exactMatchBrawler, 'search-button-exact');
               } else if (filteredBrawlers.length > 0) {
                 const firstAvailableBrawler = filteredBrawlers.find(b => !disabledBrawlers?.includes(b.name));
                 if (firstAvailableBrawler) {
-                  handleSelectBrawlerWithSubmit(firstAvailableBrawler);
+                  handleSubmission(firstAvailableBrawler, 'search-button-first');
                 }
               }
             }
@@ -310,7 +328,7 @@ const BrawlerAutocomplete: React.FC<BrawlerAutocompleteProps> = ({
                     isHighlighted && "bg-[#FFC107]/10"
                   ]
                 )}
-                onClick={() => !isDisabled && handleSelectBrawlerWithSubmit(brawler)}
+                onClick={() => !isDisabled && handleSubmission(brawler, 'dropdown-click')}
                 onMouseEnter={() => setHighlightedIndex(index)}
               >
                 <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-[#FFC107]/50 bg-black">
