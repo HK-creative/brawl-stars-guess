@@ -25,4 +25,42 @@
   image-rendering: crisp-edges;               /* Standard */
   image-rendering: pixelated;                 /* Chrome */
   -ms-interpolation-mode: nearest-neighbor;   /* IE */
+}
+
+/* Global font styling for Lilita One (English) and Abraham (Hebrew) */
+* {
+  /* Apply to all elements using Lilita One font */
+  &:is([style*="Lilita One"], [class*="lilita"]) {
+    -webkit-text-stroke: 1px #000000;
+    text-shadow: 0px 2px 0px #000000;
+    letter-spacing: -0.01em;
+  }
+  
+  /* Apply to all elements using Abraham font */
+  &:is([style*="Abraham"], [class*="abraham"]) {
+    -webkit-text-stroke: 1px #000000;
+    text-shadow: 0px 2px 0px #000000;
+    letter-spacing: -0.01em;
+  }
+}
+
+/* Font family specific styling */
+[style*="font-family: 'Lilita One'"],
+[style*="font-family:'Lilita One'"],
+[style*="fontFamily: 'Lilita One'"],
+.font-lilita,
+.lilita-one {
+  -webkit-text-stroke: 1px #000000;
+  text-shadow: 0px 2px 0px #000000;
+  letter-spacing: -0.01em;
+}
+
+[style*="font-family: 'Abraham'"],
+[style*="font-family:'Abraham'"],
+[style*="fontFamily: 'Abraham'"],
+.font-abraham,
+.abraham {
+  -webkit-text-stroke: 1px #000000;
+  text-shadow: 0px 2px 0px #000000;
+  letter-spacing: -0.01em;
 } 

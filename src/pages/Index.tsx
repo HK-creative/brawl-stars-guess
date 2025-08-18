@@ -10,6 +10,7 @@ import GameModeCard from '@/components/GameModeCard';
 import { useLanguage } from '@/contexts/LanguageContext';
 import AuthButton from '@/components/ui/auth-button';
 import { useAuthModal } from '@/contexts/AuthModalContext';
+import DailyChallengesHero from '@/components/home/DailyChallengesHero';
 
 const Index = () => {
   const { isLoggedIn, user, logout, streak, completedModes } = useStreak();
@@ -83,22 +84,7 @@ const Index = () => {
     openAuthModal('signin');
   };
 
-  // Calculate completed daily modes count (only modes that count towards streak)
-  const completedCount = Object.values(completedModes).filter(Boolean).length;
-  const totalModes = 4; // classic, audio, gadget, starpower (pixels not included in streak)
-
-  const dailyModeIcons = [
-    { name: 'classic', icon: '/ClassicIcon.png', countsTowardsStreak: true, color: '#FFD700' },
-    { name: 'audio', icon: '/AudioIcon.png', countsTowardsStreak: true, color: '#FF6B35' },
-    { name: 'gadget', icon: '/GadgetIcon.png', countsTowardsStreak: true, color: '#00FF88' },
-    { name: 'starpower', icon: '/StarpowerIcon.png', countsTowardsStreak: true, color: '#FF1493' },
-    { name: 'pixels', icon: '/PixelsIcon.png', countsTowardsStreak: false, color: '#8A2BE2' }
-  ];
-
-  // Check if a mode is completed (with safe access)
-  const isModeCompleted = (modeName: string) => {
-    return completedModes[modeName as keyof typeof completedModes] === true;
-  };
+  // Daily state is managed in the store; no per-mode UI here in the hero container.
 
   return (
     <div 
@@ -238,101 +224,20 @@ const Index = () => {
         {/* Main content area - mobile-first layout */}
         <div className="flex flex-col items-center w-full max-w-md mx-auto px-4 gap-8 md:gap-12 lg:gap-8">
           
-          {/* {t('home.daily.challenges')} BUTTON */}
-          <div className="w-full max-w-[18.4rem] lg:max-w-[21.2rem] mx-auto relative">
-            {/* 3D Rotating Stars Container */}
-            <div className="rotating-stars-container absolute inset-0 pointer-events-none">
-              <div className="star-orbit star-orbit-1">
-                <div className="star star-1">⭐</div>
-              </div>
-              <div className="star-orbit star-orbit-2">
-                <div className="star star-2">✨</div>
-              </div>
-              <div className="star-orbit star-orbit-3">
-                <div className="star star-3">💫</div>
-              </div>
-              <div className="star-orbit star-orbit-4">
-                <div className="star star-4">⭐</div>
-              </div>
-            </div>
-            
-            <div className="retro-button-container" style={{ height: isMobile ? '162px' : '167px' }}>
-              <div className="retro-button-border">
-                <div className="retro-button-base">
-                  <button
-                    onClick={() => navigate('/daily')}
-                    className="retro-button retro-button-daily"
-                  >
-                    <div className="flex flex-col items-center justify-center h-full px-6 py-8">
-                      {/* Title */}
-                      <h2 
-                        className="text-[27px] md:text-[32px] lg:text-[32px] mb-6 whitespace-nowrap"
-                        style={{ 
-                          fontFamily: language === 'he' ? "'Abraham', sans-serif" : "'Lilita One', cursive",
-                          fontWeight: '900',
-                          color: '#FFFFFF',
-                          textTransform: 'uppercase',
-                          letterSpacing: '0.02em',
-                          lineHeight: '1',
-                          textShadow: '0 -1px 0 #000, 1px 0 0 #000, -1px 0 0 #000, 0 2px 0 #000, 0 4px 4px rgba(0,0,0,0.25)'
-                        }}
-                      >
-                        {t('home.daily.challenges')}
-                      </h2>
-                      
-                      {/* Challenge icons - with colors */}
-                      <div className="flex items-center justify-center gap-4 md:gap-5">
-                        {dailyModeIcons.map((mode) => {
-                          const isCompleted = isModeCompleted(mode.name);
-                          return (
-                            <div key={mode.name} className="relative">
-                              <img 
-                                src={mode.icon}
-                                alt={`${mode.name} Icon`}
-                                className="h-10 w-auto md:h-18 md:w-auto"
-                                style={{
-                                  filter: 'none'
-                                }}
-                              />
-                              {isCompleted && (
-                                <div 
-                                  className="absolute -top-1 -right-1 w-5 h-5 rounded-full border-2 border-black flex items-center justify-center"
-                                  style={{ backgroundColor: '#00FF00' }}
-                                >
-                                  <span style={{ fontSize: '12px', color: '#000000', fontWeight: 'bold' }}>✓</span>
-                                </div>
-                              )}
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  </button>
-                </div>
-              </div>
-            </div>
-            
-            {/* Next puzzle countdown - styled container */}
-            <div className="text-center mt-4">
-              <div className="retro-countdown-container">
-                <div className="retro-countdown-border">
-                  <div className="retro-countdown-base">
-                    <div className="retro-countdown-content">
-                      <span 
-                        className="text-base md:text-lg font-bold"
-                        style={{ 
-                          color: '#FFFFFF',
-                          fontFamily: language === 'he' ? "'Abraham', sans-serif" : "'Lilita One', cursive",
-                          textShadow: '0 -1px 0 #000, 1px 0 0 #000, -1px 0 0 #000, 0 2px 0 #000, 0 4px 4px rgba(0,0,0,0.25)'
-                        }}
-                      >
-                        {t('home.next.puzzle.in')} {timeUntilNextPuzzle}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+          {/* Daily Challenges Hero */}
+          <DailyChallengesHero />
+
+          {/* Next puzzle countdown - minimal container */}
+          <div className="text-center -mt-8 md:-mt-10 lg:-mt-8">
+              <span 
+                className="text-base md:text-lg font-bold"
+                style={{ 
+                  color: '#C9C9C9',
+                  fontFamily: language === 'he' ? "'Abraham', sans-serif" : "'Lilita One', cursive"
+                }}
+              >
+                {t('home.next.puzzle.in')} {timeUntilNextPuzzle}
+              </span>
           </div>
 
           {/* {t('home.survival.title')} BUTTON */}
@@ -638,6 +543,16 @@ const Index = () => {
 
           .retro-header-mini-auth {
             background: linear-gradient(#FF8C42 0%, #FF6B1A 100%);
+          }
+
+          /* Make the currently selected language look half-pressed (same as hover) */
+          .retro-header-mini-button.retro-header-mini-active {
+            transform: translateY(-8%);
+          }
+
+          /* When clicking the active language, allow full press */
+          .retro-header-mini-button.retro-header-mini-active:active {
+            transform: translateY(0);
           }
 
           /* Countdown Container Styles */
