@@ -42,11 +42,11 @@ const translations: Translations = {
   },
   "home.tier.list": {
     en: "Tier List",
-    he: "דירוג בראולרים"
+    he: "בראולרים"
   },
   "home.join.community": {
     en: "Join Us",
-    he: "הצטרף לקהילה"
+    he: "קהילה"
   },
   "home.next.puzzle.in": {
     en: "Next puzzle in",

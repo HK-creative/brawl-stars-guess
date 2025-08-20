@@ -100,10 +100,13 @@ const TopBar: React.FC = () => {
           <Button
             variant={language === 'en' ? 'secondary' : 'ghost'}
             size="sm"
-            onClick={() => changeLanguage('en')}
+            onClick={() => { if (language !== 'en') changeLanguage('en'); }}
+            disabled={language === 'en'}
+            aria-disabled={language === 'en'}
+            tabIndex={language === 'en' ? -1 : 0}
             className={cn(
               "font-semibold",
-              language === 'en' ? "text-primary border-primary/50" : "text-foreground/70 hover:text-primary hover:bg-primary/10",
+              language === 'en' ? "text-primary border-primary/50 cursor-not-allowed" : "text-foreground/70 hover:text-primary hover:bg-primary/10",
               "border transition-all duration-300 px-4 py-2 h-auto"
             )}
             aria-label="Switch to English"
@@ -113,10 +116,13 @@ const TopBar: React.FC = () => {
           <Button
             variant={language === 'he' ? 'secondary' : 'ghost'}
             size="sm"
-            onClick={() => changeLanguage('he')}
+            onClick={() => { if (language !== 'he') changeLanguage('he'); }}
+            disabled={language === 'he'}
+            aria-disabled={language === 'he'}
+            tabIndex={language === 'he' ? -1 : 0}
             className={cn(
               "font-semibold",
-              language === 'he' ? "text-primary border-primary/50" : "text-foreground/70 hover:text-primary hover:bg-primary/10",
+              language === 'he' ? "text-primary border-primary/50 cursor-not-allowed" : "text-foreground/70 hover:text-primary hover:bg-primary/10",
               "border transition-all duration-300 px-4 py-2 h-auto"
             )}
             aria-label="Switch to Hebrew"

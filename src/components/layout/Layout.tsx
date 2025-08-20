@@ -145,11 +145,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         {!isHomePage && !hideAuthButtons && (
           <div className="absolute top-2 right-4 md:top-4 md:right-16 z-50 flex gap-2">
           <button
-            onClick={() => changeLanguage('en')}
+            onClick={() => { if (language !== 'en') changeLanguage('en'); }}
+            disabled={language === 'en'}
+            aria-disabled={language === 'en'}
+            tabIndex={language === 'en' ? -1 : 0}
             className={cn(
               'rounded-full p-1 transition-all duration-200 border',
               language === 'en' 
-                ? 'ring-2 ring-yellow-400 bg-black/60 border-yellow-400' 
+                ? 'ring-2 ring-yellow-400 bg-black/60 border-yellow-400 cursor-not-allowed' 
                 : 'opacity-70 hover:opacity-100 border-white/30'
             )}
             aria-label={t('aria.switch.english')}
@@ -164,11 +167,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           </button>
           
           <button
-            onClick={() => changeLanguage('he')}
+            onClick={() => { if (language !== 'he') changeLanguage('he'); }}
+            disabled={language === 'he'}
+            aria-disabled={language === 'he'}
+            tabIndex={language === 'he' ? -1 : 0}
             className={cn(
               'rounded-full p-1 transition-all duration-200 border',
               language === 'he' 
-                ? 'ring-2 ring-yellow-400 bg-black/60 border-yellow-400' 
+                ? 'ring-2 ring-yellow-400 bg-black/60 border-yellow-400 cursor-not-allowed' 
                 : 'opacity-70 hover:opacity-100 border-white/30'
             )}
             aria-label={t('aria.switch.hebrew')}

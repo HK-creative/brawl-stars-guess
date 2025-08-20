@@ -4,7 +4,7 @@ build tier list page  - ✅
 build join us page - ✅
 build feedback page - ✅
 victory screen
-Adapt Survival mode design to daily
+Adapt Survival mode design to daily - ✅
 Prize-giveaway feature for engaged users
 Onboarding pop-up flow
 Check Log-ins & accounts (in supabase) - data store, login, register, forgot password.

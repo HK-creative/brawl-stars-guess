@@ -74,7 +74,13 @@ html[dir="rtl"] button h3 {
   vertical-align: middle !important;
 }
 
-html[dir="rtl"] button > div {
+/* Nudge the Survival home button Hebrew title slightly upward to align with English */
+html[dir="rtl"] button h3.survival-home-button-title {
+  transform: translateY(-6%) !important;
+}
+
+/* Exclude absolutely-positioned overlays (e.g., Survival animation/label layers) */
+html[dir="rtl"] button > div:not(.absolute) {
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
