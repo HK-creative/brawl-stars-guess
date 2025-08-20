@@ -177,7 +177,7 @@ const Index = () => {
               paddingRight: isMobile ? '2px' : undefined
             }}>
           {/* Left - Feedback button with retro style */}
-          <div className="retro-header-button-container" style={{ height: isMobile ? '36px' : '32px', width: isMobile ? '36px' : '32px' }}>
+          <div className="retro-header-button-container" style={{ height: isMobile ? '44px' : '40px', width: isMobile ? '44px' : '40px' }}>
             <div className="retro-header-button-border" style={{ outline: 'none', border: 'none', overflow: 'visible' }}>
               <div className="retro-header-button-base" style={{ overflow: 'visible' }}>
                 <button
@@ -191,7 +191,7 @@ const Index = () => {
                     <img
                       src="/NewDailyUI/FeedbackIcon.svg"
                       alt=""
-                      style={{ width: isMobile ? '100%' : 'auto', height: '100%', maxWidth: isMobile ? undefined : '90%', transform: `scale(${isMobile ? 3.15 : 6.6})`, transformOrigin: 'center', display: 'block' }}
+                      style={{ width: isMobile ? '100%' : 'auto', height: '100%', maxWidth: isMobile ? undefined : '90%', transform: `scale(${isMobile ? 1.68 : 1.54})`, transformOrigin: 'center', display: 'block' }}
                       className="object-contain"
                     />
                   </div>
@@ -201,10 +201,10 @@ const Index = () => {
           </div>
 
           {/* Right - Language + Auth with retro styling */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
             {/* Language toggle with retro 3D style */}
             <div className="flex gap-1">
-              <div className="retro-header-mini-container" style={{ width: isMobile ? '36px' : '32px', height: isMobile ? '36px' : '32px' }}>
+              <div className="retro-header-mini-container" style={{ width: isMobile ? '44px' : '40px', height: isMobile ? '44px' : '40px' }}>
                 <div className="retro-header-mini-border">
                   <div className="retro-header-mini-base">
                     <button
@@ -220,15 +220,15 @@ const Index = () => {
                       <Image
                         src="/USAIcon.png"
                         alt="English"
-                        width={16}
-                        height={16}
-                        className="w-4 h-4 rounded-full object-contain"
+                        width={20}
+                        height={20}
+                        className="w-5 h-5 rounded-full object-contain"
                       />
                     </button>
                   </div>
                 </div>
               </div>
-              <div className="retro-header-mini-container" style={{ width: isMobile ? '36px' : '32px', height: isMobile ? '36px' : '32px' }}>
+              <div className="retro-header-mini-container" style={{ width: isMobile ? '44px' : '40px', height: isMobile ? '44px' : '40px' }}>
                 <div className="retro-header-mini-border">
                   <div className="retro-header-mini-base">
                     <button
@@ -244,9 +244,9 @@ const Index = () => {
                       <Image
                         src="/IsraelIcon.png"
                         alt="Hebrew"
-                        width={16}
-                        height={16}
-                        className="w-4 h-4 rounded-full object-contain"
+                        width={20}
+                        height={20}
+                        className="w-5 h-5 rounded-full object-contain"
                       />
                     </button>
                   </div>
@@ -261,8 +261,8 @@ const Index = () => {
                 aria-label="Account"
                 title="Account"
                 style={{
-                  width: isMobile ? '44px' : '40px',
-                  height: isMobile ? '44px' : '40px',
+                  width: isMobile ? '52px' : '48px',
+                  height: isMobile ? '52px' : '48px',
                   background: 'transparent',
                   border: 'none',
                   padding: 0,
@@ -279,18 +279,18 @@ const Index = () => {
                 />
               </button>
             ) : user && (
-              <div className="retro-header-button-container" style={{ height: isMobile ? '40px' : '36px' }}>
+              <div className="retro-header-button-container" style={{ height: isMobile ? '48px' : '44px' }}>
                 <div className="retro-header-button-border">
                   <div className="retro-header-button-base">
                     <button className="retro-header-button retro-header-button-user">
                       <div className="flex items-center gap-2">
-                        <div className="w-6 h-6 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center border border-green-300/50 shadow-lg">
-                          <User size={12} className="text-white" />
+                        <div className="w-7 h-7 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center border border-green-300/50 shadow-lg">
+                          <User size={14} className="text-white" />
                         </div>
-                        <span className="text-white text-sm font-semibold truncate max-w-16">
+                        <span className="text-white text-base font-semibold truncate max-w-16">
                           {user.email?.split('@')[0] || 'Player'}
                         </span>
-                        <ChevronDown className="w-3 h-3 text-slate-400" />
+                        <ChevronDown className="w-4 h-4 text-slate-400" />
                       </div>
                     </button>
                   </div>
@@ -506,7 +506,7 @@ const Index = () => {
                                 textTransform: 'uppercase',
                                 letterSpacing: '0.02em',
                                 textShadow: '0 -1px 0 #000, 1px 0 0 #000, -1px 0 0 #000, 0 2px 0 #000, 0 4px 4px rgba(0,0,0,0.25)',
-                                transform: language === 'he' ? 'translateY(-20%) scale(1.10)' : language === 'en' ? 'translateY(-5%) scale(1.20)' : undefined,
+                                transform: language === 'he' ? 'translateY(-20%)' : 'translateY(-5%)',
                                 transformOrigin: 'center'
                               }}
                             >
@@ -549,7 +549,7 @@ const Index = () => {
                                 textTransform: 'uppercase',
                                 letterSpacing: '0.02em',
                                 textShadow: '0 -1px 0 #000, 1px 0 0 #000, -1px 0 0 #000, 0 2px 0 #000, 0 4px 4px rgba(0,0,0,0.25)',
-                                transform: language === 'he' ? 'translateY(-20%) scale(1.10)' : language === 'en' ? 'translateY(-5%) scale(1.20)' : undefined,
+                                transform: language === 'he' ? 'translateY(-20%)' : 'translateY(-5%)',
                                 transformOrigin: 'center'
                               }}
                             >
@@ -594,7 +594,7 @@ const Index = () => {
                                 textTransform: 'uppercase',
                                 letterSpacing: '0.02em',
                                 textShadow: '0 -1px 0 #000, 1px 0 0 #000, -1px 0 0 #000, 0 2px 0 #000, 0 4px 4px rgba(0,0,0,0.25)',
-                                transform: language === 'he' ? 'translateY(-20%) scale(1.10)' : language === 'en' ? 'translateY(-5%) scale(1.20)' : undefined,
+                                transform: language === 'he' ? 'translateY(-20%)' : 'translateY(-5%)',
                                 transformOrigin: 'center'
                               }}
                             >
@@ -637,7 +637,7 @@ const Index = () => {
                                 textTransform: 'uppercase',
                                 letterSpacing: '0.02em',
                                 textShadow: '0 -1px 0 #000, 1px 0 0 #000, -1px 0 0 #000, 0 2px 0 #000, 0 4px 4px rgba(0,0,0,0.25)',
-                                transform: language === 'he' ? 'translateY(-20%) scale(1.10)' : language === 'en' ? 'translateY(-5%) scale(1.20)' : undefined,
+                                transform: language === 'he' ? 'translateY(-20%)' : 'translateY(-5%)',
                                 transformOrigin: 'center'
                               }}
                             >
@@ -1049,9 +1049,9 @@ const Index = () => {
             }
           }
 
-          /* Stronger, faster breathing for Play Now button */
+          /* Breathing for Play Now button (subtler and a bit slower) */
           .logo-breathe-strong-fast {
-            animation: logo-breath-strong-fast 4s ease-in-out infinite;
+            animation: logo-breath-strong-fast 5.5s ease-in-out infinite;
           }
           @keyframes logo-breath-strong-fast {
             0%, 100% {
@@ -1059,9 +1059,19 @@ const Index = () => {
               filter: brightness(1);
             }
             50% {
-              transform: scale(1.06);
-              filter: brightness(1.08);
+              transform: scale(1.03);
+              filter: brightness(1.05);
             }
+          }
+
+          /* Secondary CTA label size adjustments per language */
+          html[lang='en'] .secondary-cta-container > button > div > span {
+            transform: translateY(-5%) scale(1.38) !important; /* ~+15% from 1.20 */
+            transform-origin: center;
+          }
+          html[lang='he'] .secondary-cta-container > button > div > span {
+            transform: translateY(-20%) scale(1.27) !important; /* ~+15% from 1.10 base */
+            transform-origin: center;
           }
           `}
         </style>

@@ -77,6 +77,22 @@ html[dir="rtl"] button h3 {
 /* Nudge the Survival home button Hebrew title slightly upward to align with English */
 html[dir="rtl"] button h3.survival-home-button-title {
   transform: translateY(-6%) !important;
+  /* Increase Hebrew Survival label size: bigger on desktop via higher max */
+  font-size: clamp(28px, 7.2vw, 60px) !important;
+}
+
+/* Device-specific size adjustments for Hebrew Survival label ("הישרדות") */
+/* Mobile ONLY: increase ~30% */
+@media (max-width: 767.98px) {
+  html[dir="rtl"] button h3.survival-home-button-title {
+    font-size: clamp(36px, 9.36vw, 78px) !important;
+  }
+}
+/* PC/Desktop ONLY: reduce ~20% */
+@media (min-width: 1024px) {
+  html[dir="rtl"] button h3.survival-home-button-title {
+    font-size: clamp(28px, 5.76vw, 48px) !important;
+  }
 }
 
 /* Exclude absolutely-positioned overlays (e.g., Survival animation/label layers) */

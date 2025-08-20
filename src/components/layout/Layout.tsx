@@ -121,17 +121,17 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
                 {/* Mobile profile design */}
                 <div className="flex items-center gap-2 bg-black/60 rounded-full border border-white/30 px-2 py-1 md:hidden">
-                  <div className="w-5 h-5 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center">
-                    <User size={10} className="text-white" />
+                  <div className="w-6 h-6 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center">
+                    <User size={12} className="text-white" />
                   </div>
-                  <span className="text-white text-xs font-semibold">{user.email?.split('@')[0] || 'Player'}</span>
+                  <span className="text-white text-sm font-semibold">{user.email?.split('@')[0] || 'Player'}</span>
                   <Button 
                     variant="ghost" 
                     size="sm" 
                     onClick={handleLogout}
                     className="text-red-400 hover:bg-red-500/20 hover:text-red-300 p-1 h-auto"
                   >
-                    <LogOut size={10} />
+                    <LogOut size={12} />
                   </Button>
                 </div>
               </>
@@ -143,14 +143,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
         {/* Language selection - ONLY show on non-homepage and hidden for Survival Mode routes */}
         {!isHomePage && !hideAuthButtons && (
-          <div className="absolute top-2 right-4 md:top-4 md:right-16 z-50 flex gap-2">
+          <div className="absolute top-2 right-4 md:top-4 md:right-16 z-50 flex gap-3">
           <button
             onClick={() => { if (language !== 'en') changeLanguage('en'); }}
             disabled={language === 'en'}
             aria-disabled={language === 'en'}
             tabIndex={language === 'en' ? -1 : 0}
             className={cn(
-              'rounded-full p-1 transition-all duration-200 border',
+              'rounded-full p-1.5 transition-all duration-200 border',
               language === 'en' 
                 ? 'ring-2 ring-yellow-400 bg-black/60 border-yellow-400 cursor-not-allowed' 
                 : 'opacity-70 hover:opacity-100 border-white/30'
@@ -160,9 +160,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             <Image
               src="/USAIcon.png"
               alt={t('english')}
-              width={28}
-              height={28}
-              className="w-7 h-7 object-contain"
+              width={32}
+              height={32}
+              className="w-8 h-8 object-contain"
             />
           </button>
           
@@ -172,7 +172,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             aria-disabled={language === 'he'}
             tabIndex={language === 'he' ? -1 : 0}
             className={cn(
-              'rounded-full p-1 transition-all duration-200 border',
+              'rounded-full p-1.5 transition-all duration-200 border',
               language === 'he' 
                 ? 'ring-2 ring-yellow-400 bg-black/60 border-yellow-400 cursor-not-allowed' 
                 : 'opacity-70 hover:opacity-100 border-white/30'
@@ -182,9 +182,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             <Image
               src="/IsraelIcon.png"
               alt={t('hebrew')}
-              width={28}
-              height={28}
-              className="w-7 h-7 object-contain"
+              width={32}
+              height={32}
+              className="w-8 h-8 object-contain"
             />
           </button>
         </div>
