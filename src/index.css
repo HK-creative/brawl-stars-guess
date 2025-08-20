@@ -1884,6 +1884,85 @@ html[dir="rtl"] .survival-card-title {
   font-weight: 900 !important;
 }
 
+/* Starfield overlay (white stars only, no gradient background) */
+.starfield-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1; /* UI containers use higher z (e.g., z-10) */
+  pointer-events: none;
+  overflow: hidden;
+}
 
+/* Each layer renders many stars via box-shadow for performance */
+.star-layer,
+.star-layer::after {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: var(--star-size, 1px);
+  height: var(--star-size, 1px);
+  border-radius: 50%;
+  background: transparent; /* stars are from box-shadow dots */
+}
 
+.star-layer {
+  box-shadow: var(--star-boxshadow);
+  animation: animStar var(--star-duration, 100s) linear infinite;
+  will-change: transform;
+}
 
+/* Duplicate a second star set offset vertically for seamless vertical tiling */
+.star-layer::after {
+  content: '';
+  position: absolute;
+  top: calc(var(--star-start-offset, 600px) * -1);
+  left: 0;
+  width: var(--star-size, 1px);
+  height: var(--star-size, 1px);
+  border-radius: 50%;
+  background: transparent;
+  box-shadow: var(--star-boxshadow-2);
+}
+
+@keyframes animStar {
+  from {
+    transform: translateY(0) translateX(0);
+  }
+  to {
+    transform: translateY(calc(var(--star-field-height, 2560px) * -1))
+               translateX(calc(var(--star-field-width, 2560px) * -1));
+  }
+}
+
+/* Shooting stars */
+.shooting-star {
+  z-index: 10;
+  position: absolute;
+  top: var(--shooting-start-top, auto);
+  left: var(--shooting-start-left, auto);
+  bottom: var(--shooting-start-bottom, auto);
+  right: var(--shooting-start-right, auto);
+  width: var(--shooting-star-size, 5px);
+  height: 5px;
+  border-top-left-radius: 50%;
+  border-top-right-radius: 50%;
+  background: linear-gradient(to top, rgba(255,255,255,0), rgba(255,255,255,1));
+  animation: animShootingStar var(--shooting-star-duration, 10s) linear infinite;
+  transform-origin: bottom right;
+  will-change: transform, height;
+}
+
+@keyframes animShootingStar {
+  from {
+    transform: translateY(0) translateX(0) rotate(-45deg);
+    opacity: 1;
+    height: 5px;
+  }
+  to {
+    transform: translateY(calc(var(--star-field-height, 2560px) * -1))
+               translateX(calc(var(--star-field-width, 2560px) * -1))
+               rotate(-45deg);
+    opacity: 1;
+    height: var(--shooting-star-tail, 300px);
+  }
+}

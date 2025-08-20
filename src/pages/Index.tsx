@@ -12,6 +12,7 @@ import AuthButton from '@/components/ui/auth-button';
 import { useAuthModal } from '@/contexts/AuthModalContext';
 import DailyChallengesHero from '@/components/home/DailyChallengesHero';
 import { motion } from 'framer-motion';
+import StarField from '@/components/StarField';
 
 const Index = () => {
   const { isLoggedIn, user, logout, streak, completedModes } = useStreak();
@@ -19,17 +20,21 @@ const Index = () => {
   // Determine if the viewport is mobile-sized (client-side only)
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 640;
   const [topBarScale, setTopBarScale] = useState(1);
-  // Dynamically shrink top bar items up to 20% on very small phones
+  // Scale top bar: larger across the board, especially on mobile; still adapt for very small phones
   useEffect(() => {
     const calcScale = () => {
       if (typeof window === 'undefined') return;
       const w = window.innerWidth;
-      if (w >= 410) {
-        setTopBarScale(1);
+      const isMobileViewport = w < 640;
+      if (isMobileViewport) {
+        // For very small phones (<410px), keep a slight adaptive curve but with a higher base
+        // Map 320px->0.8 to 410px->1, then boost with a mobile base multiplier
+        const ratio = w >= 410 ? 1 : Math.max(0.8, (w - 320) / (410 - 320));
+        const mobileBase = 1.30; // stronger boost on mobile
+        setTopBarScale(ratio * mobileBase);
       } else {
-        // Linear map 320px->0.8  to 410px->1
-        const ratio = Math.max(0.8, (w - 320) / (410 - 320));
-        setTopBarScale(ratio);
+        const desktopBase = 1.12; // subtle boost on desktop
+        setTopBarScale(desktopBase);
       }
     };
     calcScale();
@@ -166,39 +171,45 @@ const Index = () => {
         backgroundRepeat: 'no-repeat'
       }}
     >
+      {/* Starfield overlay above background, below UI */}
+      <StarField shootingStars />
       <div className="px-4 flex flex-col min-h-screen overflow-x-hidden overflow-y-hidden relative z-10">
         
         {/* Header utilities - fixed top bar flush to top edge */}
         <div className="flex items-center justify-between pt-2 pb-1 flex-shrink-0 w-full lg:w-[42rem] mx-auto lg:px-0 top-bar"
             style={{
-              transform: isMobile ? `scale(${topBarScale})` : undefined,
+              transform: `scale(${topBarScale})`,
               transformOrigin: 'top center',
               paddingLeft: isMobile ? '2px' : undefined,
               paddingRight: isMobile ? '2px' : undefined
             }}>
-          {/* Left - Feedback button with retro style */}
-          <div className="retro-header-button-container" style={{ height: isMobile ? '44px' : '40px', width: isMobile ? '44px' : '40px' }}>
-            <div className="retro-header-button-border" style={{ outline: 'none', border: 'none', overflow: 'visible' }}>
-              <div className="retro-header-button-base" style={{ overflow: 'visible' }}>
-                <button
-                  onClick={() => navigate('/feedback', { state: { fromHome: true } })}
-                  className="retro-header-button retro-header-button-feedback"
-                  aria-label={t('home.feedback')}
-                  title={t('home.feedback')}
-                  style={{ overflow: 'visible' }}
-                >
-                  <div className="flex items-center justify-center" style={{ width: '100%', height: '100%', transformOrigin: 'center', overflow: 'visible' }}>
-                    <img
-                      src="/NewDailyUI/FeedbackIcon.svg"
-                      alt=""
-                      style={{ width: isMobile ? '100%' : 'auto', height: '100%', maxWidth: isMobile ? undefined : '90%', transform: `scale(${isMobile ? 1.68 : 1.54})`, transformOrigin: 'center', display: 'block' }}
-                      className="object-contain"
-                    />
-                  </div>
-                </button>
-              </div>
-            </div>
-          </div>
+          {/* Left - Feedback button (new SVG as the whole button) */}
+          <motion.button
+            onClick={() => navigate('/feedback', { state: { fromHome: true } })}
+            aria-label={t('home.feedback')}
+            title={t('home.feedback')}
+            style={{
+              width: isMobile ? '50px' : '48px',
+              height: isMobile ? '48px' : '44px',
+              background: 'transparent',
+              border: 'none',
+              padding: 0,
+              display: 'inline-block',
+              lineHeight: 0,
+            }}
+            className="focus:outline-none"
+            whileHover={{ y: -2, scale: 1.02 }}
+            whileTap={{ y: 1, scale: 0.97 }}
+            transition={{ type: 'spring', stiffness: 420, damping: 26, mass: 0.35 }}
+          >
+            <img
+              src="/NewDailyUI/FeedbackButton.svg"
+              alt=""
+              draggable={false}
+              className="select-none pointer-events-none"
+              style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+            />
+          </motion.button>
 
           {/* Right - Language + Auth with retro styling */}
           <div className="flex items-center gap-4">
@@ -256,7 +267,7 @@ const Index = () => {
 
             {/* Auth controls — unauthenticated shows icon only (no plate) */}
             {!isLoggedIn ? (
-              <button
+              <motion.button
                 onClick={handleSignUp}
                 aria-label="Account"
                 title="Account"
@@ -269,6 +280,10 @@ const Index = () => {
                   display: 'inline-block',
                   lineHeight: 0,
                 }}
+                className="focus:outline-none"
+                whileHover={{ y: -2, scale: 1.02 }}
+                whileTap={{ y: 1, scale: 0.97 }}
+                transition={{ type: 'spring', stiffness: 420, damping: 26, mass: 0.35 }}
               >
                 <img
                   src="/NewDailyUI/AccountIcon.svg"
@@ -277,7 +292,7 @@ const Index = () => {
                   className="select-none pointer-events-none"
                   style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                 />
-              </button>
+              </motion.button>
             ) : user && (
               <div className="retro-header-button-container" style={{ height: isMobile ? '48px' : '44px' }}>
                 <div className="retro-header-button-border">

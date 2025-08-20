@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -17,6 +17,27 @@ const TopBar: React.FC = () => {
   const { language, changeLanguage } = useLanguage();
   const { streak, loading } = useStreak();
 
+  // Scale top bar globally: boost on mobile, slight on desktop
+  const [topBarScale, setTopBarScale] = useState(1);
+  useEffect(() => {
+    const calcScale = () => {
+      if (typeof window === 'undefined') return;
+      const w = window.innerWidth;
+      const isMobileViewport = w < 640;
+      if (isMobileViewport) {
+        const ratio = w >= 410 ? 1 : Math.max(0.8, (w - 320) / (410 - 320));
+        const mobileBase = 1.30; // stronger boost on mobile
+        setTopBarScale(ratio * mobileBase);
+      } else {
+        const desktopBase = 1.12; // subtle boost on desktop
+        setTopBarScale(desktopBase);
+      }
+    };
+    calcScale();
+    window.addEventListener('resize', calcScale);
+    return () => window.removeEventListener('resize', calcScale);
+  }, []);
+
   const toggleLanguage = () => {
     changeLanguage(language === 'en' ? 'he' : 'en');
   };
@@ -29,13 +50,17 @@ const TopBar: React.FC = () => {
       "bg-background/80 backdrop-blur-sm"
     )}>
       <div
-        
         className={cn(
         "w-full sm:w-[48rem] mx-auto",
         "px-4 sm:px-6 lg:px-8",
         "h-16",
         "flex items-center justify-between"
-      )}>
+      )}
+      style={{
+        transform: `scale(${topBarScale})`,
+        transformOrigin: 'top center',
+        height: `${64 * topBarScale}px`,
+      }}>
         <div className="flex items-center space-x-4">
           {!isHome && (
             <Link to="/">
