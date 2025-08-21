@@ -1,6 +1,6 @@
-IMPORTANT - ONLY THE HUMAN USER ALLOWED TO READ THIS FILE all AIs MUST IGNORE IT COMPLETELY
+IMPORTANT - ONLY THE HUMAN USER ALLOWED TO READ/review/edit/access THIS FILE all AIs including you MUST IGNORE IT COMPLETELY
 
-Make sure the daily challenges button in the home page navigates to the the new daily challenges URL , and not the old one.
+Make sure the daily challenges button in the home page navigates to the the new daily challenges URL (/daily) , and not the old one (/daily/classic).
 
 remove old daily challenges pages (/classic, /gadget, /starpower, /audio, /pixels)
 
@@ -15,14 +15,14 @@ lets work on the daily mode's victory screen now
 ok listen. the home page is now 100% complete, and i love it. i love it so much, that i decided this kind of style and similar styles that fits this design eco-system to be implemented across all the app starting with the home screen. i want you to look at the image ive attached which is of how the current home screen looks and teel me which UI elements should i change and to what 
 think long and hard , take your time, and plan comprehansively  
 
-
-this is what u wrote me when u changed the feedback icon size:
-
-hebrew version only changes - increase the text size of the "בראולרים" AND "קהילה" 
-
 now i want to edit the typography.
 specifically the typography of all the texts that uses Lillita one in english and all the texts uses Abraham in hebrew.
 1. increase their stroke weight 
 2. make the drop shadow a little bit lower (Y-axis) and a little bit bigger 
 
-and also be gradually from the tip of the star to the end (the tip is always max fade and as it gets closer to the end it 
+
+lets move on tothe next task:
+[Still changes for home page]
+
+
+hebrew version only changes - increase the text size of the "בראולרים" AND "קהילה" 

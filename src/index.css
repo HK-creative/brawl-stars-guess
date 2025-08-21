@@ -1926,11 +1926,14 @@ html[dir="rtl"] .survival-card-title {
 
 @keyframes animStar {
   from {
-    transform: translateY(0) translateX(0);
+    transform: translate3d(0, 0, 0);
   }
   to {
-    transform: translateY(calc(var(--star-field-height, 2560px) * -1))
-               translateX(calc(var(--star-field-width, 2560px) * -1));
+    transform: translate3d(
+      calc(var(--star-field-width, 2560px) * -1),
+      calc(var(--star-field-height, 2560px) * -1),
+      0
+    );
   }
 }
 
@@ -1947,22 +1950,37 @@ html[dir="rtl"] .survival-card-title {
   border-top-left-radius: 50%;
   border-top-right-radius: 50%;
   background: linear-gradient(to top, rgba(255,255,255,0), rgba(255,255,255,1));
-  animation: animShootingStar var(--shooting-star-duration, 10s) linear infinite;
+  animation: animShootingStar var(--shooting-star-duration, 10s) linear infinite both;
   transform-origin: bottom right;
-  will-change: transform, height;
+  will-change: transform, height, opacity;
+  backface-visibility: hidden;
 }
 
 @keyframes animShootingStar {
-  from {
-    transform: translateY(0) translateX(0) rotate(-45deg);
-    opacity: 1;
-    height: 5px;
+  0% {
+    transform: translate3d(0, 0, 0) rotate(-45deg);
+    opacity: 0;
+    height: 0px;
   }
-  to {
-    transform: translateY(calc(var(--star-field-height, 2560px) * -1))
-               translateX(calc(var(--star-field-width, 2560px) * -1))
-               rotate(-45deg);
+  10% {
+    opacity: 1;
+    height: 6px;
+  }
+  40% {
     opacity: 1;
     height: var(--shooting-star-tail, 300px);
+  }
+  60% {
+    opacity: 0;
+    height: 0px;
+  }
+  100% {
+    transform: translate3d(
+      calc(var(--star-field-width, 2560px) * -1),
+      calc(var(--star-field-height, 2560px) * -1),
+      0
+    ) rotate(-45deg);
+    opacity: 0;
+    height: 0px;
   }
 }

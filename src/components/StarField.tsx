@@ -6,9 +6,10 @@ const STAR_FIELD_HEIGHT = 2560;
 const STAR_START_OFFSET = 600; // used in CSS ::after
 
 // Counts and speeds
-const NUM_STAR_ONE = 1700;
-const NUM_STAR_TWO = 700;
-const NUM_STAR_THREE = 200;
+// Reduced base counts to compensate for 2x2 tiling (keeps total shadows similar to previous impl)
+const NUM_STAR_ONE = 850;
+const NUM_STAR_TWO = 350;
+const NUM_STAR_THREE = 100;
 const NUM_SHOOTING_STARS = 10; // Multiple subtle streaks with randomized starts
 
 const DURATION_ONE = '100s';
@@ -91,6 +92,42 @@ const StarLayer: React.FC<{ count: number; sizePx: number; duration: string }>
 
 const StarField: React.FC<{ className?: string; shootingStars?: boolean }>
   = ({ className, shootingStars = false }) => {
+  // Freeze shooting star positions/delays across parent re-renders
+  const shootingConfig = useMemo(
+    () => {
+      if (!shootingStars) return [] as Array<{
+        key: string;
+        top: string;
+        left: string;
+        delay: string;
+        tail: string;
+        duration: string;
+      }>;
+
+      const vw = typeof window !== 'undefined' ? window.innerWidth : 1024;
+      const tailRange = vw < 480
+        ? { min: 120, max: 220 }
+        : vw < 800
+        ? { min: 140, max: 260 }
+        : { min: 160, max: 300 };
+
+      return Array.from({ length: NUM_SHOOTING_STARS }).map((_, i) => {
+        const durationSec = 8 + Math.random() * 4; // 8s–12s
+        const delaySec = Math.random() * durationSec; // desync up to one full cycle
+        const tailLen = tailRange.min + Math.floor(Math.random() * (tailRange.max - tailRange.min));
+        return {
+          key: `shooting-${i}`,
+          top: `${Math.floor(Math.random() * 100)}%`,
+          left: `${Math.floor(Math.random() * 100)}%`,
+          delay: `-${delaySec.toFixed(2)}s`,
+          tail: `${tailLen}px`,
+          duration: `${durationSec.toFixed(2)}s`,
+        };
+      });
+    },
+    [shootingStars]
+  );
+
   return (
     <div
       className={['starfield-overlay', className].filter(Boolean).join(' ')}
@@ -101,33 +138,23 @@ const StarField: React.FC<{ className?: string; shootingStars?: boolean }>
       <StarLayer count={NUM_STAR_TWO} sizePx={2} duration={DURATION_TWO} />
       <StarLayer count={NUM_STAR_THREE} sizePx={3} duration={DURATION_THREE} />
       {/* Shooting stars (optional) */}
-      {shootingStars &&
-        Array.from({ length: NUM_SHOOTING_STARS }).map((_, i) => {
-          // Randomize starting position as percentages within the overlay box
-          const top = `${Math.floor(Math.random() * 100)}%`;
-          const left = `${Math.floor(Math.random() * 100)}%`;
-          // Use negative delay to stagger phases immediately
-          const delay = `-${Math.floor(Math.random() * 10)}s`;
-          // Shorter tail: 160px - 300px
-          const tail = `${160 + Math.floor(Math.random() * 140)}px`;
-          return (
-            <div
-              key={`shooting-${i}`}
-              className="shooting-star"
-              style={{
-                ['--star-field-width' as any]: `${STAR_FIELD_WIDTH}px`,
-                ['--star-field-height' as any]: `${STAR_FIELD_HEIGHT}px`,
-                ['--shooting-star-duration' as any]: DURATION_SHOOTING,
-                ['--shooting-start-top' as any]: top,
-                ['--shooting-start-left' as any]: left,
-                ['--shooting-star-tail' as any]: tail,
-                animationDelay: delay,
-              } as React.CSSProperties}
-            />
-          );
-        })}
+      {shootingConfig.map((cfg) => (
+        <div
+          key={cfg.key}
+          className="shooting-star"
+          style={{
+            ['--star-field-width' as any]: `${STAR_FIELD_WIDTH}px`,
+            ['--star-field-height' as any]: `${STAR_FIELD_HEIGHT}px`,
+            ['--shooting-star-duration' as any]: (cfg as any).duration ?? DURATION_SHOOTING,
+            ['--shooting-start-top' as any]: cfg.top,
+            ['--shooting-start-left' as any]: cfg.left,
+            ['--shooting-star-tail' as any]: cfg.tail,
+            animationDelay: cfg.delay,
+          } as React.CSSProperties}
+        />
+      ))}
     </div>
   );
 };
 
-export default StarField;
+export default React.memo(StarField);

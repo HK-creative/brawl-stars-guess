@@ -366,118 +366,120 @@ const Index = () => {
               className="block w-full relative focus:outline-none"
               aria-label={t('home.survival.title')}
             >
-              <img
-                src="/NewDailyUI/NewSurvivalButtonDesign.svg"
-                alt=""
-                className="w-full h-auto select-none pointer-events-none"
-                draggable={false}
-              />
-              {/* Bottom gradient animation (dotLottie) — full button width, above stroke */}
-              <div
-                className="absolute pointer-events-none"
-                style={{
-                  left: 0,
-                  right: 0,
-                  bottom: '12%', // higher to sit above the black outline
-                  height: '26%',
-                  zIndex: 10, // under the text label
-                  borderRadius: '14px',
-                  overflow: 'hidden',
-                }}
-              >
-                <dotlottie-player
-                  src="/NewDailyUI/Gradient%20Footer.lottie"
-                  autoplay
-                  loop
-                  mode="normal"
-                  background="transparent"
+              <div className="logo-breathe" style={{ width: '100%', height: '100%' }}>
+                <img
+                  src="/NewDailyUI/NewSurvivalButtonDesign.svg"
+                  alt=""
+                  className="w-full h-auto select-none pointer-events-none"
+                  draggable={false}
+                />
+                {/* Bottom gradient animation (dotLottie) — full button width, above stroke */}
+                <div
+                  className="absolute pointer-events-none"
                   style={{
-                    width: '100%',
-                    height: '100%',
-                    // widen horizontally to match visual width of plate
-                    transform: 'translateZ(0) scaleX(3)',
-                    transformOrigin: 'center',
-                  }}
-                ></dotlottie-player>
-              </div>
-              {/* White shimmer effect overlay (masked to interior only, excluding stroke) */}
-              <div
-                className="absolute pointer-events-none"
-                style={{ left: 0, right: 0, top: 0, bottom: 0, zIndex: 15 }}
-              >
-                <svg
-                  viewBox="0 0 205 67"
-                  width="100%"
-                  height="100%"
-                  preserveAspectRatio="xMidYMid meet"
-                  style={{ display: 'block' }}
-                >
-                  <defs>
-                    {/* Mask: interior path filled white, with a thin black stroke to carve out the outline area */}
-                    <mask id="survival-shimmer-mask" maskUnits="userSpaceOnUse">
-                      <rect x="0" y="0" width="205" height="67" fill="black" />
-                      <path
-                        d="M10.0748 6.8152C10.1702 5.78665 11.0332 5 12.0662 5H197.736C198.914 5 199.837 6.01229 199.728 7.1848L194.856 59.6858C194.76 60.7143 193.897 61.501 192.864 61.501H7.19418C6.01663 61.501 5.09394 60.4887 5.20275 59.3162L10.0748 6.8152Z"
-                        fill="white"
-                        stroke="black"
-                        strokeWidth="1.8" /* thinner to let shimmer reach closer to the top interior without touching the outline */
-                        strokeLinejoin="round"
-                      />
-                    </mask>
-                    {/* Subtle glow to make the white lines shine */}
-                    <filter id="shimmer-glow" x="-20%" y="-20%" width="140%" height="140%">
-                      <feGaussianBlur in="SourceGraphic" stdDeviation="3.2" result="blur" />
-                      <feMerge>
-                        <feMergeNode in="blur" />
-                        <feMergeNode in="SourceGraphic" />
-                      </feMerge>
-                    </filter>
-                  </defs>
-                  {/* Use foreignObject to host the dotlottie-player, apply the mask, and filter for shine */}
-                  <g filter="url(#shimmer-glow)">
-                    <foreignObject x="0" y="0" width="205" height="67" mask="url(#survival-shimmer-mask)">
-                      <div style={{ width: '100%', height: '100%' }}>
-                        <dotlottie-player
-                          src="/NewDailyUI/White%20Shimmer%20Effect%20for%20Buttons.lottie"
-                          /* manual loop with delay via onComplete handler */
-                          mode="normal"
-                          background="transparent"
-                          speed={4}
-                          ref={survivalShimmerRef as any}
-                          style={{
-                            width: '100%',
-                            height: '100%',
-                            // Slight upscale and upward nudge so the animation reaches the top interior without touching the stroke
-                            transform: 'translateY(-3.0%) translateZ(0) scale(1.02, 1.06)',
-                            transformOrigin: 'center',
-                            mixBlendMode: 'screen',
-                            filter: 'drop-shadow(0 0 9px rgba(255,255,255,0.45)) brightness(1.1)',
-                            opacity: 0.22,
-                          }}
-                        ></dotlottie-player>
-                      </div>
-                    </foreignObject>
-                  </g>
-                </svg>
-              </div>
-              {/* Overlay label */}
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none" style={{ zIndex: 20 }}>
-                <h3
-                  className={language === 'he' ? 'survival-home-button-title' : ''}
-                  style={{
-                    fontFamily: language === 'he' ? "'Abraham', sans-serif" : "'Lilita One', cursive",
-                    fontWeight: 900,
-                    color: '#FFFFFF',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.02em',
-                    lineHeight: 1,
-                    textShadow:
-                      '0 -1px 0 #000, 1px 0 0 #000, -1px 0 0 #000, 0 2px 0 #000, 0 4px 4px rgba(0,0,0,0.25)',
-                    fontSize: 'clamp(24px, 6.4vw, 42px)'
+                    left: 0,
+                    right: 0,
+                    bottom: '12%', // higher to sit above the black outline
+                    height: '26%',
+                    zIndex: 10, // under the text label
+                    borderRadius: '14px',
+                    overflow: 'hidden',
                   }}
                 >
-                  {t('home.survival.title')}
-                </h3>
+                  <dotlottie-player
+                    src="/NewDailyUI/Gradient%20Footer.lottie"
+                    autoplay
+                    loop
+                    mode="normal"
+                    background="transparent"
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      // widen horizontally to match visual width of plate
+                      transform: 'translateZ(0) scaleX(3)',
+                      transformOrigin: 'center',
+                    }}
+                  ></dotlottie-player>
+                </div>
+                {/* White shimmer effect overlay (masked to interior only, excluding stroke) */}
+                <div
+                  className="absolute pointer-events-none"
+                  style={{ left: 0, right: 0, top: 0, bottom: 0, zIndex: 15 }}
+                >
+                  <svg
+                    viewBox="0 0 205 67"
+                    width="100%"
+                    height="100%"
+                    preserveAspectRatio="xMidYMid meet"
+                    style={{ display: 'block' }}
+                  >
+                    <defs>
+                      {/* Mask: interior path filled white, with a thin black stroke to carve out the outline area */}
+                      <mask id="survival-shimmer-mask" maskUnits="userSpaceOnUse">
+                        <rect x="0" y="0" width="205" height="67" fill="black" />
+                        <path
+                          d="M10.0748 6.8152C10.1702 5.78665 11.0332 5 12.0662 5H197.736C198.914 5 199.837 6.01229 199.728 7.1848L194.856 59.6858C194.76 60.7143 193.897 61.501 192.864 61.501H7.19418C6.01663 61.501 5.09394 60.4887 5.20275 59.3162L10.0748 6.8152Z"
+                          fill="white"
+                          stroke="black"
+                          strokeWidth="1.8" /* thinner to let shimmer reach closer to the top interior without touching the outline */
+                          strokeLinejoin="round"
+                        />
+                      </mask>
+                      {/* Subtle glow to make the white lines shine */}
+                      <filter id="shimmer-glow" x="-20%" y="-20%" width="140%" height="140%">
+                        <feGaussianBlur in="SourceGraphic" stdDeviation="3.2" result="blur" />
+                        <feMerge>
+                          <feMergeNode in="blur" />
+                          <feMergeNode in="SourceGraphic" />
+                        </feMerge>
+                      </filter>
+                    </defs>
+                    {/* Use foreignObject to host the dotlottie-player, apply the mask, and filter for shine */}
+                    <g filter="url(#shimmer-glow)">
+                      <foreignObject x="0" y="0" width="205" height="67" mask="url(#survival-shimmer-mask)">
+                        <div style={{ width: '100%', height: '100%' }}>
+                          <dotlottie-player
+                            src="/NewDailyUI/White%20Shimmer%20Effect%20for%20Buttons.lottie"
+                            /* manual loop with delay via onComplete handler */
+                            mode="normal"
+                            background="transparent"
+                            speed={4}
+                            ref={survivalShimmerRef as any}
+                            style={{
+                              width: '100%',
+                              height: '100%',
+                              // Slight upscale and upward nudge so the animation reaches the top interior without touching the stroke
+                              transform: 'translateY(-3.0%) translateZ(0) scale(1.02, 1.06)',
+                              transformOrigin: 'center',
+                              mixBlendMode: 'screen',
+                              filter: 'drop-shadow(0 0 9px rgba(255,255,255,0.45)) brightness(1.1)',
+                              opacity: 0.22,
+                            }}
+                          ></dotlottie-player>
+                        </div>
+                      </foreignObject>
+                    </g>
+                  </svg>
+                </div>
+                {/* Overlay label */}
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none" style={{ zIndex: 20 }}>
+                  <h3
+                    className={language === 'he' ? 'survival-home-button-title' : ''}
+                    style={{
+                      fontFamily: language === 'he' ? "'Abraham', sans-serif" : "'Lilita One', cursive",
+                      fontWeight: 900,
+                      color: '#FFFFFF',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.02em',
+                      lineHeight: 1,
+                      textShadow:
+                        '0 -1px 0 #000, 1px 0 0 #000, -1px 0 0 #000, 0 2px 0 #000, 0 4px 4px rgba(0,0,0,0.25)',
+                      fontSize: 'clamp(24px, 6.4vw, 42px)'
+                    }}
+                  >
+                    {t('home.survival.title')}
+                  </h3>
+                </div>
               </div>
             </button>
             </motion.div>
