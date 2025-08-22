@@ -16,7 +16,7 @@ const PlayNowText: React.FC<{ language: string }> = React.memo(({ language }) =>
       color: '#FFFFFF',
       textTransform: 'uppercase',
       textShadow:
-        '0 -1px 0 #000, 1px 0 0 #000, -1px 0 0 #000, 0 2px 0 #000, 0 4px 4px rgba(0,0,0,0.25)',
+        '0 -1px 0 #000, 1px 0 0 #000, -1px 0 0 #000, 0 2px 0 #000, 0 3px 0 #000, 0 6px 6px rgba(0,0,0,0.35)',
       display: 'block',
       whiteSpace: 'nowrap',
       position: 'relative',
@@ -177,7 +177,7 @@ const DailyChallengesHero: React.FC = () => {
                 textTransform: 'uppercase',
                 color: '#FFFFFF',
                 textShadow:
-                  '0 -1px 0 #000, 1px 0 0 #000, -1px 0 0 #000, 0 2px 0 #000, 0 4px 4px rgba(0,0,0,0.25)',
+                  '0 -1px 0 #000, 1px 0 0 #000, -1px 0 0 #000, 0 2px 0 #000, 0 3px 0 #000, 0 6px 6px rgba(0,0,0,0.35)',
                 display: 'inline-block',
                 transform: language === 'he' && isDesktop ? 'translateY(-7%) scale(0.86)' : 'translateY(-7%)',
                 margin: 0,

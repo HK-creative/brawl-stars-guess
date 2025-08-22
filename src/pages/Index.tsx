@@ -189,8 +189,8 @@ const Index = () => {
             aria-label={t('home.feedback')}
             title={t('home.feedback')}
             style={{
-              width: isMobile ? '50px' : '48px',
-              height: isMobile ? '48px' : '44px',
+              width: isMobile ? '56px' : '72px',
+              height: isMobile ? '54px' : '66px',
               background: 'transparent',
               border: 'none',
               padding: 0,
@@ -214,56 +214,70 @@ const Index = () => {
           {/* Right - Language + Auth with retro styling */}
           <div className="flex items-center gap-4">
             {/* Language toggle with retro 3D style */}
-            <div className="flex gap-1">
-              <div className="retro-header-mini-container" style={{ width: isMobile ? '44px' : '40px', height: isMobile ? '44px' : '40px' }}>
-                <div className="retro-header-mini-border">
-                  <div className="retro-header-mini-base">
-                    <button
-                      onClick={() => { if (language !== 'en') changeLanguage('en'); }}
-                      disabled={language === 'en'}
-                      aria-disabled={language === 'en'}
-                      className={cn(
-                        'retro-header-mini-button',
-                        language === 'en' ? 'retro-header-mini-active cursor-not-allowed' : 'retro-header-mini-inactive'
-                      )}
-                      tabIndex={language === 'en' ? -1 : 0}
-                    >
-                      <Image
-                        src="/USAIcon.png"
-                        alt="English"
-                        width={20}
-                        height={20}
-                        className="w-5 h-5 rounded-full object-contain"
-                      />
-                    </button>
-                  </div>
-                </div>
-              </div>
-              <div className="retro-header-mini-container" style={{ width: isMobile ? '44px' : '40px', height: isMobile ? '44px' : '40px' }}>
-                <div className="retro-header-mini-border">
-                  <div className="retro-header-mini-base">
-                    <button
-                      onClick={() => { if (language !== 'he') changeLanguage('he'); }}
-                      disabled={language === 'he'}
-                      aria-disabled={language === 'he'}
-                      className={cn(
-                        'retro-header-mini-button',
-                        language === 'he' ? 'retro-header-mini-active cursor-not-allowed' : 'retro-header-mini-inactive'
-                      )}
-                      tabIndex={language === 'he' ? -1 : 0}
-                    >
-                      <Image
-                        src="/IsraelIcon.png"
-                        alt="Hebrew"
-                        width={20}
-                        height={20}
-                        className="w-5 h-5 rounded-full object-contain"
-                      />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
+          <div className={cn("flex", isMobile ? "gap-1" : "gap-2")}>
+            <button
+              onClick={() => { if (language !== 'en') changeLanguage('en'); }}
+              disabled={language === 'en'}
+              aria-disabled={language === 'en'}
+              aria-label="English"
+              title="English"
+              tabIndex={language === 'en' ? -1 : 0}
+              style={{
+                width: isMobile ? '28px' : '40px',
+                height: isMobile ? '28px' : '40px',
+                background: 'transparent',
+                border: 'none',
+                padding: 0,
+                display: 'inline-block',
+                cursor: language === 'en' ? 'default' : 'pointer',
+                borderRadius: '8px',
+                boxShadow: language === 'en'
+                  ? (isMobile ? '0 0 0 1px rgba(255,255,255,0.65)' : '0 0 0 2px rgba(255,255,255,0.55)')
+                  : 'none',
+                transition: 'box-shadow 120ms ease'
+              }}
+            >
+              <Image
+                src="/NewDailyUI/united-states-icon.png"
+                alt="English"
+                width={20}
+                height={20}
+                className="select-none pointer-events-none"
+                style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+              />
+            </button>
+            <button
+              onClick={() => { if (language !== 'he') changeLanguage('he'); }}
+              disabled={language === 'he'}
+              aria-disabled={language === 'he'}
+              aria-label="Hebrew"
+              title="Hebrew"
+              tabIndex={language === 'he' ? -1 : 0}
+              style={{
+                width: isMobile ? '28px' : '40px',
+                height: isMobile ? '28px' : '40px',
+                background: 'transparent',
+                border: 'none',
+                padding: 0,
+                display: 'inline-block',
+                cursor: language === 'he' ? 'default' : 'pointer',
+                borderRadius: '8px',
+                boxShadow: language === 'he'
+                  ? (isMobile ? '0 0 0 1px rgba(255,255,255,0.65)' : '0 0 0 2px rgba(255,255,255,0.55)')
+                  : 'none',
+                transition: 'box-shadow 120ms ease'
+              }}
+            >
+              <Image
+                src="/NewDailyUI/israel-icon.png"
+                alt="Hebrew"
+                width={20}
+                height={20}
+                className="select-none pointer-events-none"
+                style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+              />
+            </button>
+          </div>
 
             {/* Auth controls — unauthenticated shows icon only (no plate) */}
             {!isLoggedIn ? (
@@ -272,8 +286,8 @@ const Index = () => {
                 aria-label="Account"
                 title="Account"
                 style={{
-                  width: isMobile ? '52px' : '48px',
-                  height: isMobile ? '52px' : '48px',
+                  width: isMobile ? '58px' : '76px',
+                  height: isMobile ? '58px' : '76px',
                   background: 'transparent',
                   border: 'none',
                   padding: 0,
@@ -294,7 +308,7 @@ const Index = () => {
                 />
               </motion.button>
             ) : user && (
-              <div className="retro-header-button-container" style={{ height: isMobile ? '48px' : '44px' }}>
+              <div className="retro-header-button-container" style={{ height: isMobile ? '54px' : '70px' }}>
                 <div className="retro-header-button-border">
                   <div className="retro-header-button-base">
                     <button className="retro-header-button retro-header-button-user">
@@ -453,7 +467,7 @@ const Index = () => {
                               transformOrigin: 'center',
                               mixBlendMode: 'screen',
                               filter: 'drop-shadow(0 0 9px rgba(255,255,255,0.45)) brightness(1.1)',
-                              opacity: 0.22,
+                              opacity: 0.18,
                             }}
                           ></dotlottie-player>
                         </div>
@@ -473,7 +487,7 @@ const Index = () => {
                       letterSpacing: '0.02em',
                       lineHeight: 1,
                       textShadow:
-                        '0 -1px 0 #000, 1px 0 0 #000, -1px 0 0 #000, 0 2px 0 #000, 0 4px 4px rgba(0,0,0,0.25)',
+                        '0 -1px 0 #000, 1px 0 0 #000, -1px 0 0 #000, 0 2px 0 #000, 0 3px 0 #000, 0 6px 6px rgba(0,0,0,0.35)',
                       fontSize: 'clamp(24px, 6.4vw, 42px)'
                     }}
                   >
@@ -522,7 +536,7 @@ const Index = () => {
                                 color: '#FFFFFF',
                                 textTransform: 'uppercase',
                                 letterSpacing: '0.02em',
-                                textShadow: '0 -1px 0 #000, 1px 0 0 #000, -1px 0 0 #000, 0 2px 0 #000, 0 4px 4px rgba(0,0,0,0.25)',
+                                textShadow: '0 -1px 0 #000, 1px 0 0 #000, -1px 0 0 #000, 0 2px 0 #000, 0 3px 0 #000, 0 6px 6px rgba(0,0,0,0.35)',
                                 transform: language === 'he' ? 'translateY(-20%)' : 'translateY(-5%)',
                                 transformOrigin: 'center'
                               }}
@@ -565,7 +579,7 @@ const Index = () => {
                                 color: '#FFFFFF',
                                 textTransform: 'uppercase',
                                 letterSpacing: '0.02em',
-                                textShadow: '0 -1px 0 #000, 1px 0 0 #000, -1px 0 0 #000, 0 2px 0 #000, 0 4px 4px rgba(0,0,0,0.25)',
+                                textShadow: '0 -1px 0 #000, 1px 0 0 #000, -1px 0 0 #000, 0 2px 0 #000, 0 3px 0 #000, 0 6px 6px rgba(0,0,0,0.35)',
                                 transform: language === 'he' ? 'translateY(-20%)' : 'translateY(-5%)',
                                 transformOrigin: 'center'
                               }}
@@ -610,7 +624,7 @@ const Index = () => {
                                 color: '#FFFFFF',
                                 textTransform: 'uppercase',
                                 letterSpacing: '0.02em',
-                                textShadow: '0 -1px 0 #000, 1px 0 0 #000, -1px 0 0 #000, 0 2px 0 #000, 0 4px 4px rgba(0,0,0,0.25)',
+                                textShadow: '0 -1px 0 #000, 1px 0 0 #000, -1px 0 0 #000, 0 2px 0 #000, 0 3px 0 #000, 0 6px 6px rgba(0,0,0,0.35)',
                                 transform: language === 'he' ? 'translateY(-20%)' : 'translateY(-5%)',
                                 transformOrigin: 'center'
                               }}
@@ -653,7 +667,7 @@ const Index = () => {
                                 color: '#FFFFFF',
                                 textTransform: 'uppercase',
                                 letterSpacing: '0.02em',
-                                textShadow: '0 -1px 0 #000, 1px 0 0 #000, -1px 0 0 #000, 0 2px 0 #000, 0 4px 4px rgba(0,0,0,0.25)',
+                                textShadow: '0 -1px 0 #000, 1px 0 0 #000, -1px 0 0 #000, 0 2px 0 #000, 0 3px 0 #000, 0 6px 6px rgba(0,0,0,0.35)',
                                 transform: language === 'he' ? 'translateY(-20%)' : 'translateY(-5%)',
                                 transformOrigin: 'center'
                               }}
@@ -844,77 +858,7 @@ const Index = () => {
             background: linear-gradient(#2D5016 0%, #1A3009 100%);
           }
 
-          /* Mini Header Button Styles */
-          .retro-header-mini-container {
-            position: relative;
-            display: inline-block;
-          }
-
-          .retro-header-mini-border {
-            border: 3px solid #8B6914;
-            outline: 1px solid #3D2914;
-            width: 100%;
-            height: 100%;
-            border-radius: 8px;
-          }
-
-          .retro-header-mini-base {
-            background-color: #5D4A1F;
-            outline: 1px solid black;
-            position: relative;
-            width: 100%;
-            height: 100%;
-            border-radius: 5px;
-          }
-
-          .retro-header-mini-button {
-            width: 100%;
-            height: 100%;
-            outline: 1px solid black;
-            border: 2px solid;
-            border-left-color: rgba(255,255,255,0.4);
-            border-top-color: rgba(255,255,255,0.6);
-            border-bottom-color: rgba(0,0,0,0.4);
-            border-right-color: rgba(0,0,0,0.3);
-            cursor: pointer;
-            transform: translateY(-15%);
-            transition: transform 0.15s ease;
-            border-radius: 3px;
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-          }
-
-          .retro-header-mini-button:hover {
-            transform: translateY(-8%);
-          }
-
-          .retro-header-mini-button:active {
-            transform: translateY(0);
-          }
-
-          .retro-header-mini-active {
-            background: linear-gradient(#FF8C42 0%, #FF6B1A 100%);
-          }
-
-          .retro-header-mini-inactive {
-            background: linear-gradient(#666666 0%, #444444 100%);
-          }
-
-          .retro-header-mini-auth {
-            background: linear-gradient(#FF8C42 0%, #FF6B1A 100%);
-          }
-
-          /* Make the currently selected language look half-pressed (same as hover) */
-          .retro-header-mini-button.retro-header-mini-active {
-            transform: translateY(-8%);
-          }
-
-          /* When clicking the active language, allow full press */
-          .retro-header-mini-button.retro-header-mini-active:active {
-            transform: translateY(0);
-          }
+          /* Mini header retro styles removed (icon-only language toggles) */
 
           /* Countdown Container Styles */
           .retro-countdown-container {
@@ -1087,7 +1031,7 @@ const Index = () => {
             transform-origin: center;
           }
           html[lang='he'] .secondary-cta-container > button > div > span {
-            transform: translateY(-20%) scale(1.27) !important; /* ~+15% from 1.10 base */
+            transform: translateY(-22%) scale(1.5) !important; /* further increased size for Hebrew labels: "בראולרים" and "קהילה" */
             transform-origin: center;
           }
           `}
