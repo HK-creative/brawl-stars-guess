@@ -21,6 +21,7 @@ import { useMotionPrefs } from '@/hooks/useMotionPrefs';
 import ModeTitle from '@/components/ModeTitle';
 import { SlidingNumber } from '@/components/ui/sliding-number';
 import type { GameModeName } from '@/types/gameModes';
+import { getPortrait } from '@/lib/image-helpers';
 
 // Import brawler data
 import { brawlers } from '@/data/brawlers';
@@ -592,13 +593,14 @@ const SurvivalModePage: React.FC = () => {
                       transition: { delay: 0.2, duration: 0.5 }
                     }}
                     className="flex justify-center mb-6"
-                  >
-                    <img 
-                      src="/8_bit_victory.gif" 
-                      alt="Victory" 
-                      className="w-32 h-32 object-contain"
-                    />
-                  </motion.div>
+              >
+                <img 
+                  src="/Brawler_GIFs/8bit_win.gif"
+                  onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/8-bit_portrait.png'; }}
+                  alt="Victory"
+                  className="w-32 h-32 object-contain"
+                />
+              </motion.div>
                   
                   {/* Victory Headline */}
                   <motion.h2
@@ -613,43 +615,63 @@ const SurvivalModePage: React.FC = () => {
                     {t('survival.victory.title')}
                   </motion.h2>
                   
-                  {/* Correct Brawler Name */}
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ 
-                      opacity: 1,
-                      transition: { delay: 0.4, duration: 0.5 }
-                    }}
-                    className="text-center text-xl text-yellow-300 font-medium mb-6"
-                  >
-                    {lastCorrectBrawler}
-                  </motion.div>
+                  {/* Correct Brawler Portrait */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ 
+                  opacity: 1,
+                  transition: { delay: 0.4, duration: 0.5 }
+                }}
+                className="flex justify-center mb-6"
+              >
+                <img
+                  src={getPortrait(lastCorrectBrawler)}
+                  alt={lastCorrectBrawler}
+                  className="w-24 h-24 rounded-xl border-2 border-yellow-300 shadow-lg"
+                />
+              </motion.div>
                   
-                  {/* Score Section */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ 
-                      opacity: 1,
-                      y: 0,
-                      transition: { delay: 0.5, duration: 0.5 }
-                    }}
-                    className="bg-black/30 rounded-xl p-4 mb-6"
-                  >
-                    <div className="grid grid-cols-2 gap-4 text-white">
-                      <div className="text-center">
-                        <div className="text-sm opacity-70">{t('survival.points.earned')}</div>
-                        <div className="text-2xl font-bold text-green-400">
-                          +<SlidingNumber value={currentRoundPoints} />
-                        </div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-sm opacity-70">{t('survival.total.score')}</div>
-                        <div className="text-2xl font-bold text-yellow-400">
-                          <SlidingNumber value={totalScore} />
-                        </div>
-                      </div>
-                    </div>
-                  </motion.div>
+                  {/* Score Section with hierarchy and breakdown */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ 
+                  opacity: 1,
+                  y: 0,
+                  transition: { delay: 0.5, duration: 0.5 }
+                }}
+                className="bg-black/30 rounded-xl p-5 mb-6 text-white"
+              >
+                {/* Total score on top, larger */}
+                <div className="text-center mb-3">
+                  <div className="text-sm opacity-70">{t('survival.total.score')}</div>
+                  <div className="text-4xl font-extrabold text-yellow-300">
+                    <SlidingNumber value={totalScore} transition={{ type: 'spring', stiffness: 90, damping: 18, mass: 0.8 }} />
+                  </div>
+                </div>
+                {/* Round earned below */}
+                <div className="text-center mb-2">
+                  <div className="text-sm opacity-70">{t('survival.points.earned')}</div>
+                  <div className="text-2xl font-bold text-green-400">
+                    +<SlidingNumber value={currentRoundPoints} />
+                  </div>
+                </div>
+                {/* Breakdown bullets */}
+                <div className="mt-3 text-sm text-white/85">
+                  {(() => {
+                    const base = 100;
+                    const guesses = Math.max(0, 55 - (lastRoundGuessesUsed * 5));
+                    const elapsed = 150 - lastRoundTimeLeft;
+                    const time = Math.max(0, 30 - Math.floor(elapsed / 5));
+                    return (
+                      <ul className="list-disc list-inside space-y-1 text-left max-w-md mx-auto">
+                        <li className="flex items-center justify-between"><span>Base</span><span className="font-semibold">+{base}</span></li>
+                        <li className="flex items-center justify-between"><span>Guesses left bonus</span><span className="font-semibold">+{guesses}</span></li>
+                        <li className="flex items-center justify-between"><span>Time left bonus</span><span className="font-semibold">+{time}</span></li>
+                      </ul>
+                    );
+                  })()}
+                </div>
+              </motion.div>
                   
                   {/* Countdown Timer */}
                   <motion.div

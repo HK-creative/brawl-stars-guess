@@ -284,31 +284,39 @@ export function getGadgetImagePath(brawler: string, gadgetName?: string): string
     return "/GadgetImages/shelly_gadget_01.png";
   }
 
-  const normalized = brawler.toLowerCase().replace(/ /g, '_');
+  // Normalize brawler name to match file naming
+  const raw = brawler.toLowerCase().trim();
 
-  // Hard-coded special cases whose filenames break the rule
-  const specialMap: Record<string, string> = {
-    "mr.p": "/GadgetImages/mrp_gadget_01.png",
-    "el primo": "/GadgetImages/elprimo_gadget_01.png",
-    "colonel ruffs": "/GadgetImages/colonel_ruffs_gadget_01.png",
+  // Special base-name overrides for known exceptions
+  const baseOverrideMap: Record<string, string> = {
+    "mr.p": "mrp",
+    "el primo": "elprimo",
+    "colonel ruffs": "ruffs",
+    "8-bit": "8bit",
+    "larry & lawrie": "larry_lawrie",
   };
-  const specialKey = brawler.toLowerCase();
-  if (specialMap[specialKey]) return specialMap[specialKey];
 
-  // Special short names (e.g. R-T, Jae-Yong) that need custom logic
-  const cleaned = brawler.toLowerCase().replace(/[-_ ]/g, "");
+  // Special short names (e.g., R-T, Jae-Yong) that need custom logic with exact casing
+  const cleaned = raw.replace(/[-_ ]/g, "").replace(/[.'’]/g, "");
   if (cleaned === "rt") {
-    return gadgetName && /2|second/i.test(gadgetName)
-      ? "/GadgetImages/rt_gadget_02.png"
-      : "/GadgetImages/rt_gadget_01.png";
+    const isSecond = gadgetName ? (/2/.test(gadgetName) || /second/i.test(gadgetName)) : false;
+    return isSecond ? "/GadgetImages/rt_gadget_02.png" : "/GadgetImages/rt_gadget_01.png";
   }
   if (cleaned === "jaeyong") {
-    return gadgetName && /2|second/i.test(gadgetName)
-      ? "/GadgetImages/Jae-Yong_gadget_2.png"
-      : "/GadgetImages/Jae-Yong_gadget_1.png";
+    const isSecond = gadgetName ? (/2/.test(gadgetName) || /second/i.test(gadgetName)) : false;
+    return isSecond ? "/GadgetImages/Jae-Yong_gadget_2.png" : "/GadgetImages/Jae-Yong_gadget_1.png";
   }
 
-  // Determine index suffix
+  // General normalization: drop punctuation, ampersands, collapse to underscores
+  const normalizedBase = raw
+    .replace(/[.'’]/g, "") // remove dots/apostrophes
+    .replace(/&/g, "") // remove ampersand
+    .replace(/[^a-z0-9]+/g, "_") // non-alnum -> underscore
+    .replace(/^_+|_+$/g, ""); // trim leading/trailing underscores
+
+  const base = baseOverrideMap[raw] || normalizedBase;
+
+  // Determine index suffix (padded); callers may attempt unpadded fallback
   let idx = "01";
   if (gadgetName) {
     const m = gadgetName.match(/(\d+)/);
@@ -316,7 +324,7 @@ export function getGadgetImagePath(brawler: string, gadgetName?: string): string
     else if (/second/i.test(gadgetName)) idx = "02";
   }
 
-  return `/GadgetImages/${normalized}_gadget_${idx}.png`;
+  return `/GadgetImages/${base}_gadget_${idx}.png`;
 }
 
 // Legacy exports for backward compatibility

@@ -85,7 +85,7 @@ const DailyModesPage: React.FC = () => {
       {/* Shared header stays mounted and static across mode switches */}
       <DailySharedHeader currentMode={currentMode} onModeChange={handleModeChange} />
 
-      <DailyModeTransitionOrchestrator modeKey={currentMode} className="daily-mode-content-container" axis="x" disabled>
+      <DailyModeTransitionOrchestrator modeKey={currentMode} className="daily-mode-content-container" axis="x">
         {renderModeContent()}
       </DailyModeTransitionOrchestrator>
     </div>

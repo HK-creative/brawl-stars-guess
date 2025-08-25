@@ -4,7 +4,7 @@ import { toast } from '@/hooks/use-toast';
 import { useDailyStore, DailyGameMode } from '@/stores/useDailyStore';
 import { useStreak } from '@/contexts/StreakContext';
 import { brawlers, getBrawlerDisplayName, getBrawlerLocalizedName } from '@/data/brawlers';
-import { getPortrait } from '@/lib/image-helpers';
+import { getPortrait, getGadgetImagePath } from '@/lib/image-helpers';
 import BrawlerAutocomplete from '@/components/BrawlerAutocomplete';
 import ReactConfetti from 'react-confetti';
 import { fetchDailyChallenge, fetchYesterdayChallenge } from '@/lib/daily-challenges';
@@ -24,43 +24,24 @@ import { SlidingNumber } from '@/components/ui/sliding-number';
 
 const DEFAULT_PORTRAIT = '/portraits/shelly.png';
 
-// Helper to get gadget image path with fallback variants
+// Helper to get gadget image path with robust fallbacks (padded and unpadded)
 const getGadgetImageVariants = (brawler: string, gadgetName?: string): string[] => {
-  if (!brawler) {
-    return [];
-  }
-  
-  // Clean up brawler name for file path
-  const normalizedBrawler = brawler.toLowerCase().replace(/ /g, '_');
-  
-  // Handle special cases
-  const specialCases: { [key: string]: string } = {
-    'el_primo': 'el_primo',
-    '8-bit': '8_bit',
-    'mr._p': 'mr_p'
-  };
-  
-  const finalBrawlerName = specialCases[normalizedBrawler] || normalizedBrawler;
-  
-  // Default to gadget 01 if no specific gadget name provided
-  let baseNum = '01';
-  if (gadgetName) {
-    const match = gadgetName.match(/(\d+)/);
-    if (match) {
-      baseNum = match[1].padStart(2, '0');
-    } else if (gadgetName.includes('First')) {
-      baseNum = '01';
-    } else if (gadgetName.includes('Second')) {
-      baseNum = '02';
-    }
-  }
-  
-  // Generate both possible variants
-  const variant1 = `/GadgetImages/${finalBrawlerName}_gadget_${baseNum}.png`;
-  const variant2 = `/GadgetImages/${finalBrawlerName}_gadget_${baseNum.replace(/^0+/, '')}.png`;
-  
-  // Return both variants to try
-  return [variant1, variant2];
+  if (!brawler) return [];
+
+  // Primary path using centralized helper (handles specials like 8-bit, Mr. P, El Primo, Ruffs, Larry & Lawrie, RT, Jae-Yong)
+  const primary = getGadgetImagePath(brawler, gadgetName);
+
+  // Unpadded fallback (e.g., _01 -> _1)
+  const unpadded = primary.replace(/_gadget_0?(\d)\.png$/i, (_m, d: string) => `_gadget_${d}.png`);
+
+  // Padded fallback (e.g., _1 -> _01) to cover assets with padded numbering
+  const padded = primary.replace(/_gadget_(\d)\.png$/i, (_m, d: string) => `_gadget_${String(d).padStart(2, '0')}.png`);
+
+  // Ensure uniqueness and stable order
+  const variants = [primary];
+  if (!variants.includes(unpadded)) variants.push(unpadded);
+  if (!variants.includes(padded)) variants.push(padded);
+  return variants;
 };
 
 interface DailyGadgetModeContentProps {
@@ -174,25 +155,26 @@ const DailyGadgetModeContent: React.FC<DailyGadgetModeContentProps> = ({ onModeC
     return brawlers.find(b => b.name.toLowerCase() === gadget.brawlerName.toLowerCase()) || brawlers[0];
   };
 
-  const handleImageError = () => {
-    console.error('Image failed to load:', gadgetImage);
-    // Try next variant if available
-    if (currentVariantIndex < imageVariants.length - 1) {
-      const nextIndex = currentVariantIndex + 1;
+  const handleImageError = useCallback((_err?: Error) => {
+    console.error('Gadget image failed to load at index:', currentVariantIndex, imageVariants[currentVariantIndex]);
+    // advance one-by-one through variants; no forced placeholder
+    const nextIndex = currentVariantIndex + 1;
+    if (nextIndex < imageVariants.length) {
       setCurrentVariantIndex(nextIndex);
       setGadgetImage(imageVariants[nextIndex]);
+      setImageLoaded(false);
       console.log('Trying next variant:', imageVariants[nextIndex]);
     } else {
-      console.warn('All gadget image variants failed to load');
-      setGadgetImage('');
+      console.warn('All gadget image variants exhausted. Showing error UI (no fallback image).');
+      // keep last failed src so Image shows error state; do not change to any placeholder
       setImageLoaded(false);
     }
-  };
+  }, [currentVariantIndex, imageVariants]);
 
-  const handleImageLoad = () => {
+  const handleImageLoad = useCallback(() => {
     console.log('Gadget image loaded successfully:', gadgetImage);
     setImageLoaded(true);
-  };
+  }, [gadgetImage]);
 
   // Handle brawler selection
   const handleSelectBrawler = (brawler: any) => {
@@ -356,20 +338,31 @@ const DailyGadgetModeContent: React.FC<DailyGadgetModeContentProps> = ({ onModeC
               {/* Gadget Image */}
               <div className="flex justify-center mb-6">
                 <div className="w-64 h-64 md:w-72 md:h-72 rounded-3xl border-4 border-green-500/60 bg-black/20 backdrop-blur-sm flex items-center justify-center overflow-hidden shadow-2xl">
-                  {gadgetImage ? (
-                    <Image
-                      src={gadgetImage}
-                      fallbackSrc={imageVariants.length > 1 ? imageVariants[1] : '/GadgetImages/shelly_gadget_01.png'}
-                      alt="Mystery Gadget"
-                      className="w-full h-full object-contain"
-                      priority
-                    />
-                  ) : (
-                    <div className="text-center">
-                      <div className="animate-spin h-12 w-12 border-4 border-white/20 border-t-white rounded-full mx-auto mb-4"></div>
-                      <div className="text-white/50 text-sm">Loading...</div>
-                    </div>
-                  )}
+                  {(() => {
+                    const primarySrc = imageVariants[currentVariantIndex];
+                    const activeSrc = gadgetImage || primarySrc;
+                    // Avoid rendering the Image component with an empty src, which would
+                    // cause it to momentarily use the default portrait (Shelly) internally.
+                    if (!activeSrc) {
+                      return (
+                        <div className="text-center w-full h-full flex items-center justify-center">
+                          <div className="animate-spin h-12 w-12 border-4 border-white/20 border-t-white rounded-full"></div>
+                        </div>
+                      );
+                    }
+                    console.debug('Gadget image attempt:', { activeSrc, currentVariantIndex });
+                    return (
+                      <Image
+                        src={activeSrc}
+                        alt="Mystery Gadget"
+                        className="w-full h-full object-contain"
+                        priority
+                        disableFallback
+                        onLoadComplete={handleImageLoad}
+                        onLoadError={handleImageError}
+                      />
+                    );
+                  })()}
                 </div>
               </div>
 

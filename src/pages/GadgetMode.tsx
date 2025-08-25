@@ -8,7 +8,7 @@ import BrawlerAutocomplete from '@/components/BrawlerAutocomplete';
 import { brawlers, Brawler } from '@/data/brawlers';
 import { toast } from 'sonner';
 import { fetchDailyChallenge, getTimeUntilNextChallenge, fetchYesterdayChallenge } from '@/lib/daily-challenges';
-import { getPortrait, getPin, DEFAULT_PIN, DEFAULT_PORTRAIT } from '@/lib/image-helpers';
+import { getPortrait, getPin, DEFAULT_PIN, DEFAULT_PORTRAIT, getGadgetImagePath } from '@/lib/image-helpers';
 import Image from '@/components/ui/image';
 import { cn } from '@/lib/utils';
 import Confetti from 'react-confetti';
@@ -29,51 +29,10 @@ const getNextModeKey = (currentMode: string) => {
   return modes[(currentIndex + 1) % modes.length];
 };
 
-// Helper to get gadget image path
+// Helper to get gadget image path (centralized)
 const getGadgetImage = (brawler: string, gadgetName?: string): string => {
-  // If no brawler provided, use a specific default brawler's gadget instead of generic GadgetIcon
-  if (!brawler) {
-    // Return a specific brawler's gadget image as fallback
-    return `/GadgetImages/shelly_gadget_01.png`;
-  }
-  
-  // Clean up brawler name for file path
-  const normalizedBrawler = brawler.toLowerCase().replace(/ /g, '_');
-  
-  // First, try to determine the base gadget number from the name
-  let baseNum = '01';
-  if (gadgetName) {
-    // Look for numbers in the gadget name
-    const match = gadgetName.match(/(\d+)/);
-    if (match) {
-      baseNum = match[1].padStart(2, '0');
-    } else if (gadgetName.includes('First')) {
-      baseNum = '01';
-    } else if (gadgetName.includes('Second')) {
-      baseNum = '02';
-    }
-  }
-  
-  // Generate both possible variants
-  const variant1 = `/GadgetImages/${normalizedBrawler}_gadget_${baseNum}.png`;
-  const variant2 = `/GadgetImages/${normalizedBrawler}_gadget_${baseNum.replace(/^0+/, '')}.png`; // Try without leading zeros
-  
-  // Blacklist check - NEVER return GadgetIcon.png or GadgetIcon (1).png
-  const isBannedImage = (path: string) => {
-    return path.includes('GadgetIcon.png') || 
-           path.includes('GadgetIcon (1).png') || 
-           path === '/GadgetIcon.png' || 
-           path === '/GadgetIcon (1).png';
-  };
-  
-  // Check if either variant is banned
-  if (isBannedImage(variant1) || isBannedImage(variant2)) {
-    // If banned, return a known good gadget image
-    return `/GadgetImages/shelly_gadget_01.png`;
-  }
-  
-  // Always return the canonical variant (with leading zeros)
-  return variant1;
+  if (!brawler) return `/GadgetImages/shelly_gadget_01.png`;
+  return getGadgetImagePath(brawler, gadgetName);
 };
 
 interface GadgetChallenge {

@@ -9,6 +9,7 @@ export interface ImageProps extends Omit<React.ImgHTMLAttributes<HTMLImageElemen
   imageType?: 'pin' | 'portrait' | 'generic';
   lazy?: boolean;
   priority?: boolean;
+  disableFallback?: boolean;
   onLoadStart?: () => void;
   onLoadComplete?: () => void;
   onLoadError?: (error: Error) => void;
@@ -21,6 +22,7 @@ const Image = React.forwardRef<HTMLImageElement, ImageProps>(({
   imageType = 'generic',
   lazy = true,
   priority = false,
+  disableFallback = false,
   className,
   onLoadStart,
   onLoadComplete,
@@ -36,7 +38,7 @@ const Image = React.forwardRef<HTMLImageElement, ImageProps>(({
 
   // Determine fallback based on image type
   const defaultFallback = imageType === 'pin' ? DEFAULT_PIN : DEFAULT_PORTRAIT;
-  const finalFallback = fallbackSrc || defaultFallback;
+  const finalFallback = disableFallback ? undefined : (fallbackSrc || defaultFallback);
 
   // Setup intersection observer for lazy loading
   useEffect(() => {
@@ -93,7 +95,7 @@ const Image = React.forwardRef<HTMLImageElement, ImageProps>(({
       })
       .catch((error) => {
         // Try fallback
-        if (optimizedSrc !== finalFallback) {
+        if (finalFallback && optimizedSrc !== finalFallback) {
           loadImageWithCache(finalFallback)
             .then(() => {
               setImgSrc(finalFallback);

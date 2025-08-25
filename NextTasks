@@ -2,8 +2,6 @@ IMPORTANT - ONLY THE HUMAN USER ALLOWED TO READ/review/edit/access THIS FILE all
 
 Make sure the daily challenges button in the home page navigates to the the new daily challenges URL (/daily) , and not the old one (/daily/classic).
 
-remove old daily challenges pages (/classic, /gadget, /starpower, /audio, /pixels)
-
 make sure streaks works correctly. it should work like this - user gains +1 to his streak whenever he completes ALL daily modes in the same day. if a day passed by and user did not complete all daily modes, he loses his streak, which becomes 0, and he can start gaining streaks again. connect data to Supabase if needed.
 
 when user guesses new brawler, he should appear on top, not on bottom. that means the most recent guess will always be on top. it should work like this in all modes (both daily and survival).
@@ -16,3 +14,4 @@ ok listen. the home page is now 100% complete, and i love it. i love it so much,
 think long and hard , take your time, and plan comprehansively  
 
 
+i want you to replace the current background UI of the wrong guesses @dom-element:div with this new background 

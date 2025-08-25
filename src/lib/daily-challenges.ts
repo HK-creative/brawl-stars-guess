@@ -1,5 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import { brawlers, Brawler } from "@/data/brawlers";
+import { brawlerHasGadgetAssets } from "@/data/gadgetAssets";
+import { getGadgetImagePath } from "@/lib/image-helpers";
 
 // Interface for daily challenge data structure
 export interface DailyChallenge {
@@ -81,12 +83,12 @@ const getSeededBrawler = (mode: string, date: string): Brawler => {
   return brawlers[rnd.nextInt(brawlers.length)];
 };
 
-// Get deterministic daily brawler for a specific mode and date with 2-day exclusion
+// Get deterministic daily brawler for a specific mode and date with cross-mode exclusion
 const getDailyBrawler = (mode: string, date: string): Brawler => {
   // Get all modes for cross-mode checking
   const allModes = ['classic', 'gadget', 'starpower', 'audio', 'pixels'];
   const selectedBrawlers: string[] = [];
-  
+
   // Check what brawlers have already been selected for other modes today
   for (const otherMode of allModes) {
     if (otherMode !== mode) {
@@ -96,33 +98,35 @@ const getDailyBrawler = (mode: string, date: string): Brawler => {
       selectedBrawlers.push(brawlers[otherBrawlerIndex].name);
     }
   }
-  
+
+  // Build candidate pool. For gadget mode, restrict to brawlers with known gadget assets
+  let pool: Brawler[] = brawlers;
+  if (mode === 'gadget') {
+    const filtered = brawlers.filter(b => brawlerHasGadgetAssets(b.name));
+    if (filtered.length > 0) {
+      pool = filtered;
+      console.log(`[gadget] Filtered candidate pool to ${pool.length} brawlers with gadget assets`);
+    } else {
+      console.warn('[gadget] No filtered candidates found; falling back to full brawler list');
+    }
+  }
+
   // Create a unique seed for this mode and date
   const seed = `${mode}-${date}`;
-  const random = new SeededRandom(seed);
-  
+  let random = new SeededRandom(seed);
+
   // Try to find a brawler that hasn't been used in other modes
   let attempts = 0;
-  let selectedBrawler: Brawler;
-  
-  do {
-    const brawlerIndex = random.nextInt(brawlers.length);
-    selectedBrawler = brawlers[brawlerIndex];
+  let selectedBrawler: Brawler = pool[random.nextInt(pool.length)];
+
+  while (attempts < 10 && selectedBrawlers.includes(selectedBrawler.name)) {
     attempts++;
-    
-    // If we've tried too many times or no conflicts, accept this brawler
-    if (attempts > 10 || !selectedBrawlers.includes(selectedBrawler.name)) {
-      break;
-    }
-    
-    // Create a new seed with attempt number to get different result
     const newSeed = `${mode}-${date}-attempt-${attempts}`;
-    const newRandom = new SeededRandom(newSeed);
-    const newBrawlerIndex = newRandom.nextInt(brawlers.length);
-    selectedBrawler = brawlers[newBrawlerIndex];
-  } while (selectedBrawlers.includes(selectedBrawler.name) && attempts < 10);
-  
-    return selectedBrawler;
+    random = new SeededRandom(newSeed);
+    selectedBrawler = pool[random.nextInt(pool.length)];
+  }
+
+  return selectedBrawler;
 };
 
 // Get available audio files for a specific brawler
@@ -466,16 +470,13 @@ const getDeterministicDailyChallenge = (mode: string, date: string): any => {
     case 'gadget':
       // Get the first gadget for the brawler (most brawlers have at least one)
       const gadget = brawler.gadgets?.[0];
-      // Handle special cases for image naming
-      let gadgetImageName = brawler.name.toLowerCase().replace(/ /g, '_');
-      if (brawler.name === 'Larry & Lawrie') {
-        gadgetImageName = 'larry_lawrie_';
-      }
+      const imagePath = getGadgetImagePath(brawler.name, gadget?.name);
+      console.log(`[gadget] Selected ${brawler.name} with image ${imagePath}`);
       return {
         brawler: brawler.name,
         gadgetName: gadget?.name || "Mystery Gadget",
         tip: gadget?.tip || "This gadget has mysterious powers.",
-        image: `/GadgetImages/${gadgetImageName}_gadget_01.png`
+        image: imagePath
       };
       
     case 'starpower':
