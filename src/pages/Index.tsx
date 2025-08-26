@@ -164,12 +164,6 @@ const Index = () => {
   return (
     <div 
       className="h-screen text-white overflow-hidden flex flex-col relative"
-      style={{
-        backgroundImage: 'url(/BRAWLDLE-HOME-BACKGROUND-MOBILE.png)',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat'
-      }}
     >
       {/* Starfield overlay above background, below UI */}
       <StarField shootingStars />

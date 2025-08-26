@@ -1,12 +1,7 @@
 IMPORTANT - ONLY THE HUMAN USER ALLOWED TO READ/review/edit/access THIS FILE all AIs including you MUST IGNORE IT COMPLETELY
 
-Make sure the daily challenges button in the home page navigates to the the new daily challenges URL (/daily) , and not the old one (/daily/classic).
 
 make sure streaks works correctly. it should work like this - user gains +1 to his streak whenever he completes ALL daily modes in the same day. if a day passed by and user did not complete all daily modes, he loses his streak, which becomes 0, and he can start gaining streaks again. connect data to Supabase if needed.
-
-when user guesses new brawler, he should appear on top, not on bottom. that means the most recent guess will always be on top. it should work like this in all modes (both daily and survival).
-
-fix audio mode's player. currently, when user press play it plays the sound and stuck on the pause button. i want that when it finished play the audio it will go back to the play button, and no puase button should be in there.  
 
 lets work on the daily mode's victory screen now
 

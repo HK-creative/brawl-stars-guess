@@ -211,7 +211,7 @@ export const useDailyStore = create<DailyGameState & DailyActions>()(
             [mode]: {
               ...current,
               guessCount: current.guessCount + 1,
-              guesses: [...existing, guess],
+              guesses: [guess, ...existing],
             },
           } as any;
         });
@@ -236,7 +236,7 @@ export const useDailyStore = create<DailyGameState & DailyActions>()(
           return {
             [mode]: {
               ...state[mode],
-              guesses: [...existing, guess],
+              guesses: [guess, ...existing],
             },
           } as any;
         });

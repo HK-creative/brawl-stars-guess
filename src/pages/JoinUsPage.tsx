@@ -14,7 +14,6 @@ import { ArrowLeft, Users, MessageCircle, Youtube, Instagram, Info, Crown, Gradu
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { t } from '@/lib/i18n';
-import RotatingBackground from '@/components/layout/RotatingBackground';
 
 type Role = 'Community Member' | 'Club Owner' | 'Instructor';
 
@@ -234,7 +233,6 @@ const JoinUsPage = () => {
 
   return (
     <div className="relative min-h-screen flex flex-col">
-      <RotatingBackground />
       {/* Header */}
       <div className="relative z-10 sticky top-0 flex items-center justify-between p-4 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <Button

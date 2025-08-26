@@ -448,6 +448,7 @@ const DailyAudioModeContent: React.FC<DailyAudioModeContentProps> = ({ onModeCha
                       src={audioUrl}
                       onLoadedData={() => setAudioLoaded(true)}
                       onError={() => setAudioError(true)}
+                      onEnded={handleAudioEnded}
                       preload="auto"
                     />
                   )}

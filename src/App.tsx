@@ -3,7 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ToastProvider } from "@/hooks/use-toast";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { useEffect, Suspense, lazy } from "react";
 import { initLanguage } from "@/lib/i18n";
@@ -13,6 +13,9 @@ import { AuthModalProvider } from '@/contexts/AuthModalContext';
 import AuthModal from '@/components/AuthModal';
 import { preloadCriticalImages } from '@/lib/image-helpers';
 import { initPerformanceMonitoring, analyzeBundleSize } from '@/lib/performance';
+import { AnimatePresence } from 'framer-motion';
+import RotatingBackground from './components/layout/RotatingBackground';
+import RouteTransitionOrchestrator from './components/layout/RouteTransitionOrchestrator';
 
 // Layout (not lazy loaded as it's needed immediately)
 import Layout from "./components/layout/Layout";
@@ -50,6 +53,43 @@ const queryClient = new QueryClient({
   },
 });
 
+// Animated route switcher that groups the Layout branch vs Daily page for smooth transitions
+const AnimatedRoutes = () => {
+  const location = useLocation();
+  const groupKey = location.pathname.startsWith('/daily') ? 'daily' : 'app';
+
+  return (
+    <AnimatePresence mode="sync" initial={false}>
+      <RouteTransitionOrchestrator key={groupKey} routeKey={groupKey}>
+        <Routes location={location}>
+          <Route path="/auth" element={<AuthPage />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
+
+          {/* Unified Daily Modes Page - Outside Layout to remove language selection */}
+          <Route path="/daily" element={<DailyModesPage />} />
+
+          {/* New standalone pages - Outside Layout */}
+          <Route path="/feedback" element={<FeedbackPage />} />
+          <Route path="/join-us" element={<JoinUsPage />} />
+          <Route path="/tier-list" element={<TierListPage />} />
+
+          <Route element={<Layout />}>
+            <Route index element={<Index />} />
+            <Route path="/endless" element={<EndlessMode />} />
+            <Route path="/survival" element={<SurvivalModePage />} />
+            <Route path="/survival/setup" element={<SurvivalSetupPage />} />
+            <Route path="/survival/game" element={<SurvivalModePage />} />
+
+            <Route path="/score" element={<ScorePage />} />
+            <Route path="/settings" element={<SettingsPage />} />
+            <Route path="*" element={<NotFound />} />
+          </Route>
+        </Routes>
+      </RouteTransitionOrchestrator>
+    </AnimatePresence>
+  );
+};
+
 const App = () => {
   useEffect(() => {
     // Initialize language on app load
@@ -74,31 +114,12 @@ const App = () => {
           <Sonner />
               <AuthModal />
           <BrowserRouter>
+            {/* Static background layer that does not animate between routes */}
+            <div className="fixed inset-0 -z-10 pointer-events-none">
+              <RotatingBackground />
+            </div>
             <Suspense fallback={<LoadingSpinner />}>
-              <Routes>
-                  <Route path="/auth" element={<AuthPage />} />
-                  <Route path="/auth/callback" element={<AuthCallback />} />
-                  
-                  {/* Unified Daily Modes Page - Outside Layout to remove language selection */}
-                  <Route path="/daily" element={<DailyModesPage />} />
-                  
-                  {/* New standalone pages - Outside Layout */}
-                  <Route path="/feedback" element={<FeedbackPage />} />
-                  <Route path="/join-us" element={<JoinUsPage />} />
-                  <Route path="/tier-list" element={<TierListPage />} />
-                  
-                  <Route element={<Layout />}>
-                    <Route index element={<Index />} />
-                <Route path="/endless" element={<EndlessMode />} />
-                <Route path="/survival" element={<SurvivalModePage />} />
-                <Route path="/survival/setup" element={<SurvivalSetupPage />} />
-                <Route path="/survival/game" element={<SurvivalModePage />} />
-                
-                <Route path="/score" element={<ScorePage />} />
-                <Route path="/settings" element={<SettingsPage />} />
-                <Route path="*" element={<NotFound />} />
-                  </Route>
-              </Routes>
+              <AnimatedRoutes />
             </Suspense>
           </BrowserRouter>
           <Toaster />

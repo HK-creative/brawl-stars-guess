@@ -26,7 +26,6 @@ import { getPortrait } from '@/lib/image-helpers';
 // Import brawler data
 import { brawlers } from '@/data/brawlers';
 
-import RotatingBackground from '@/components/layout/RotatingBackground';
 import DailyModeTransitionOrchestrator from '@/components/layout/DailyModeTransitionOrchestrator';
 
 const SurvivalModePage: React.FC = () => {
@@ -374,7 +373,6 @@ const SurvivalModePage: React.FC = () => {
   const uiTimeLeft = currentTimerValue ?? activeRoundState?.timerLeft;
   return (
     <div className="survival-mode-container survival-classic-theme relative">
-      <RotatingBackground />
       {/* Sticky Header with Timer only (home button reused from Layout, visually within header) */}
       <div className="sticky top-0 z-40">
         <motion.div

@@ -9,7 +9,7 @@ Prize-giveaway feature for engaged users
 Onboarding pop-up flow
 Check Log-ins & accounts (in supabase) - data store, login, register, forgot password.
 True single-page mobile layout
-Final home-screen polish
+Final home-screen polish - ✅
 Complete Translations 
 Micro-animations throughout the UI
 Analytics Tracking

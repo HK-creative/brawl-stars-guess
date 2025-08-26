@@ -1,6 +1,5 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import RotatingBackground from './RotatingBackground';
 import { cn } from '@/lib/utils';
 import { useLocation, Outlet } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -29,10 +28,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   };
 
   return (
-      <div className="min-h-screen bg-background">
-        <div className="fixed top-0 left-0 w-full h-full">
-          <RotatingBackground />
-        </div>
+      <div className="min-h-screen">
 
         {/* Auth buttons - ONLY on non-homepage and hidden for Survival Mode routes */}
         {!isHomePage && !hideAuthButtons && (

@@ -461,7 +461,7 @@ const DailyClassicModeContent: React.FC<DailyClassicModeContentProps> = ({ onMod
                               correctAnswer={getCorrectBrawler()}
                               isMobile={window.innerWidth < 768}
                               gridTemplateClass="grid-cols-6"
-                              isNew={index === guesses.length - 1}
+                              isNew={index === 0}
                             />
                           </motion.div>
                         ))}

@@ -3,7 +3,6 @@ import { useSearchParams } from 'react-router-dom';
 import { useDailyStore, DailyGameMode } from '@/stores/useDailyStore';
 import usePageTitle from '@/hooks/usePageTitle';
 import { t } from '@/lib/i18n';
-import RotatingBackground from '@/components/layout/RotatingBackground';
 import DailyModeTransitionOrchestrator from '@/components/layout/DailyModeTransitionOrchestrator';
 import DailySharedHeader from '@/components/layout/DailySharedHeader';
 
@@ -80,7 +79,6 @@ const DailyModesPage: React.FC = () => {
   
   return (
     <div className="daily-mode-container">
-      <RotatingBackground />
 
       {/* Shared header stays mounted and static across mode switches */}
       <DailySharedHeader currentMode={currentMode} onModeChange={handleModeChange} />

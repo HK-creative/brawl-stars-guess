@@ -69,4 +69,25 @@ alwaysApply: true
   - Update references to external docs
   - Maintain links between related rules
   - Document breaking changes
+
+## Cross-cutting Implementation Lessons (Generic)
+
+- **List Order Changes (append → prepend or reverse)**
+  - After changing data order, audit render logic for index-based assumptions (`index === 0`, `length - 1`, `reverse()`/`slice().reverse()`).
+  - Update any "newest" markers to reflect the new order; avoid brittle index checks when possible.
+  - Prefer stable React keys (IDs, names) over array indices to prevent remounting/flicker when prepending.
+
+- **Media UI Lifecycle (Audio/Video)**
+  - Always wire `onEnded` to reset UI state (e.g., return to Play icon) and clear any playing flags.
+  - Keep a single source of truth for playback state; sync state on `onPlay`, `onPause`, `onEnded`, and on `src` changes.
+  - Handle error states with `onError` and provide a graceful fallback or retry.
+
+- **Motion Accessibility & Directionality**
+  - Respect `prefers-reduced-motion`; provide non-animated fallbacks.
+  - Make entrance/exit offsets RTL-aware where direction matters.
+  - Use low-coupling orchestration (container-layout + child stagger) to avoid layout thrash.
+
+- **Read-Before-Write Discipline**
+  - Search and review all affected modules before mutating code; re-read after changes to verify integrity.
+
 Follow [cline_rules.md](.clinerules/cline_rules.md) for proper rule formatting and structure.
