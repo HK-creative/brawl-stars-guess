@@ -296,13 +296,16 @@ const BrawlerAutocomplete: React.FC<BrawlerAutocompleteProps> = ({
           id="brawler-list"
           role="listbox"
           className={cn(
-            "absolute z-[9999] w-full mt-2",
+            "absolute z-[99999] w-full mt-2",
             "bg-[#1A1A1A] backdrop-blur-sm",
             "border-2 border-[#FFC107] rounded-2xl shadow-2xl",
             "max-h-[300px] overflow-y-auto",
             "scrollbar-thin scrollbar-thumb-[#FFC107]/30 scrollbar-track-transparent"
           )}
-          style={{ zIndex: 9999 }}
+          style={{ 
+            zIndex: 99999,
+            isolation: 'isolate'
+          }}
         >
           {filteredBrawlers.map((brawler, index) => {
             const pinPath = getPin(brawler.name);
