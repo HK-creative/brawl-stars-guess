@@ -57,10 +57,11 @@ const queryClient = new QueryClient({
 const AnimatedRoutes = () => {
   const location = useLocation();
   const groupKey = location.pathname.startsWith('/daily') ? 'daily' : 'app';
+  const dailyOrigin = (location.state as any)?.dailyOrigin;
 
   return (
     <AnimatePresence mode="sync" initial={false}>
-      <RouteTransitionOrchestrator key={groupKey} routeKey={groupKey}>
+      <RouteTransitionOrchestrator key={groupKey} routeKey={groupKey} originPercent={groupKey === 'daily' ? dailyOrigin : undefined}>
         <Routes location={location}>
           <Route path="/auth" element={<AuthPage />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
@@ -76,7 +77,7 @@ const AnimatedRoutes = () => {
           <Route element={<Layout />}>
             <Route index element={<Index />} />
             <Route path="/endless" element={<EndlessMode />} />
-            <Route path="/survival" element={<SurvivalModePage />} />
+            <Route path="/survival" element={<SurvivalSetupPage />} />
             <Route path="/survival/setup" element={<SurvivalSetupPage />} />
             <Route path="/survival/game" element={<SurvivalModePage />} />
 

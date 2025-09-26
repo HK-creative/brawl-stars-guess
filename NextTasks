@@ -9,4 +9,4 @@ ok listen. the home page is now 100% complete, and i love it. i love it so much,
 think long and hard , take your time, and plan comprehansively  
 
 
-i want you to replace the current background UI of the wrong guesses @dom-element:div with this new background 
+now remove the current transition animation that accurs when user press daily button on the home screen and transition to daily game modes page. the current transition animation looks like the page is scrolled down and up or something like that idk, but it doesnt fit well. after remove the current transition, think about what would be the best transition animation/fx for going from home page to daily challenges.

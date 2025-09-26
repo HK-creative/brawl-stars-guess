@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect, useState } from 'react';
+import React, { useMemo, useEffect, useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -78,12 +78,22 @@ const DailyChallengesHero: React.FC = () => {
     return () => clearInterval(timer);
   }, [modes.length]);
 
-  const [rippleKey, setRippleKey] = useState(0);
+  const cardRef = useRef<HTMLDivElement | null>(null);
 
-  const onOpenDaily = () => {
-    // Trigger a quick ripple animation, then navigate
-    setRippleKey((k) => k + 1);
-    setTimeout(() => navigate('/daily'), 220);
+  const navigateWithOrigin = (clientX?: number, clientY?: number) => {
+    let xPct = 50;
+    let yPct = 50;
+    if (typeof clientX === 'number' && typeof clientY === 'number' && clientX > 0 && clientY > 0) {
+      xPct = Math.max(0, Math.min(100, (clientX / window.innerWidth) * 100));
+      yPct = Math.max(0, Math.min(100, (clientY / window.innerHeight) * 100));
+    } else if (cardRef.current) {
+      const rect = cardRef.current.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+      xPct = Math.max(0, Math.min(100, (cx / window.innerWidth) * 100));
+      yPct = Math.max(0, Math.min(100, (cy / window.innerHeight) * 100));
+    }
+    navigate('/daily', { state: { dailyOrigin: { x: xPct, y: yPct } } });
   };
 
   return (
@@ -95,11 +105,12 @@ const DailyChallengesHero: React.FC = () => {
         <motion.div
           role="button"
           tabIndex={0}
-          onClick={onOpenDaily}
+          ref={cardRef}
+          onClick={(e) => navigateWithOrigin(e.clientX, e.clientY)}
           onKeyDown={(e) => {
             if (e.key === 'Enter' || e.key === ' ') {
               e.preventDefault();
-              onOpenDaily();
+              navigateWithOrigin();
             }
           }}
           aria-label="Open Daily Challenges"
@@ -115,24 +126,7 @@ const DailyChallengesHero: React.FC = () => {
           whileTap={{ y: 1, scale: 0.97 }}
           transition={{ type: 'spring', stiffness: 420, damping: 26, mass: 0.35 }}
         >
-          {/* Click ripple */}
-          {rippleKey > 0 && (
-            <motion.span
-              key={rippleKey}
-              style={{
-                position: 'absolute',
-                inset: 0,
-                pointerEvents: 'none',
-                zIndex: 30,
-                background: 'radial-gradient(circle at center, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0.12) 40%, rgba(255,255,255,0) 70%)',
-                mixBlendMode: 'screen',
-                borderRadius: 12
-              }}
-              initial={{ opacity: 0.5, scale: 0.85 }}
-              animate={{ opacity: 0, scale: 1.25 }}
-              transition={{ duration: 0.35, ease: 'easeOut' }}
-            />
-          )}
+          {/* Button micro-interactions handled via whileHover/whileTap; no click ripple */}
           <img 
             src="/NewDailyUI/Daily's section container.png"
             alt="Daily Challenges Container"

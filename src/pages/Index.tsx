@@ -163,19 +163,30 @@ const Index = () => {
 
   return (
     <div 
-      className="h-screen text-white overflow-hidden flex flex-col relative"
+      className="min-h-screen text-white flex flex-col relative"
+      style={{
+        minHeight: '100dvh', // Dynamic viewport height for better mobile support
+        maxHeight: '100dvh',
+        overflow: 'auto'
+      }}
     >
       {/* Starfield overlay above background, below UI */}
       <StarField shootingStars />
-      <div className="px-4 flex flex-col min-h-screen overflow-x-hidden overflow-y-hidden relative z-10">
+      <div className="px-4 flex flex-col overflow-x-hidden relative z-10"
+           style={{
+             minHeight: '100%',
+             maxHeight: '100%',
+             paddingBottom: 'env(safe-area-inset-bottom, 16px)'
+           }}>
         
-        {/* Header utilities - fixed top bar flush to top edge */}
-        <div className="flex items-center justify-between pt-2 pb-1 flex-shrink-0 w-full lg:w-[42rem] mx-auto lg:px-0 top-bar"
+        {/* Header utilities - responsive top bar */}
+        <div className="flex items-center justify-between pt-2 pb-1 flex-shrink-0 w-full max-w-[42rem] mx-auto top-bar"
             style={{
-              transform: `scale(${topBarScale})`,
+              transform: isMobile ? 'none' : `scale(${topBarScale})`,
               transformOrigin: 'top center',
-              paddingLeft: isMobile ? '2px' : undefined,
-              paddingRight: isMobile ? '2px' : undefined
+              paddingLeft: isMobile ? '8px' : undefined,
+              paddingRight: isMobile ? '8px' : undefined,
+              paddingTop: 'max(8px, env(safe-area-inset-top, 8px))'
             }}>
           {/* Left - Feedback button (new SVG as the whole button) */}
           <motion.button
@@ -330,7 +341,7 @@ const Index = () => {
             src={language === 'he' ? '/Brawldle%20Hebrew%20Logo.png' : '/Brawldle%20Logo.png'}
             alt="Brawldle Logo"
             className={cn(
-              "relative z-10 -mt-8 lg:-mt-16 mb-0 lg:mb-0 select-none block mx-auto logo-breathe",
+              "relative z-10 -mt-12 lg:-mt-20 mb-0 lg:mb-0 select-none block mx-auto logo-breathe",
               // Reduced ~17% on mobile (270px -> 224px) and ~6% on desktop (355px -> 334px)
               isMobile ? 'w-[224px]' : 'w-[334px]'
             )}
@@ -338,8 +349,15 @@ const Index = () => {
           />
         </div>
 
-        {/* Main content area - mobile-first layout */}
-        <div className="flex flex-col items-center w-full max-w-md mx-auto px-4 gap-8 md:gap-12 lg:gap-8">
+        {/* Main content area - mobile-first layout with safe spacing */}
+        <div className="flex flex-col items-center w-full max-w-md mx-auto px-4 flex-1"
+             style={{
+               paddingLeft: 'max(16px, env(safe-area-inset-left, 16px))',
+               paddingRight: 'max(16px, env(safe-area-inset-right, 16px))',
+               gap: isMobile ? '1rem' : '2rem', // Tighter spacing on mobile to fit everything
+               justifyContent: 'flex-start', // Start from top, we'll control spacing manually
+               minHeight: 0 // Allow shrinking
+             }}>
           
           {/* Daily Challenges Hero */}
           <DailyChallengesHero />
@@ -361,7 +379,8 @@ const Index = () => {
 
           {/* {t('home.survival.title')} BUTTON */}
           <div
-            className="mx-auto mb-12 lg:mb-10 w-[clamp(252px,43.2vw,396px)] lg:w-[clamp(230px,35.4vw,335px)]"
+            className="mx-auto w-[clamp(252px,43.2vw,396px)] lg:w-[clamp(230px,35.4vw,335px)]"
+            style={{ marginTop: isMobile ? '1rem' : '1.5rem' }} // Space above survival button
           >
             <motion.div
               whileHover={{ y: -2, scale: 1.02 }}
@@ -494,8 +513,13 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Footer - SECONDARY BUTTONS ROW - positioned at bottom */}
-        <div className="w-full flex justify-center mt-auto mb-4 lg:mb-6">
+        {/* Footer - SECONDARY BUTTONS ROW - positioned at bottom with safe area */}
+        <div className="w-full flex justify-center mt-auto"
+             style={{
+               marginTop: isMobile ? '1.5rem' : '2rem', // Space between survival and bottom buttons
+               marginBottom: isMobile ? '0.75rem' : '1rem', // Small space from bottom edge
+               paddingBottom: 'max(8px, env(safe-area-inset-bottom, 8px))'
+             }}>
           <div className="w-full max-w-md lg:max-w-lg rounded-2xl">
             <div className="flex w-full max-w-[26rem] lg:max-w-[32rem] mx-auto gap-6 lg:gap-8 relative">
               {language === 'he' ? (

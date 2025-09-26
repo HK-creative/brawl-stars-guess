@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
 import PrimaryButton from '@/components/ui/primary-button';
 import { Timer } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
@@ -14,7 +13,6 @@ import PixelsMode from './PixelsMode';
 import { cn } from '@/lib/utils';
 // Victory/Loss popups removed - using inline victory flow
 import SurvivalLossPopup from '@/components/SurvivalLossPopup';
-import SurvivalSetupPopup from '@/components/SurvivalSetupPopup';
 import { t } from '@/lib/i18n';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useMotionPrefs } from '@/hooks/useMotionPrefs';
@@ -94,7 +92,6 @@ const SurvivalModePage: React.FC = () => {
   const [currentRoundPoints, setCurrentRoundPoints] = useState(0);
   // Victory popup removed - using inline victory flow
   const [showLossPopup, setShowLossPopup] = useState(false);
-  const [showSetupPopup, setShowSetupPopup] = useState(true);
   
   // New states for inline victory flow
   const [showInlineVictory, setShowInlineVictory] = useState(false);
@@ -258,10 +255,9 @@ const SurvivalModePage: React.FC = () => {
 
   // Effect to start the very first round once after setup
   useEffect(() => {
-    // Only start the first round when the game is playing, setup popup is closed, and no rounds have started yet
+    // Only start the first round when the game is playing and no rounds have started yet
     if (
       gameStatus === 'playing' &&
-      !showSetupPopup &&
       currentRound === 0 &&
       !activeRoundState?.isRoundActive &&
       !initialRoundStartedRef.current
@@ -284,7 +280,14 @@ const SurvivalModePage: React.FC = () => {
         setIsLoading(false);
       }
     }
-  }, [settings, gameStatus, currentRound, activeRoundState, startNextRound, showSetupPopup]);
+  }, [settings, gameStatus, currentRound, activeRoundState, startNextRound]);
+
+  // Guard: if settings are missing or game is not in playing state, redirect to setup page
+  useEffect(() => {
+    if (!settings || !settings.modes || settings.modes.length === 0 || gameStatus === 'setup') {
+      navigate('/survival');
+    }
+  }, [settings, gameStatus, navigate]);
 
   // Update UI when mode changes
   useEffect(() => {
@@ -421,7 +424,7 @@ const SurvivalModePage: React.FC = () => {
             </button>
           </div>
           {/* Timer - top right inside header */}
-          {settings?.timer && gameStatus === 'playing' && !showSetupPopup && !showLossPopup && (
+          {settings?.timer && gameStatus === 'playing' && !showLossPopup && (
             <div className="absolute right-4 top-1/2 -translate-y-1/2 select-none">
               <motion.div
                 initial={motionOK ? { opacity: 0, y: -6 } : { opacity: 1 }}
@@ -483,7 +486,7 @@ const SurvivalModePage: React.FC = () => {
         </div>
       </div>
       {/* Simple, centered Points line below the round headline */}
-      {!isLoading && !showSetupPopup && !challengeError && (
+      {!isLoading && !challengeError && (
         <div className="w-full max-w-4xl mx-auto px-4 relative z-10">
           <div className="text-center mt-1" aria-live="polite">
             <span className="text-sm text-white/70">Points: </span>
@@ -502,11 +505,11 @@ const SurvivalModePage: React.FC = () => {
       )}
       
       {/* Default content when no game is running and not in setup */}
-      {!isLoading && !showSetupPopup && (!activeRoundState || !activeRoundState.isRoundActive) && gameStatus !== 'gameover' && (
+      {!isLoading && (!activeRoundState || !activeRoundState.isRoundActive) && gameStatus !== 'gameover' && (
         <div className="survival-mode-content">
           <div className="flex items-center justify-center min-h-[400px]">
             <PrimaryButton
-              onClick={() => setShowSetupPopup(true)}
+              onClick={() => navigate('/survival')}
               className="survival-mode-guess-counter text-xl py-4 px-8"
             >
               Start Survival Mode
@@ -553,7 +556,7 @@ const SurvivalModePage: React.FC = () => {
       )}
       
       {/* Main Game Content - Only show if game is active and not loading and no errors */}
-      {!isLoading && !showSetupPopup && !challengeError && activeRoundState && activeRoundState.isRoundActive && (
+      {!isLoading && !challengeError && activeRoundState && activeRoundState.isRoundActive && (
         <div className="survival-mode-content">
           {/* Simplified points display is now rendered just below the round headline */}
 
@@ -775,36 +778,7 @@ const SurvivalModePage: React.FC = () => {
         </div>
       )}
       
-      {/* Setup Popup - Shows initially and lets user configure settings */}
-      {showSetupPopup && (
-        <div className="absolute inset-0 z-50">
-          <SurvivalSetupPopup
-            onStart={(settings) => {
-              // Hide setup popup
-              setShowSetupPopup(false);
-              
-              // Reset scores and state
-              setTotalScore(0);
-              setCurrentRoundPoints(0);
-              
-              // Reset the game key to force a remount of components
-              setModeKey(`survival-start-${Date.now()}`);
-              
-              // Allow the first-round effect to run for a fresh session
-              initialRoundStartedRef.current = false;
-              // Ensure round end lock is released for a fresh session
-              roundEndLockRef.current = false;
-
-              // Initialize game with settings
-              initializeGame(settings);
-              resetModeSelectionState();
-              
-              // First round will be started by the effect
-            }}
-            onCancel={() => navigate('/')}
-          />
-        </div>
-      )}
+      {/* Setup Popup removed - use dedicated /survival page */}
       
       {/* Victory popup removed - using inline victory flow */}
       
@@ -823,8 +797,8 @@ const SurvivalModePage: React.FC = () => {
               resetModeSelectionState();
               // Release any stale lock before a new session
               roundEndLockRef.current = false;
-              // Show setup popup again
-              setShowSetupPopup(true);
+              // Navigate to setup page
+              navigate('/survival');
             }}
             onHome={() => navigate('/')}
           />
