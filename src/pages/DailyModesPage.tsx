@@ -5,6 +5,7 @@ import usePageTitle from '@/hooks/usePageTitle';
 import { t } from '@/lib/i18n';
 import DailyModeTransitionOrchestrator from '@/components/layout/DailyModeTransitionOrchestrator';
 import DailySharedHeader from '@/components/layout/DailySharedHeader';
+import StarField from '@/components/StarField';
 
 // Import all mode content components
 import DailyClassicModeContent from './daily/DailyClassicModeContent';
@@ -78,14 +79,26 @@ const DailyModesPage: React.FC = () => {
   };
   
   return (
-    <div className="daily-mode-container">
+    <div 
+      className="min-h-screen text-white flex flex-col relative daily-background-overlay"
+      style={{
+        minHeight: '100dvh', // Dynamic viewport height for better mobile support
+        maxHeight: '100dvh',
+        overflow: 'auto'
+      }}
+    >
+      {/* Starfield overlay above background, below UI - same as home page */}
+      <StarField shootingStars />
+      
+      <div className="flex flex-col relative z-10" style={{ minHeight: '100%' }}>
+        {/* Shared header stays mounted and static across mode switches */}
+        <DailySharedHeader currentMode={currentMode} onModeChange={handleModeChange} />
 
-      {/* Shared header stays mounted and static across mode switches */}
-      <DailySharedHeader currentMode={currentMode} onModeChange={handleModeChange} />
+        <DailyModeTransitionOrchestrator modeKey={currentMode} className="daily-mode-content-container flex-1" axis="x">
+          {renderModeContent()}
+        </DailyModeTransitionOrchestrator>
+      </div>
 
-      <DailyModeTransitionOrchestrator modeKey={currentMode} className="daily-mode-content-container" axis="x">
-        {renderModeContent()}
-      </DailyModeTransitionOrchestrator>
     </div>
   );
 };

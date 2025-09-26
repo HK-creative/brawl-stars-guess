@@ -60,32 +60,34 @@ const AnimatedRoutes = () => {
   const dailyOrigin = (location.state as any)?.dailyOrigin;
 
   return (
-    <AnimatePresence mode="sync" initial={false}>
+    <AnimatePresence mode="wait" initial={false}>
       <RouteTransitionOrchestrator key={groupKey} routeKey={groupKey} originPercent={groupKey === 'daily' ? dailyOrigin : undefined}>
-        <Routes location={location}>
-          <Route path="/auth" element={<AuthPage />} />
-          <Route path="/auth/callback" element={<AuthCallback />} />
+        <div style={{ position: 'fixed', inset: 0, overflow: 'hidden' }}>
+          <Routes location={location}>
+            <Route path="/auth" element={<AuthPage />} />
+            <Route path="/auth/callback" element={<AuthCallback />} />
 
-          {/* Unified Daily Modes Page - Outside Layout to remove language selection */}
-          <Route path="/daily" element={<DailyModesPage />} />
+            {/* Unified Daily Modes Page - Outside Layout to remove language selection */}
+            <Route path="/daily" element={<DailyModesPage />} />
 
-          {/* New standalone pages - Outside Layout */}
-          <Route path="/feedback" element={<FeedbackPage />} />
-          <Route path="/join-us" element={<JoinUsPage />} />
-          <Route path="/tier-list" element={<TierListPage />} />
+            {/* New standalone pages - Outside Layout */}
+            <Route path="/feedback" element={<FeedbackPage />} />
+            <Route path="/join-us" element={<JoinUsPage />} />
+            <Route path="/tier-list" element={<TierListPage />} />
 
-          <Route element={<Layout />}>
-            <Route index element={<Index />} />
-            <Route path="/endless" element={<EndlessMode />} />
-            <Route path="/survival" element={<SurvivalSetupPage />} />
-            <Route path="/survival/setup" element={<SurvivalSetupPage />} />
-            <Route path="/survival/game" element={<SurvivalModePage />} />
+            <Route element={<Layout />}>
+              <Route index element={<Index />} />
+              <Route path="/endless" element={<EndlessMode />} />
+              <Route path="/survival" element={<SurvivalSetupPage />} />
+              <Route path="/survival/setup" element={<SurvivalSetupPage />} />
+              <Route path="/survival/game" element={<SurvivalModePage />} />
 
-            <Route path="/score" element={<ScorePage />} />
-            <Route path="/settings" element={<SettingsPage />} />
-            <Route path="*" element={<NotFound />} />
-          </Route>
-        </Routes>
+              <Route path="/score" element={<ScorePage />} />
+              <Route path="/settings" element={<SettingsPage />} />
+              <Route path="*" element={<NotFound />} />
+            </Route>
+          </Routes>
+        </div>
       </RouteTransitionOrchestrator>
     </AnimatePresence>
   );

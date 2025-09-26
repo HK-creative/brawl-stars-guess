@@ -163,7 +163,7 @@ const Index = () => {
 
   return (
     <div 
-      className="min-h-screen text-white flex flex-col relative"
+      className="min-h-screen text-white flex flex-col relative home-background-overlay"
       style={{
         minHeight: '100dvh', // Dynamic viewport height for better mobile support
         maxHeight: '100dvh',
@@ -194,8 +194,8 @@ const Index = () => {
             aria-label={t('home.feedback')}
             title={t('home.feedback')}
             style={{
-              width: isMobile ? '42px' : '52px',
-              height: isMobile ? '36px' : '44px',
+              width: isMobile ? '50px' : '56px',
+              height: isMobile ? '44px' : '48px',
               background: 'transparent',
               border: 'none',
               padding: 0,
@@ -254,8 +254,8 @@ const Index = () => {
             aria-label={language === 'en' ? 'Switch to Hebrew' : 'Switch to English'}
             title={language === 'en' ? 'Switch to Hebrew' : 'Switch to English'}
             style={{
-              width: isMobile ? '28px' : '40px',
-              height: isMobile ? '28px' : '40px',
+              width: isMobile ? '32px' : '40px',
+              height: isMobile ? '32px' : '40px',
               background: 'transparent',
               border: 'none',
               padding: 0,
@@ -284,8 +284,8 @@ const Index = () => {
                 aria-label="Account"
                 title="Account"
                 style={{
-                  width: isMobile ? '58px' : '76px',
-                  height: isMobile ? '58px' : '76px',
+                  width: isMobile ? '64px' : '76px',
+                  height: isMobile ? '64px' : '76px',
                   background: 'transparent',
                   border: 'none',
                   padding: 0,
@@ -335,15 +335,15 @@ const Index = () => {
             alt="Brawldle Logo"
             className={cn(
               "relative z-10 -mt-16 lg:-mt-24 mb-0 lg:mb-0 select-none block mx-auto logo-breathe",
-              // Reduced ~17% on mobile (270px -> 224px) and ~6% on desktop (355px -> 334px)
-              isMobile ? 'w-[224px]' : 'w-[334px]'
+              // Reduced ~17% on mobile (270px -> 224px) and further reduced on desktop (334px -> 300px)
+              isMobile ? 'w-[224px]' : 'w-[300px]'
             )}
             priority
           />
         </div>
 
         {/* Main content area - mobile-first layout with safe spacing */}
-        <div className="flex flex-col items-center w-full max-w-md mx-auto px-4 flex-1"
+        <div className="flex flex-col items-center w-full max-w-md mx-auto px-4 flex-1 main-content-tablet"
              style={{
                paddingLeft: 'max(16px, env(safe-area-inset-left, 16px))',
                paddingRight: 'max(16px, env(safe-area-inset-right, 16px))',
@@ -353,10 +353,17 @@ const Index = () => {
              }}>
           
           {/* Daily Challenges Hero */}
-          <DailyChallengesHero />
+          <div 
+            className="daily-hero-container"
+            style={{ 
+              transform: isMobile ? 'scale(1.05)' : 'none',
+              marginTop: isMobile ? '1.5rem' : '0' // Additional spacing above daily button for mobile
+            }}>
+            <DailyChallengesHero />
+          </div>
 
           {/* Next puzzle countdown - minimal container */}
-          <div className="text-center -mt-6 md:-mt-8 lg:-mt-6">
+          <div className="text-center -mt-4 md:-mt-8 lg:-mt-6">
             <span 
               className="text-base md:text-lg font-bold"
               style={{ 
@@ -372,8 +379,11 @@ const Index = () => {
 
           {/* {t('home.survival.title')} BUTTON */}
           <div
-            className="mx-auto w-[clamp(252px,43.2vw,396px)] lg:w-[clamp(230px,35.4vw,335px)]"
-            style={{ marginTop: isMobile ? '1rem' : '1.5rem' }} // Space above survival button
+            className="mx-auto survival-button-tablet"
+            style={{ 
+              marginTop: isMobile ? '1.5rem' : '1.5rem', // Further increased space above survival button for mobile
+              width: isMobile ? 'clamp(280px, 75vw, 320px)' : 'clamp(200px,30vw,300px)' // Reduced desktop survival button size
+            }}
           >
             <motion.div
               whileHover={{ y: -2, scale: 1.02 }}
@@ -507,9 +517,9 @@ const Index = () => {
         </div>
 
         {/* Footer - SECONDARY BUTTONS ROW - positioned at bottom with safe area */}
-        <div className="w-full flex justify-center mt-auto"
+        <div className="w-full flex justify-center mt-auto bottom-buttons-tablet"
              style={{
-               marginTop: isMobile ? '2.5rem' : '3rem', // Further increased space between survival and bottom buttons
+               marginTop: isMobile ? '14rem' : '3rem', // Further increased space between survival and bottom buttons
                marginBottom: isMobile ? '0.75rem' : '1rem', // Small space from bottom edge
                paddingBottom: 'max(8px, env(safe-area-inset-bottom, 8px))'
              }}>
@@ -785,10 +795,13 @@ const Index = () => {
           .secondary-cta-container {
             width: 100%;
             position: relative;
-            height: 65px; /* increased mobile/tablet height */
+            height: 72px; /* further increased mobile height */
+          }
+          @media (min-width: 768px) and (max-width: 1023px) { /* tablet only */
+            .secondary-cta-container { height: 75px; } /* tablet height between mobile and desktop */
           }
           @media (min-width: 1024px) { /* lg */
-            .secondary-cta-container { height: 78px; } /* increased desktop height */
+            .secondary-cta-container { height: 78px; } /* desktop height */
           }
           .secondary-cta-button {
             cursor: pointer;
@@ -1044,6 +1057,103 @@ const Index = () => {
           html[lang='he'] .secondary-cta-container > button > div > span {
             transform: translateY(-22%) scale(1.5) !important; /* further increased size for Hebrew labels: "בראולרים" and "קהילה" */
             transform-origin: center;
+          }
+
+          /* ===== TABLET-SPECIFIC IMPROVEMENTS (768px - 1023px) ===== */
+          
+          /* iPad Mini (768px-819px) - Base tablet size */
+          @media (min-width: 768px) and (max-width: 819px) {
+            .daily-hero-container {
+              transform: scale(1.02) !important;
+              margin-top: 1rem !important;
+            }
+            .survival-button-tablet {
+              width: 320px !important;
+              margin-top: 1.5rem !important;
+            }
+            .bottom-buttons-tablet {
+              margin-top: 3.5rem !important;
+            }
+            .secondary-cta-container {
+              height: 70px !important;
+            }
+            .main-content-tablet {
+              gap: 1.5rem !important;
+              padding-bottom: 2rem !important;
+            }
+            .flex.w-full.max-w-\\[28rem\\] {
+              max-width: 24rem !important;
+            }
+          }
+
+          /* iPad Air (820px-999px) - Scaled up to match iPad Mini */
+          @media (min-width: 820px) and (max-width: 999px) {
+            .daily-hero-container {
+              transform: scale(1.12) !important; /* 10% larger than iPad Mini */
+              margin-top: 1.2rem !important;
+            }
+            .survival-button-tablet {
+              width: 360px !important; /* Larger for iPad Air */
+              margin-top: 1.7rem !important;
+            }
+            .bottom-buttons-tablet {
+              margin-top: 4rem !important;
+            }
+            .secondary-cta-container {
+              height: 78px !important; /* Larger buttons */
+            }
+            .main-content-tablet {
+              gap: 1.8rem !important;
+              padding-bottom: 2.4rem !important;
+            }
+            .flex.w-full.max-w-\\[28rem\\] {
+              max-width: 27rem !important;
+            }
+          }
+
+          /* iPad Pro (1000px-1023px) - Scaled up significantly to match iPad Mini */
+          @media (min-width: 1000px) and (max-width: 1023px) {
+            .daily-hero-container {
+              transform: scale(1.45) !important; /* 45% larger than iPad Mini for much bigger appearance */
+              margin-top: 2rem !important;
+            }
+            .survival-button-tablet {
+              width: 480px !important; /* Much larger for iPad Pro */
+              margin-top: 2.5rem !important;
+            }
+            .bottom-buttons-tablet {
+              margin-top: 6.5rem !important; /* Much more spacing */
+            }
+            .secondary-cta-container {
+              height: 95px !important; /* Much larger buttons */
+            }
+            .main-content-tablet {
+              gap: 2.8rem !important; /* Larger gaps */
+              padding-bottom: 4rem !important; /* More padding */
+            }
+            .flex.w-full.max-w-\\[28rem\\] {
+              max-width: 36rem !important; /* Much wider container */
+            }
+          }
+
+          /* Common tablet rules for all sizes */
+          @media (min-width: 768px) and (max-width: 1023px) {
+            .flex-1 {
+              justify-content: space-between !important;
+            }
+          }
+
+          /* Darker background overlay for all devices */
+          .home-background-overlay::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.2); /* Dark overlay - increase opacity for more darkness */
+            z-index: 1;
+            pointer-events: none;
           }
           `}
         </style>
