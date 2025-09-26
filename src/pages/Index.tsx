@@ -194,8 +194,8 @@ const Index = () => {
             aria-label={t('home.feedback')}
             title={t('home.feedback')}
             style={{
-              width: isMobile ? '56px' : '72px',
-              height: isMobile ? '54px' : '66px',
+              width: isMobile ? '42px' : '52px',
+              height: isMobile ? '36px' : '44px',
               background: 'transparent',
               border: 'none',
               padding: 0,
@@ -207,82 +207,75 @@ const Index = () => {
             whileTap={{ y: 1, scale: 0.97 }}
             transition={{ type: 'spring', stiffness: 420, damping: 26, mass: 0.35 }}
           >
-            <img
-              src="/NewDailyUI/FeedbackButton.svg"
-              alt=""
-              draggable={false}
+            <svg 
+              width="100%" 
+              height="100%" 
+              viewBox="0 0 42 36" 
+              fill="none" 
+              xmlns="http://www.w3.org/2000/svg"
               className="select-none pointer-events-none"
-              style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-            />
+            >
+              <g filter="url(#filter0_di_2044_4369)">
+                <mask id="path-1-outside-1_2044_4369" maskUnits="userSpaceOnUse" x="2" y="0" width="38" height="32" fill="black">
+                  <rect fill="white" x="2" width="38" height="32"/>
+                  <path fillRule="evenodd" clipRule="evenodd" d="M13 1C7.47715 1 3 5.47714 3 11V16.6127C3 22.1356 7.47715 26.6127 13 26.6127H17.9766L21.622 31L25.4643 26.6127H29C34.5228 26.6127 39 22.1356 39 16.6127V11C39 5.47715 34.5228 1 29 1H13Z"/>
+                </mask>
+                <path fillRule="evenodd" clipRule="evenodd" d="M13 1C7.47715 1 3 5.47714 3 11V16.6127C3 22.1356 7.47715 26.6127 13 26.6127H17.9766L21.622 31L25.4643 26.6127H29C34.5228 26.6127 39 22.1356 39 16.6127V11C39 5.47715 34.5228 1 29 1H13Z" fill="white"/>
+                <path d="M17.9766 26.6127L18.3611 26.2932L18.2112 26.1127H17.9766V26.6127ZM21.622 31L21.2375 31.3195L21.612 31.7703L21.9982 31.3294L21.622 31ZM25.4643 26.6127V26.1127H25.2375L25.0881 26.2833L25.4643 26.6127ZM3 11H3.5C3.5 5.75329 7.75329 1.5 13 1.5V1V0.5C7.20101 0.5 2.5 5.201 2.5 11H3ZM3 16.6127H3.5V11H3H2.5V16.6127H3ZM13 26.6127V26.1127C7.7533 26.1127 3.5 21.8594 3.5 16.6127H3H2.5C2.5 22.4117 7.20101 27.1127 13 27.1127V26.6127ZM17.9766 26.6127V26.1127H13V26.6127V27.1127H17.9766V26.6127ZM21.622 31L22.0066 30.6805L18.3611 26.2932L17.9766 26.6127L17.592 26.9323L21.2375 31.3195L21.622 31ZM25.4643 26.6127L25.0881 26.2833L21.2459 30.6706L21.622 31L21.9982 31.3294L25.8404 26.9421L25.4643 26.6127ZM29 26.6127V26.1127H25.4643V26.6127V27.1127H29V26.6127ZM39 16.6127H38.5C38.5 21.8594 34.2467 26.1127 29 26.1127V26.6127V27.1127C34.799 27.1127 39.5 22.4117 39.5 16.6127H39ZM39 11H38.5V16.6127H39H39.5V11H39ZM29 1V1.5C34.2467 1.5 38.5 5.7533 38.5 11H39H39.5C39.5 5.20101 34.799 0.5 29 0.5V1ZM13 1V1.5H29V1V0.5H13V1Z" fill="black" mask="url(#path-1-outside-1_2044_4369)"/>
+              </g>
+              <ellipse cx="12.0094" cy="19.1584" rx="3.52701" ry="3.47702" fill="#040513"/>
+              <ellipse cx="20.9015" cy="19.1584" rx="3.52701" ry="3.47702" fill="#040513"/>
+              <ellipse cx="29.9904" cy="19.1584" rx="3.52701" ry="3.47702" fill="#040513"/>
+              <defs>
+                <filter id="filter0_di_2044_4369" x="0.5" y="0.5" width="41" height="35.2703" filterUnits="userSpaceOnUse" colorInterpolationFilters="sRGB">
+                  <feFlood floodOpacity="0" result="BackgroundImageFix"/>
+                  <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+                  <feOffset dy="2"/>
+                  <feGaussianBlur stdDeviation="1"/>
+                  <feComposite in2="hardAlpha" operator="out"/>
+                  <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0"/>
+                  <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_2044_4369"/>
+                  <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_2044_4369" result="shape"/>
+                  <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+                  <feOffset dy="2"/>
+                  <feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1"/>
+                  <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.15 0"/>
+                  <feBlend mode="normal" in2="shape" result="effect2_innerShadow_2044_4369"/>
+                </filter>
+              </defs>
+            </svg>
           </motion.button>
 
           {/* Right - Language + Auth with retro styling */}
           <div className="flex items-center gap-4">
-            {/* Language toggle with retro 3D style */}
-          <div className={cn("flex", isMobile ? "gap-1" : "gap-2")}>
-            <button
-              onClick={() => { if (language !== 'en') changeLanguage('en'); }}
-              disabled={language === 'en'}
-              aria-disabled={language === 'en'}
-              aria-label="English"
-              title="English"
-              tabIndex={language === 'en' ? -1 : 0}
-              style={{
-                width: isMobile ? '28px' : '40px',
-                height: isMobile ? '28px' : '40px',
-                background: 'transparent',
-                border: 'none',
-                padding: 0,
-                display: 'inline-block',
-                cursor: language === 'en' ? 'default' : 'pointer',
-                borderRadius: '8px',
-                boxShadow: language === 'en'
-                  ? (isMobile ? '0 0 0 1px rgba(255,255,255,0.65)' : '0 0 0 2px rgba(255,255,255,0.55)')
-                  : 'none',
-                transition: 'box-shadow 120ms ease'
-              }}
-            >
-              <Image
-                src="/NewDailyUI/united-states-icon.png"
-                alt="English"
-                width={20}
-                height={20}
-                className="select-none pointer-events-none"
-                style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-              />
-            </button>
-            <button
-              onClick={() => { if (language !== 'he') changeLanguage('he'); }}
-              disabled={language === 'he'}
-              aria-disabled={language === 'he'}
-              aria-label="Hebrew"
-              title="Hebrew"
-              tabIndex={language === 'he' ? -1 : 0}
-              style={{
-                width: isMobile ? '28px' : '40px',
-                height: isMobile ? '28px' : '40px',
-                background: 'transparent',
-                border: 'none',
-                padding: 0,
-                display: 'inline-block',
-                cursor: language === 'he' ? 'default' : 'pointer',
-                borderRadius: '8px',
-                boxShadow: language === 'he'
-                  ? (isMobile ? '0 0 0 1px rgba(255,255,255,0.65)' : '0 0 0 2px rgba(255,255,255,0.55)')
-                  : 'none',
-                transition: 'box-shadow 120ms ease'
-              }}
-            >
-              <Image
-                src="/NewDailyUI/israel-icon.png"
-                alt="Hebrew"
-                width={20}
-                height={20}
-                className="select-none pointer-events-none"
-                style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-              />
-            </button>
-          </div>
+            {/* Language toggle - show only active language */}
+          <button
+            onClick={() => changeLanguage(language === 'en' ? 'he' : 'en')}
+            aria-label={language === 'en' ? 'Switch to Hebrew' : 'Switch to English'}
+            title={language === 'en' ? 'Switch to Hebrew' : 'Switch to English'}
+            style={{
+              width: isMobile ? '28px' : '40px',
+              height: isMobile ? '28px' : '40px',
+              background: 'transparent',
+              border: 'none',
+              padding: 0,
+              display: 'inline-block',
+              cursor: 'pointer',
+              borderRadius: '8px',
+              boxShadow: isMobile ? '0 0 0 1px rgba(255,255,255,0.65)' : '0 0 0 2px rgba(255,255,255,0.55)',
+              transition: 'box-shadow 120ms ease, transform 120ms ease'
+            }}
+            className="hover:scale-105"
+          >
+            <Image
+              src={language === 'en' ? '/NewDailyUI/united-states-icon.png' : '/NewDailyUI/israel-icon.png'}
+              alt={language === 'en' ? 'English' : 'Hebrew'}
+              width={20}
+              height={20}
+              className="select-none pointer-events-none"
+              style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+            />
+          </button>
 
             {/* Auth controls — unauthenticated shows icon only (no plate) */}
             {!isLoggedIn ? (
