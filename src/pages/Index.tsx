@@ -334,7 +334,7 @@ const Index = () => {
             src={language === 'he' ? '/Brawldle%20Hebrew%20Logo.png' : '/Brawldle%20Logo.png'}
             alt="Brawldle Logo"
             className={cn(
-              "relative z-10 -mt-12 lg:-mt-20 mb-0 lg:mb-0 select-none block mx-auto logo-breathe",
+              "relative z-10 -mt-16 lg:-mt-24 mb-0 lg:mb-0 select-none block mx-auto logo-breathe",
               // Reduced ~17% on mobile (270px -> 224px) and ~6% on desktop (355px -> 334px)
               isMobile ? 'w-[224px]' : 'w-[334px]'
             )}
@@ -356,7 +356,7 @@ const Index = () => {
           <DailyChallengesHero />
 
           {/* Next puzzle countdown - minimal container */}
-          <div className="text-center -mt-8 md:-mt-10 lg:-mt-8">
+          <div className="text-center -mt-6 md:-mt-8 lg:-mt-6">
             <span 
               className="text-base md:text-lg font-bold"
               style={{ 
@@ -509,12 +509,12 @@ const Index = () => {
         {/* Footer - SECONDARY BUTTONS ROW - positioned at bottom with safe area */}
         <div className="w-full flex justify-center mt-auto"
              style={{
-               marginTop: isMobile ? '1.5rem' : '2rem', // Space between survival and bottom buttons
+               marginTop: isMobile ? '2.5rem' : '3rem', // Further increased space between survival and bottom buttons
                marginBottom: isMobile ? '0.75rem' : '1rem', // Small space from bottom edge
                paddingBottom: 'max(8px, env(safe-area-inset-bottom, 8px))'
              }}>
           <div className="w-full max-w-md lg:max-w-lg rounded-2xl">
-            <div className="flex w-full max-w-[26rem] lg:max-w-[32rem] mx-auto gap-6 lg:gap-8 relative">
+            <div className="flex w-full max-w-[28rem] lg:max-w-[34rem] mx-auto gap-6 lg:gap-8 relative">
               {language === 'he' ? (
                 <>
                   {/* {t('home.join.community')} (hebrew: placed first/left in DOM for RTL) */}
@@ -785,10 +785,10 @@ const Index = () => {
           .secondary-cta-container {
             width: 100%;
             position: relative;
-            height: 60px; /* mobile/tablet default */
+            height: 65px; /* increased mobile/tablet height */
           }
           @media (min-width: 1024px) { /* lg */
-            .secondary-cta-container { height: 72px; }
+            .secondary-cta-container { height: 78px; } /* increased desktop height */
           }
           .secondary-cta-button {
             cursor: pointer;
