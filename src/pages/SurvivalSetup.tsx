@@ -4,10 +4,11 @@ import { useSurvivalStore, defaultSurvivalSettings, GameMode, SurvivalSettings }
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { resetModeSelectionState } from '@/lib/survival-logic';
-import { Timer, ArrowLeft } from 'lucide-react';
+// No longer need lucide-react imports - using custom SVGs
 import { t } from '@/lib/i18n';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
+import StarField from '@/components/StarField';
 
 const SETTINGS_STORAGE_KEY = 'survival_last_settings';
 
@@ -92,12 +93,11 @@ const SurvivalSetupPage: React.FC = () => {
       label: t('survival.starpower.label'), 
       description: t('survival.starpower.description'), 
       icon: (
-        <div className="relative">
-          {/* Star icon for Star Power */}
-          <svg className="w-7 h-7" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-          </svg>
-        </div>
+        <img 
+          src="/StarpowerIcon.png" 
+          alt="Star Power" 
+          className="w-6 h-6 sm:w-7 sm:h-7 object-contain"
+        />
       ),
       color: 'from-yellow-500 to-yellow-600'
     },
@@ -106,12 +106,11 @@ const SurvivalSetupPage: React.FC = () => {
       label: t('survival.gadget.label'), 
       description: t('survival.gadget.description'), 
       icon: (
-        <div className="relative">
-          {/* Lightning bolt for Gadget */}
-          <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M7 2v11h3v9l7-12h-4l4-8z"/>
-          </svg>
-        </div>
+        <img 
+          src="/GadgetIcon.png" 
+          alt="Gadget" 
+          className="w-6 h-6 sm:w-7 sm:h-7 object-contain"
+        />
       ),
       color: 'from-green-500 to-green-600'
     },
@@ -120,12 +119,11 @@ const SurvivalSetupPage: React.FC = () => {
       label: t('survival.audio.label'), 
       description: t('survival.audio.description'), 
       icon: (
-        <div className="relative">
-          {/* Volume/Sound icon for Audio */}
-          <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
-          </svg>
-        </div>
+        <img 
+          src="/AudioIcon.png" 
+          alt="Audio" 
+          className="w-6 h-6 sm:w-7 sm:h-7 object-contain"
+        />
       ),
       color: 'from-purple-500 to-purple-600'
     },
@@ -134,12 +132,11 @@ const SurvivalSetupPage: React.FC = () => {
       label: t('survival.classic.label'), 
       description: t('survival.classic.description'), 
       icon: (
-        <div className="relative">
-          {/* Circle/Portrait icon for Classic */}
-          <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-          </svg>
-        </div>
+        <img 
+          src="/ClassicIcon.png" 
+          alt="Classic" 
+          className="w-6 h-6 sm:w-7 sm:h-7 object-contain"
+        />
       ),
       color: 'from-blue-500 to-blue-600'
     },
@@ -148,12 +145,11 @@ const SurvivalSetupPage: React.FC = () => {
       label: t('survival.pixels.label'), 
       description: t('survival.pixels.description'), 
       icon: (
-        <div className="relative">
-          {/* Grid/Pixels icon */}
-          <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M4 4h4v4H4V4zm6 0h4v4h-4V4zm6 0h4v4h-4V4zM4 10h4v4H4v-4zm6 0h4v4h-4v-4zm6 0h4v4h-4v-4zM4 16h4v4H4v-4zm6 0h4v4h-4v-4zm6 0h4v4h-4v-4z"/>
-          </svg>
-        </div>
+        <img 
+          src="/PixelsIcon.png" 
+          alt="Pixels" 
+          className="w-6 h-6 sm:w-7 sm:h-7 object-contain"
+        />
       ),
       color: 'from-indigo-500 to-indigo-600'
     },
@@ -224,32 +220,33 @@ const SurvivalSetupPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden">
-      {/* Background with diagonal stripes */}
-      <div className="absolute inset-0 bg-gradient-to-br from-yellow-500 via-yellow-600 to-orange-600">
-        {/* Diagonal black stripes */}
-        <div className="absolute inset-0" style={{
-          backgroundImage: `repeating-linear-gradient(
-            45deg,
-            transparent,
-            transparent 25px,
-            rgba(0, 0, 0, 0.35) 25px,
-            rgba(0, 0, 0, 0.35) 50px
-          )`
-        }} />
-      </div>
-
+    <div 
+      className="min-h-screen text-white flex flex-col relative home-background-overlay"
+      style={{
+        minHeight: '100dvh', // Dynamic viewport height for better mobile support
+        maxHeight: '100dvh',
+        overflow: 'auto'
+      }}
+    >
+      {/* Starfield overlay above background, below UI */}
+      <StarField shootingStars />
+      
       {/* Content */}
       <div className="relative z-10 min-h-screen flex flex-col p-4 sm:p-6">
         {/* Header */}
         <div className="flex items-center mb-6 sm:mb-8">
-          {/* Back button */}
+          {/* Custom SVG Back button */}
           <button
             onClick={() => navigate('/')}
-            className="bg-blue-600 hover:bg-blue-700 rounded-lg p-3 mr-4 transition-colors"
-            aria-label="Go back"
+            className="transition-all duration-200 transform hover:scale-110 active:scale-95 mr-4"
+            aria-label="Go back to home"
           >
-            <ArrowLeft className="h-5 w-5 text-white" />
+            <img
+              src="/Survival Pre-Game Screen/Back Button.svg"
+              alt="Back"
+              className="w-10 h-10 sm:w-12 sm:h-12"
+              style={{ pointerEvents: 'none' }}
+            />
           </button>
           
           {/* Title */}
@@ -310,33 +307,32 @@ const SurvivalSetupPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Bottom section */}
-        <div className="space-y-4">
-          {/* Timer info */}
-          <div className="flex items-center justify-center gap-2 text-white/90">
-            <Timer className="h-5 w-5" />
-            <span className="text-sm font-medium">150 seconds per round</span>
-          </div>
-          
-          {/* Play button */}
-          <div className="flex justify-center px-4">
-            <button
-              onClick={handleStartGame}
-              disabled={!isValidationPassed}
-              className={cn(
-                "bg-gradient-to-b from-yellow-400 to-yellow-600 text-black font-black text-xl py-3 px-20 rounded-lg shadow-lg transition-all transform w-full max-w-xs",
-                "hover:from-yellow-300 hover:to-yellow-500 hover:scale-105 active:scale-100",
-                !isValidationPassed && "opacity-50 cursor-not-allowed hover:scale-100"
-              )}
-              style={{
-                fontFamily: language === 'he' ? "'Abraham', sans-serif" : "'Lilita One', cursive",
-                textShadow: '2px 2px 4px rgba(0,0,0,0.4)',
-                boxShadow: '0 4px 8px rgba(0,0,0,0.3), inset 0 -2px 0 rgba(0,0,0,0.2)'
+        {/* Bottom section - SVG Start Button */}
+        <div className="flex justify-center px-4">
+          <button
+            onClick={handleStartGame}
+            disabled={!isValidationPassed}
+            className={cn(
+              "transition-all duration-200 transform",
+              "hover:scale-105 active:scale-95",
+              !isValidationPassed && "opacity-50 cursor-not-allowed hover:scale-100"
+            )}
+            aria-label={language === 'en' ? 'Start Game' : 'התחל משחק'}
+          >
+            {/* SVG Button with language switching */}
+            <img
+              src={language === 'en' 
+                ? '/Survival Pre-Game Screen/Pre-survival Start Button English.svg'
+                : '/Survival Pre-Game Screen/Pre-survival Start Button Hebrew.svg'
+              }
+              alt={language === 'en' ? 'Play - 150 seconds per round' : 'שחק - 150 שניות לסיבוב'}
+              className="w-full max-w-xs sm:max-w-sm h-auto"
+              style={{ 
+                filter: !isValidationPassed ? 'grayscale(0.3) brightness(0.7)' : 'none',
+                pointerEvents: 'none' // Prevent image from interfering with button clicks
               }}
-            >
-              PLAY
-            </button>
-          </div>
+            />
+          </button>
         </div>
       </div>
     </div>
