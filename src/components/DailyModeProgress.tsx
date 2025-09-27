@@ -22,14 +22,14 @@ const DailyModeProgress: React.FC<DailyModeProgressProps> = ({
   
   const modes = [
     { 
-      key: 'classic' as const, 
-      name: t('mode.classic'), 
-      state: classic,
-      iconSrc: '/ClassicIcon.png',
-      path: '/daily?mode=classic',
-      color: 'from-yellow-500 to-amber-600',
-      bgColor: 'bg-yellow-500/20',
-      borderColor: 'border-yellow-400/40'
+      key: 'pixels' as const, 
+      name: t('mode.pixels'), 
+      state: pixels,
+      iconSrc: '/PixelsIcon.png',
+      path: '/daily?mode=pixels',
+      color: 'from-indigo-500 to-blue-600',
+      bgColor: 'bg-indigo-500/20',
+      borderColor: 'border-indigo-400/40'
     },
     { 
       key: 'gadget' as const, 
@@ -62,14 +62,14 @@ const DailyModeProgress: React.FC<DailyModeProgressProps> = ({
       borderColor: 'border-emerald-400/40'
     },
     { 
-      key: 'pixels' as const, 
-      name: t('mode.pixels'), 
-      state: pixels,
-      iconSrc: '/PixelsIcon.png',
-      path: '/daily?mode=pixels',
-      color: 'from-indigo-500 to-blue-600',
-      bgColor: 'bg-indigo-500/20',
-      borderColor: 'border-indigo-400/40'
+      key: 'classic' as const, 
+      name: t('mode.classic'), 
+      state: classic,
+      iconSrc: '/ClassicIcon.png',
+      path: '/daily?mode=classic',
+      color: 'from-yellow-500 to-amber-600',
+      bgColor: 'bg-yellow-500/20',
+      borderColor: 'border-yellow-400/40'
     },
   ];
 

@@ -31,6 +31,7 @@ const BrawlerAutocomplete: React.FC<BrawlerAutocompleteProps> = ({
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const [filteredBrawlers, setFilteredBrawlers] = useState<Brawler[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [dropdownPosition, setDropdownPosition] = useState<'bottom' | 'top'>('bottom');
   const wrapperRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
@@ -38,6 +39,26 @@ const BrawlerAutocomplete: React.FC<BrawlerAutocompleteProps> = ({
   
   const currentLanguage = getLanguage();
   const { toast } = useToast();
+
+  // Calculate optimal dropdown position to avoid clipping
+  const calculateDropdownPosition = useCallback(() => {
+    if (!wrapperRef.current) return;
+    
+    const rect = wrapperRef.current.getBoundingClientRect();
+    const viewportHeight = window.innerHeight;
+    const dropdownHeight = 300; // max-height of dropdown
+    
+    // Check if dropdown would be clipped at bottom
+    const spaceBelow = viewportHeight - rect.bottom;
+    const spaceAbove = rect.top;
+    
+    // If there's not enough space below but there is above, position on top
+    if (spaceBelow < dropdownHeight && spaceAbove > dropdownHeight) {
+      setDropdownPosition('top');
+    } else {
+      setDropdownPosition('bottom');
+    }
+  }, []);
 
   // Centralized submission handler - prevents all duplicate submissions
   const handleSubmission = useCallback((brawler: Brawler, source: string) => {
@@ -112,12 +133,21 @@ const BrawlerAutocomplete: React.FC<BrawlerAutocompleteProps> = ({
         setIsOpen(false);
       }
     };
+
+    const handleScroll = () => {
+      if (isOpen) {
+        calculateDropdownPosition();
+      }
+    };
     
     document.addEventListener('mousedown', handleClickOutside);
+    window.addEventListener('scroll', handleScroll, true);
+    
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
+      window.removeEventListener('scroll', handleScroll, true);
     };
-  }, [wrapperRef]);
+  }, [wrapperRef, isOpen, calculateDropdownPosition]);
 
   useEffect(() => {
     if (value === '' && inputRef.current && !disabled) {
@@ -129,6 +159,7 @@ const BrawlerAutocomplete: React.FC<BrawlerAutocompleteProps> = ({
   
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onChange(e.target.value);
+    calculateDropdownPosition();
     setIsOpen(true);
   };
 
@@ -229,7 +260,7 @@ const BrawlerAutocomplete: React.FC<BrawlerAutocompleteProps> = ({
   }, [highlightedIndex]);
 
   return (
-    <div ref={wrapperRef} className="relative group w-full max-w-[320px] mx-auto sm:max-w-full">
+    <div ref={wrapperRef} className="relative group w-full max-w-[320px] mx-auto sm:max-w-full autocomplete-container">
       <div className="relative w-full">
         <div 
           className="absolute left-0 top-0 bottom-0 flex items-center justify-center w-12 bg-[#FFC107] rounded-l-2xl z-10 cursor-pointer hover:bg-[#FFD700] transition-colors duration-200"
@@ -262,7 +293,10 @@ const BrawlerAutocomplete: React.FC<BrawlerAutocompleteProps> = ({
           placeholder={t('search.brawlers')}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
-          onFocus={() => setIsOpen(true)}
+          onFocus={() => {
+            calculateDropdownPosition();
+            setIsOpen(true);
+          }}
           className={cn(
             "w-full pl-14 pr-12 py-4 h-12 text-base sm:text-lg font-medium",
             "bg-[#1A1A1A] text-white",
@@ -296,7 +330,8 @@ const BrawlerAutocomplete: React.FC<BrawlerAutocompleteProps> = ({
           id="brawler-list"
           role="listbox"
           className={cn(
-            "absolute z-[99999] w-full mt-2",
+            "absolute z-[99999] w-full",
+            dropdownPosition === 'top' ? 'mb-2 bottom-full' : 'mt-2 top-full',
             "bg-[#1A1A1A] backdrop-blur-sm",
             "border-2 border-[#FFC107] rounded-2xl shadow-2xl",
             "max-h-[300px] overflow-y-auto",

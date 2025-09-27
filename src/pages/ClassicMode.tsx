@@ -3,7 +3,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { t } from '@/lib/i18n';
-import { brawlers, Brawler } from '@/data/brawlers';
+import { brawlers, Brawler, getBrawlerDisplayName } from '@/data/brawlers';
 import BrawlerGuessRow from '@/components/BrawlerGuessRow';
 import BrawlerAutocomplete from '@/components/BrawlerAutocomplete';
 import { fetchDailyChallenge, getTimeUntilNextChallenge } from '@/lib/daily-challenges';
@@ -466,15 +466,15 @@ const ClassicMode = ({
       )}
       
       <div className="mb-2 flex flex-col">
-        {/* Attribute Discovery Card - only show in survival mode */}
+        {/* Attribute Discovery Card - only show in survival mode, using Daily Mode design */}
         {isSurvivalMode && (
           <div className="flex justify-center mb-6">
             <div className="w-64 h-64 md:w-72 md:h-72 rounded-3xl border-4 border-amber-500/60 bg-black/20 backdrop-blur-sm flex items-center justify-center overflow-hidden shadow-2xl">
-              <div className="flex flex-col justify-center p-3 w-full h-full">
-                <div className="flex flex-col gap-2 h-full justify-center">
+              <div className="flex flex-col justify-center p-2 w-full h-full">
+                <div className="flex flex-col gap-1.5 h-full justify-center">
                   {/* Rarity */}
                   <div className={cn(
-                    "flex-1 aspect-square flex items-center rounded-lg px-3 py-2 min-h-0",
+                    "flex-1 aspect-square flex items-center rounded-lg px-2 py-1.5 min-h-0",
                     discoveredAttributes.rarity 
                       ? "bg-green-500/20 border border-green-500/40" 
                       : "bg-gray-500/20 border border-gray-500/40"
@@ -484,10 +484,10 @@ const ClassicMode = ({
                       currentLanguage === 'he' ? "flex-row-reverse" : "flex-row"
                     )}>
                       <div className={cn(
-                        "text-xs font-medium",
+                        "text-[10px] font-medium",
                         discoveredAttributes.rarity ? "text-green-400" : "text-gray-400"
                       )}>{t('attribute.label.rarity')}</div>
-                      <div className="text-white text-sm font-bold">
+                      <div className="text-white text-xs font-bold">
                         {discoveredAttributes.rarity ? t(`rarity.${discoveredAttributes.rarity.toLowerCase().replace(' ', '.')}`) : '?'}
                       </div>
                     </div>
@@ -495,7 +495,7 @@ const ClassicMode = ({
                   
                   {/* Class */}
                   <div className={cn(
-                    "flex-1 aspect-square flex items-center rounded-lg px-3 py-2 min-h-0",
+                    "flex-1 aspect-square flex items-center rounded-lg px-2 py-1.5 min-h-0",
                     discoveredAttributes.class 
                       ? "bg-green-500/20 border border-green-500/40" 
                       : "bg-gray-500/20 border border-gray-500/40"
@@ -505,10 +505,10 @@ const ClassicMode = ({
                       currentLanguage === 'he' ? "flex-row-reverse" : "flex-row"
                     )}>
                       <div className={cn(
-                        "text-xs font-medium",
+                        "text-[10px] font-medium",
                         discoveredAttributes.class ? "text-green-400" : "text-gray-400"
                       )}>{t('attribute.label.class')}</div>
-                      <div className="text-white text-sm font-bold">
+                      <div className="text-white text-xs font-bold">
                         {discoveredAttributes.class || '?'}
                       </div>
                     </div>
@@ -516,7 +516,7 @@ const ClassicMode = ({
                   
                   {/* Range */}
                   <div className={cn(
-                    "flex-1 aspect-square flex items-center rounded-lg px-3 py-2 min-h-0",
+                    "flex-1 aspect-square flex items-center rounded-lg px-2 py-1.5 min-h-0",
                     discoveredAttributes.range 
                       ? "bg-green-500/20 border border-green-500/40" 
                       : "bg-gray-500/20 border border-gray-500/40"
@@ -526,10 +526,10 @@ const ClassicMode = ({
                       currentLanguage === 'he' ? "flex-row-reverse" : "flex-row"
                     )}>
                       <div className={cn(
-                        "text-xs font-medium",
+                        "text-[10px] font-medium",
                         discoveredAttributes.range ? "text-green-400" : "text-gray-400"
                       )}>{t('attribute.label.range')}</div>
-                      <div className="text-white text-sm font-bold">
+                      <div className="text-white text-xs font-bold">
                         {discoveredAttributes.range ? t(`range.${discoveredAttributes.range.toLowerCase().replace(' ', '.')}`) : '?'}
                       </div>
                     </div>
@@ -537,7 +537,7 @@ const ClassicMode = ({
                   
                   {/* Wall Break */}
                   <div className={cn(
-                    "flex-1 aspect-square flex items-center rounded-lg px-3 py-2 min-h-0",
+                    "flex-1 aspect-square flex items-center rounded-lg px-2 py-1.5 min-h-0",
                     discoveredAttributes.wallbreak !== null 
                       ? "bg-green-500/20 border border-green-500/40" 
                       : "bg-gray-500/20 border border-gray-500/40"
@@ -547,10 +547,10 @@ const ClassicMode = ({
                       currentLanguage === 'he' ? "flex-row-reverse" : "flex-row"
                     )}>
                       <div className={cn(
-                        "text-[10px] font-medium",
+                        "text-[9px] font-medium",
                         discoveredAttributes.wallbreak !== null ? "text-green-400" : "text-gray-400"
                       )}>{t('attribute.label.wallbreak')}</div>
-                      <div className="text-white text-sm font-bold">
+                      <div className="text-white text-xs font-bold">
                         {discoveredAttributes.wallbreak !== null ? t(`wallbreak.${discoveredAttributes.wallbreak ? 'yes' : 'no'}`) : '?'}
                       </div>
                     </div>
@@ -558,7 +558,7 @@ const ClassicMode = ({
                   
                   {/* Release Year */}
                   <div className={cn(
-                    "flex-1 aspect-square flex items-center rounded-lg px-3 py-2 min-h-0",
+                    "flex-1 aspect-square flex items-center rounded-lg px-2 py-1.5 min-h-0",
                     discoveredAttributes.releaseYear 
                       ? "bg-green-500/20 border border-green-500/40" 
                       : "bg-gray-500/20 border border-gray-500/40"
@@ -568,10 +568,10 @@ const ClassicMode = ({
                       currentLanguage === 'he' ? "flex-row-reverse" : "flex-row"
                     )}>
                       <div className={cn(
-                        "text-xs font-medium",
+                        "text-[10px] font-medium",
                         discoveredAttributes.releaseYear ? "text-green-400" : "text-gray-400"
                       )}>{t('attribute.label.year')}</div>
-                      <div className="text-white text-sm font-bold">
+                      <div className="text-white text-xs font-bold">
                         {discoveredAttributes.releaseYear || '?'}
                       </div>
                     </div>
@@ -582,42 +582,68 @@ const ClassicMode = ({
           </div>
         )}
         
-        <div className="mb-2">
-          <form className="space-y-2">
-            <div className="w-full max-w-md mx-auto">
-              <BrawlerAutocomplete
-                brawlers={availableBrawlers}
-                value={inputValue}
-                onChange={setInputValue}
-                onSelect={handleSelectBrawler}
-                onSubmit={handleSubmit}
-                disabled={isGameOver}
-                disabledBrawlers={guessedBrawlerNames}
-              />
-            </div>
-            
-            {/* Guess Button - only show when not in survival mode */}
-            {!isSurvivalMode && (
-            <Button 
-              type="submit" 
-              disabled={!selectedBrawler || isGameOver}
-              className={cn(
-                "w-full bg-gradient-to-r from-amber-600 to-pink-600 hover:from-amber-500 hover:to-pink-500 border-none",
-                (!selectedBrawler || isGameOver) && "opacity-50 cursor-not-allowed"
-              )}
+        {/* Search Bar - Match Daily Mode exactly for survival mode */}
+        {isSurvivalMode ? (
+          <div className="daily-mode-input-section mb-8 w-full max-w-md mx-auto">
+            <BrawlerAutocomplete
+              brawlers={availableBrawlers}
+              value={inputValue}
+              onChange={setInputValue}
+              onSelect={handleSelectBrawler}
+              onSubmit={handleSubmit}
+              disabled={isGameOver}
+              disabledBrawlers={guessedBrawlerNames}
+            />
+          </div>
+        ) : (
+          <div className="mb-2">
+            <form className="space-y-2">
+              <div className="w-full max-w-md mx-auto">
+                <BrawlerAutocomplete
+                  brawlers={availableBrawlers}
+                  value={inputValue}
+                  onChange={setInputValue}
+                  onSelect={handleSelectBrawler}
+                  onSubmit={handleSubmit}
+                  disabled={isGameOver}
+                  disabledBrawlers={guessedBrawlerNames}
+                />
+              </div>
+              
+              <Button 
+                type="submit" 
+                disabled={!selectedBrawler || isGameOver}
+                className={cn(
+                  "w-full bg-gradient-to-r from-amber-600 to-pink-600 hover:from-amber-500 hover:to-pink-500 border-none",
+                  (!selectedBrawler || isGameOver) && "opacity-50 cursor-not-allowed"
+                )}
+              >
+                Guess
+              </Button>
+            </form>
+          </div>
+        )}
+
+        {/* Guess Counter - Daily Mode style for survival mode */}
+        {isSurvivalMode && (
+          <div className="flex justify-center mb-4">
+            <motion.div 
+              className="daily-mode-guess-counter flex items-center"
+              initial={motionOK ? { opacity: 0, y: 10 } : { opacity: 1 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={transition}
             >
-              Guess
-            </Button>
-            )}
-          </form>
-          
-          {/* Guess Counter - only show in survival mode */}
-          {isSurvivalMode && (
-            <div className="w-full flex justify-center gap-4 mt-2">
-              <GuessCounter isSurvivalMode={true} guessCount={guessCount} maxGuesses={maxGuesses} />
-            </div>
-          )}
-        </div>
+              <span className="font-bold text-sm mr-1">#</span>
+              <div className={cn(
+                "font-bold text-sm",
+                guessesLeft <= 3 ? "text-red-300" : "text-white"
+              )}>
+                <SlidingNumber value={guessesLeft} />
+              </div>
+              <span className="text-white/90 ml-1 text-sm">{t('guesses.left')}</span>
+            </motion.div>
+          </div>
+        )}
         
         <div className={gridWidthClass}>
           <div className="w-full rounded-lg overflow-hidden flex flex-col">
@@ -640,75 +666,159 @@ const ClassicMode = ({
             )}
             
             
-            {/* Detailed Attribute Comparison Grid - Match Daily Style */}
-            {guesses.length > 0 && (
-              <div className="mt-8">
-                <div className="space-y-3">
-                  {/* Header Row */}
-                  <div className="grid grid-cols-6 gap-2 text-center text-white/60 text-sm font-medium mb-2">
-                    <div className="border-b border-white/20 pb-1">{t('attribute.label.brawler')}</div>
-                    <div className="border-b border-white/20 pb-1">{t('attribute.label.rarity')}</div>
-                    <div className="border-b border-white/20 pb-1">{t('attribute.label.class')}</div>
-                    <div className="border-b border-white/20 pb-1">{t('attribute.label.range')}</div>
-                    <div className="border-b border-white/20 pb-1 text-[10px]">{t('attribute.label.wallbreak')}</div>
-                    <div className="border-b border-white/20 pb-1">{t('attribute.label.year')}</div>
-                  </div>
-                  
-                  {/* Guess Rows */}
-                  <AnimatePresence initial={false} mode="popLayout">
+{/* Guesses Section - Different for Daily vs Survival */}
+            {isSurvivalMode ? (
+              /* Simple Guesses Grid for Survival Mode - Match Daily Mode exactly */
+              guesses.length > 0 && (
+                <div className="daily-mode-guesses-section">
+                  <motion.div className="daily-mode-guesses-grid" layout>
                     {guesses.map((guess, index) => {
-                      const isNewest = index === 0; // Newest is first in array
-                      return (
-                        <motion.div
-                          key={`${guess.name}-${guesses.length - index}`}
-                          initial={motionOK && isNewest ? { 
-                            opacity: 0, 
-                            y: 60,
-                            scale: 0.95,
-                            filter: "blur(4px)"
-                          } : { opacity: 0 }}
-                          animate={{
-                            opacity: 1,
-                            y: 0,
-                            scale: 1,
-                            filter: "blur(0px)",
-                            transition: {
+                      const isCorrect = guess.name.toLowerCase() === getCorrectBrawler().name.toLowerCase();
+                      const portraitSrc = getPortrait(guess.name) || DEFAULT_PORTRAIT;
+                      const isNewest = index === 0; // The newest guess is always at index 0
+                      
+                      if (isNewest) {
+                        // Only the newest guess gets entrance animation
+                        return (
+                          <motion.div
+                            key={guess.name} // Use stable key based on name, not index
+                            initial={motionOK ? { 
+                              opacity: 0, 
+                              scale: 0.8,
+                              y: -20,
+                              filter: "blur(3px)"
+                            } : { opacity: 0 }}
+                            animate={{
+                              opacity: 1,
+                              scale: 1,
+                              y: 0,
+                              filter: "blur(0px)",
+                              transition: {
+                                type: "spring",
+                                stiffness: 300,
+                                damping: 25,
+                                mass: 0.8
+                              }
+                            }}
+                            layout
+                            className={cn(
+                              "daily-mode-guess-item",
+                              isCorrect ? "daily-mode-guess-correct" : "daily-mode-guess-incorrect"
+                            )}
+                          >
+                            <img
+                              src={portraitSrc}
+                              alt={guess.name}
+                              className="daily-mode-guess-portrait"
+                            />
+                            <span className="daily-mode-guess-name">
+                              {getBrawlerDisplayName(guess, currentLanguage)}
+                            </span>
+                          </motion.div>
+                        );
+                      } else {
+                        // Existing guesses just get layout animations for repositioning
+                        return (
+                          <motion.div
+                            key={guess.name} // Stable key
+                            layout
+                            transition={{
                               type: "spring",
                               stiffness: 400,
                               damping: 30,
-                              mass: 0.8,
-                              duration: 0.6
-                            }
-                          }}
-                          exit={{ 
-                            opacity: 0, 
-                            scale: 0.95,
-                            y: -20,
-                            transition: { duration: 0.3, ease: "easeInOut" }
-                          }}
-                          layout
-                          transition={{
-                            layout: {
-                              type: "spring",
-                              stiffness: 400,
-                              damping: 30,
-                              mass: 0.8
-                            }
-                          }}
-                        >
-                          <BrawlerGuessRow
-                            guess={guess}
-                            correctAnswer={correctBrawler}
-                            isMobile={window.innerWidth < 768}
-                            gridTemplateClass="grid-cols-6"
-                            isNew={index === 0}
-                          />
-                        </motion.div>
-                      );
+                              mass: 0.6
+                            }}
+                            className={cn(
+                              "daily-mode-guess-item",
+                              isCorrect ? "daily-mode-guess-correct" : "daily-mode-guess-incorrect"
+                            )}
+                          >
+                            <img
+                              src={portraitSrc}
+                              alt={guess.name}
+                              className="daily-mode-guess-portrait"
+                            />
+                            <span className="daily-mode-guess-name">
+                              {getBrawlerDisplayName(guess, currentLanguage)}
+                            </span>
+                          </motion.div>
+                        );
+                      }
                     })}
-                  </AnimatePresence>
+                  </motion.div>
                 </div>
-              </div>
+              )
+            ) : (
+              /* Detailed Attribute Comparison Grid for Daily Mode */
+              guesses.length > 0 && (
+                <div className="mt-8">
+                  <div className="space-y-3">
+                    {/* Header Row - Daily Mode style with smaller text */}
+                    <div className="grid grid-cols-6 gap-2 text-center text-white/60 text-xs font-medium mb-2">
+                      <div className="border-b border-white/20 pb-1">{t('attribute.label.brawler')}</div>
+                      <div className="border-b border-white/20 pb-1">{t('attribute.label.rarity')}</div>
+                      <div className="border-b border-white/20 pb-1">{t('attribute.label.class')}</div>
+                      <div className="border-b border-white/20 pb-1">{t('attribute.label.range')}</div>
+                      <div className="border-b border-white/20 pb-1 text-[9px]">{t('attribute.label.wallbreak')}</div>
+                      <div className="border-b border-white/20 pb-1">{t('attribute.label.year')}</div>
+                    </div>
+                    
+                    {/* Guess Rows */}
+                    <AnimatePresence initial={false} mode="popLayout">
+                      {guesses.map((guess, index) => {
+                        const isNewest = index === 0; // Newest is first in array
+                        return (
+                          <motion.div
+                            key={`${guess.name}-${guesses.length - index}`}
+                            initial={motionOK && isNewest ? { 
+                              opacity: 0, 
+                              y: 60,
+                              scale: 0.95,
+                              filter: "blur(4px)"
+                            } : { opacity: 0 }}
+                            animate={{
+                              opacity: 1,
+                              y: 0,
+                              scale: 1,
+                              filter: "blur(0px)",
+                              transition: {
+                                type: "spring",
+                                stiffness: 400,
+                                damping: 30,
+                                mass: 0.8,
+                                duration: 0.6
+                              }
+                            }}
+                            exit={{ 
+                              opacity: 0, 
+                              scale: 0.95,
+                              y: -20,
+                              transition: { duration: 0.3, ease: "easeInOut" }
+                            }}
+                            layout
+                            transition={{
+                              layout: {
+                                type: "spring",
+                                stiffness: 400,
+                                damping: 30,
+                                mass: 0.8
+                              }
+                            }}
+                          >
+                            <BrawlerGuessRow
+                              guess={guess}
+                              correctAnswer={correctBrawler}
+                              isMobile={window.innerWidth < 768}
+                              gridTemplateClass="grid-cols-6"
+                              isNew={index === 0}
+                            />
+                          </motion.div>
+                        );
+                      })}
+                    </AnimatePresence>
+                  </div>
+                </div>
+              )
             )}
           </div>
         </div>

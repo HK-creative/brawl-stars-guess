@@ -5,25 +5,22 @@ import { toast } from '@/hooks/use-toast';
 import { useDailyStore, DailyGameMode } from '@/stores/useDailyStore';
 import { useStreak } from '@/contexts/StreakContext';
 import { brawlers, getBrawlerDisplayName, getBrawlerLocalizedName } from '@/data/brawlers';
-import { getPortrait } from '@/lib/image-helpers';
+import { getPortrait, DEFAULT_PORTRAIT } from '@/lib/image-helpers';
 import BrawlerAutocomplete from '@/components/BrawlerAutocomplete';
 import ReactConfetti from 'react-confetti';
 import { fetchDailyChallenge, fetchYesterdayChallenge } from '@/lib/daily-challenges';
 import { t, getLanguage } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
+import Image from '@/components/ui/image';
 import PrimaryButton from '@/components/ui/primary-button';
 import SecondaryButton from '@/components/ui/secondary-button';
 import ModeTitle from '@/components/ModeTitle';
 import DailyModeProgress from '@/components/DailyModeProgress';
-
-import Image from '@/components/ui/image';
-import usePageTitle from '@/hooks/usePageTitle';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useMotionPrefs } from '@/hooks/useMotionPrefs';
 import { SlidingNumber } from '@/components/ui/sliding-number';
-
-
-const DEFAULT_PORTRAIT = '/portraits/shelly.png';
+import AnimatedElement from '@/components/ui/animated-element';
+import usePageTitle from '@/hooks/usePageTitle';
 
 // Helper to get star power image path with fallback variants
 const getStarPowerImageVariants = (brawler: string, starPowerName?: string): string[] => {
@@ -346,37 +343,104 @@ const DailyStarPowerModeContent: React.FC<DailyStarPowerModeContentProps> = ({ o
         >
           <div className="daily-mode-card-content">
             {showVictoryScreen ? (
-              // Victory Screen
-              <div className="daily-mode-victory-section">
-                <h2 className="daily-mode-victory-title">
-                  GG EZ
-                </h2>
-                <p className="daily-mode-victory-text">
-                  {t('daily.you.found')} <span className="font-bold" style={{ color: 'hsla(var(--daily-mode-primary), 1)' }}>{getBrawlerDisplayName(getCorrectBrawler(), currentLanguage)}</span> {t('daily.in.guesses')} {starpower.guessCount} {t('daily.guesses.count')}
-                </p>
-                
-                <div className="flex flex-col gap-6 items-center">
-                  <SecondaryButton
-                    onClick={() => navigate('/')}
-                  >
-                    {t('daily.go.home')}
-                  </SecondaryButton>
-                  <PrimaryButton
-                    onClick={handleNextMode}
-                    className="px-8 py-3"
-                  >
-                    <img 
-                      src="/AudioIcon.png" 
-                      alt="Audio Mode" 
-                      className={cn(
-                        "h-6 w-6",
-                        currentLanguage === 'he' ? "ml-2" : "mr-2"
-                      )}
-                    />
-                    {t('daily.next.mode')}
-                  </PrimaryButton>
+              // Redesigned Victory Screen
+              <AnimatedElement type="fade" delay={0} className="daily-mode-victory-section">
+                <div className="victory-container">
+                  {/* Success Icon & Title */}
+                  <AnimatedElement type="scale" delay={0.1} className="victory-header">
+                    <div className="success-icon-container">
+                      <div className="success-icon">
+                        <svg className="checkmark" viewBox="0 0 52 52">
+                          <circle className="checkmark-circle" cx="26" cy="26" r="25" fill="none"/>
+                          <path className="checkmark-check" fill="none" d="m15.5,26.5l7.5,7.5l13.5,-13.5"/>
+                        </svg>
+                      </div>
+                    </div>
+                    <h2 className="victory-title">
+                      {t('daily.victory.title')}
+                    </h2>
+                  </AnimatedElement>
+
+                  {/* Brawler & Performance Stats */}
+                  <AnimatedElement type="slideUp" delay={0.2} className="victory-stats">
+                    <div className="found-brawler">
+                      <div className="brawler-portrait">
+                        <Image 
+                          src={getPortrait(getCorrectBrawler().name)} 
+                          alt={getBrawlerDisplayName(getCorrectBrawler(), currentLanguage)}
+                          className="portrait-image"
+                          fallbackSrc={DEFAULT_PORTRAIT}
+                        />
+                      </div>
+                      <div className="brawler-info">
+                        <p className="found-text">{t('daily.you.found')}</p>
+                        <h3 className="brawler-name">
+                          {getBrawlerDisplayName(getCorrectBrawler(), currentLanguage)}
+                        </h3>
+                      </div>
+                    </div>
+
+                    <div className="performance-grid">
+                      <div className="stat-card guess-count">
+                        <div className="stat-icon">🎯</div>
+                        <div className="stat-value">
+                          <SlidingNumber value={starpower.guessCount} />
+                        </div>
+                        <div className="stat-label">{t('daily.guesses.used')}</div>
+                      </div>
+                      
+                      <div className="stat-card accuracy">
+                        <div className="stat-icon">📈</div>
+                        <div className="stat-value">
+                          {Math.round((1 / starpower.guessCount) * 100)}%
+                        </div>
+                        <div className="stat-label">{t('daily.accuracy')}</div>
+                      </div>
+                      
+                      <div className="stat-card streak">
+                        <div className="stat-icon">🔥</div>
+                        <div className="stat-value">
+                          <SlidingNumber value={streak} />
+                        </div>
+                        <div className="stat-label">{t('daily.streak')}</div>
+                      </div>
+                    </div>
+                  </AnimatedElement>
+
+                  {/* Action Buttons */}
+                  <AnimatedElement type="slideUp" delay={0.3} className="victory-actions">
+                    <div className="action-buttons">
+                      <PrimaryButton
+                        onClick={handleNextMode}
+                        className="next-mode-btn"
+                      >
+                        <img 
+                          src="/AudioIcon.png" 
+                          alt="Audio Mode" 
+                          className={cn(
+                            "btn-icon",
+                            currentLanguage === 'he' ? "ml-2" : "mr-2"
+                          )}
+                        />
+                        {t('daily.next.mode')}
+                        <div className="btn-arrow">→</div>
+                      </PrimaryButton>
+                      
+                      <div className="secondary-actions">
+                        <SecondaryButton
+                          onClick={() => navigate('/')}
+                          className="home-btn"
+                        >
+                          <svg className="home-icon" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+                          </svg>
+                          {t('daily.go.home')}
+                        </SecondaryButton>
+                      </div>
+                    </div>
+                  </AnimatedElement>
                 </div>
-              </div>
+              </AnimatedElement>
             ) : (
               // Game Content
               <div className="daily-mode-game-area">
@@ -427,46 +491,85 @@ const DailyStarPowerModeContent: React.FC<DailyStarPowerModeContentProps> = ({ o
                 </div>
 
                 {/* Guesses Grid */}
-                {guesses.length > 0 && (
-                  <div className="daily-mode-guesses-section">
-                    <div className="daily-mode-guesses-grid">
-                      <AnimatePresence initial={false}>
-                        {guesses.map((guess, index) => {
-                          const isCorrect = guess.name.toLowerCase() === getCorrectBrawler().name.toLowerCase();
-                          const portraitSrc = getPortrait(guess.name) || DEFAULT_PORTRAIT;
-                          
-                          return (
-                            <motion.div
-                              key={`${guess.name}-${index}`}
-                              initial={motionOK ? { opacity: 0, y: 8, x: isRTL ? 8 : -8 } : { opacity: 0 }}
-                              animate={{
-                                opacity: 1,
-                                y: 0,
-                                x: 0,
-                                transition: { ...transition, delay: motionOK ? Math.min(index * 0.04, 0.3) : 0 },
-                              }}
-                              exit={{ opacity: 0, y: -4, x: 0, transition }}
-                              layout
-                              className={cn(
-                                "daily-mode-guess-item",
-                                isCorrect ? "daily-mode-guess-correct" : "daily-mode-guess-incorrect"
-                              )}
-                            >
-                              <img
-                                src={portraitSrc}
-                                alt={guess.name}
-                                className="daily-mode-guess-portrait"
-                              />
-                              <span className="daily-mode-guess-name">
-                                {getBrawlerDisplayName(guess, currentLanguage)}
-                              </span>
-                            </motion.div>
-                          );
-                        })}
-                      </AnimatePresence>
-                    </div>
-                  </div>
-                )}
+              {guesses.length > 0 && (
+                <div className="daily-mode-guesses-section">
+                  <motion.div className="daily-mode-guesses-grid" layout>
+                    {guesses.map((guess, index) => {
+                      const isCorrect = guess.name.toLowerCase() === getCorrectBrawler().name.toLowerCase();
+                      const portraitSrc = getPortrait(guess.name) || DEFAULT_PORTRAIT;
+                      const isNewest = index === 0; // The newest guess is always at index 0
+                      
+                      if (isNewest) {
+                        // Only the newest guess gets entrance animation
+                        return (
+                          <motion.div
+                            key={guess.name} // Use stable key based on name, not index
+                            initial={motionOK ? { 
+                              opacity: 0, 
+                              scale: 0.8,
+                              y: -20,
+                              filter: "blur(3px)"
+                            } : { opacity: 0 }}
+                            animate={{
+                              opacity: 1,
+                              scale: 1,
+                              y: 0,
+                              filter: "blur(0px)",
+                              transition: {
+                                type: "spring",
+                                stiffness: 300,
+                                damping: 25,
+                                mass: 0.8
+                              }
+                            }}
+                            layout
+                            className={cn(
+                              "daily-mode-guess-item",
+                              isCorrect ? "daily-mode-guess-correct" : "daily-mode-guess-incorrect"
+                            )}
+                          >
+                            <img
+                              src={portraitSrc}
+                              alt={guess.name}
+                              className="daily-mode-guess-portrait"
+                            />
+                            <span className="daily-mode-guess-name">
+                              {getBrawlerDisplayName(guess, currentLanguage)}
+                            </span>
+                          </motion.div>
+                        );
+                      } else {
+                        // Existing guesses just get layout animations for repositioning
+                        return (
+                          <motion.div
+                            key={guess.name} // Stable key
+                            layout
+                            transition={{
+                              type: "spring",
+                              stiffness: 400,
+                              damping: 30,
+                              mass: 0.6
+                            }}
+                            className={cn(
+                              "daily-mode-guess-item",
+                              isCorrect ? "daily-mode-guess-correct" : "daily-mode-guess-incorrect"
+                            )}
+                          >
+                            <img
+                              src={portraitSrc}
+                              alt={guess.name}
+                              className="daily-mode-guess-portrait"
+                            />
+                            <span className="daily-mode-guess-name">
+                              {getBrawlerDisplayName(guess, currentLanguage)}
+                            </span>
+                          </motion.div>
+                        );
+                      }
+                    })}
+                  </motion.div>
+                </div>
+              )}
 
                 {/* Yesterday's Brawler */}
                 {yesterdayData && (

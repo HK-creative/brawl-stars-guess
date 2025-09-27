@@ -20,14 +20,14 @@ const DailyModesPage: React.FC = () => {
   
   // Determine current mode from URL
   const getCurrentModeFromUrl = (): DailyGameMode => {
-    // Check query parameter first (?mode=classic)
+    // Check query parameter first (?mode=pixels)
     const modeParam = searchParams.get('mode') as DailyGameMode;
     if (modeParam && ['classic', 'gadget', 'starpower', 'audio', 'pixels'].includes(modeParam)) {
       return modeParam;
     }
     
-    // Default to classic
-    return 'classic';
+    // Default to pixels (now first mode)
+    return 'pixels';
   };
   
   const [currentMode, setCurrentMode] = useState<DailyGameMode>(getCurrentModeFromUrl);

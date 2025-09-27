@@ -251,29 +251,51 @@ const Index = () => {
             {/* Language toggle - show only active language */}
           <button
             onClick={() => changeLanguage(language === 'en' ? 'he' : 'en')}
+            onTouchStart={() => {}} // Ensures touch events are properly handled on mobile
             aria-label={language === 'en' ? 'Switch to Hebrew' : 'Switch to English'}
             title={language === 'en' ? 'Switch to Hebrew' : 'Switch to English'}
             style={{
-              width: isMobile ? '32px' : '40px',
-              height: isMobile ? '32px' : '40px',
+              // Increased minimum touch target size for better mobile accessibility
+              width: isMobile ? '44px' : '40px', // Increased from 32px to 44px on mobile
+              height: isMobile ? '44px' : '40px', // Increased from 32px to 44px on mobile
+              minWidth: '44px', // iOS Human Interface Guidelines minimum
+              minHeight: '44px', // iOS Human Interface Guidelines minimum
               background: 'transparent',
               border: 'none',
-              padding: 0,
-              display: 'inline-block',
+              padding: isMobile ? '6px' : '0', // Added padding on mobile for better touch area
+              display: 'inline-flex', // Changed to flex for better centering
+              alignItems: 'center',
+              justifyContent: 'center',
               cursor: 'pointer',
               borderRadius: '8px',
               boxShadow: isMobile ? '0 0 0 1px rgba(255,255,255,0.65)' : '0 0 0 2px rgba(255,255,255,0.55)',
-              transition: 'box-shadow 120ms ease, transform 120ms ease'
+              transition: 'box-shadow 120ms ease, transform 120ms ease, background-color 120ms ease',
+              // Better mobile touch feedback
+              WebkitTapHighlightColor: 'rgba(255, 255, 255, 0.1)',
+              WebkitUserSelect: 'none',
+              userSelect: 'none',
+              // Ensure proper z-index for touch events
+              position: 'relative',
+              zIndex: 10
             }}
-            className="hover:scale-105"
+            className={cn(
+              "hover:scale-105 active:scale-95", // Added active state for touch feedback
+              isMobile && "active:bg-white/10" // Background feedback on mobile
+            )}
           >
             <Image
               src={language === 'en' ? '/NewDailyUI/united-states-icon.png' : '/NewDailyUI/israel-icon.png'}
               alt={language === 'en' ? 'English' : 'Hebrew'}
-              width={20}
-              height={20}
+              width={isMobile ? 24 : 20} // Slightly larger icon on mobile
+              height={isMobile ? 24 : 20}
               className="select-none pointer-events-none"
-              style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+              style={{ 
+                width: isMobile ? '24px' : '100%', 
+                height: isMobile ? '24px' : '100%', 
+                objectFit: 'contain',
+                // Ensure the image doesn't interfere with touch events
+                touchAction: 'none'
+              }}
             />
           </button>
 

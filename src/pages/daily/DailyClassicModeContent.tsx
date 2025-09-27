@@ -5,12 +5,14 @@ import { toast } from '@/hooks/use-toast';
 import { useDailyStore, DailyGameMode } from '@/stores/useDailyStore';
 import { useStreak } from '@/contexts/StreakContext';
 import { brawlers, getBrawlerDisplayName, getBrawlerLocalizedName } from '@/data/brawlers';
+import { getPortrait, DEFAULT_PORTRAIT } from '@/lib/image-helpers';
 import BrawlerAutocomplete from '@/components/BrawlerAutocomplete';
 import BrawlerGuessRow from '@/components/BrawlerGuessRow';
 import ReactConfetti from 'react-confetti';
 import { fetchDailyChallenge, fetchYesterdayChallenge } from '@/lib/daily-challenges';
 import { t, getLanguage } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
+import Image from '@/components/ui/image';
 import PrimaryButton from '@/components/ui/primary-button';
 import SecondaryButton from '@/components/ui/secondary-button';
 import ModeTitle from '@/components/ModeTitle';
@@ -18,6 +20,7 @@ import DailyModeProgress from '@/components/DailyModeProgress';
 import { motion, AnimatePresence } from 'framer-motion';
 import { SlidingNumber } from '@/components/ui/sliding-number';
 import { useMotionPrefs } from '@/hooks/useMotionPrefs';
+import AnimatedElement from '@/components/ui/animated-element';
 
 
 interface DailyClassicModeContentProps {
@@ -171,9 +174,9 @@ const DailyClassicModeContent: React.FC<DailyClassicModeContentProps> = ({ onMod
     setIsSubmitting(false);
   }, [selectedBrawler, classic.guesses, submitGuess, completeMode, currentLanguage, getCorrectBrawler]);
 
-  // Handle next mode navigation
+  // Handle next mode navigation (back to pixels - start of cycle)
   const handleNextMode = () => {
-    onModeChange('gadget');
+    onModeChange('pixels');
   };
 
   // Handle play again
@@ -238,9 +241,9 @@ const DailyClassicModeContent: React.FC<DailyClassicModeContentProps> = ({ onMod
           <DailyModeProgress currentMode="classic" className="mb-6 mt-1" onModeChange={onModeChange} />
 
           {/* Title */}
-          <div className="text-center mb-2 mt-2">
+          <AnimatedElement type="slideUp" delay={0} className="text-center mb-2 mt-2">
             <ModeTitle title={t('mode.classic')} />
-          </div>
+          </AnimatedElement>
         </div>
       )}
 
@@ -254,43 +257,345 @@ const DailyClassicModeContent: React.FC<DailyClassicModeContentProps> = ({ onMod
         >
           <div className="daily-mode-card-content">
             {showVictoryScreen ? (
-              // Victory Screen
-              <div className="daily-mode-victory-section">
-                <h2 className="daily-mode-victory-title">
-                  GG EZ
-                </h2>
-                <p className="daily-mode-victory-text">
-                  {t('daily.you.found')} <span className="font-bold" style={{ color: 'hsla(var(--daily-mode-primary), 1)' }}>{getBrawlerDisplayName(getCorrectBrawler(), currentLanguage)}</span> {t('daily.in.guesses')} {classic.guessCount} {t('daily.guesses.count')}
-                </p>
-                
-                <div className="flex flex-col gap-6 items-center">
-                  <PrimaryButton
-                    onClick={handleNextMode}
-                    className="px-8 py-3"
-                  >
-                    <img 
-                      src="/GadgetIcon.png" 
-                      alt="Gadget Mode" 
-                      className={cn(
-                        "h-6 w-6",
-                        currentLanguage === 'he' ? "ml-2" : "mr-2"
-                      )}
-                    />
-                    {t('daily.next.mode')}
-                  </PrimaryButton>
-                  
-                  <SecondaryButton
-                    onClick={() => navigate('/')}
-                  >
-                    {t('daily.go.home')}
-                  </SecondaryButton>
+              // Redesigned Victory Screen
+              <AnimatedElement type="fade" delay={0} className="daily-mode-victory-section">
+                <div className="victory-container">
+                  {/* Success Icon & Title */}
+                  <AnimatedElement type="scale" delay={0.1} className="victory-header">
+                    <div className="success-icon-container">
+                      <div className="success-icon">
+                        <svg className="checkmark" viewBox="0 0 52 52">
+                          <circle className="checkmark-circle" cx="26" cy="26" r="25" fill="none"/>
+                          <path className="checkmark-check" fill="none" d="m15.5,26.5l7.5,7.5l13.5,-13.5"/>
+                        </svg>
+                      </div>
+                    </div>
+                    <h2 className="victory-title">
+                      {t('daily.victory.title')}
+                    </h2>
+                  </AnimatedElement>
+
+                  {/* Brawler & Performance Stats */}
+                  <AnimatedElement type="slideUp" delay={0.2} className="victory-stats">
+                    <div className="found-brawler">
+                      <div className="brawler-portrait">
+                        <Image 
+                          src={getPortrait(getCorrectBrawler().name)} 
+                          alt={getBrawlerDisplayName(getCorrectBrawler(), currentLanguage)}
+                          className="portrait-image"
+                          fallbackSrc={DEFAULT_PORTRAIT}
+                        />
+                      </div>
+                      <div className="brawler-info">
+                        <p className="found-text">{t('daily.you.found')}</p>
+                        <h3 className="brawler-name">
+                          {getBrawlerDisplayName(getCorrectBrawler(), currentLanguage)}
+                        </h3>
+                      </div>
+                    </div>
+
+                    <div className="performance-grid">
+                      <div className="stat-card guess-count">
+                        <div className="stat-icon">🎯</div>
+                        <div className="stat-value">
+                          <SlidingNumber value={classic.guessCount} />
+                        </div>
+                        <div className="stat-label">{t('daily.guesses.used')}</div>
+                      </div>
+                      
+                      <div className="stat-card accuracy">
+                        <div className="stat-icon">📈</div>
+                        <div className="stat-value">
+                          {Math.round((1 / classic.guessCount) * 100)}%
+                        </div>
+                        <div className="stat-label">{t('daily.accuracy')}</div>
+                      </div>
+                      
+                      <div className="stat-card streak">
+                        <div className="stat-icon">🔥</div>
+                        <div className="stat-value">
+                          <SlidingNumber value={streak} />
+                        </div>
+                        <div className="stat-label">{t('daily.streak')}</div>
+                      </div>
+                    </div>
+                  </AnimatedElement>
+
+                  {/* Action Buttons */}
+                  <AnimatedElement type="slideUp" delay={0.3} className="victory-actions">
+                    <div className="action-buttons">
+                      <PrimaryButton
+                        onClick={handleNextMode}
+                        className="next-mode-btn"
+                      >
+                        <img 
+                          src="/PixelsIcon.png" 
+                          alt="Pixels Mode" 
+                          className={cn(
+                            "btn-icon",
+                            currentLanguage === 'he' ? "ml-2" : "mr-2"
+                          )}
+                        />
+                        {t('daily.next.mode')}
+                        <div className="btn-arrow">→</div>
+                      </PrimaryButton>
+                      
+                      <div className="secondary-actions">
+                        <SecondaryButton
+                          onClick={() => navigate('/')}
+                          className="home-btn"
+                        >
+                          <svg className="home-icon" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+                          </svg>
+                          {t('daily.go.home')}
+                        </SecondaryButton>
+                      </div>
+                    </div>
+                  </AnimatedElement>
                 </div>
-              </div>
+
+                <style>{`
+                  .victory-container {
+                    padding: 2rem 1.5rem;
+                    text-align: center;
+                    max-width: 400px;
+                    margin: 0 auto;
+                  }
+
+                  .victory-header {
+                    margin-bottom: 2rem;
+                  }
+
+                  .success-icon-container {
+                    margin-bottom: 1rem;
+                  }
+
+                  .success-icon {
+                    width: 80px;
+                    height: 80px;
+                    margin: 0 auto;
+                    position: relative;
+                  }
+
+                  .checkmark {
+                    width: 80px;
+                    height: 80px;
+                    border-radius: 50%;
+                    display: block;
+                    stroke-width: 3;
+                    stroke: #4ade80;
+                    stroke-miterlimit: 10;
+                    box-shadow: inset 0px 0px 0px #4ade80;
+                    animation: fill 0.4s ease-in-out 0.4s forwards, scale 0.3s ease-in-out 0.9s both;
+                  }
+
+                  .checkmark-circle {
+                    stroke-dasharray: 166;
+                    stroke-dashoffset: 166;
+                    stroke-width: 3;
+                    stroke-miterlimit: 10;
+                    stroke: #4ade80;
+                    fill: none;
+                    animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+                  }
+
+                  .checkmark-check {
+                    transform-origin: 50% 50%;
+                    stroke-dasharray: 48;
+                    stroke-dashoffset: 48;
+                    stroke-width: 3;
+                    stroke: #4ade80;
+                    animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards;
+                  }
+
+                  @keyframes stroke {
+                    100% { stroke-dashoffset: 0; }
+                  }
+
+                  @keyframes scale {
+                    0%, 100% { transform: none; }
+                    50% { transform: scale3d(1.1, 1.1, 1); }
+                  }
+
+                  @keyframes fill {
+                    100% { box-shadow: inset 0px 0px 0px 30px #4ade80; }
+                  }
+
+                  .victory-title {
+                    font-size: 2rem;
+                    font-weight: 800;
+                    background: linear-gradient(135deg, #4ade80, #22c55e, #15803d);
+                    -webkit-background-clip: text;
+                    -webkit-text-fill-color: transparent;
+                    background-clip: text;
+                    margin: 0;
+                  }
+
+                  .victory-stats {
+                    margin-bottom: 2rem;
+                  }
+
+                  .found-brawler {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 1rem;
+                    margin-bottom: 1.5rem;
+                    padding: 1rem;
+                    background: rgba(74, 222, 128, 0.1);
+                    border: 1px solid rgba(74, 222, 128, 0.2);
+                    border-radius: 1rem;
+                  }
+
+                  .brawler-portrait {
+                    width: 60px;
+                    height: 60px;
+                    border-radius: 50%;
+                    overflow: hidden;
+                    border: 3px solid #4ade80;
+                    box-shadow: 0 0 20px rgba(74, 222, 128, 0.3);
+                  }
+
+                  .portrait-image {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                  }
+
+                  .brawler-info {
+                    text-align: left;
+                  }
+
+                  .found-text {
+                    font-size: 0.875rem;
+                    color: rgba(255, 255, 255, 0.7);
+                    margin: 0 0 0.25rem 0;
+                  }
+
+                  .brawler-name {
+                    font-size: 1.25rem;
+                    font-weight: 700;
+                    color: #4ade80;
+                    margin: 0;
+                  }
+
+                  .performance-grid {
+                    display: grid;
+                    grid-template-columns: repeat(3, 1fr);
+                    gap: 0.75rem;
+                  }
+
+                  .stat-card {
+                    background: rgba(255, 255, 255, 0.05);
+                    border: 1px solid rgba(255, 255, 255, 0.1);
+                    border-radius: 0.75rem;
+                    padding: 1rem 0.5rem;
+                    transition: all 0.2s ease;
+                  }
+
+                  .stat-card:hover {
+                    background: rgba(255, 255, 255, 0.08);
+                    transform: translateY(-2px);
+                  }
+
+                  .stat-icon {
+                    font-size: 1.5rem;
+                    margin-bottom: 0.5rem;
+                  }
+
+                  .stat-value {
+                    font-size: 1.5rem;
+                    font-weight: 700;
+                    color: #fbbf24;
+                    margin-bottom: 0.25rem;
+                  }
+
+                  .stat-label {
+                    font-size: 0.75rem;
+                    color: rgba(255, 255, 255, 0.6);
+                    text-transform: uppercase;
+                    letter-spacing: 0.025em;
+                  }
+
+                  .victory-actions {
+                    margin-top: 1rem;
+                  }
+
+                  .action-buttons {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 0.75rem;
+                  }
+
+                  .next-mode-btn {
+                    position: relative;
+                    background: linear-gradient(135deg, #4ade80, #22c55e);
+                    border: none;
+                    padding: 1rem 2rem;
+                    border-radius: 0.75rem;
+                    font-weight: 600;
+                    color: white;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 0.5rem;
+                    transition: all 0.2s ease;
+                    box-shadow: 0 4px 20px rgba(74, 222, 128, 0.3);
+                  }
+
+                  .next-mode-btn:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 8px 30px rgba(74, 222, 128, 0.4);
+                  }
+
+                  .btn-icon {
+                    width: 1.25rem;
+                    height: 1.25rem;
+                  }
+
+                  .btn-arrow {
+                    margin-left: 0.5rem;
+                    transition: transform 0.2s ease;
+                  }
+
+                  .next-mode-btn:hover .btn-arrow {
+                    transform: translateX(4px);
+                  }
+
+                  .secondary-actions {
+                    display: flex;
+                    justify-content: center;
+                  }
+
+                  .home-btn {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                    background: rgba(255, 255, 255, 0.1);
+                    border: 1px solid rgba(255, 255, 255, 0.2);
+                    color: rgba(255, 255, 255, 0.8);
+                    padding: 0.75rem 1.5rem;
+                    border-radius: 0.5rem;
+                    transition: all 0.2s ease;
+                  }
+
+                  .home-btn:hover {
+                    background: rgba(255, 255, 255, 0.15);
+                    color: white;
+                  }
+
+                  .home-icon {
+                    width: 1rem;
+                    height: 1rem;
+                  }
+                `}</style>
+              </AnimatedElement>
             ) : (
               // Game Content
               <div className="daily-mode-game-area">
                 {/* Attribute Discovery Box for Classic Mode */}
-                <div className="flex justify-center mb-6">
+                <AnimatedElement type="slideUp" delay={0.1} className="flex justify-center mb-6">
                   <div className="w-64 h-64 md:w-72 md:h-72 rounded-3xl border-4 border-amber-500/60 bg-black/20 backdrop-blur-sm flex items-center justify-center overflow-hidden shadow-2xl">
                     <div className="flex flex-col justify-center p-3 w-full h-full">
                       <div className="flex flex-col gap-2 h-full justify-center">
@@ -401,10 +706,10 @@ const DailyClassicModeContent: React.FC<DailyClassicModeContentProps> = ({ onMod
                       </div>
                     </div>
                   </div>
-                </div>
+                </AnimatedElement>
 
                 {/* Search Bar */}
-                <div className="daily-mode-input-section mb-8 w-full max-w-md mx-auto">
+                <AnimatedElement type="slideUp" delay={0.2} className="daily-mode-input-section mb-8 w-full max-w-md mx-auto">
                     <BrawlerAutocomplete
                       brawlers={brawlers}
                       value={inputValue}
@@ -414,7 +719,7 @@ const DailyClassicModeContent: React.FC<DailyClassicModeContentProps> = ({ onMod
                       disabled={classic.isCompleted}
                       disabledBrawlers={guessedBrawlerNames}
                     />
-                </div>
+                </AnimatedElement>
 
                 {/* Guesses Counter */}
                 <div className="flex justify-center mb-4">
@@ -472,7 +777,7 @@ const DailyClassicModeContent: React.FC<DailyClassicModeContentProps> = ({ onMod
 
                 {/* Yesterday's Brawler */}
                 {yesterdayData && (
-                  <div className="flex justify-center mt-4">
+                  <AnimatedElement type="slideUp" delay={0.3} className="flex justify-center mt-4">
                     <span className="text-sm text-white/80">
                       {t('daily.yesterday.classic')}{' '}
                       <AnimatePresence mode="wait" initial={false}>
@@ -487,7 +792,7 @@ const DailyClassicModeContent: React.FC<DailyClassicModeContentProps> = ({ onMod
                         </motion.span>
                       </AnimatePresence>
                     </span>
-                  </div>
+                  </AnimatedElement>
                 )}
 
                 {/* Next Brawler In Timer - moved below yesterday's */}

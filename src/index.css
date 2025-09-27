@@ -2035,3 +2035,267 @@ html[dir="rtl"] .survival-card-title {
   z-index: 1;
   pointer-events: none;
 }
+
+/* Autocomplete dropdown visibility fix */
+.autocomplete-container {
+  /* Ensure this container can show dropdowns outside bounds */
+  overflow: visible !important;
+}
+
+/* Force parent containers to not clip autocomplete dropdowns */
+.autocomplete-container,
+.autocomplete-container * {
+  /* Allow dropdowns to escape clipping */
+  clip: unset !important;
+  clip-path: none !important;
+}
+
+/* Ensure all parent containers allow overflow for autocomplete */
+.daily-classic-theme,
+.daily-gadget-theme,  
+.daily-starpower-theme,
+.daily-audio-theme,
+.daily-pixels-theme {
+  /* Allow autocomplete dropdowns to show beyond container bounds */
+  overflow: visible !important;
+}
+
+/* Daily mode content containers should allow overflow for autocomplete */
+.daily-mode-content-container {
+  overflow: visible !important;
+}
+
+/* Professional Victory Screen Styles - Applied to all daily modes */
+.victory-container {
+  padding: 2rem 1.5rem;
+  text-align: center;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.victory-header {
+  margin-bottom: 2rem;
+}
+
+.success-icon-container {
+  margin-bottom: 1rem;
+}
+
+.success-icon {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.checkmark {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: block;
+  stroke-width: 3;
+  stroke: #4ade80;
+  stroke-miterlimit: 10;
+  box-shadow: inset 0px 0px 0px #4ade80;
+  animation: fill 0.4s ease-in-out 0.4s forwards, scale 0.3s ease-in-out 0.9s both;
+}
+
+.checkmark-circle {
+  stroke-dasharray: 166;
+  stroke-dashoffset: 166;
+  stroke-width: 3;
+  stroke-miterlimit: 10;
+  stroke: #4ade80;
+  fill: none;
+  animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+}
+
+.checkmark-check {
+  transform-origin: 50% 50%;
+  stroke-dasharray: 48;
+  stroke-dashoffset: 48;
+  stroke-width: 3;
+  stroke: #4ade80;
+  animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards;
+}
+
+@keyframes stroke {
+  100% { stroke-dashoffset: 0; }
+}
+
+@keyframes scale {
+  0%, 100% { transform: none; }
+  50% { transform: scale3d(1.1, 1.1, 1); }
+}
+
+@keyframes fill {
+  100% { box-shadow: inset 0px 0px 0px 30px #4ade80; }
+}
+
+.victory-title {
+  font-size: 2rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #4ade80, #22c55e, #15803d);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0;
+}
+
+.victory-stats {
+  margin-bottom: 2rem;
+}
+
+.found-brawler {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: rgba(74, 222, 128, 0.1);
+  border: 1px solid rgba(74, 222, 128, 0.2);
+  border-radius: 1rem;
+}
+
+.brawler-portrait {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 3px solid #4ade80;
+  box-shadow: 0 0 20px rgba(74, 222, 128, 0.3);
+}
+
+.portrait-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.brawler-info {
+  text-align: left;
+}
+
+.found-text {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0 0 0.25rem 0;
+}
+
+.brawler-name {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #4ade80;
+  margin: 0;
+}
+
+.performance-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+}
+
+.stat-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.75rem;
+  padding: 1rem 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.stat-card:hover {
+  background: rgba(255, 255, 255, 0.08);
+  transform: translateY(-2px);
+}
+
+.stat-icon {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #fbbf24;
+  margin-bottom: 0.25rem;
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.6);
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.victory-actions {
+  margin-top: 1rem;
+}
+
+.action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.next-mode-btn {
+  position: relative;
+  background: linear-gradient(135deg, #4ade80, #22c55e);
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 20px rgba(74, 222, 128, 0.3);
+}
+
+.next-mode-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(74, 222, 128, 0.4);
+}
+
+.btn-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.btn-arrow {
+  margin-left: 0.5rem;
+  transition: transform 0.2s ease;
+}
+
+.next-mode-btn:hover .btn-arrow {
+  transform: translateX(4px);
+}
+
+.secondary-actions {
+  display: flex;
+  justify-content: center;
+}
+
+.home-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.8);
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.home-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+}
+
+.home-icon {
+  width: 1rem;
+  height: 1rem;
+}

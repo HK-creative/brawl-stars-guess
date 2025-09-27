@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { t } from '@/lib/i18n';
+import { t, getLanguage } from '@/lib/i18n';
 import { Switch } from '@/components/ui/switch';
 import { Check, X, Infinity as InfinityIcon } from 'lucide-react';
 import BrawlerAutocomplete from '@/components/BrawlerAutocomplete';
-import { brawlers, Brawler } from '@/data/brawlers';
+import { brawlers, Brawler, getBrawlerDisplayName } from '@/data/brawlers';
 import { toast } from 'sonner';
 import { fetchDailyChallenge, getTimeUntilNextChallenge, fetchYesterdayChallenge } from '@/lib/daily-challenges';
 import { getPortrait, getPin, DEFAULT_PIN, DEFAULT_PORTRAIT, getGadgetImagePath } from '@/lib/image-helpers';
@@ -485,10 +485,10 @@ const GadgetMode = ({
             </div>
           </div>
           
-          {/* Input Form */}
-          <form onSubmit={handleSubmit} className="mb-4 max-w-md mx-auto px-2">
+          {/* Search Bar - Match Daily Mode exactly */}
+          <div className="daily-mode-input-section mb-8 w-full max-w-md mx-auto">
             <BrawlerAutocomplete
-              brawlers={brawlers} 
+              brawlers={brawlers}
               value={guess}
               onChange={setGuess}
               onSelect={handleBrawlerSelect}
@@ -496,7 +496,7 @@ const GadgetMode = ({
               disabled={showResult}
               disabledBrawlers={guesses}
             />
-          </form>
+          </div>
 
           {/* Guess Counter */}
           <div className="w-full flex justify-center gap-4 mt-4">
@@ -507,90 +507,107 @@ const GadgetMode = ({
               transition={transition}
             >
               {isSurvivalMode ? (
-                <div className="survival-mode-guess-counter">
-                  <span className="text-lg font-bold tracking-wide">{t('guesses.left')}</span>
-                  <span className={`text-2xl font-extrabold ${Math.max(0, guessesLeft) <= 3 ? 'text-red-400' : 'text-white'}`}>
+                <div className="daily-mode-guess-counter flex items-center">
+                  <span className="font-bold text-sm mr-1">#</span>
+                  <div className={cn(
+                    "font-bold text-sm",
+                    Math.max(0, guessesLeft) <= 3 ? "text-red-300" : "text-white"
+                  )}>
                     <SlidingNumber value={Math.max(0, guessesLeft)} />
-                  </span>
+                  </div>
+                  <span className="text-white/90 ml-1 text-sm">{t('guesses.left')}</span>
                 </div>
               ) : (
-                <div className="survival-mode-guess-counter">
-                  <span className="text-base font-semibold">{t('number.of.guesses')}</span>
-                  <span className="text-base font-bold">
+                <div className="daily-mode-guess-counter flex items-center">
+                  <span className="font-bold text-sm mr-1">#</span>
+                  <div className="font-bold text-sm">
                     <SlidingNumber value={attempts} padStart />
-                  </span>
+                  </div>
+                  <span className="text-white/90 ml-1 text-sm">{t('number.of.guesses')}</span>
                 </div>
               )}
             </motion.div>
           </div>
 
-          {/* Previous Guesses */}
+          {/* Previous Guesses - Match Daily Mode exactly */}
           {guesses.length > 0 && (
-            <div className="mt-6">
-              <h3 className="text-lg font-bold text-white mb-3 text-center">Previous Guesses:</h3>
-              <div className="flex flex-wrap justify-center gap-2">
-                <AnimatePresence initial={false} mode="popLayout">
-                  {guesses.map((prevGuess, index) => {
-                    const isNewest = index === guesses.length - 1; // Newest is last in array for this component
+            <div className="daily-mode-guesses-section">
+              <motion.div className="daily-mode-guesses-grid" layout>
+                {guesses.map((guess, index) => {
+                  const isCorrect = guess.toLowerCase() === dailyChallenge?.brawler.toLowerCase();
+                  const portraitSrc = getPortrait(guess) || DEFAULT_PORTRAIT;
+                  const isNewest = index === 0; // The newest guess is always at index 0
+                  const currentLanguage = getLanguage();
+                  
+                  if (isNewest) {
+                    // Only the newest guess gets entrance animation
                     return (
-                      <motion.div 
-                        key={`${prevGuess}-${guesses.length - index}`}
-                        initial={motionOK && isNewest ? { 
+                      <motion.div
+                        key={guess} // Use stable key based on name, not index
+                        initial={motionOK ? { 
                           opacity: 0, 
-                          y: 40,
                           scale: 0.8,
+                          y: -20,
                           filter: "blur(3px)"
                         } : { opacity: 0 }}
                         animate={{
                           opacity: 1,
-                          y: 0,
                           scale: 1,
+                          y: 0,
                           filter: "blur(0px)",
                           transition: {
                             type: "spring",
-                            stiffness: 400,
-                            damping: 28,
-                            mass: 0.7,
-                            duration: 0.5
+                            stiffness: 300,
+                            damping: 25,
+                            mass: 0.8
                           }
-                        }}
-                        exit={{ 
-                          opacity: 0, 
-                          scale: 0.8,
-                          y: -15,
-                          transition: { duration: 0.25, ease: "easeInOut" }
                         }}
                         layout
-                        transition={{
-                          layout: {
-                            type: "spring",
-                            stiffness: 400,
-                            damping: 28,
-                            mass: 0.7
-                          }
-                        }}
-                        className="flex items-center gap-2 bg-red-900/50 border border-red-500 px-3 py-1 rounded-lg"
+                        className={cn(
+                          "daily-mode-guess-item",
+                          isCorrect ? "daily-mode-guess-correct" : "daily-mode-guess-incorrect"
+                        )}
                       >
                         <img
-                          src={getPortrait(prevGuess)}
-                          alt={prevGuess}
-                          className="w-6 h-6 rounded-full"
-                          onError={(e) => {
-                            console.log(`Failed to load portrait for ${prevGuess}, trying fallback`);
-                            e.currentTarget.src = DEFAULT_PORTRAIT;
-                            e.currentTarget.onerror = () => {
-                              console.log(`Failed to load fallback portrait for ${prevGuess}, hiding image`);
-                              e.currentTarget.style.display = 'none';
-                            };
-                          }}
+                          src={portraitSrc}
+                          alt={guess}
+                          className="daily-mode-guess-portrait"
                         />
-                        <span className="text-sm text-white">{prevGuess}</span>
-                        <X className="w-4 h-4 text-red-400" />
+                        <span className="daily-mode-guess-name">
+                          {guess}
+                        </span>
                       </motion.div>
                     );
-                  })}
-                </AnimatePresence>
-              </div>
+                  } else {
+                    // Existing guesses just get layout animations for repositioning
+                    return (
+                      <motion.div
+                        key={guess} // Stable key
+                        layout
+                        transition={{
+                          type: "spring",
+                          stiffness: 400,
+                          damping: 30,
+                          mass: 0.6
+                        }}
+                        className={cn(
+                          "daily-mode-guess-item",
+                          isCorrect ? "daily-mode-guess-correct" : "daily-mode-guess-incorrect"
+                        )}
+                      >
+                        <img
+                          src={portraitSrc}
+                          alt={guess}
+                          className="daily-mode-guess-portrait"
+                        />
+                        <span className="daily-mode-guess-name">
+                          {guess}
+                        </span>
+                      </motion.div>
+                    );
+                  }
+                })}
+              </motion.div>
             </div>
           )}
         </div>

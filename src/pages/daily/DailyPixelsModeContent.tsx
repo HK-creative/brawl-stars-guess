@@ -235,9 +235,9 @@ const DailyPixelsModeContent: React.FC<DailyPixelsModeContentProps> = ({ onModeC
     setIsSubmitting(false);
   }, [selectedBrawler, pixelsData, pixels.guesses, submitGuess, completeMode, currentLanguage, getCorrectBrawler, pixels.guessCount]);
 
-  // Handle next mode navigation (back to classic)
+  // Handle next mode navigation
   const handleNextMode = () => {
-    onModeChange('classic');
+    onModeChange('gadget');
   };
 
   // Handle play again
@@ -404,23 +404,35 @@ const DailyPixelsModeContent: React.FC<DailyPixelsModeContentProps> = ({ onModeC
               {/* Guesses Grid */}
               {guesses.length > 0 && (
                 <div className="daily-mode-guesses-section">
-                  <div className="daily-mode-guesses-grid">
-                    <AnimatePresence initial={false}>
-                      {guesses.map((guess, index) => {
-                        const isCorrect = guess.name.toLowerCase() === getCorrectBrawler().name.toLowerCase();
-                        const portraitSrc = getPortrait(guess.name) || DEFAULT_PORTRAIT;
-                        
+                  <motion.div className="daily-mode-guesses-grid" layout>
+                    {guesses.map((guess, index) => {
+                      const isCorrect = guess.name.toLowerCase() === getCorrectBrawler().name.toLowerCase();
+                      const portraitSrc = getPortrait(guess.name) || DEFAULT_PORTRAIT;
+                      const isNewest = index === 0; // The newest guess is always at index 0
+                      
+                      if (isNewest) {
+                        // Only the newest guess gets entrance animation
                         return (
                           <motion.div
-                            key={`${guess.name}-${index}`}
-                            initial={motionOK ? { opacity: 0, y: 8, x: isRTL ? 8 : -8 } : { opacity: 0 }}
+                            key={guess.name} // Use stable key based on name, not index
+                            initial={motionOK ? { 
+                              opacity: 0, 
+                              scale: 0.8,
+                              y: -20,
+                              filter: "blur(3px)"
+                            } : { opacity: 0 }}
                             animate={{
                               opacity: 1,
+                              scale: 1,
                               y: 0,
-                              x: 0,
-                              transition: { ...transition, delay: motionOK ? Math.min(index * 0.04, 0.3) : 0 },
+                              filter: "blur(0px)",
+                              transition: {
+                                type: "spring",
+                                stiffness: 300,
+                                damping: 25,
+                                mass: 0.8
+                              }
                             }}
-                            exit={{ opacity: 0, y: -4, x: 0, transition }}
                             layout
                             className={cn(
                               "daily-mode-guess-item",
@@ -437,9 +449,36 @@ const DailyPixelsModeContent: React.FC<DailyPixelsModeContentProps> = ({ onModeC
                             </span>
                           </motion.div>
                         );
-                      })}
-                    </AnimatePresence>
-                  </div>
+                      } else {
+                        // Existing guesses just get layout animations for repositioning
+                        return (
+                          <motion.div
+                            key={guess.name} // Stable key
+                            layout
+                            transition={{
+                              type: "spring",
+                              stiffness: 400,
+                              damping: 30,
+                              mass: 0.6
+                            }}
+                            className={cn(
+                              "daily-mode-guess-item",
+                              isCorrect ? "daily-mode-guess-correct" : "daily-mode-guess-incorrect"
+                            )}
+                          >
+                            <img
+                              src={portraitSrc}
+                              alt={guess.name}
+                              className="daily-mode-guess-portrait"
+                            />
+                            <span className="daily-mode-guess-name">
+                              {getBrawlerDisplayName(guess, currentLanguage)}
+                            </span>
+                          </motion.div>
+                        );
+                      }
+                    })}
+                  </motion.div>
                 </div>
               )}
 

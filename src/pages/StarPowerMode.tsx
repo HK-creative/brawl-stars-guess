@@ -703,8 +703,8 @@ const StarPowerMode = ({
             </div>
           </div>
           
-          {/* Input Form */}
-          <form onSubmit={handleSubmit} className="mb-4 max-w-md mx-auto px-2">
+          {/* Search Bar - Match Daily Mode exactly */}
+          <div className="daily-mode-input-section mb-8 w-full max-w-md mx-auto">
             <BrawlerAutocomplete
               brawlers={brawlers}
               value={guess}
@@ -714,7 +714,7 @@ const StarPowerMode = ({
               disabled={isGameOver}
               disabledBrawlers={guesses}
             />
-          </form>
+          </div>
               {/* Guess Counter */}
               <div className="w-full flex justify-center gap-4 mt-2">
                 <motion.div
@@ -724,18 +724,23 @@ const StarPowerMode = ({
                   transition={transition}
                 >
                   {isSurvivalMode ? (
-                    <div className="survival-mode-guess-counter">
-                      <span className="text-lg font-bold tracking-wide">{t('guesses.left')}</span>
-                      <span className={`text-2xl font-extrabold ${(maxGuesses - attempts) <= 3 ? 'text-red-400' : 'text-white'}`}>
+                    <div className="daily-mode-guess-counter flex items-center">
+                      <span className="font-bold text-sm mr-1">#</span>
+                      <div className={cn(
+                        "font-bold text-sm",
+                        (maxGuesses - attempts) <= 3 ? "text-red-300" : "text-white"
+                      )}>
                         <SlidingNumber value={Math.max(0, maxGuesses - attempts)} />
-                      </span>
+                      </div>
+                      <span className="text-white/90 ml-1 text-sm">{t('guesses.left')}</span>
                     </div>
                   ) : (
-                    <div className="survival-mode-guess-counter">
-                      <span className="text-base font-semibold">{t('number.of.guesses')}</span>
-                      <span className="text-base font-bold">
+                    <div className="daily-mode-guess-counter flex items-center">
+                      <span className="font-bold text-sm mr-1">#</span>
+                      <div className="font-bold text-sm">
                         <SlidingNumber value={guessCount} padStart />
-                      </span>
+                      </div>
+                      <span className="text-white/90 ml-1 text-sm">{t('number.of.guesses')}</span>
                     </div>
                   )}
                 </motion.div>
@@ -743,71 +748,84 @@ const StarPowerMode = ({
             </div>
           </div>
         </motion.div>
-        {/* Previous Guesses */}
+        {/* Previous Guesses - Match Daily Mode exactly */}
         {guesses.length > 0 && (
-          <div className="survival-mode-guesses-section">
-            <div className="survival-mode-guesses-grid">
-              <AnimatePresence initial={false} mode="popLayout">
-                {guesses.map((pastGuess, idx) => {
-                  const isCorrect = pastGuess.toLowerCase() === dailyChallenge.brawler.toLowerCase();
-                  const isNewest = idx === guesses.length - 1;
+          <div className="daily-mode-guesses-section">
+            <motion.div className="daily-mode-guesses-grid" layout>
+              {guesses.map((guess, index) => {
+                const isCorrect = guess.toLowerCase() === dailyChallenge.brawler.toLowerCase();
+                const portraitSrc = getPortrait(guess) || DEFAULT_PIN;
+                const isNewest = index === 0; // The newest guess is always at index 0
+                
+                if (isNewest) {
+                  // Only the newest guess gets entrance animation
                   return (
                     <motion.div
-                      key={`${pastGuess}-${guesses.length - idx}`}
-                      initial={motionOK && isNewest ? { 
+                      key={guess} // Use stable key based on name, not index
+                      initial={motionOK ? { 
                         opacity: 0, 
-                        y: 45,
-                        scale: 0.9,
-                        filter: "blur(2px)"
+                        scale: 0.8,
+                        y: -20,
+                        filter: "blur(3px)"
                       } : { opacity: 0 }}
                       animate={{
                         opacity: 1,
-                        y: 0,
                         scale: 1,
+                        y: 0,
                         filter: "blur(0px)",
                         transition: {
                           type: "spring",
-                          stiffness: 350,
+                          stiffness: 300,
                           damping: 25,
-                          mass: 0.75,
-                          duration: 0.5
+                          mass: 0.8
                         }
-                      }}
-                      exit={{ 
-                        opacity: 0, 
-                        scale: 0.9,
-                        y: -18,
-                        transition: { duration: 0.28, ease: "easeInOut" }
                       }}
                       layout
-                      transition={{
-                        layout: {
-                          type: "spring",
-                          stiffness: 350,
-                          damping: 25,
-                          mass: 0.75
-                        }
-                      }}
                       className={cn(
-                        "survival-mode-guess-item",
-                        isCorrect ? "survival-mode-guess-correct" : "survival-mode-guess-incorrect",
-                        !isCorrect && isNewest ? "animate-shake" : ""
+                        "daily-mode-guess-item",
+                        isCorrect ? "daily-mode-guess-correct" : "daily-mode-guess-incorrect"
                       )}
                     >
                       <img
-                        src={getPortrait(pastGuess)}
-                        alt={pastGuess}
-                        className="survival-mode-guess-portrait"
-                        onError={e => { e.currentTarget.src = DEFAULT_PIN; }}
+                        src={portraitSrc}
+                        alt={guess}
+                        className="daily-mode-guess-portrait"
                       />
-                      <span className="survival-mode-guess-name">
-                        {pastGuess}
+                      <span className="daily-mode-guess-name">
+                        {guess}
                       </span>
                     </motion.div>
                   );
-                })}
-              </AnimatePresence>
-            </div>
+                } else {
+                  // Existing guesses just get layout animations for repositioning
+                  return (
+                    <motion.div
+                      key={guess} // Stable key
+                      layout
+                      transition={{
+                        type: "spring",
+                        stiffness: 400,
+                        damping: 30,
+                        mass: 0.6
+                      }}
+                      className={cn(
+                        "daily-mode-guess-item",
+                        isCorrect ? "daily-mode-guess-correct" : "daily-mode-guess-incorrect"
+                      )}
+                    >
+                      <img
+                        src={portraitSrc}
+                        alt={guess}
+                        className="daily-mode-guess-portrait"
+                      />
+                      <span className="daily-mode-guess-name">
+                        {guess}
+                      </span>
+                    </motion.div>
+                  );
+                }
+              })}
+            </motion.div>
           </div>
         )}
         {/* Victory Section - only show if not in survival mode */}
