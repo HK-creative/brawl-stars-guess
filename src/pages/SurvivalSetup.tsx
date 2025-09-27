@@ -4,11 +4,59 @@ import { useSurvivalStore, defaultSurvivalSettings, GameMode, SurvivalSettings }
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { resetModeSelectionState } from '@/lib/survival-logic';
-import { Timer, Volume2, Image, Zap } from 'lucide-react';
+import { Timer, ArrowLeft } from 'lucide-react';
 import { t } from '@/lib/i18n';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { cn } from '@/lib/utils';
 
 const SETTINGS_STORAGE_KEY = 'survival_last_settings';
+
+// GameModeCard component for the new design
+interface GameModeCardProps {
+  mode: {
+    id: GameMode;
+    label: string;
+    description: string;
+    icon: React.ReactNode;
+    color: string;
+  };
+  isSelected: boolean;
+  onToggle: () => void;
+}
+
+const GameModeCard: React.FC<GameModeCardProps> = ({ mode, isSelected, onToggle }) => {
+  return (
+    <button
+      onClick={onToggle}
+      className={cn(
+        "relative overflow-hidden rounded-lg transition-all duration-200 h-20 sm:h-24",
+        "border-2",
+        isSelected 
+          ? "border-yellow-400 shadow-lg shadow-yellow-400/30 scale-105" 
+          : "border-yellow-500 hover:border-yellow-400 hover:scale-102"
+      )}
+    >
+      {/* Dark top section - larger portion */}
+      <div className="h-2/3 bg-black flex items-center justify-center">
+        <div className="text-white text-lg sm:text-xl">
+          {mode.icon}
+        </div>
+      </div>
+      
+      {/* Golden bottom section - smaller portion */}
+      <div className="h-1/3 bg-gradient-to-r from-yellow-600 to-amber-600 flex items-center justify-center">
+        <span className="text-white font-bold text-xs sm:text-sm tracking-wider">
+          {mode.label.toUpperCase()}
+        </span>
+      </div>
+      
+      {/* Selection indicator */}
+      {isSelected && (
+        <div className="absolute top-1 right-1 w-3 h-3 bg-yellow-300 rounded-full border border-yellow-600 shadow-sm" />
+      )}
+    </button>
+  );
+};
 
 // Helper functions for localStorage
 const saveSettingsToStorage = (settings: SurvivalSettings): void => {
@@ -40,38 +88,73 @@ const SurvivalSetupPage: React.FC = () => {
   // Force update of translations by recreating the array when language changes
   const gameModeDetails = React.useMemo(() => [
     { 
-      id: 'classic' as GameMode, 
-      label: t('survival.classic.label'), 
-      description: t('survival.classic.description'), 
-      icon: <Image className="h-6 w-6" />,
-      color: 'from-blue-500 to-blue-600'
+      id: 'starpower' as GameMode, 
+      label: t('survival.starpower.label'), 
+      description: t('survival.starpower.description'), 
+      icon: (
+        <div className="relative">
+          {/* Star icon for Star Power */}
+          <svg className="w-7 h-7" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+          </svg>
+        </div>
+      ),
+      color: 'from-yellow-500 to-yellow-600'
     },
     { 
       id: 'gadget' as GameMode, 
       label: t('survival.gadget.label'), 
       description: t('survival.gadget.description'), 
-      icon: <Zap className="h-6 w-6" />,
+      icon: (
+        <div className="relative">
+          {/* Lightning bolt for Gadget */}
+          <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M7 2v11h3v9l7-12h-4l4-8z"/>
+          </svg>
+        </div>
+      ),
       color: 'from-green-500 to-green-600'
-    },
-    { 
-      id: 'starpower' as GameMode, 
-      label: t('survival.starpower.label'), 
-      description: t('survival.starpower.description'), 
-      icon: <div className="h-5 w-5 bg-yellow-400 rounded-full flex items-center justify-center"><div className="h-2 w-2 bg-yellow-600 rounded-full"></div></div>,
-      color: 'from-yellow-500 to-yellow-600'
     },
     { 
       id: 'audio' as GameMode, 
       label: t('survival.audio.label'), 
       description: t('survival.audio.description'), 
-      icon: <Volume2 className="h-6 w-6" />,
+      icon: (
+        <div className="relative">
+          {/* Volume/Sound icon for Audio */}
+          <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+          </svg>
+        </div>
+      ),
       color: 'from-purple-500 to-purple-600'
+    },
+    { 
+      id: 'classic' as GameMode, 
+      label: t('survival.classic.label'), 
+      description: t('survival.classic.description'), 
+      icon: (
+        <div className="relative">
+          {/* Circle/Portrait icon for Classic */}
+          <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+          </svg>
+        </div>
+      ),
+      color: 'from-blue-500 to-blue-600'
     },
     { 
       id: 'pixels' as GameMode, 
       label: t('survival.pixels.label'), 
       description: t('survival.pixels.description'), 
-      icon: <div className="h-5 w-5 bg-indigo-400 rounded-sm flex items-center justify-center"><div className="h-2 w-2 bg-indigo-600 rounded-sm"></div></div>,
+      icon: (
+        <div className="relative">
+          {/* Grid/Pixels icon */}
+          <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M4 4h4v4H4V4zm6 0h4v4h-4V4zm6 0h4v4h-4V4zM4 10h4v4H4v-4zm6 0h4v4h-4v-4zm6 0h4v4h-4v-4zM4 16h4v4H4v-4zm6 0h4v4h-4v-4zm6 0h4v4h-4v-4z"/>
+          </svg>
+        </div>
+      ),
       color: 'from-indigo-500 to-indigo-600'
     },
   ], [language]); // Re-create when language changes
@@ -141,87 +224,121 @@ const SurvivalSetupPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-900 to-black flex flex-col items-center justify-center p-4">
-      <div className="bg-black/60 backdrop-blur-md rounded-xl overflow-hidden w-full max-w-lg border border-white/5 shadow-2xl">
+    <div className="min-h-screen relative overflow-hidden">
+      {/* Background with diagonal stripes */}
+      <div className="absolute inset-0 bg-gradient-to-br from-yellow-500 via-yellow-600 to-orange-600">
+        {/* Diagonal black stripes */}
+        <div className="absolute inset-0" style={{
+          backgroundImage: `repeating-linear-gradient(
+            45deg,
+            transparent,
+            transparent 25px,
+            rgba(0, 0, 0, 0.35) 25px,
+            rgba(0, 0, 0, 0.35) 50px
+          )`
+        }} />
+      </div>
+
+      {/* Content */}
+      <div className="relative z-10 min-h-screen flex flex-col p-4 sm:p-6">
         {/* Header */}
-        <div className="bg-gradient-to-r from-amber-600 to-pink-600 py-3 px-4">
-          <h1 className="text-xl text-white font-bold text-center">{t('survival.mode.title')}</h1>
-        </div>
-        
-        {/* Subtitle */}
-        <div className="px-4 pt-4 pb-2 text-center">
-          <p className="text-white/70 text-sm">{t('survival.select.challenge.modes')}</p>
-        </div>
-        
-        {/* Additional descriptions */}
-        <div className="px-4 pb-2 text-center space-y-1">
-          <p className="text-white/80 text-xs">{t('survival.how.many')}</p>
+        <div className="flex items-center mb-6 sm:mb-8">
+          {/* Back button */}
+          <button
+            onClick={() => navigate('/')}
+            className="bg-blue-600 hover:bg-blue-700 rounded-lg p-3 mr-4 transition-colors"
+            aria-label="Go back"
+          >
+            <ArrowLeft className="h-5 w-5 text-white" />
+          </button>
           
+          {/* Title */}
+          <div className="flex-1">
+            <h1 className="text-white text-4xl sm:text-5xl font-black tracking-wide" 
+                style={{ 
+                  fontFamily: language === 'he' ? "'Abraham', sans-serif" : "'Lilita One', cursive",
+                  fontStyle: 'italic',
+                  textShadow: '3px 3px 6px rgba(0,0,0,0.7), 1px 1px 2px rgba(0,0,0,0.5)'
+                }}>
+              SURVIVAL
+            </h1>
+            <h2 className="text-yellow-100 text-base sm:text-lg font-bold mt-1 tracking-wide"
+                style={{
+                  fontFamily: language === 'he' ? "'Abraham', sans-serif" : "'Lilita One', cursive",
+                  textShadow: '2px 2px 4px rgba(0,0,0,0.7)'
+                }}>
+              CHOOSE GAME MODES
+            </h2>
+          </div>
         </div>
-        
-        {/* Mode Selection */}
-        <div className="p-4">
-          <div className="grid grid-cols-2 gap-3">
-            {gameModeDetails.map(mode => (
-              <button 
+
+        {/* Game Mode Cards */}
+        <div className="flex-1 flex flex-col justify-center max-w-lg mx-auto w-full px-4">
+          {/* Top row - 2 cards */}
+          <div className="grid grid-cols-2 gap-3 mb-3">
+            {gameModeDetails.slice(0, 2).map(mode => (
+              <GameModeCard 
                 key={mode.id}
-                onClick={() => handleModeToggle(mode.id)}
-                className={`relative rounded-lg border transition-all duration-200 ${
-                  localSettings.modes.includes(mode.id) 
-                             ? 'border-white/50 bg-white/10' 
-                             : 'border-white/10 bg-black/40 hover:bg-black/30'}`}
-              >
-                <div className={`p-3 flex flex-col items-center text-center gap-2 ${
-                  localSettings.modes.includes(mode.id) 
-                    ? 'bg-gradient-to-br ' + mode.color + ' text-white'
-                    : 'bg-black/40 text-white/60'}`}
-                  >
-                  <div className="text-lg">
-                    {mode.icon}
-                  </div>
-                    <h3 className="font-medium text-white text-sm">{mode.label}</h3>
-                </div>
-              </button>
+                mode={mode}
+                isSelected={localSettings.modes.includes(mode.id)}
+                onToggle={() => handleModeToggle(mode.id)}
+              />
             ))}
           </div>
           
-          {/* Timer info */}
-          <div className="mt-5 py-3 border-t border-white/5 flex items-center justify-center gap-2 text-white/60">
-            <Timer className="h-4 w-4" />
-            <span className="text-xs">{t('time.per.round.seconds')}</span>
+          {/* Bottom row - 2 cards */}
+          <div className="grid grid-cols-2 gap-3 mb-3">
+            {gameModeDetails.slice(2, 4).map(mode => (
+              <GameModeCard 
+                key={mode.id}
+                mode={mode}
+                isSelected={localSettings.modes.includes(mode.id)}
+                onToggle={() => handleModeToggle(mode.id)}
+              />
+            ))}
+          </div>
+          
+          {/* Centered Pixels card */}
+          <div className="flex justify-center mb-8">
+            <div className="w-40">
+              <GameModeCard 
+                mode={gameModeDetails[4]} // Pixels mode
+                isSelected={localSettings.modes.includes(gameModeDetails[4].id)}
+                onToggle={() => handleModeToggle(gameModeDetails[4].id)}
+              />
+            </div>
           </div>
         </div>
-        
-        {/* Footer with just the buttons */}
-        <div className="p-4 flex justify-between border-t border-white/5">
-          <Button 
-            variant="ghost" 
-            onClick={() => navigate('/')}
-            className="text-white/70 hover:text-white hover:bg-white/5"
-            size="sm"
-          >
-            {t('button.cancel')}
-          </Button>
+
+        {/* Bottom section */}
+        <div className="space-y-4">
+          {/* Timer info */}
+          <div className="flex items-center justify-center gap-2 text-white/90">
+            <Timer className="h-5 w-5" />
+            <span className="text-sm font-medium">150 seconds per round</span>
+          </div>
           
-          <Button 
-            onClick={handleStartGame} 
-            disabled={!isValidationPassed}
-            size="sm"
-            className={`${!isValidationPassed ? 'opacity-50' : ''} 
-                      bg-gradient-to-r from-amber-600 to-pink-600 hover:from-amber-500 
-                      hover:to-pink-500 text-white`}
-          >
-            {t('button.start.game')}
-          </Button>
+          {/* Play button */}
+          <div className="flex justify-center px-4">
+            <button
+              onClick={handleStartGame}
+              disabled={!isValidationPassed}
+              className={cn(
+                "bg-gradient-to-b from-yellow-400 to-yellow-600 text-black font-black text-xl py-3 px-20 rounded-lg shadow-lg transition-all transform w-full max-w-xs",
+                "hover:from-yellow-300 hover:to-yellow-500 hover:scale-105 active:scale-100",
+                !isValidationPassed && "opacity-50 cursor-not-allowed hover:scale-100"
+              )}
+              style={{
+                fontFamily: language === 'he' ? "'Abraham', sans-serif" : "'Lilita One', cursive",
+                textShadow: '2px 2px 4px rgba(0,0,0,0.4)',
+                boxShadow: '0 4px 8px rgba(0,0,0,0.3), inset 0 -2px 0 rgba(0,0,0,0.2)'
+              }}
+            >
+              PLAY
+            </button>
+          </div>
         </div>
       </div>
-      
-      {/* Minimal mode selection indicator */}
-      {localSettings.modes.length > 0 && (
-        <div className="mt-3 px-3 py-1 rounded-full bg-white/10 text-xs text-white/60">
-          {localSettings.modes.length} {t('game.selected')}
-        </div>
-      )}
     </div>
   );
 };

@@ -168,13 +168,19 @@ const DailyModeTransitionOrchestrator: React.FC<Props> = ({
         >
           {React.Children.map(children, (child, index) => {
             if (React.isValidElement(child)) {
-              return React.cloneElement(child, {
-                ...child.props,
-                // Pass down the child variants so components can use them
-                childVariants,
-                // Add a custom prop to indicate stagger index
-                staggerIndex: index
-              } as any);
+              // Only pass animation props to motion components or custom components, not DOM elements
+              const isMotionComponent = typeof child.type === 'string' && child.type.startsWith('motion.');
+              const isCustomComponent = typeof child.type !== 'string';
+              
+              if (isMotionComponent || isCustomComponent) {
+                return React.cloneElement(child, {
+                  ...child.props,
+                  // Pass down the child variants so components can use them
+                  childVariants,
+                  // Add a custom prop to indicate stagger index
+                  staggerIndex: index
+                } as any);
+              }
             }
             return child;
           })}

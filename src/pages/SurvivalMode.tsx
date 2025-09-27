@@ -328,8 +328,7 @@ const SurvivalModePage: React.FC = () => {
         setCurrentTimerValue(prevTime => {
           if (typeof prevTime === 'number' && prevTime > 0) {
             const newTime = prevTime - 1;
-            // Update the store as well
-            setTimerLeft(newTime);
+            
             // If this tick reaches zero, end immediately and flash
             if (newTime === 0) {
               if (timerRef.current) {
@@ -350,8 +349,13 @@ const SurvivalModePage: React.FC = () => {
               }
               // Show loss popup
               setShowLossPopup(true);
+              // Update store after React state update to avoid render-during-render warning
+              setTimeout(() => setTimerLeft(0), 0);
               return 0;
             }
+            
+            // Update store after React state update to avoid render-during-render warning
+            setTimeout(() => setTimerLeft(newTime), 0);
             return newTime;
           } else {
             // Already zero or invalid; ensure cleanup

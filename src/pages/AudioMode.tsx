@@ -12,7 +12,7 @@ import { getPortrait } from '@/lib/image-helpers';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import ReactConfetti from 'react-confetti';
-import VictorySection from '../components/VictoryPopup';
+import VictorySection from '@/components/VictoryPopup';
 // removed unused GameModeTracker and HomeButton imports
 import { motion, AnimatePresence } from 'framer-motion';
 import { useMotionPrefs } from '@/hooks/useMotionPrefs';
@@ -1127,38 +1127,18 @@ const AudioMode = ({
         {/* Victory popup - only show if not in survival mode */}
         {isGameOver && !skipVictoryScreen && (
           <div ref={victoryRef}>
-            {(() => {
-                return (
-                  <VictorySection
-                    brawlerName={correctBrawlerName}
-                    brawlerPortrait={getPortrait(correctBrawlerName)}
-                    tries={guessCount}
-                    mode="audio"
-                    nextModeKey="gadget"
-                    onNextMode={() => navigate('/gadget')}
-                    nextBrawlerIn={timeUntilNext ? `${timeUntilNext.hours}h ${timeUntilNext.minutes}m ${timeUntilNext.seconds}s` : undefined}
-                    yesterdayBrawlerName={yesterdayAudio?.brawler}
-                    yesterdayBrawlerPortrait={yesterdayAudio?.audio ? undefined : undefined}
-                    onShare={undefined}
-                  />
-                );
-              } catch (error) {
-                console.error("Error rendering VictorySection:", error);
-                return (
-                  <div className="p-6 bg-red-800/30 rounded-xl text-white">
-                    <h2 className="text-2xl font-bold mb-4">Victory!</h2>
-                    <p>You guessed the brawler: <strong>{correctBrawlerName}</strong></p>
-                    <p className="mt-2">Number of tries: {guessCount}</p>
-                    <button
-                      onClick={() => navigate('/gadget')}
-                      className="mt-4 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
-                    >
-                      Next Mode: Gadget
-                    </button>
-                  </div>
-                );
-              }
-            })()}
+            <VictorySection
+              brawlerName={correctBrawlerName}
+              brawlerPortrait={getPortrait(correctBrawlerName)}
+              tries={guessCount}
+              mode="audio"
+              nextModeKey="gadget"
+              onNextMode={() => navigate('/gadget')}
+              nextBrawlerIn={timeUntilNext ? `${timeUntilNext.hours}h ${timeUntilNext.minutes}m ${timeUntilNext.seconds}s` : undefined}
+              yesterdayBrawlerName={yesterdayAudio?.brawler}
+              yesterdayBrawlerPortrait={yesterdayAudio?.audio ? undefined : undefined}
+              onShare={undefined}
+            />
           </div>
         )}
 

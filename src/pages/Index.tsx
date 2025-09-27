@@ -286,12 +286,12 @@ const Index = () => {
             <Image
               src={language === 'en' ? '/NewDailyUI/united-states-icon.png' : '/NewDailyUI/israel-icon.png'}
               alt={language === 'en' ? 'English' : 'Hebrew'}
-              width={isMobile ? 24 : 20} // Slightly larger icon on mobile
-              height={isMobile ? 24 : 20}
+              width={isMobile ? 32 : 20} // Increased mobile icon size to better fill the button
+              height={isMobile ? 32 : 20}
               className="select-none pointer-events-none"
               style={{ 
-                width: isMobile ? '24px' : '100%', 
-                height: isMobile ? '24px' : '100%', 
+                width: isMobile ? '32px' : '100%', 
+                height: isMobile ? '32px' : '100%', 
                 objectFit: 'contain',
                 // Ensure the image doesn't interfere with touch events
                 touchAction: 'none'

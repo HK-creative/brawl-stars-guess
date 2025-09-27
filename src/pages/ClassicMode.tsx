@@ -294,22 +294,66 @@ const ClassicMode = ({
     
     if (isGameOver) return;
     
-    if (!selectedBrawler) {
-      toast({
-        id: String(Date.now()),
-        title: 'No brawler selected',
-        description: 'Please select a brawler to make a guess.',
-        variant: 'destructive',
+    // If no brawler is selected, try to find one that matches the current input
+    let brawlerToGuess = selectedBrawler;
+    if (!brawlerToGuess && inputValue.trim()) {
+      const currentLanguage = getLanguage();
+      const inputLower = inputValue.trim().toLowerCase();
+      
+      // Try multiple matching strategies for robustness
+      let matchingBrawler = availableBrawlers.find(brawler => {
+        const displayName = getBrawlerDisplayName(brawler, currentLanguage);
+        return displayName.toLowerCase() === inputLower;
       });
+      
+      // If exact match fails, try a more flexible approach
+      if (!matchingBrawler) {
+        matchingBrawler = availableBrawlers.find(brawler => {
+          const displayName = getBrawlerDisplayName(brawler, currentLanguage);
+          const normalizedDisplay = displayName.toLowerCase().replace(/[^\w]/g, '');
+          const normalizedInput = inputLower.replace(/[^\w]/g, '');
+          return normalizedDisplay === normalizedInput;
+        });
+      }
+      
+      // Also try the brawler's internal name
+      if (!matchingBrawler) {
+        matchingBrawler = availableBrawlers.find(brawler => 
+          brawler.name.toLowerCase() === inputLower
+        );
+      }
+      
+      if (matchingBrawler && !guessedBrawlerNames.includes(matchingBrawler.name)) {
+        brawlerToGuess = matchingBrawler;
+        setSelectedBrawler(matchingBrawler);
+      }
+    }
+    
+    // In survival mode, don't show error toasts for invalid submissions to reduce noise
+    if (!brawlerToGuess) {
+      // Silently return in survival mode to avoid spam
+      if (isSurvivalMode) {
+        return;
+      }
+      
+      // Only show error in non-survival modes and only if user actually tried to input something
+      if (inputValue.trim()) {
+        toast({
+          id: String(Date.now()),
+          title: 'No brawler selected',
+          description: 'Please select a brawler to make a guess.',
+          variant: 'destructive',
+        });
+      }
       return;
     }
     
     // Check if this brawler has already been guessed
-    if (guessedBrawlerNames.includes(selectedBrawler.name)) {
+    if (guessedBrawlerNames.includes(brawlerToGuess.name)) {
       toast({
         id: String(Date.now()),
         title: 'Already guessed',
-        description: `You've already guessed ${selectedBrawler.name}.`,
+        description: `You've already guessed ${brawlerToGuess.name}.`,
         variant: 'destructive',
       });
       setInputValue('');
@@ -318,8 +362,8 @@ const ClassicMode = ({
     }
     
     // Add the guess at the beginning of the array (newest first)
-    setGuesses(prevGuesses => [selectedBrawler, ...prevGuesses]);
-    setGuessedBrawlerNames(prev => [...prev, selectedBrawler.name]);
+    setGuesses(prevGuesses => [brawlerToGuess, ...prevGuesses]);
+    setGuessedBrawlerNames(prev => [...prev, brawlerToGuess.name]);
     setGuessCount(prevCount => prevCount + 1);
     
     // Update discovered attributes for survival mode
@@ -327,19 +371,19 @@ const ClassicMode = ({
       const correctBrawler = getCorrectBrawler();
       const newDiscovered = { ...discoveredAttributes };
       
-      if (selectedBrawler.rarity === correctBrawler.rarity && !newDiscovered.rarity) {
+      if (brawlerToGuess.rarity === correctBrawler.rarity && !newDiscovered.rarity) {
         newDiscovered.rarity = correctBrawler.rarity;
       }
-      if (selectedBrawler.class === correctBrawler.class && !newDiscovered.class) {
+      if (brawlerToGuess.class === correctBrawler.class && !newDiscovered.class) {
         newDiscovered.class = correctBrawler.class;
       }
-      if (selectedBrawler.range === correctBrawler.range && !newDiscovered.range) {
+      if (brawlerToGuess.range === correctBrawler.range && !newDiscovered.range) {
         newDiscovered.range = correctBrawler.range;
       }
-      if (selectedBrawler.wallbreak === correctBrawler.wallbreak && !newDiscovered.wallbreak) {
+      if (brawlerToGuess.wallbreak === correctBrawler.wallbreak && !newDiscovered.wallbreak) {
         newDiscovered.wallbreak = correctBrawler.wallbreak;
       }
-      if (selectedBrawler.releaseYear === correctBrawler.releaseYear && !newDiscovered.releaseYear) {
+      if (brawlerToGuess.releaseYear === correctBrawler.releaseYear && !newDiscovered.releaseYear) {
         newDiscovered.releaseYear = correctBrawler.releaseYear;
       }
       
@@ -359,13 +403,13 @@ const ClassicMode = ({
     setLastGuessIndex(0); // Set to 0 since newest guess is now at the top
     
     // Check if correct guess
-    const isCorrect = selectedBrawler.name.toLowerCase() === correctBrawlerName.toLowerCase();
+    const isCorrect = brawlerToGuess.name.toLowerCase() === correctBrawlerName.toLowerCase();
     
     if (isCorrect) {
       // For survival mode, defer to the parent component to handle victory
       if (isSurvivalMode && onRoundEnd) {
         // Pass the actual brawler name that was guessed correctly to ensure correct display in victory popup
-        onRoundEnd({ success: true, brawlerName: selectedBrawler.name });
+        onRoundEnd({ success: true, brawlerName: brawlerToGuess.name });
         return;
       }
       

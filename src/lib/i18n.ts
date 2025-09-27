@@ -73,6 +73,7 @@ const translations: Translations = {
   "label.daily_challenge": { en: "Daily Challenge", he: "אתגר יומי" },
   "stats.brawlers_guessed": { en: "Brawlers guessed:", he: "בראולרים שניחשת:" },
   "timer.next_in": { en: "Next in: {hours}h {minutes}m", he: "אתגר הבא בעוד: {hours}ש {minutes}דק" },
+  "timer": { en: "Timer", he: "טיימר" },
   "status.processing": { en: "Processing…", he: "טוען…" },
   "auth.error": { en: "Authentication Error", he: "שגיאת אימות" },
   "auth.reset_password": { en: "Reset Your Password", he: "איפוס סיסמה" },
@@ -500,6 +501,20 @@ const translations: Translations = {
   "survival.pixels.description": {
     en: "Guess the Brawler from their pixelated portrait.",
     he: "נחשו את הבראולר מהתמונה המפוקסלת"
+  },
+  
+  // Survival Mode Selection Popup
+  "survival.mode.selection.title": {
+    en: "Choose Game Mode",
+    he: "בחר מצב משחק"
+  },
+  "survival.mode.selection.subtitle": {
+    en: "Select which mode you want to play next",
+    he: "בחר איזה מצב תרצה לשחק בהמשך"
+  },
+  "survival.mode.selection.help": {
+    en: "In Survival Mode, each round lets you choose a different game mode. Use your guesses wisely - they're limited across all rounds!",
+    he: "במצב הישרדות, כל סיבוב מאפשר לך לבחור מצב משחק שונה. השתמש בניחושים שלך בחוכמה - הם מוגבלים לכל הסיבובים!"
   },
   
   // Buttons & Actions
@@ -1169,6 +1184,14 @@ const translations: Translations = {
   "attribute.label.wallbreak": {
     en: "Wallbreak",
     he: "שבירת קיר"
+  },
+  "wallbreak.yes": {
+    en: "Yes",
+    he: "כן"
+  },
+  "wallbreak.no": {
+    en: "No",
+    he: "לא"
   },
   "attribute.label.release.year": {
     en: "Release Year",
