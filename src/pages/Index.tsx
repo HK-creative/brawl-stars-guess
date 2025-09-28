@@ -350,7 +350,7 @@ const Index = () => {
             </div>
             
         {/* Brand block - animated logo */}
-        <div className="text-center mb-1 lg:mb-2 flex-shrink-0">
+        <div className="text-center mb-0 lg:mb-2 flex-shrink-0">
           {/* Brawldle logo image with breathing animation */}
           <Image
             src={language === 'he' ? '/Brawldle%20Hebrew%20Logo.png' : '/Brawldle%20Logo.png'}
@@ -402,7 +402,7 @@ const Index = () => {
           <div
             className="mx-auto survival-button-tablet"
             style={{ 
-              marginTop: isMobile ? '1rem' : '1rem', // Reduced spacing above survival button universally
+              marginTop: isMobile ? '1.25rem' : '1rem', // Mobile spacing transferred from logo-to-daily gap
               width: isMobile ? 'clamp(250px, 75vw, 285px)' : 'clamp(185px,30vw,270px)' // Balanced mobile increase, PC slight increase
             }}
           >
@@ -499,8 +499,10 @@ const Index = () => {
                             style={{
                               width: '100%',
                               height: '100%',
-                              // Slight upscale and upward nudge so the animation reaches the top interior without touching the stroke
-                              transform: 'translateY(-3.0%) translateZ(0) scale(1.02, 1.06)',
+                              // Mobile-corrected positioning: neutralize offset on small screens
+                              transform: isMobile 
+                                ? 'translateY(0%) translateZ(0) scale(1.0, 1.0)' // Mobile: exact alignment
+                                : 'translateY(-3.0%) translateZ(0) scale(1.02, 1.06)', // Desktop: original positioning
                               transformOrigin: 'center',
                               mixBlendMode: 'screen',
                               filter: 'drop-shadow(0 0 9px rgba(255,255,255,0.45)) brightness(1.1)',
