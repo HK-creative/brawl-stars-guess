@@ -357,8 +357,8 @@ const Index = () => {
             alt="Brawldle Logo"
             className={cn(
               "relative z-10 -mt-16 lg:-mt-24 mb-0 lg:mb-0 select-none block mx-auto logo-breathe",
-              // Reduced ~17% on mobile (270px -> 224px) and further reduced on desktop (334px -> 300px)
-              isMobile ? 'w-[224px]' : 'w-[300px]'
+              // Reduced ~17% + additional 15% on mobile (270px -> 224px -> 190px) and desktop (334px -> 300px -> 255px)
+              isMobile ? 'w-[190px]' : 'w-[255px]'
             )}
             priority
           />
@@ -378,7 +378,6 @@ const Index = () => {
           <div 
             className="daily-hero-container"
             style={{ 
-              transform: isMobile ? 'scale(1.05)' : 'none',
               marginTop: isMobile ? '1.5rem' : '0' // Additional spacing above daily button for mobile
             }}>
             <DailyChallengesHero />
@@ -404,7 +403,7 @@ const Index = () => {
             className="mx-auto survival-button-tablet"
             style={{ 
               marginTop: isMobile ? '1.5rem' : '1.5rem', // Further increased space above survival button for mobile
-              width: isMobile ? 'clamp(280px, 75vw, 320px)' : 'clamp(200px,30vw,300px)' // Reduced desktop survival button size
+              width: isMobile ? 'clamp(238px, 75vw, 272px)' : 'clamp(170px,30vw,255px)' // 15% reduced mobile & desktop survival button size
             }}
           >
             <motion.div

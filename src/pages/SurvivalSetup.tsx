@@ -33,7 +33,7 @@ const GameModeCard: React.FC<GameModeCardProps> = ({ mode, isSelected, onToggle 
       onClick={onToggle}
       className={cn(
         "relative overflow-hidden rounded-3xl transition-all duration-500 transform",
-        "h-36 sm:h-40 w-full group",
+        "h-36 sm:h-40 lg:h-36 w-full group",
         "hover:scale-[1.02] active:scale-98",
         "hover:shadow-2xl shadow-black/20"
       )}
@@ -53,7 +53,7 @@ const GameModeCard: React.FC<GameModeCardProps> = ({ mode, isSelected, onToggle 
             "mb-4 transition-all duration-300",
             isSelected ? "text-cyan-100" : "text-white/90 group-hover:text-white"
           )}>
-            <div className="w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 lg:w-16 lg:h-16 flex items-center justify-center">
               {mode.icon}
             </div>
           </div>
@@ -61,14 +61,15 @@ const GameModeCard: React.FC<GameModeCardProps> = ({ mode, isSelected, onToggle 
           {/* Extra Large Text Label - No background */}
           <span 
             className={cn(
-              "text-lg sm:text-xl font-bold uppercase tracking-wider text-center leading-none transition-all duration-300",
+              "text-lg sm:text-xl lg:text-lg font-bold uppercase tracking-wider text-center leading-none transition-all duration-300",
               language === 'he' ? "font-normal" : "",
               isSelected ? "text-cyan-100" : "text-white/90 group-hover:text-white"
             )}
             style={{
+              fontFamily: language === 'he' ? "'Abraham', sans-serif" : "'Lilita One', cursive",
               textShadow: language === 'he' 
                 ? '2px 2px 4px rgba(0,0,0,0.8), 1px 1px 2px rgba(0,0,0,0.6), 0px 0px 8px rgba(0,0,0,0.3)'
-                : 'none'
+                : '2px 2px 4px rgba(0,0,0,0.7)'
             }}
           >
             {mode.label}
@@ -275,7 +276,7 @@ const SurvivalSetupPage: React.FC = () => {
             }}>
           <button
             onClick={() => navigate('/')}
-            className="absolute left-4 sm:left-20 top-4 transition-all duration-200 transform hover:scale-110 active:scale-95"
+            className="absolute left-4 sm:left-32 lg:left-40 top-4 transition-all duration-200 transform hover:scale-110 active:scale-95"
             aria-label="Go back to home"
             style={{
               width: '50px',
@@ -297,9 +298,12 @@ const SurvivalSetupPage: React.FC = () => {
         </div>
             
         {/* Brand block - Title and Subtitle with better spacing */}
-        <div className="text-center mt-8 mb-10 flex-shrink-0">
+        <div className="text-center mt-4 mb-6 flex-shrink-0">
           <div className="relative z-10 select-none block mx-auto">
-            <h1 className="text-white text-5xl sm:text-7xl lg:text-8xl font-black tracking-wide mb-6" 
+            <h1 className={cn(
+              "text-white text-5xl sm:text-7xl font-black tracking-wide mb-4",
+              language === 'en' ? "lg:text-6xl" : "lg:text-8xl"
+            )} 
                 style={{ 
                   fontFamily: language === 'he' ? "'Abraham', sans-serif" : "'Lilita One', cursive",
                   fontStyle: 'italic',
@@ -309,12 +313,16 @@ const SurvivalSetupPage: React.FC = () => {
                 }}>
               {language === 'he' ? 'הישרדות' : 'SURVIVAL'}
             </h1>
-            <h2 className="text-yellow-100 text-base sm:text-lg font-bold tracking-wide"
+            <h2 className={cn(
+              "text-yellow-100 font-bold tracking-wide",
+              language === 'he' ? "text-[8px] sm:text-[10px]" : "text-base sm:text-lg"
+            )}
                 style={{
                   fontFamily: language === 'he' ? "'Abraham', sans-serif" : "'Lilita One', cursive",
                   textShadow: language === 'he' 
                     ? '2px 2px 4px rgba(0,0,0,0.8), 1px 1px 2px rgba(0,0,0,0.6), 0px 0px 8px rgba(0,0,0,0.3)'
-                    : '2px 2px 4px rgba(0,0,0,0.7)'
+                    : '2px 2px 4px rgba(0,0,0,0.7)',
+                  fontSize: language === 'he' ? 'clamp(8px, 2vw, 10px)' : undefined // Force override CSS !important
                 }}>
               {language === 'he' ? 'בחר סוגי משחק' : 'CHOOSE GAME MODES'}
             </h2>
@@ -331,7 +339,7 @@ const SurvivalSetupPage: React.FC = () => {
              }}>
           
           {/* Game Mode Cards Section - Redesigned Layout */}
-          <section className="flex flex-col w-full mb-16" aria-label="Game mode selection">
+          <section className="flex flex-col w-full mb-8" aria-label="Game mode selection">
             {/* Top row - 2 cards */}
             <div className="grid grid-cols-2 gap-5 mb-5">
               {gameModeDetails.slice(0, 2).map(mode => (
@@ -369,7 +377,7 @@ const SurvivalSetupPage: React.FC = () => {
           </section>
 
           {/* Call to Action Section */}
-          <section className="flex justify-center w-full mt-8" aria-label="Start game">
+          <section className="flex justify-center w-full mt-2" aria-label="Start game">
             <button
               onClick={handleStartGame}
               disabled={!isValidationPassed}
@@ -386,7 +394,7 @@ const SurvivalSetupPage: React.FC = () => {
                   : '/Survival Pre-Game Screen/Pre-survival Start Button Hebrew.svg'
                 }
                 alt={language === 'en' ? 'Play - 150 seconds per round' : 'שחק - 150 שניות לסיבוב'}
-                className="w-full max-w-xs sm:max-w-md lg:max-w-lg h-auto"
+                className="w-full max-w-xs sm:max-w-md lg:max-w-xl h-auto"
                 style={{ 
                   filter: !isValidationPassed ? 'grayscale(0.3) brightness(0.7)' : 'none',
                   pointerEvents: 'none'
