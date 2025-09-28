@@ -350,15 +350,15 @@ const Index = () => {
             </div>
             
         {/* Brand block - animated logo */}
-        <div className="text-center mb-2 lg:mb-4 flex-shrink-0">
+        <div className="text-center mb-1 lg:mb-2 flex-shrink-0">
           {/* Brawldle logo image with breathing animation */}
           <Image
             src={language === 'he' ? '/Brawldle%20Hebrew%20Logo.png' : '/Brawldle%20Logo.png'}
             alt="Brawldle Logo"
             className={cn(
               "relative z-10 -mt-16 lg:-mt-24 mb-0 lg:mb-0 select-none block mx-auto logo-breathe",
-              // Reduced ~17% + additional 15% on mobile (270px -> 224px -> 190px) and desktop (334px -> 300px -> 255px)
-              isMobile ? 'w-[190px]' : 'w-[255px]'
+              // Balanced mobile size, further reduced PC logo size
+              isMobile ? 'w-[190px]' : 'w-[230px]'
             )}
             priority
           />
@@ -378,13 +378,13 @@ const Index = () => {
           <div 
             className="daily-hero-container"
             style={{ 
-              marginTop: isMobile ? '1.5rem' : '0' // Additional spacing above daily button for mobile
+              marginTop: isMobile ? '1rem' : '0' // Reduced spacing above daily button for mobile
             }}>
             <DailyChallengesHero />
           </div>
 
           {/* Next puzzle countdown - minimal container */}
-          <div className="text-center -mt-4 md:-mt-8 lg:-mt-6">
+          <div className="text-center -mt-6 md:-mt-10 lg:-mt-8">
             <span 
               className="text-base md:text-lg font-bold"
               style={{ 
@@ -402,8 +402,8 @@ const Index = () => {
           <div
             className="mx-auto survival-button-tablet"
             style={{ 
-              marginTop: isMobile ? '1.5rem' : '1.5rem', // Further increased space above survival button for mobile
-              width: isMobile ? 'clamp(238px, 75vw, 272px)' : 'clamp(170px,30vw,255px)' // 15% reduced mobile & desktop survival button size
+              marginTop: isMobile ? '1rem' : '1rem', // Reduced spacing above survival button universally
+              width: isMobile ? 'clamp(250px, 75vw, 285px)' : 'clamp(185px,30vw,270px)' // Balanced mobile increase, PC slight increase
             }}
           >
             <motion.div
@@ -540,7 +540,7 @@ const Index = () => {
         {/* Footer - SECONDARY BUTTONS ROW - positioned at bottom with safe area */}
         <div className="w-full flex justify-center mt-auto bottom-buttons-tablet"
              style={{
-               marginTop: isMobile ? '14rem' : '3rem', // Further increased space between survival and bottom buttons
+               marginTop: isMobile ? '14rem' : '4rem', // Mobile unchanged, PC buttons moved lower
                marginBottom: isMobile ? '0.75rem' : '1rem', // Small space from bottom edge
                paddingBottom: 'max(8px, env(safe-area-inset-bottom, 8px))'
              }}>

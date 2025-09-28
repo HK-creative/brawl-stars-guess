@@ -36,7 +36,7 @@ const DailyChallengesHero: React.FC = () => {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const [isDesktop, setIsDesktop] = useState(false);
-  const dailyScale = isDesktop ? 0.9775 : 0.935;
+  const dailyScale = isDesktop ? 0.9775 : 1.00;
   useEffect(() => {
     // Desktop breakpoint detection to allow PC-specific typography without affecting mobile
     const mq = window.matchMedia('(min-width: 1024px), (hover: hover) and (pointer: fine)');
