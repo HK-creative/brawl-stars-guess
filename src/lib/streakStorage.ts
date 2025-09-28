@@ -9,7 +9,6 @@ const STREAK_KEY = 'brawldle_streak';
 const LAST_COMPLETED_KEY = 'brawldle_last_completed';
 
 const ISRAEL_TZ = 'Asia/Jerusalem';
-
 export function getTodayInIsrael() {
   return dayjs().tz(ISRAEL_TZ).format('YYYY-MM-DD');
 }
@@ -24,27 +23,40 @@ export function getStreak() {
   return { streak, lastCompleted };
 }
 
-export function incrementStreak(today: string) {
-  const { streak, lastCompleted } = getStreak();
-  if (lastCompleted === today) return streak;
-  if (lastCompleted === getYesterdayInIsrael()) {
-    localStorage.setItem(STREAK_KEY, String(streak + 1));
-    localStorage.setItem(LAST_COMPLETED_KEY, today);
-    return streak + 1;
+export function setStreak(streak: number, lastCompleted: string | null) {
+  localStorage.setItem(STREAK_KEY, String(streak));
+  if (lastCompleted) {
+    localStorage.setItem(LAST_COMPLETED_KEY, lastCompleted);
   } else {
-    localStorage.setItem(STREAK_KEY, '1');
-    localStorage.setItem(LAST_COMPLETED_KEY, today);
-    return 1;
+    localStorage.removeItem(LAST_COMPLETED_KEY);
   }
 }
 
-export function resetStreak(today: string) {
-  localStorage.setItem(STREAK_KEY, '1');
-  localStorage.setItem(LAST_COMPLETED_KEY, today);
-  return 1;
+export function incrementStreak() {
+  const today = getTodayInIsrael();
+  const { streak, lastCompleted } = getStreak();
+
+  if (lastCompleted === today) {
+    return streak; // Already incremented today
+  }
+
+  const yesterday = getYesterdayInIsrael();
+  const newStreak = (lastCompleted === yesterday) ? streak + 1 : 1;
+  
+  setStreak(newStreak, today);
+  return newStreak;
 }
 
-export function setStreak(streak: number, lastCompleted: string) {
-  localStorage.setItem(STREAK_KEY, String(streak));
-  localStorage.setItem(LAST_COMPLETED_KEY, lastCompleted);
-} 
+export function checkAndResetStreak() {
+  const { streak, lastCompleted } = getStreak();
+  const today = getTodayInIsrael();
+  const yesterday = getYesterdayInIsrael();
+
+  if (lastCompleted && lastCompleted !== today && lastCompleted !== yesterday) {
+    console.log(`Streak lost. Last completed: ${lastCompleted}. Resetting to 0.`);
+    setStreak(0, null); // Reset streak to 0
+    return { streak: 0, lastCompleted: null };
+  }
+
+  return { streak, lastCompleted };
+}

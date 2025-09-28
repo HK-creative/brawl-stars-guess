@@ -2,28 +2,17 @@ import React, { createContext, useContext, useEffect, useState, ReactNode } from
 import {
   getStreak,
   incrementStreak,
-  resetStreak,
   setStreak,
   getTodayInIsrael,
+  checkAndResetStreak,
 } from '@/lib/streakStorage';
 import { supabase } from '@/integrations/supabase/client';
-import { Database } from '@/integrations/supabase/types';
 import { onAuthStateChange, signOut } from '@/lib/auth';
-
-export interface GameModeCompletion {
-  classic: boolean;
-  starpower: boolean;
-  gadget: boolean;
-  audio: boolean;
-  voice?: boolean;
-  endless?: boolean;
-}
+import { useDailyStore } from '@/stores/useDailyStore';
 
 interface StreakContextType {
   streak: number;
   lastCompleted: string | null;
-  completedModes: GameModeCompletion;
-  markModeCompleted: (mode: keyof GameModeCompletion) => Promise<void>;
   isLoggedIn: boolean;
   login: () => void;
   logout: () => Promise<void>;
@@ -33,183 +22,114 @@ interface StreakContextType {
 
 const StreakContext = createContext<StreakContextType | undefined>(undefined);
 
-const getInitialCompletedModes = (): GameModeCompletion => {
-  const stored = localStorage.getItem('completedModes');
-  if (stored) {
-    const { date, modes } = JSON.parse(stored);
-    if (date === getTodayInIsrael()) {
-      return modes;
-    }
-  }
-  return {
-    classic: false,
-    starpower: false,
-    gadget: false,
-    audio: false,
-  };
-};
-
 export const StreakProvider = ({ children }: { children: ReactNode }) => {
   const [streak, setStreakState] = useState(0);
   const [lastCompleted, setLastCompleted] = useState<string | null>(null);
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [completedModes, setCompletedModes] = useState<GameModeCompletion>(getInitialCompletedModes());
 
-  // Load streak from localStorage or Supabase
+  const areAllModesCompleted = useDailyStore((state) => state.areAllModesCompleted);
+
+  // Effect for initializing and syncing streak
   useEffect(() => {
-    const fetchStreak = async () => {
-      try {
-        setLoading(true);
-        const local = getStreak();
-        setStreakState(local.streak);
-        setLastCompleted(local.lastCompleted);
-        
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session?.user) {
-          setUser(session.user);
-          // Fetch from DB
-          const { data, error } = await supabase
-            .from('profiles')
-            .select('current_streak,last_completed_date')
-            .eq('id', session.user.id)
-            .single();
-          if (!error && data) {
-            // Merge logic: prefer longer/more recent streak
-            const localDate = local.lastCompleted || '';
-            const dbDate = data.last_completed_date || '';
-            if (
-              (local.streak > data.current_streak) ||
-              (localDate > dbDate)
-            ) {
-              // Push local up
-              await supabase.from('profiles').upsert({
-                id: session.user.id,
-                current_streak: local.streak,
-                last_completed_date: local.lastCompleted,
-              });
-            } else {
-              // Overwrite local
-              setStreak(data.current_streak, data.last_completed_date);
-              setStreakState(data.current_streak);
-              setLastCompleted(data.last_completed_date);
-            }
+    const fetchAndSyncStreak = async (authedUser: any) => {
+      setLoading(true);
+      // 1. Check and reset local streak based on date
+      const initialStreak = checkAndResetStreak();
+      setStreakState(initialStreak.streak);
+      setLastCompleted(initialStreak.lastCompleted);
+
+      if (authedUser) {
+        // 2. Fetch from DB if logged in
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('current_streak, last_completed_date')
+          .eq('id', authedUser.id)
+          .single();
+
+        if (data) {
+          const local = getStreak(); // Re-get local after reset check
+          const dbStreak = data.current_streak || 0;
+          const dbDate = data.last_completed_date || '';
+
+          // 3. Merge logic: local vs. DB
+          if (local.streak > dbStreak || (local.lastCompleted || '') > dbDate) {
+            // Local is ahead, push to DB
+            setStreakState(local.streak);
+            setLastCompleted(local.lastCompleted);
+            await supabase.from('profiles').upsert({
+              id: authedUser.id,
+              current_streak: local.streak,
+              last_completed_date: local.lastCompleted,
+            });
+          } else {
+            // DB is ahead, overwrite local
+            setStreak(dbStreak, dbDate);
+            setStreakState(dbStreak);
+            setLastCompleted(dbDate);
           }
+        } else if (error) {
+          console.error('Error fetching profile for streak sync:', error.message);
         }
-      } catch (error) {
-        console.error('Error fetching streak:', error);
-      } finally {
-        setLoading(false);
       }
+      setLoading(false);
     };
 
-    fetchStreak();
+    // Initial load
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+      fetchAndSyncStreak(session?.user ?? null);
+    });
 
     // Listen for auth changes
-    const { data: listener } = onAuthStateChange((session) => {
-      if (session?.user) {
-        setUser(session.user);
-        fetchStreak();
-      } else {
-        setUser(null);
-        // Load local streak only
-        const local = getStreak();
-        setStreakState(local.streak);
-        setLastCompleted(local.lastCompleted);
-      }
+    const { data: authListener } = onAuthStateChange((session) => {
+      const authedUser = session?.user ?? null;
+      setUser(authedUser);
+      fetchAndSyncStreak(authedUser);
     });
 
     return () => {
-      listener?.subscription.unsubscribe();
+      authListener.subscription.unsubscribe();
     };
   }, []);
 
-  // Reset completed modes at midnight Israel time
+  // Effect for handling streak increment when all modes are completed
   useEffect(() => {
-    const checkDate = () => {
-      const stored = localStorage.getItem('completedModes');
-      if (stored) {
-        const { date } = JSON.parse(stored);
-        if (date !== getTodayInIsrael()) {
-          setCompletedModes({
-            classic: false,
-            starpower: false,
-            gadget: false,
-            audio: false,
-          });
-          localStorage.setItem('completedModes', JSON.stringify({
-            date: getTodayInIsrael(),
-            modes: {
-              classic: false,
-              starpower: false,
-              gadget: false,
-              audio: false,
-            }
-          }));
-        }
-      }
-    };
-
-    checkDate();
-    const interval = setInterval(checkDate, 60000); // Check every minute
-    return () => clearInterval(interval);
-  }, []);
-
-  const markModeCompleted = async (mode: keyof GameModeCompletion) => {
-    try {
-      // Guards against invalid modes
-      if (!completedModes.hasOwnProperty(mode)) {
-        console.warn(`Invalid mode: ${mode}`);
-        return;
-      }
-      
-      // Don't do anything if this mode was already completed
-      if (completedModes[mode] === true) {
-        return;
-      }
-      
+    if (areAllModesCompleted()) {
       const today = getTodayInIsrael();
-      const newCompletedModes = { ...completedModes, [mode]: true };
-      setCompletedModes(newCompletedModes);
-      
-      localStorage.setItem('completedModes', JSON.stringify({
-        date: today,
-        modes: newCompletedModes
-      }));
-
-      // Check if all modes are completed
-      if (Object.values(newCompletedModes).filter(value => typeof value === 'boolean').every(Boolean)) {
-        const newStreak = incrementStreak(today);
+      // Prevent multiple increments on the same day
+      if (lastCompleted !== today) {
+        console.log('All modes completed! Incrementing streak.');
+        const newStreak = incrementStreak();
         setStreakState(newStreak);
         setLastCompleted(today);
+
         if (user) {
-          await supabase.from('profiles').upsert({
+          supabase.from('profiles').upsert({
             id: user.id,
             current_streak: newStreak,
             last_completed_date: today,
+          }).then(({ error }) => {
+            if (error) {
+              console.error('Failed to update streak in Supabase:', error.message);
+            }
           });
         }
       }
-    } catch (error) {
-      console.error('Error updating streak:', error);
     }
-  };
+  }, [areAllModesCompleted, lastCompleted, user]);
 
   const login = () => {
     window.location.href = '/auth';
   };
 
   const logout = async () => {
-    try {
-      await signOut();
-      setUser(null);
-      // Keep local streak
-      const local = getStreak();
-      setStreakState(local.streak);
-      setLastCompleted(local.lastCompleted);
-    } catch (error) {
-      console.error('Error logging out:', error);
-    }
+    await signOut();
+    setUser(null);
+    // On logout, just rely on the local storage streak which should be up-to-date
+    const local = getStreak();
+    setStreakState(local.streak);
+    setLastCompleted(local.lastCompleted);
   };
 
   return (
@@ -217,8 +137,6 @@ export const StreakProvider = ({ children }: { children: ReactNode }) => {
       value={{
         streak,
         lastCompleted,
-        completedModes,
-        markModeCompleted,
         isLoggedIn: !!user,
         login,
         logout,
@@ -235,4 +153,5 @@ export const useStreak = () => {
   const ctx = useContext(StreakContext);
   if (!ctx) throw new Error('useStreak must be used within StreakProvider');
   return ctx;
-}; 
+};
+ 

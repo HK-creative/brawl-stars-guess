@@ -12,7 +12,7 @@ import StarField from '@/components/StarField';
 
 const SETTINGS_STORAGE_KEY = 'survival_last_settings';
 
-// GameModeCard component for the new design
+// Completely redesigned GameModeCard component - Modern glassmorphism style
 interface GameModeCardProps {
   mode: {
     id: GameMode;
@@ -26,35 +26,69 @@ interface GameModeCardProps {
 }
 
 const GameModeCard: React.FC<GameModeCardProps> = ({ mode, isSelected, onToggle }) => {
+  const { language } = useLanguage();
+  
   return (
     <button
       onClick={onToggle}
       className={cn(
-        "relative overflow-hidden rounded-lg transition-all duration-200 h-20 sm:h-24",
-        "border-2",
-        isSelected 
-          ? "border-yellow-400 shadow-lg shadow-yellow-400/30 scale-105" 
-          : "border-yellow-500 hover:border-yellow-400 hover:scale-102"
+        "relative overflow-hidden rounded-3xl transition-all duration-500 transform",
+        "h-36 sm:h-40 w-full group",
+        "hover:scale-[1.02] active:scale-98",
+        "hover:shadow-2xl shadow-black/20"
       )}
     >
-      {/* Dark top section - larger portion */}
-      <div className="h-2/3 bg-black flex items-center justify-center">
-        <div className="text-white text-lg sm:text-xl">
-          {mode.icon}
+      {/* Card Background - Outline when off, Fill when on */}
+      <div className={cn(
+        "absolute inset-0 rounded-3xl transition-all duration-500",
+        isSelected 
+          ? "bg-gradient-to-br from-cyan-500/40 via-blue-500/30 to-purple-500/40 border-2 border-cyan-400"
+          : "bg-gradient-to-br from-white/8 to-white/4 backdrop-blur-md border-2 border-cyan-400/60 group-hover:border-cyan-400/80"
+      )}>
+        
+        {/* Content Container */}
+        <div className="relative z-10 flex flex-col items-center justify-center h-full p-4">
+          {/* Extra Large Icon - No background */}
+          <div className={cn(
+            "mb-4 transition-all duration-300",
+            isSelected ? "text-cyan-100" : "text-white/90 group-hover:text-white"
+          )}>
+            <div className="w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center">
+              {mode.icon}
+            </div>
+          </div>
+          
+          {/* Extra Large Text Label - No background */}
+          <span 
+            className={cn(
+              "text-lg sm:text-xl font-bold uppercase tracking-wider text-center leading-none transition-all duration-300",
+              language === 'he' ? "font-normal" : "",
+              isSelected ? "text-cyan-100" : "text-white/90 group-hover:text-white"
+            )}
+            style={{
+              textShadow: language === 'he' 
+                ? '2px 2px 4px rgba(0,0,0,0.8), 1px 1px 2px rgba(0,0,0,0.6), 0px 0px 8px rgba(0,0,0,0.3)'
+                : 'none'
+            }}
+          >
+            {mode.label}
+          </span>
         </div>
+        
+        {/* Selection indicator - glowing dot */}
+        {isSelected && (
+          <div className="absolute top-3 right-3 w-2.5 h-2.5 bg-cyan-400 rounded-full shadow-lg shadow-cyan-400/50">
+            <div className="absolute inset-0 bg-cyan-400 rounded-full animate-ping opacity-75" />
+          </div>
+        )}
+        
+        {/* Subtle shimmer effect on hover */}
+        <div className={cn(
+          "absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700",
+          "bg-gradient-to-r from-transparent via-white/5 to-transparent",
+          "translate-x-[-100%] group-hover:translate-x-[100%] duration-1000"
+        )} />
       </div>
-      
-      {/* Golden bottom section - smaller portion */}
-      <div className="h-1/3 bg-gradient-to-r from-yellow-600 to-amber-600 flex items-center justify-center">
-        <span className="text-white font-bold text-xs sm:text-sm tracking-wider">
-          {mode.label.toUpperCase()}
-        </span>
-      </div>
-      
-      {/* Selection indicator */}
-      {isSelected && (
-        <div className="absolute top-1 right-1 w-3 h-3 bg-yellow-300 rounded-full border border-yellow-600 shadow-sm" />
-      )}
     </button>
   );
 };
@@ -96,7 +130,7 @@ const SurvivalSetupPage: React.FC = () => {
         <img 
           src="/StarpowerIcon.png" 
           alt="Star Power" 
-          className="w-6 h-6 sm:w-7 sm:h-7 object-contain"
+          className="w-full h-full object-contain"
         />
       ),
       color: 'from-yellow-500 to-yellow-600'
@@ -109,7 +143,7 @@ const SurvivalSetupPage: React.FC = () => {
         <img 
           src="/GadgetIcon.png" 
           alt="Gadget" 
-          className="w-6 h-6 sm:w-7 sm:h-7 object-contain"
+          className="w-full h-full object-contain"
         />
       ),
       color: 'from-green-500 to-green-600'
@@ -122,7 +156,7 @@ const SurvivalSetupPage: React.FC = () => {
         <img 
           src="/AudioIcon.png" 
           alt="Audio" 
-          className="w-6 h-6 sm:w-7 sm:h-7 object-contain"
+          className="w-full h-full object-contain"
         />
       ),
       color: 'from-purple-500 to-purple-600'
@@ -135,7 +169,7 @@ const SurvivalSetupPage: React.FC = () => {
         <img 
           src="/ClassicIcon.png" 
           alt="Classic" 
-          className="w-6 h-6 sm:w-7 sm:h-7 object-contain"
+          className="w-full h-full object-contain"
         />
       ),
       color: 'from-blue-500 to-blue-600'
@@ -148,7 +182,7 @@ const SurvivalSetupPage: React.FC = () => {
         <img 
           src="/PixelsIcon.png" 
           alt="Pixels" 
-          className="w-6 h-6 sm:w-7 sm:h-7 object-contain"
+          className="w-full h-full object-contain"
         />
       ),
       color: 'from-indigo-500 to-indigo-600'
@@ -232,107 +266,134 @@ const SurvivalSetupPage: React.FC = () => {
       <StarField shootingStars />
       
       {/* Content */}
-      <div className="relative z-10 min-h-screen flex flex-col p-4 sm:p-6">
-        {/* Header */}
-        <div className="flex items-center mb-6 sm:mb-8">
-          {/* Custom SVG Back button */}
+      <div className="px-4 flex flex-col overflow-x-hidden relative z-10" style={{ minHeight: '100%', maxHeight: '100%', paddingBottom: 'env(safe-area-inset-bottom, 16px)' }}>
+        
+        {/* Back button - positioned independently at original Y location */}
+        <div className="pt-4 pb-2 flex-shrink-0 w-full relative"
+            style={{
+              paddingTop: 'max(16px, env(safe-area-inset-top, 16px))'
+            }}>
           <button
             onClick={() => navigate('/')}
-            className="transition-all duration-200 transform hover:scale-110 active:scale-95 mr-4"
+            className="absolute left-4 sm:left-20 top-4 transition-all duration-200 transform hover:scale-110 active:scale-95"
             aria-label="Go back to home"
+            style={{
+              width: '50px',
+              height: '44px',
+              background: 'transparent',
+              border: 'none',
+              padding: 0,
+              display: 'inline-block',
+              lineHeight: 0,
+            }}
           >
             <img
               src="/Survival Pre-Game Screen/Back Button.svg"
               alt="Back"
-              className="w-10 h-10 sm:w-12 sm:h-12"
+              className="w-full h-full object-contain"
               style={{ pointerEvents: 'none' }}
             />
           </button>
-          
-          {/* Title */}
-          <div className="flex-1">
-            <h1 className="text-white text-4xl sm:text-5xl font-black tracking-wide" 
+        </div>
+            
+        {/* Brand block - Title and Subtitle with better spacing */}
+        <div className="text-center mt-8 mb-10 flex-shrink-0">
+          <div className="relative z-10 select-none block mx-auto">
+            <h1 className="text-white text-5xl sm:text-7xl lg:text-8xl font-black tracking-wide mb-6" 
                 style={{ 
                   fontFamily: language === 'he' ? "'Abraham', sans-serif" : "'Lilita One', cursive",
                   fontStyle: 'italic',
-                  textShadow: '3px 3px 6px rgba(0,0,0,0.7), 1px 1px 2px rgba(0,0,0,0.5)'
+                  textShadow: language === 'he' 
+                    ? '2px 2px 4px rgba(0,0,0,0.8), 1px 1px 2px rgba(0,0,0,0.6), 0px 0px 8px rgba(0,0,0,0.3)'
+                    : '3px 3px 6px rgba(0,0,0,0.7), 1px 1px 2px rgba(0,0,0,0.5)'
                 }}>
-              SURVIVAL
+              {language === 'he' ? 'הישרדות' : 'SURVIVAL'}
             </h1>
-            <h2 className="text-yellow-100 text-base sm:text-lg font-bold mt-1 tracking-wide"
+            <h2 className="text-yellow-100 text-base sm:text-lg font-bold tracking-wide"
                 style={{
                   fontFamily: language === 'he' ? "'Abraham', sans-serif" : "'Lilita One', cursive",
-                  textShadow: '2px 2px 4px rgba(0,0,0,0.7)'
+                  textShadow: language === 'he' 
+                    ? '2px 2px 4px rgba(0,0,0,0.8), 1px 1px 2px rgba(0,0,0,0.6), 0px 0px 8px rgba(0,0,0,0.3)'
+                    : '2px 2px 4px rgba(0,0,0,0.7)'
                 }}>
-              CHOOSE GAME MODES
+              {language === 'he' ? 'בחר סוגי משחק' : 'CHOOSE GAME MODES'}
             </h2>
           </div>
         </div>
 
-        {/* Game Mode Cards */}
-        <div className="flex-1 flex flex-col justify-center max-w-lg mx-auto w-full px-4">
-          {/* Top row - 2 cards */}
-          <div className="grid grid-cols-2 gap-3 mb-3">
-            {gameModeDetails.slice(0, 2).map(mode => (
-              <GameModeCard 
-                key={mode.id}
-                mode={mode}
-                isSelected={localSettings.modes.includes(mode.id)}
-                onToggle={() => handleModeToggle(mode.id)}
-              />
-            ))}
-          </div>
+        {/* Main content area - UX optimized spacing */}
+        <div className="flex flex-col items-center w-full max-w-lg mx-auto px-4 flex-1"
+             style={{
+               paddingLeft: 'max(20px, env(safe-area-inset-left, 20px))',
+               paddingRight: 'max(20px, env(safe-area-inset-right, 20px))',
+               justifyContent: 'flex-start',
+               minHeight: 0
+             }}>
           
-          {/* Bottom row - 2 cards */}
-          <div className="grid grid-cols-2 gap-3 mb-3">
-            {gameModeDetails.slice(2, 4).map(mode => (
-              <GameModeCard 
-                key={mode.id}
-                mode={mode}
-                isSelected={localSettings.modes.includes(mode.id)}
-                onToggle={() => handleModeToggle(mode.id)}
-              />
-            ))}
-          </div>
-          
-          {/* Centered Pixels card */}
-          <div className="flex justify-center mb-8">
-            <div className="w-40">
-              <GameModeCard 
-                mode={gameModeDetails[4]} // Pixels mode
-                isSelected={localSettings.modes.includes(gameModeDetails[4].id)}
-                onToggle={() => handleModeToggle(gameModeDetails[4].id)}
-              />
+          {/* Game Mode Cards Section - Redesigned Layout */}
+          <section className="flex flex-col w-full mb-16" aria-label="Game mode selection">
+            {/* Top row - 2 cards */}
+            <div className="grid grid-cols-2 gap-5 mb-5">
+              {gameModeDetails.slice(0, 2).map(mode => (
+                <GameModeCard 
+                  key={mode.id}
+                  mode={mode}
+                  isSelected={localSettings.modes.includes(mode.id)}
+                  onToggle={() => handleModeToggle(mode.id)}
+                />
+              ))}
             </div>
-          </div>
-        </div>
+            
+            {/* Middle row - 2 cards */}
+            <div className="grid grid-cols-2 gap-5 mb-5">
+              {gameModeDetails.slice(2, 4).map(mode => (
+                <GameModeCard 
+                  key={mode.id}
+                  mode={mode}
+                  isSelected={localSettings.modes.includes(mode.id)}
+                  onToggle={() => handleModeToggle(mode.id)}
+                />
+              ))}
+            </div>
+            
+            {/* Bottom centered card - Pixels */}
+            <div className="flex justify-center">
+              <div className="w-40 sm:w-44">
+                <GameModeCard 
+                  mode={gameModeDetails[4]} // Pixels mode
+                  isSelected={localSettings.modes.includes(gameModeDetails[4].id)}
+                  onToggle={() => handleModeToggle(gameModeDetails[4].id)}
+                />
+              </div>
+            </div>
+          </section>
 
-        {/* Bottom section - SVG Start Button */}
-        <div className="flex justify-center px-4">
-          <button
-            onClick={handleStartGame}
-            disabled={!isValidationPassed}
-            className={cn(
-              "transition-all duration-200 transform",
-              "hover:scale-105 active:scale-95",
-              !isValidationPassed && "opacity-50 cursor-not-allowed hover:scale-100"
-            )}
-            aria-label={language === 'en' ? 'Start Game' : 'התחל משחק'}
-          >
-            {/* SVG Button with language switching */}
-            <img
-              src={language === 'en' 
-                ? '/Survival Pre-Game Screen/Pre-survival Start Button English.svg'
-                : '/Survival Pre-Game Screen/Pre-survival Start Button Hebrew.svg'
-              }
-              alt={language === 'en' ? 'Play - 150 seconds per round' : 'שחק - 150 שניות לסיבוב'}
-              className="w-full max-w-xs sm:max-w-sm h-auto"
-              style={{ 
-                filter: !isValidationPassed ? 'grayscale(0.3) brightness(0.7)' : 'none',
-                pointerEvents: 'none' // Prevent image from interfering with button clicks
-              }}
-            />
-          </button>
+          {/* Call to Action Section */}
+          <section className="flex justify-center w-full mt-8" aria-label="Start game">
+            <button
+              onClick={handleStartGame}
+              disabled={!isValidationPassed}
+              className={cn(
+                "transition-all duration-200 transform",
+                "hover:scale-105 active:scale-95",
+                !isValidationPassed && "opacity-50 cursor-not-allowed hover:scale-100"
+              )}
+              aria-label={language === 'en' ? 'Start Game' : 'התחל משחק'}
+            >
+              <img
+                src={language === 'en' 
+                  ? '/Survival Pre-Game Screen/Pre-survival Start Button English.svg'
+                  : '/Survival Pre-Game Screen/Pre-survival Start Button Hebrew.svg'
+                }
+                alt={language === 'en' ? 'Play - 150 seconds per round' : 'שחק - 150 שניות לסיבוב'}
+                className="w-full max-w-xs sm:max-w-md lg:max-w-lg h-auto"
+                style={{ 
+                  filter: !isValidationPassed ? 'grayscale(0.3) brightness(0.7)' : 'none',
+                  pointerEvents: 'none'
+                }}
+              />
+            </button>
+          </section>
         </div>
       </div>
     </div>
