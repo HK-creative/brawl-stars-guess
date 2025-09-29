@@ -1,13 +1,7 @@
 IMPORTANT - ONLY THE HUMAN USER ALLOWED TO READ/review/edit/access THIS FILE all AIs including you MUST IGNORE IT COMPLETELY
 
-
-make sure streaks works correctly. it should work like this - user gains +1 to his streak whenever he completes ALL daily modes in the same day. if a day passed by and user did not complete all daily modes, he loses his streak, which becomes 0, and he can start gaining streaks again. connect data to Supabase if needed.
-
-lets work on the daily mode's victory screen now
-
 ok listen. the home page is now 100% complete, and i love it. i love it so much, that i decided this kind of style and similar styles that fits this design eco-system to be implemented across all the app starting with the home screen. i want you to look at the image ive attached which is of how the current home screen looks and teel me which UI elements should i change and to what 
 think long and hard , take your time, and plan comprehansively  
 
 lets work on the daily mode's victory screen now.
-I want to redesign it completley, and improve it. Please Think like a professional product designer and UX UI designer and improve the victory part now.
-only change the daily's victory part, nothing else.
+

@@ -36,7 +36,7 @@ const DailyChallengesHero: React.FC = () => {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const [isDesktop, setIsDesktop] = useState(false);
-  const dailyScale = isDesktop ? 0.9775 : 1.00;
+  const dailyScale = isDesktop ? 1.05 : 1.08;
   useEffect(() => {
     // Desktop breakpoint detection to allow PC-specific typography without affecting mobile
     const mq = window.matchMedia('(min-width: 1024px), (hover: hover) and (pointer: fine)');
@@ -116,9 +116,9 @@ const DailyChallengesHero: React.FC = () => {
           aria-label="Open Daily Challenges"
           className="relative mx-auto cursor-pointer focus:outline-none"
           style={{ 
-            width: 'clamp(266px, 33vw, 306px)', 
-            height: 'clamp(239px, 28.4vw, 262px)',
-            maxWidth: '306px',
+            width: 'clamp(200px, 70vw, 320px)', 
+            height: 'clamp(180px, 62vw, 285px)',
+            maxWidth: '320px',
             aspectRatio: '219/193'
           }}
           initial={{ y: 0, scale: 1 }}

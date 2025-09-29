@@ -8,14 +8,14 @@ Adapt Survival mode design to daily - ✅
 Prize-giveaway feature for engaged users
 Onboarding pop-up flow
 Check Log-ins & accounts (in supabase) - data store, login, register, forgot password.
-True single-page mobile layout
+True single-page mobile layout  - ✅
 Final home-screen polish - ✅
 Complete Translations 
 Micro-animations throughout the UI
 Analytics Tracking
 Responsive desktop, mobile, tablet. 
 Improve Speed
-Connect streak count to Supabase database
+Connect streak count to Supabase database  - ✅
 replace tier list data with real data 
 
 leaderboards (?)

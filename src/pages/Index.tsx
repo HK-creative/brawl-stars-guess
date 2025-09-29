@@ -357,8 +357,8 @@ const Index = () => {
             alt="Brawldle Logo"
             className={cn(
               "relative z-10 -mt-16 lg:-mt-24 mb-0 lg:mb-0 select-none block mx-auto logo-breathe",
-              // Balanced mobile size, further reduced PC logo size
-              isMobile ? 'w-[190px]' : 'w-[230px]'
+              // Responsive logo sizing for all mobile devices
+              isMobile ? 'w-[clamp(160px,50vw,220px)]' : 'w-[230px]'
             )}
             priority
           />
@@ -403,7 +403,7 @@ const Index = () => {
             className="mx-auto survival-button-tablet"
             style={{ 
               marginTop: isMobile ? '1.25rem' : '1rem', // Mobile spacing transferred from logo-to-daily gap
-              width: isMobile ? 'clamp(250px, 75vw, 285px)' : 'clamp(185px,30vw,270px)' // Balanced mobile increase, PC slight increase
+              width: isMobile ? 'clamp(210px, 75vw, 285px)' : 'clamp(200px,30vw,285px)' // Mobile small-device optimized
             }}
           >
             <motion.div
@@ -542,8 +542,8 @@ const Index = () => {
         {/* Footer - SECONDARY BUTTONS ROW - positioned at bottom with safe area */}
         <div className="w-full flex justify-center mt-auto bottom-buttons-tablet"
              style={{
-               marginTop: isMobile ? '14rem' : '4rem', // Mobile unchanged, PC buttons moved lower
-               marginBottom: isMobile ? '0.75rem' : '1rem', // Small space from bottom edge
+               marginTop: isMobile ? '14rem' : '6rem', // PC buttons moved to bottom edge
+               marginBottom: isMobile ? '0.75rem' : '0.5rem', // PC minimal space from bottom
                paddingBottom: 'max(8px, env(safe-area-inset-bottom, 8px))'
              }}>
           <div className="w-full max-w-md lg:max-w-lg rounded-2xl">
