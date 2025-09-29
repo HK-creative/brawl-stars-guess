@@ -28,67 +28,38 @@ interface GameModeCardProps {
 const GameModeCard: React.FC<GameModeCardProps> = ({ mode, isSelected, onToggle }) => {
   const { language } = useLanguage();
   
-  // Add CSS animations for border glow for each mode
-  React.useEffect(() => {
-    if (!document.getElementById('borderGlowAnimations')) {
-      const style = document.createElement('style');
-      style.id = 'borderGlowAnimations';
-      style.textContent = `
-        @keyframes borderGlow-gadget {
-          0% { box-shadow: 0 0 12px #9C3EF466, 0 0 25px #9C3EF433, inset 0 0 8px #9C3EF422; }
-          100% { box-shadow: 0 0 20px #9C3EF488, 0 0 40px #9C3EF455, inset 0 0 15px #9C3EF433; }
-        }
-        @keyframes borderGlow-starpower {
-          0% { box-shadow: 0 0 12px #00CFFF66, 0 0 25px #00CFFF33, inset 0 0 8px #00CFFF22; }
-          100% { box-shadow: 0 0 20px #00CFFF88, 0 0 40px #00CFFF55, inset 0 0 15px #00CFFF33; }
-        }
-        @keyframes borderGlow-classic {
-          0% { box-shadow: 0 0 12px #82D72466, 0 0 25px #82D72433, inset 0 0 8px #82D72422; }
-          100% { box-shadow: 0 0 20px #82D72488, 0 0 40px #82D72455, inset 0 0 15px #82D72433; }
-        }
-        @keyframes borderGlow-pixels {
-          0% { box-shadow: 0 0 12px #F9831E66, 0 0 25px #F9831E33, inset 0 0 8px #F9831E22; }
-          100% { box-shadow: 0 0 20px #F9831E88, 0 0 40px #F9831E55, inset 0 0 15px #F9831E33; }
-        }
-        @keyframes borderGlow-audio {
-          0% { box-shadow: 0 0 12px #8EA0E166, 0 0 25px #8EA0E133, inset 0 0 8px #8EA0E122; }
-          100% { box-shadow: 0 0 20px #8EA0E188, 0 0 40px #8EA0E155, inset 0 0 15px #8EA0E133; }
-        }
-      `;
-      document.head.appendChild(style);
-    }
-  }, []);
+  // Removed animated glow effects to prevent interference with clicks
   
-  // Get unique colors for each game mode
+  // Get unique colors for each game mode with pronounced gradients
   const getGameModeColors = (modeId: string) => {
     const colorMap = {
       'gadget': { 
         main: '#9C3EF4', 
-        gradient: 'from-purple-500/70 via-violet-500/60 to-purple-600/70', // Less transparent
-        border: 'border-purple-500', // Match gradient colors
-        glow: 'shadow-lg shadow-purple-500/30' // Stronger glow
+        gradient: 'from-purple-600/80 via-purple-400/50 to-violet-600/80', // More contrast
+        border: 'border-purple-500',
+        glow: 'shadow-lg shadow-purple-500/30'
       },
       'starpower': { 
         main: '#00CFFF', 
-        gradient: 'from-cyan-400/70 via-blue-400/60 to-cyan-500/70', 
+        gradient: 'from-cyan-500/80 via-sky-300/50 to-blue-500/80', // More contrast
         border: 'border-cyan-400', 
         glow: 'shadow-lg shadow-cyan-400/30' 
       },
       'classic': { 
         main: '#82D724', 
-        gradient: 'from-green-400/70 via-lime-400/60 to-green-500/70', 
+        gradient: 'from-green-500/80 via-lime-300/50 to-emerald-600/80', // More contrast
         border: 'border-green-400', 
         glow: 'shadow-lg shadow-green-400/30' 
       },
       'pixels': { 
         main: '#F9831E', 
-        gradient: 'from-orange-400/70 via-amber-400/60 to-orange-500/70', 
+        gradient: 'from-orange-500/80 via-yellow-400/50 to-red-500/80', // More contrast
         border: 'border-orange-400', 
         glow: 'shadow-lg shadow-orange-400/30' 
       },
       'audio': { 
         main: '#8EA0E1', 
-        gradient: 'from-blue-300/70 via-indigo-300/60 to-blue-400/70', 
+        gradient: 'from-blue-400/80 via-indigo-200/50 to-purple-400/80', // More contrast
         border: 'border-blue-300', 
         glow: 'shadow-lg shadow-blue-300/30' 
       }
@@ -98,43 +69,69 @@ const GameModeCard: React.FC<GameModeCardProps> = ({ mode, isSelected, onToggle 
   
   const modeColors = getGameModeColors(mode.id);
   
+  // Handle click with proper event handling to prevent issues
+  const handleCardClick = (e: React.MouseEvent | React.TouchEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Small delay to ensure visual feedback is visible
+    setTimeout(() => {
+      onToggle();
+    }, 50);
+  };
+
   return (
     <button
-      onClick={onToggle}
+      onClick={handleCardClick}
+      onTouchEnd={handleCardClick} // Add touch support for mobile
+      disabled={false} // Ensure button is always enabled
       className={cn(
-        "relative transition-all duration-500 transform", // Removed overflow-hidden
-        "w-full group",
-        "hover:shadow-2xl shadow-black/20"
+        "relative w-full cursor-pointer group", // Added group back for CSS-only hover
+        "transition-all duration-300 ease-out", // Smooth transitions
+        "hover:scale-[1.02]", // Subtle CSS-only hover scale
+        "active:scale-[0.98]", // Subtle press feedback
+        "focus:outline-none",
+        isSelected && "scale-[1.01]" // Subtle selected state scaling
       )}
       style={{
-        transform: 'skewX(-8deg)',
+        transform: isSelected 
+          ? 'skewX(-8deg) scale(1.01)' // Slightly larger when selected
+          : 'skewX(-8deg)',
         transformOrigin: 'center',
-        height: 'clamp(80px, 12vh, 128px)' // Responsive height that scales with viewport
+        height: 'clamp(80px, 12vh, 128px)', // Responsive height that scales with viewport
+        userSelect: 'none', // Prevent text selection
+        WebkitTouchCallout: 'none', // Prevent iOS callout
+        WebkitUserSelect: 'none',
+        // Ensure entire area is clickable
+        touchAction: 'manipulation',
+        WebkitTapHighlightColor: 'transparent'
       }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.transform = 'skewX(-8deg) scale(1.02)';
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.transform = 'skewX(-8deg) scale(1)';
-      }}
-      onMouseDown={(e) => {
-        e.currentTarget.style.transform = 'skewX(-8deg) scale(0.98)';
-      }}
-      onMouseUp={(e) => {
-        e.currentTarget.style.transform = 'skewX(-8deg) scale(1.02)';
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          handleCardClick(e as any);
+        }
       }}
     >
       {/* Card Background with Integrated Text Area */}
-      <div className={cn(
-        "absolute inset-0 transition-all duration-500",
-        "border-2" // Always have border
-      )}
-      style={{
-        borderColor: modeColors.main, // Always use the mode's main color
-        boxShadow: `0 0 8px ${modeColors.main}88, 0 0 16px ${modeColors.main}44`, // Always visible glow
-        animation: isSelected ? `borderGlow-${mode.id} 2s ease-in-out infinite alternate` : undefined,
-        overflow: 'visible' // Don't clip the checkmark
-      }}>
+      <div 
+        className={cn(
+          "absolute inset-0 transition-all duration-300",
+          "border-2", // Always have border
+          // CSS-only glow effects based on state
+          isSelected 
+            ? `shadow-lg` // Larger glow when selected
+            : `shadow-sm`, // Subtle glow when not selected
+          // Hover effects via group-hover
+          "group-hover:shadow-md"
+        )}
+        style={{
+          borderColor: modeColors.main, // Always use the mode's main color
+          boxShadow: isSelected 
+            ? `0 0 6px ${modeColors.main}AA` // More visible outline glow when selected
+            : `0 0 3px ${modeColors.main}77`, // Subtle outline glow when not selected
+          overflow: 'visible' // Don't clip the checkmark
+        }}>
         {/* Main card background */}
         <div className={cn(
           "absolute inset-0 transition-all duration-500",
@@ -143,9 +140,12 @@ const GameModeCard: React.FC<GameModeCardProps> = ({ mode, isSelected, onToggle 
             : "bg-gradient-to-br from-white/8 to-white/4 backdrop-blur-md"
         )} />
         
-        {/* Integrated dark text area at bottom */}
-        <div className="absolute inset-x-0 bottom-0 bg-black/60 backdrop-blur-sm transition-all duration-500"
-             style={{ height: 'clamp(24px, 4vh, 32px)' }} />
+        {/* Integrated colored text area at bottom */}
+        <div className="absolute inset-x-0 bottom-0 backdrop-blur-sm transition-all duration-500"
+             style={{ 
+               height: 'clamp(24px, 4vh, 32px)',
+               backgroundColor: `${modeColors.main}80` // Use mode's unique color with 50% opacity
+             }} />
         
         {/* Content Container */}
         <div 
@@ -158,7 +158,9 @@ const GameModeCard: React.FC<GameModeCardProps> = ({ mode, isSelected, onToggle 
           {/* Responsive Icon - Centered in middle of card */}
           <div className={cn(
             "absolute inset-0 flex items-center justify-center transition-all duration-300",
-            isSelected ? "text-cyan-100" : "text-white/90 group-hover:text-white"
+            isSelected 
+              ? "text-white scale-110" // Slightly larger and pure white when selected
+              : "text-white/90 group-hover:text-white group-hover:scale-105" // Hover effects
           )}
                style={{ 
                  paddingBottom: 'clamp(24px, 4vh, 32px)' // Account for text area height
@@ -182,7 +184,10 @@ const GameModeCard: React.FC<GameModeCardProps> = ({ mode, isSelected, onToggle 
               className={cn(
                 "font-bold uppercase tracking-wider text-center leading-none transition-all duration-300 whitespace-nowrap relative z-30",
                 language === 'he' ? "font-normal" : "",
-                "text-white" // Always white text, unaffected by card colors
+                "text-white", // Always white text, unaffected by card colors
+                isSelected 
+                  ? "scale-105 font-extrabold" // Slightly larger and bolder when selected
+                  : "group-hover:scale-102" // Subtle hover scaling
               )}
               style={{
                 fontFamily: language === 'he' ? "'Abraham', sans-serif" : "'Lilita One', cursive",
@@ -205,7 +210,7 @@ const GameModeCard: React.FC<GameModeCardProps> = ({ mode, isSelected, onToggle 
       {/* Selection indicator - checkmark FULLY ON TOP and NEVER cut off */}
       {isSelected && (
         <div 
-          className="fixed z-[9999] w-24 h-24 flex items-center justify-center pointer-events-none"
+          className="fixed z-[1] w-12 h-12 flex items-center justify-center pointer-events-none"
           style={{ 
             top: `${-12}px`, // Position relative to card
             right: `${-12}px`,
@@ -215,9 +220,8 @@ const GameModeCard: React.FC<GameModeCardProps> = ({ mode, isSelected, onToggle 
           <img
             src="/Survival Pre-Game Screen/Checkmark-BS.svg"
             alt="Selected"
-            className="w-full h-full object-contain drop-shadow-2xl"
+            className="w-full h-full object-contain"
             style={{ 
-              filter: 'drop-shadow(0 4px 8px rgba(24, 254, 16, 0.8)) drop-shadow(0 0 16px rgba(24, 254, 16, 0.6))',
               maxWidth: 'none',
               maxHeight: 'none'
             }}
@@ -225,12 +229,7 @@ const GameModeCard: React.FC<GameModeCardProps> = ({ mode, isSelected, onToggle 
         </div>
       )}
         
-        {/* Subtle shimmer effect on hover */}
-        <div className={cn(
-          "absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700",
-          "bg-gradient-to-r from-transparent via-white/5 to-transparent",
-          "translate-x-[-100%] group-hover:translate-x-[100%] duration-1000"
-        )} />
+        {/* Removed shimmer effect to prevent click interference */}
       </div>
     </button>
   );
@@ -461,21 +460,22 @@ const SurvivalSetupPage: React.FC = () => {
                 }}>
               {language === 'he' ? 'הישרדות' : 'SURVIVAL'}
             </h1>
-            {/* English Subtitle */}
+            {/* English Subtitle - Responsive and properly sized */}
             {language === 'en' && (
-              <h2 className="text-yellow-100 font-bold tracking-wide text-xs sm:text-sm lg:text-base"
+              <h2 className="text-yellow-100 font-bold tracking-wide"
                   style={{
                     fontFamily: "'Lilita One', cursive",
+                    fontSize: 'clamp(14px, 3vw, 24px)', // Responsive: 14px min, 3vw scaling, 24px max
                     textShadow: '2px 2px 4px rgba(0,0,0,0.7)'
                   }}>
                 CHOOSE GAME MODES
               </h2>
             )}
             
-            {/* Hebrew Subtitle - Recreated from scratch with tiny size */}
+            {/* Hebrew Subtitle - Capped for large screens */}
             {language === 'he' && (
               <div style={{ 
-                fontSize: '5vw',
+                fontSize: 'clamp(8px, 4vw, 16px)', // Capped at 16px max instead of unlimited 5vw
                 fontFamily: "'Abraham', sans-serif",
                 color: '#fef3c7', // text-yellow-100
                 fontWeight: 'bold',
